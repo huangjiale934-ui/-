@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script src="api-adapter.js?v=20261025a"></script>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230f4c81%27/%3E%3Cpath d=%27M6 22 L12 14 L17 18 L26 8%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="香港强积金市场数据平台 · 广州精研数据有限公司">香港强积金市场数据平台 · 广州精研数据有限公司</title>
+<meta name="description" content="香港强积金（MPF）市场数据平台：全市场 451 条成分基金、11 家受托人、24 个强积金计划，覆盖规模分布、回报表现、风险级别与多维度排名。数据取自香港积金局官方「強積金基金平台」，由广州精研数据有限公司每日同步整理。">
+<!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
+<link rel="preload" as="image" href="img/hero-hk.webp?v=2" media="(min-width: 701px)">
+<link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
+<link rel="stylesheet" href="b.css?p=home&v=20261021b">
+<link rel="stylesheet" href="home.css?v=20261011a">
+</head>
+<body class="home">
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo">
+      <img class="logo-img" src="img/logo.png" alt="JING YAN 精研">
+      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</span></div>
+    </div>
+    <nav class="nav">
+      <a href="/" class="on" data-i18n="首页">首页</a>
+      <a href="index.html" data-i18n="强积金资料库">强积金资料库</a>
+      
+      <a href="analysis.html" data-i18n="MPF基金可视化对比">MPF基金可视化对比</a>
+    </nav>
+    <div class="lang-sw" id="langSw" role="group" aria-label="语言">
+      <button type="button" data-lang="zh-Hans">简</button>
+      <button type="button" data-lang="zh-Hant">繁</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+    <div class="hdr-right">
+      <div class="ver-chip" id="verChip"><span data-i18n="数据版本">数据版本</span><b>—</b></div>
+      <div class="upd">
+        <span class="dot"></span>
+        <!-- 状态行完全由 JS 接管（与其他两页一致） -->
+        <span class="t">数据加载中…</span>
+        <span class="cnt"></span>
+      </div>
+      <button class="btn-refresh" data-i18n-title="立即同步最新数据">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
+        </svg><span class="rt" data-i18n="更新数据">更新数据</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Hero：先讲市场 -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-tag" data-i18n="香港强积金市场数据平台">香港强积金市场数据平台</div>
+      <h1><span data-i18n="全市场 451 条成分基金">全市场 451 条成分基金</span><br><span data-i18n="一站看透">一站看透</span></h1>
+      <p class="hero-sub" data-i18n="收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照；单位净值取自各发行人官网每日更新，其余资料来自积金局。">收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照；单位净值取自各发行人官网每日更新，其余资料来自积金局。</p>
+      <p class="hero-slogan" data-i18n="积金局季度资料 + 发行人每日净值 · 每日自动同步 · 未经增删">积金局季度资料 + 发行人每日净值 · 每日自动同步 · 未经增删</p>
+      <div class="hero-btns">
+        <a class="cta primary" href="index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
+          <span data-i18n="强积金资料库">强积金资料库</span>
+          <span class="cta-sub" data-i18n="451 条成分基金全量数据">451 条成分基金全量数据</span>
+        </a>
+        <a class="cta ghost" href="analysis.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V9"/><path d="M16 21V13"/><path d="M4 21h16"/><path d="M12 9V3"/><path d="m9 6 3-3 3 3"/></svg>
+          <span data-i18n="基金可视化对比">基金可视化对比</span>
+          <span class="cta-sub" data-i18n="走势对比 · 自算指数 · 定投试算">走势对比 · 自算指数 · 定投试算</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 市场概览 -->
+<section class="mk">
+  <div class="mk-wrap">
+    <div class="mk-head">
+      <h2 data-i18n="香港强积金市场概览">香港强积金市场概览</h2>
+      <div class="mk-asof mk-slot"></div>
+    </div>
+
+    <!-- 关键指标 -->
+    <div class="mk-kpi mk-slot" id="mkKpi">
+      <div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div>
+    </div>
+
+    <!-- 市场排行榜（2026-10-22：领导要求前移至「市场涨跌温度计」之前；模块内容未改动） -->
+    <div class="mk-rank">
+      <!-- 2026-10-22（领导）：标题与说明去掉，模块整体上移；榜单内容不动 -->
+      <div class="mk-tops">
+        <div class="mk-top"><h3 data-i18n="近 1 年回报领先">近 1 年回报领先</h3><a class="mk-more" href="index.html?rk=ann1#ann1"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="年率化回报 · 由高至低">年率化回报 · 由高至低</p>
+          <ol class="mk-slot" id="mkTop1"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+        <div class="mk-top"><h3 data-i18n="近 5 年回报领先">近 5 年回报领先</h3><a class="mk-more" href="index.html?rk=ann5#ann5"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="年率化回报 · 由高至低">年率化回报 · 由高至低</p>
+          <ol class="mk-slot" id="mkTop4"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+        <div class="mk-top"><h3 data-i18n="推出至今累积回报">推出至今累积回报</h3><a class="mk-more" href="index.html?rk=cumLaunch#cumLaunch"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="自基金推出日起累积 · 由高至低">自基金推出日起累积 · 由高至低</p>
+          <ol class="mk-slot" id="mkTop5"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+        <div class="mk-top"><h3 data-i18n="规模领先">规模领先</h3><a class="mk-more" href="index.html?rk=size#size"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="基金资产规模 · 由大至小">基金资产规模 · 由大至小</p>
+          <ol class="mk-slot" id="mkTop2"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+        <div class="mk-top"><h3 data-i18n="总开支最低">总开支最低</h3><a class="mk-more" href="index.html?rk=fer#fer"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="基金开支比率 FER · 由低至高">基金开支比率 FER · 由低至高</p>
+          <ol class="mk-slot" id="mkTop3"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+        <div class="mk-top"><h3 data-i18n="低风险优选">低风险优选</h3><a class="mk-more" href="index.html?rk=risk#risk"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="积金局风险级别最低 · 规模较大者优先">积金局风险级别最低 · 规模较大者优先</p>
+          <ol class="mk-slot" id="mkTop6"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+      </div>
+    </div>
+
+    <!-- 最新资讯 + 历年走势（2026-10-22：随排行榜一起上移，位于排行榜之后） -->
+    <div class="mk-charts2">
+      <div class="mk-panel news-panel">
+        <div class="news-head">
+          <div>
+            <h3 data-i18n="MPF 最新资讯">MPF 最新资讯</h3>
+            <p class="ph" data-i18n="积金局最新新闻稿，点击标题直达官网原文">积金局最新新闻稿，点击标题直达官网原文</p>
+          </div>
+          <a class="news-more" href="https://www.mpfa.org.hk/tc/info-centre/press-releases" target="_blank" rel="noopener" data-i18n="查看全部 →">查看全部 →</a>
+        </div>
+        <ul class="news-list" id="newsList">
+          <li class="news-item"><div class="sk sk-li"></div></li>
+          <li class="news-item"><div class="sk sk-li"></div></li>
+          <li class="news-item"><div class="sk sk-li"></div></li>
+        </ul>
+        <p class="news-note" data-i18n="来源：积金局「新闻稿」。本平台仅展示标题与日期并链接至官网原文，不转载内容。">来源：积金局「新闻稿」。本平台仅展示标题与日期并链接至官网原文，不转载内容。</p>
+      </div>
+      <div class="mk-panel">
+        <h3 data-i18n="市场整体回报走势">市场整体回报走势</h3>
+        <p class="ph" data-i18n="历年全市场算术平均与中位数回报（%）">历年全市场算术平均与中位数回报（%）</p>
+        <div class="mk-slot" id="mkYearLine"><div class="sk sk-chart"></div></div>
+        <!-- 市场解读：2026-10-20 移入右栏，填满资讯块带来的高度差 -->
+        <div class="mk-read mk-slot" id="mkRead"><div class="sk sk-text"></div></div>
+      </div>
+    </div>
+
+    <!-- 市场涨跌温度计 -->
+    <div class="mk-panel mk-thermo-panel">
+      <div class="mk-thermo-head">
+        <h3 data-i18n="市场涨跌温度计">市场涨跌温度计</h3>
+        <p class="ph" data-i18n="以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，红为涨、绿为跌">以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，红为涨、绿为跌</p>
+      </div>
+      <div class="mk-slot mk-thermo-slot" id="mkThermo"><div class="sk sk-thermo"></div></div>
+    </div>
+
+    <!-- 环形图 / 扇形图 / 风险柱状图 -->
+    <div class="mk-charts">
+      <div class="mk-panel pie-panel">
+        <h3 data-i18n="基金种类分布">基金种类分布</h3>
+        <p class="ph" data-i18n="按基金数目占比 · 右侧为规模">按基金数目占比 · 右侧为规模</p>
+        <div class="mk-slot pie-flex" id="mkTypeRing"><div class="sk sk-pie"></div></div>
+      </div>
+      <div class="mk-panel pie-panel">
+        <h3 data-i18n="受托人市场份额">受托人市场份额</h3>
+        <p class="ph" data-i18n="按旗下基金资产规模占比">按旗下基金资产规模占比</p>
+        <div class="mk-slot pie-flex" id="mkTrusteePie"><div class="sk sk-pie"></div></div>
+      </div>
+      <div class="mk-panel">
+        <h3 data-i18n="风险级别分布">风险级别分布</h3>
+        <p class="ph" data-i18n="按积金局风险级别统计基金数">按积金局风险级别统计基金数</p>
+        <div class="mk-slot cols" id="mkRisk"><div class="sk sk-cols"></div></div>
+        <div class="mk-note" id="mkRiskNote"></div>
+        <!-- 风险等级图例 -->
+        <div class="risk-legend" id="riskLegend">
+          <div class="rl-title" data-i18n="风险级别图例（1 级最低 → 7 级最高）">风险级别图例（1 级最低 → 7 级最高）</div>
+          <ul class="rl-list"></ul>
+          <p class="rl-note" data-i18n="风险级别由积金局按基金价格波动幅度评定，1 级最低、7 级最高。色块自浅蓝（低风险）逐级过渡至深蓝（高风险），仅为风险示意，与涨跌无关。">风险级别由积金局按基金价格波动幅度评定，1 级最低、7 级最高。色块自浅蓝（低风险）逐级过渡至深蓝（高风险），仅为风险示意，与涨跌无关。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 积金局最新月度公布（按月更新；官方口径为「過去 12 個月」） -->
+    <div class="mk-official">
+      <div class="mk-panel">
+        <div class="mo-head">
+          <h3 data-i18n="积金局最新公布 · 按月更新">积金局最新公布 · 按月更新</h3>
+          <a class="mo-src" id="moSrc" href="https://www.mpfa.org.hk/tc/info-centre/press-releases/20261006" target="_blank" rel="noopener"></a>
+        </div>
+        <p class="ph" data-i18n="各基金种类的过去 12 个月年率化净回报（已扣除收费及费用）；「最高／最低」为该类别内个别基金的区间">各基金种类的过去 12 个月年率化净回报（已扣除收费及费用）；「最高／最低」为该类别内个别基金的区间</p>
+        <div class="mk-slot" id="mkOfficial"><div class="sk sk-chart"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="mk-src" data-i18n="数据来源：香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表；单位资产净值、业绩与持仓另取自各计划受托人／保荐人官网。">
+    数据来源：香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表；单位资产净值、业绩与持仓另取自各计划受托人／保荐人官网。
+  </div>
+</section>
+
+<!-- 市场排行榜已并入上方市场概览（2026-10-22 领导要求前移） -->
+
+
+<section class="biz about">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-i18n="广州精研数据有限公司">广州精研数据有限公司</h2>
+      <p data-i18n="成立于 2023 年，紧抓粤港澳大湾区融合发展机遇，专注大湾区数据服务——连接双城 · 搭建桥梁。专业 · 高效 · 安全 · 省心。">成立于 2023 年，紧抓粤港澳大湾区融合发展机遇，专注大湾区数据服务——连接双城 · 搭建桥梁。专业 · 高效 · 安全 · 省心。</p>
+    </div>
+
+    <!-- 公司简介四条（成立时间／公司愿景／团队实力／业务版图） -->
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="成立时间">成立时间</h4></div>
+        <p class="ac-t" data-i18n="紧抓机遇，应运而生">紧抓机遇，应运而生</p>
+        <p data-i18n="公司成立于 2023 年，紧抓粤港澳大湾区融合发展的时代机遇，专注大湾区数据服务，为香港机构提供合规的数据清洗、分析及内地市场拓展支持。">公司成立于 2023 年，紧抓粤港澳大湾区融合发展的时代机遇，专注大湾区数据服务，为香港机构提供合规的数据清洗、分析及内地市场拓展支持。</p>
+      </div>
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="公司愿景">公司愿景</h4></div>
+        <p class="ac-t" data-i18n="连接双城，搭建桥梁">连接双城，搭建桥梁</p>
+        <p data-i18n="聚焦粤港澳大湾区数据服务领域，致力于搭建内地与香港青年的深度对话桥梁，促进两地青年在文化、职业与发展层面的交流互鉴，推动区域人才协同融合。">聚焦粤港澳大湾区数据服务领域，致力于搭建内地与香港青年的深度对话桥梁，促进两地青年在文化、职业与发展层面的交流互鉴，推动区域人才协同融合。</p>
+      </div>
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="团队实力">团队实力</h4></div>
+        <p class="ac-t" data-i18n="精英汇聚，人才基石">精英汇聚，人才基石</p>
+        <p data-i18n="汇聚内地 985/211 院校及香港顶尖高校的优秀人才，组建专业、多元的复合型服务团队，已成功向行业输送百余名兼具两地背景的高素质专业人才，夯实发展根基。">汇聚内地 985/211 院校及香港顶尖高校的优秀人才，组建专业、多元的复合型服务团队，已成功向行业输送百余名兼具两地背景的高素质专业人才，夯实发展根基。</p>
+      </div>
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="业务版图">业务版图</h4></div>
+        <p class="ac-t" data-i18n="多元服务，全面覆盖">多元服务，全面覆盖</p>
+        <p data-i18n="提供保险数据支持、北上养老规划咨询服务，推出免费 MPF 行政服务，并与双盈财富深度合作开展专业 MPF 投资咨询，构建一站式、全链条的专业数据与咨询服务体系。">提供保险数据支持、北上养老规划咨询服务，推出免费 MPF 行政服务，并与双盈财富深度合作开展专业 MPF 投资咨询，构建一站式、全链条的专业数据与咨询服务体系。</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="六大核心优势">六大核心优势</h3>
+    <div class="adv-grid">
+      <div class="adv-card"><div class="ai" style="background:#eaf4fd;color:#4a90d9">⏱</div>
+        <h4 data-i18n="时效性">时效性</h4><p data-i18n="办理开户通常 3-4 周内完成，其他服务尽可能快速办理。">办理开户通常 3-4 周内完成，其他服务尽可能快速办理。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#eaf4fd;color:#4a90d9">🎯</div>
+        <h4 data-i18n="专业性">专业性</h4><p data-i18n="专注于 MPF 服务，行业深耕 10+ 年，行政服务类型多种。">专注于 MPF 服务，行业深耕 10+ 年，行政服务类型多种。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#eaf4fd;color:#4a90d9">🛡️</div>
+        <h4 data-i18n="安全性">安全性</h4><p data-i18n="持有强积金中介人牌照，操作完全合法，客户资料绝对保密。">持有强积金中介人牌照，操作完全合法，客户资料绝对保密。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#eaf4fd;color:#4a90d9">🔁</div>
+        <h4 data-i18n="延续性">延续性</h4><p data-i18n="持续跟进服务，完善的客户管理系统，不惧流失。">持续跟进服务，完善的客户管理系统，不惧流失。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#eaf4fd;color:#4a90d9">🤝</div>
+        <h4 data-i18n="客户体验">客户体验</h4><p data-i18n="工作时间固定上下班、不会失联；不推销任何保险、不争夺渠道。">工作时间固定上下班、不会失联；不推销任何保险、不争夺渠道。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#eaf4fd;color:#4a90d9">💰</div>
+        <h4 data-i18n="经济性">经济性</h4><p data-i18n="对客户、对渠道完全免费，保证无隐形消费。">对客户、对渠道完全免费，保证无隐形消费。</p></div>
+    </div>
+
+    <h3 class="sub-h"><span data-i18n="免费 MPF 行政服务">免费 MPF 行政服务</span><small data-i18n="全周期专人对接，拒绝隐形收费">全周期专人对接，拒绝隐形收费</small></h3>
+    <div class="flow-grid">
+      <div class="flow-step"><div class="fn">1</div><h4 data-i18n="开户前咨询服务">开户前咨询服务</h4>
+        <p data-i18n="强积金开设所需的平台是什么？如何开设强积金计划？强积金的供应商有哪些？如何查看自己的强积金？">强积金开设所需的平台是什么？如何开设强积金计划？强积金的供应商有哪些？如何查看自己的强积金？</p></div>
+      <div class="flow-step"><div class="fn">2</div><h4 data-i18n="开户中代办服务">开户中代办服务</h4>
+        <p data-i18n="协助注册积金易账号；协助准备强积金开设材料；跟进缴款事宜（如 DDA 授权）；跟进积金易发出的信件及报表；跟进电话查询积金易服务。">协助注册积金易账号；协助准备强积金开设材料；跟进缴款事宜（如 DDA 授权）；跟进积金易发出的信件及报表；跟进电话查询积金易服务。</p></div>
+      <div class="flow-step"><div class="fn">3</div><h4 data-i18n="开户后持续服务">开户后持续服务</h4>
+        <p data-i18n="更改登记地址；供款记录调取；供款补全；强积金账户整合；更改供款周期／金额。">更改登记地址；供款记录调取；供款补全；强积金账户整合；更改供款周期／金额。</p></div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="战略合作伙伴">战略合作伙伴</h3>
+    <div class="partner">
+      <div class="pi">🤝</div>
+      <div>
+        <h4 data-i18n="双盈专业财富管理有限公司（APW）">双盈专业财富管理有限公司（APW）</h4>
+        <p data-i18n="双盈专业财富管理有限公司（APW）是一家专注香港强积金（MPF）服务的专业机构，拥有逾 10 年资产投资经验。我们以科学投资策略和严格风控体系为核心，帮助客户在退休储蓄中获取超越市场平均的回报。">双盈专业财富管理有限公司（APW）是一家专注香港强积金（MPF）服务的专业机构，拥有逾 10 年资产投资经验。我们以科学投资策略和严格风控体系为核心，帮助客户在退休储蓄中获取超越市场平均的回报。</p>
+        <div class="p-stats">
+          <span><b data-i18n="数亿">数亿</b><small data-i18n="资产服务规模">资产服务规模</small></span>
+          <span><b>10+ <small data-i18n="年">年</small></b><small data-i18n="专注强积金领域">专注强积金领域</small></span>
+          <span><b>IC001045</b><small data-i18n="强积金中介人牌照 注册编号">强积金中介人牌照 注册编号</small></span>
+          <span><b data-i18n="科学策略 · 严格风控">科学策略 · 严格风控</b><small data-i18n="核心优势">核心优势</small></span>
+        </div>
+        <span class="ptag" data-i18n="合作内容：强积金开户与投资咨询服务">合作内容：强积金开户与投资咨询服务</span>
+      </div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="服务承诺">服务承诺</h3>
+    <div class="promise-grid">
+      <div class="promise-card"><h4 data-i18n="数据准确性承诺">🎯 数据准确性承诺</h4>
+        <p data-i18n="所有数值均来自积金局及各受托人官网公开发布的数据，只做求和与算术平均，不做任何推算或补全。">所有数值均来自积金局及各受托人官网公开发布的数据，只做求和与算术平均，不做任何推算或补全。</p></div>
+      <div class="promise-card"><h4 data-i18n="中立性承诺">⚖️ 中立性承诺</h4>
+        <p data-i18n="不偏好任何保险公司、受托人或产品，排名完全由官方数值决定，不接受任何形式的排名干预。">不偏好任何保险公司、受托人或产品，排名完全由官方数值决定，不接受任何形式的排名干预。</p></div>
+      <div class="promise-card"><h4 data-i18n="隐私保护承诺">🔒 隐私保护承诺</h4>
+        <p data-i18n="平台不收集任何个人身份信息，不设置登录，不向任何第三方出售或共享用户数据。">平台不收集任何个人身份信息，不设置登录，不向任何第三方出售或共享用户数据。</p></div>
+      <div class="promise-card"><h4 data-i18n="持续更新承诺">🔁 持续更新承诺</h4>
+        <p data-i18n="数据每日自动同步，官网改版或来源失效时自动告警并沿用最近一次核对结果，绝不静默失效。">数据每日自动同步，官网改版或来源失效时自动告警并沿用最近一次核对结果，绝不静默失效。</p></div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="业务板块">业务板块</h3>
+    <div class="biz-grid">
+      <div class="biz-card">
+        <div class="biz-ic ic-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+        </div>
+        <h3><span data-i18n="强积金行政服务">强积金行政服务</span> <span class="free" data-i18n="免费">免费</span></h3>
+        <p data-i18n="开户前咨询、开户中代办、开户后持续跟进：注册积金易账号、材料准备、缴款跟进、账户整合，全周期专人对接，无隐形收费。">开户前咨询、开户中代办、开户后持续跟进：注册积金易账号、材料准备、缴款跟进、账户整合，全周期专人对接，无隐形收费。</p>
+      </div>
+      <div class="biz-card">
+        <div class="biz-ic ic-teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h3 data-i18n="强积金投资咨询">强积金投资咨询</h3>
+        <p data-i18n="与战略合作伙伴双盈财富管理有限公司深度合作，逾 10 年资产投资经验，以科学投资策略与严格风控体系服务退休储蓄。">与战略合作伙伴双盈财富管理有限公司深度合作，逾 10 年资产投资经验，以科学投资策略与严格风控体系服务退休储蓄。</p>
+      </div>
+      <div class="biz-card">
+        <div class="biz-ic ic-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-6 4 3 5-8"/></svg>
+        </div>
+        <h3 data-i18n="保险数据支持">保险数据支持</h3>
+        <p data-i18n="为香港机构提供合规的数据清洗、整理与分析服务，以扎实的数据基座支撑业务决策与内地市场拓展。">为香港机构提供合规的数据清洗、整理与分析服务，以扎实的数据基座支撑业务决策与内地市场拓展。</p>
+      </div>
+      <div class="biz-card">
+        <div class="biz-ic ic-amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3 data-i18n="北上养老规划咨询">北上养老规划咨询</h3>
+        <p data-i18n="面向大湾区居民提供跨境养老规划咨询服务，助力两地生活无缝衔接。">面向大湾区居民提供跨境养老规划咨询服务，助力两地生活无缝衔接。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 数据平台 -->
+<section class="plat">
+  <div class="wrap plat-grid">
+    <div class="plat-copy">
+      <h2 data-i18n="自建强积金数据平台">自建强积金数据平台</h2>
+      <p data-i18n="全市场 451 条成分基金逐只收录（按单位类别逐行统计；积金局官网页面标注的 382 只，系将同一基金的各个单位类别合并后的计数），数据取自香港积金局「強積金基金平台」，每日自动同步、未经增删，免费开放给每一位客户。">全市场 <b>451 条</b>成分基金逐只收录（按单位类别逐行统计；积金局官网页面标注的 382 只，系将同一基金的各个单位类别合并后的计数），数据取自香港积金局「強積金基金平台」，每日自动同步、未经增删，免费开放给每一位客户。</p>
+      <ul class="plat-list">
+        <li data-i18n="关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选">关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选</li>
+        <li data-i18n="21 个维度榜单 · 类别冠军 · 勾选对比">21 个维度榜单 · 类别冠军 · 勾选对比</li>
+        <li data-i18n="移动端适配 · 繁体／简体／英文切换 · 数据每日自动同步">移动端适配 · 繁体／简体／英文切换 · 数据每日自动同步</li>
+      </ul>
+      <div class="plat-btns">
+        <a class="btn solid" href="index.html#db" data-i18n="进入基金最新数据 →">进入基金最新数据 →</a>
+        <a class="btn line" href="analysis.html" data-i18n="进入基金对比 →">进入基金对比 →</a>
+      </div>
+    </div>
+    <div class="plat-img">
+      <img src="img/bridge.webp" alt="连接内地与香港的数据桥梁" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<footer class="foot home-foot">
+  <div class="wrap">
+    <div class="foot-brand">
+      <img src="img/logo.png" alt="JING YAN" class="foot-logo" loading="lazy">
+      <div>
+        <b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b>
+        <div class="muted" data-i18n="专业 · 高效 · 安全 · 省心 —— 期待与您共创大湾区发展新机遇">专业 · 高效 · 安全 · 省心 —— 期待与您共创大湾区发展新机遇</div>
+      </div>
+    </div>
+    <div class="foot-links">
+      <a href="index.html" data-i18n="强积金资料库">强积金资料库</a>
+      <a href="analysis.html" data-i18n="基金可视化对比">基金可视化对比</a>
+    </div>
+    <div class="disclaimer">
+      <b data-i18n="风险提示与免责声明：">风险提示与免责声明：</b><span data-i18n="本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。">本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。</span>
+    </div>
+    <details class="foot-fold" id="foldLinks">
+      <summary><span class="ff-a" data-i18n="友情链接 · 官方数据来源">友情链接 · 官方数据来源</span><span class="ff-arrow">▾</span></summary>
+      <div class="ff-body"><div class="friend-links"></div></div>
+    </details>
+    <div class="copyright" data-i18n="© 2026 广州精研数据有限公司 · 保留所有权利">© 2026 广州精研数据有限公司 · 保留所有权利</div>
+  </div>
+</footer>
+
+<button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+</button>
+
+<script src="b.js?p=home&v=20261021b"></script>
+<script src="home.js?v=20261011a"></script>
+<script src="heat.js"></script>
+<script>renderFriends();</script>
+
+</body>
+</html>

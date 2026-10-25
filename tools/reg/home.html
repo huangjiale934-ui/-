@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="fx-ready"><head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230f4c81%27/%3E%3Cpath d=%27M6 22 L12 14 L17 18 L26 8%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="香港强积金市场数据平台 · 广州精研数据有限公司">香港强积金市场数据平台 · 广州精研数据有限公司</title>
+<meta name="description" content="香港强积金（MPF）市场数据平台：全市场 451 条成分基金、11 家受托人、24 个强积金计划，覆盖规模分布、回报表现、风险级别与多维度排名。数据取自香港积金局官方「強積金基金平台」，由广州精研数据有限公司每日同步整理。">
+<!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
+<link rel="preload" as="image" href="img/hero-hk.webp?v=1792470114000" media="(min-width: 701px)">
+<link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
+<link rel="stylesheet" href="style.css?v=1792470114000">
+<link rel="stylesheet" href="analysis.css?v=1792470114000">
+<link rel="stylesheet" href="home.css?v=1792470114000">
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:true,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'8c2dfc0a1e074ad982a66da18996828f'
+    });
+  }catch(e){}
+})();
+</script></head>
+<body class="home">
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo">
+      <img class="logo-img" src="img/logo.png" alt="JING YAN 精研">
+      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</span></div>
+    </div>
+    <nav class="nav">
+      <a href="/" class="on" data-i18n="首页">首页</a>
+      <a href="/index.html" data-i18n="强积金资料库">强积金资料库</a>
+      
+      <a href="/analysis.html" data-i18n="MPF基金可视化对比">MPF基金可视化对比</a>
+    </nav>
+    <div class="lang-sw" id="langSw" role="group" aria-label="语言">
+      <button type="button" data-lang="zh-Hans" class="on">简</button>
+      <button type="button" data-lang="zh-Hant">繁</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+    <div class="hdr-right">
+      <div class="ver-chip" id="verChip" data-tip="官方资料（积金局）：2026-09-30
+单位净值（发行人官网）：最新 2026-10-15
+指数行情（东方财富）：最新 2026-10-19
+已回填历史净值：450 只基金
+自算指标（日涨跌 / 年初至今 / 区间涨幅 / 回撤）基于官网净值序列，未含分红再投资与费用调整。" aria-label="官方资料（积金局）：2026-09-30
+单位净值（发行人官网）：最新 2026-10-15
+指数行情（东方财富）：最新 2026-10-19
+已回填历史净值：450 只基金
+自算指标（日涨跌 / 年初至今 / 区间涨幅 / 回撤）基于官网净值序列，未含分红再投资与费用调整。"><span data-i18n="数据版本">数据版本</span><b>2026-10-20</b></div>
+      <div class="upd">
+        <span class="dot warn" title="数据同步可能存在延迟，稍后将自动重试"></span>
+        <!-- 状态行完全由 JS 接管（与其他两页一致） -->
+        <span class="t">数据更新 2026-10-20 13:50</span>
+        <span class="cnt">451 条基金</span>
+      </div>
+      <button class="btn-refresh" data-i18n-title="立即同步最新数据" title="立即同步最新数据">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path>
+        </svg><span class="rt" data-i18n="更新数据">更新数据</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Hero：先讲市场 -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-tag" data-i18n="香港强积金市场数据平台">香港强积金市场数据平台</div>
+      <h1><span data-i18n="全市场 451 条成分基金">全市场 451 条成分基金</span><br><span data-i18n="一站看透">一站看透</span></h1>
+      <p class="hero-sub" data-i18n="逐条收录香港积金局「強積金基金平台」公布的全部成分基金，从规模分布、回报表现到风险级别与多维排名，用官方数据还原一个真实的强积金市场。">逐条收录香港积金局「強積金基金平台」公布的全部成分基金，从规模分布、回报表现到风险级别与多维排名，用官方数据还原一个真实的强积金市场。</p>
+      <p class="hero-slogan" data-i18n="数据取自积金局官网 · 每日自动同步 · 未经增删">数据取自积金局官网 · 每日自动同步 · 未经增删</p>
+      <div class="hero-btns">
+        <a class="cta primary" href="/index.html">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"></path><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"></path></svg>
+          <span data-i18n="强积金资料库">强积金资料库</span>
+          <span class="cta-sub" data-i18n="451 条成分基金全量数据">451 条成分基金全量数据</span>
+        </a>
+        <a class="cta ghost" href="/index.html?rk=1#ann1">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V9"></path><path d="M16 21V13"></path><path d="M4 21h16"></path><path d="M12 9V3"></path><path d="m9 6 3-3 3 3"></path></svg>
+          <span data-i18n="MPFA 基金榜单">MPFA 基金榜单</span>
+          <span class="cta-sub" data-i18n="21 个维度榜单 · 一键对比">21 个维度榜单 · 一键对比</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 市场概览 -->
+<section class="mk">
+  <div class="mk-wrap">
+    <div class="mk-head">
+      <h2 data-i18n="香港强积金市场概览">香港强积金市场概览</h2>
+      <div class="mk-asof mk-slot"><span class="upd-live"><i></i>数据更新时间 <b>2026-10-20 13:50</b></span><span class="upd-of">积金局资料截至 <b>2026-09-30</b></span></div>
+    </div>
+
+    <!-- 关键指标 -->
+    <div class="mk-kpi mk-slot" id="mkKpi"><div class="mk-card"><div class="mk-k">成分基金</div><div class="mk-v">451 <small>条</small></div><div class="mk-s">按单位类别逐行统计</div></div><div class="mk-card"><div class="mk-k">受托人／发行人</div><div class="mk-v">11 <small>家</small></div><div class="mk-s">涵盖 24 个强积金计划</div></div><div class="mk-card"><div class="mk-k">市场总规模</div><div class="mk-v">1.68 万亿<small>港元</small></div><div class="mk-s">各成分基金资产规模合计</div></div><div class="mk-card"><div class="mk-k">近 1 年平均回报</div><div class="mk-v">+7.62%</div><div class="mk-s">全市场算术平均 · 351/447 条录得正回报</div></div></div>
+
+    <!-- 市场涨跌温度计 -->
+    <div class="mk-panel mk-thermo-panel">
+      <div class="mk-thermo-head">
+        <h3 data-i18n="市场涨跌温度计">市场涨跌温度计</h3>
+        <p class="ph" data-i18n="以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，红为涨、绿为跌">以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，红为涨、绿为跌</p>
+      </div>
+      <div class="mk-slot mk-thermo-slot" id="mkThermo"><div class="thermo-wrap"><svg class="thermo-svg" viewBox="0 0 168 308" role="img" aria-label="市场涨跌温度计"><defs><linearGradient id="tgrad" gradientUnits="userSpaceOnUse" x1="0" y1="16" x2="0" y2="242"><stop offset="0" stop-color="#d93025"></stop><stop offset="0.5" stop-color="#e0a94a"></stop><stop offset="1" stop-color="#12996b"></stop></linearGradient><clipPath id="tclip"><rect x="52" y="16" width="40" height="226" rx="20"></rect></clipPath></defs><rect class="thermo-track" x="52" y="16" width="40" height="226" rx="20"></rect><g clip-path="url(#tclip)"><rect x="52" y="109.26" width="40" height="132.74" fill="url(#tgrad)"></rect></g><circle class="thermo-bulb" cx="72" cy="272" r="30" fill="#12996b"></circle><line class="tick-line" x1="98" y1="16" x2="108" y2="16"></line><text class="tick-txt" x="46" y="19.5" text-anchor="end">+20%</text><line class="tick-grid" x1="52" y1="16" x2="92" y2="16"></line><line class="tick-line" x1="98" y1="166.67" x2="108" y2="166.67"></line><text class="tick-txt" x="46" y="170.17" text-anchor="end">0%</text><line class="tick-grid" x1="52" y1="166.67" x2="92" y2="166.67"></line><line class="tick-line" x1="98" y1="242" x2="108" y2="242"></line><text class="tick-txt" x="46" y="245.5" text-anchor="end">-10%</text><line class="tick-grid" x1="52" y1="242" x2="92" y2="242"></line><line class="mark-line" x1="50" y1="109.26" x2="126" y2="109.26" stroke="#d93025"></line><circle class="mark-dot" cx="72" cy="109.26" r="7" fill="#d93025"></circle><g transform="translate(104,98.26)"><rect class="mark-pill" width="62" height="22" rx="11" fill="#d93025"></rect><text class="mark-val" x="31" y="15.5" text-anchor="middle">+7.62%</text></g></svg><div class="thermo-stats"><div class="ts-row"><div class="ts-box"><span class="ts-k">近 1 年平均回报</span><b class="ts-v up">+7.62%</b><span class="ts-s">全市场算术平均</span></div><div class="ts-box"><span class="ts-k">近 1 年中位数回报</span><b class="ts-v up">+6.32%</b><span class="ts-s">一半基金高于此值</span></div><div class="ts-box"><span class="ts-k">正回报基金占比</span><b class="ts-v">78.5%</b><span class="ts-s">351 / 447</span></div></div><div class="ts-bar"><i class="tb-up" style="width:78.52348993288591%"></i><i class="tb-flat" style="width:0%"></i><i class="tb-down" style="width:21.476510067114095%"></i></div><ul class="ts-list"><li><i class="mk-dot up"></i>上涨 <b class="up">351 条</b><span>（78.5%）</span></li><li><i class="mk-dot flat"></i>平盘 <b>0 条</b><span>（0.0%）</span></li><li><i class="mk-dot down"></i>下跌 <b class="down">96 条</b><span>（21.5%）</span></li></ul><p class="ts-note">刻度区间 -10% ~ +20%；有近 1 年回报数据的成分基金 <b>447</b> / 451 条，资料截至 2026-09-30。</p></div></div></div>
+    </div>
+
+    <!-- 环形图 / 扇形图 / 风险柱状图 -->
+    <div class="mk-charts">
+      <div class="mk-panel pie-panel">
+        <h3 data-i18n="基金种类分布">基金种类分布</h3>
+        <p class="ph" data-i18n="按基金数目占比 · 右侧为规模">按基金数目占比 · 右侧为规模</p>
+        <div class="mk-slot pie-flex" id="mkTypeRing"><svg class="chart-svg pie" viewBox="0 0 132 132" width="132" height="132" role="img"><path d="M66 1A65 65 0 0 1 112.04 111.88L94.55 94.45A40.3 40.3 0 0 0 66 25.7Z" fill="#1f5fa8"><title>股票基金：169（37.5%）</title></path><path d="M112.04 111.88A65 65 0 0 1 3.96 46.6L27.54 53.97A40.3 40.3 0 0 0 94.55 94.45Z" fill="#2f9e8f"><title>混合资产基金：191（42.4%）</title></path><path d="M3.96 46.6A65 65 0 0 1 16.58 23.78L35.36 39.82A40.3 40.3 0 0 0 27.54 53.97Z" fill="#e0a13e"><title>货币市场基金 — 强积金保守基金：29（6.4%）</title></path><path d="M16.58 23.78A65 65 0 0 1 22.25 17.93L38.87 36.2A40.3 40.3 0 0 0 35.36 39.82Z" fill="#7b6bb0"><title>保证基金：9（2.0%）</title></path><path d="M22.25 17.93A65 65 0 0 1 55.18 1.91L59.29 26.26A40.3 40.3 0 0 0 38.87 36.2Z" fill="#d4695f"><title>债券基金：41（9.1%）</title></path><path d="M55.18 1.91A65 65 0 0 1 66 1L66 25.7A40.3 40.3 0 0 0 59.29 26.26Z" fill="#6b7f99"><title>货币市场基金 — 不包括强积金保守基金：12（2.7%）</title></path><text class="pie-c1" x="66" y="66" text-anchor="middle">451</text><text class="pie-c2" x="66" y="82" text-anchor="middle">条基金</text></svg><ul class="pie-legend"><li><i style="background:#1f5fa8"></i><span class="lg-n" title="股票基金">股票基金</span><span class="lg-v">169 条 · 8,013 亿</span></li><li><i style="background:#2f9e8f"></i><span class="lg-n" title="混合资产基金">混合资产基金</span><span class="lg-v">191 条 · 5,700 亿</span></li><li><i style="background:#e0a13e"></i><span class="lg-n" title="货币市场基金 — 强积金保守基金">货币市场（保守）</span><span class="lg-v">29 条 · 1,713 亿</span></li><li><i style="background:#7b6bb0"></i><span class="lg-n" title="保证基金">保证基金</span><span class="lg-v">9 条 · 822 亿</span></li><li><i style="background:#d4695f"></i><span class="lg-n" title="债券基金">债券基金</span><span class="lg-v">41 条 · 525 亿</span></li><li><i style="background:#6b7f99"></i><span class="lg-n" title="货币市场基金 — 不包括强积金保守基金">货币市场（非保守）</span><span class="lg-v">12 条 · 66 亿</span></li></ul></div>
+      </div>
+      <div class="mk-panel pie-panel">
+        <h3 data-i18n="受托人市场份额">受托人市场份额</h3>
+        <p class="ph" data-i18n="按旗下基金资产规模占比">按旗下基金资产规模占比</p>
+        <div class="mk-slot pie-flex" id="mkTrusteePie"><svg class="chart-svg pie" viewBox="0 0 132 132" width="132" height="132" role="img"><path d="M66 66L66 1A65 65 0 0 1 129.82 78.3Z" fill="#1f5fa8"><title>HSBC：471,983（28.0%）</title></path><path d="M66 66L129.82 78.3A65 65 0 0 1 44.95 127.5Z" fill="#2f9e8f"><title>宏利：458,284（27.2%）</title></path><path d="M66 66L44.95 127.5A65 65 0 0 1 7.94 95.21Z" fill="#e0a13e"><title>銀聯信託：207,658（12.3%）</title></path><path d="M66 66L7.94 95.21A65 65 0 0 1 2.75 51Z" fill="#7b6bb0"><title>永明：187,307（11.1%）</title></path><path d="M66 66L2.75 51A65 65 0 0 1 22.48 17.72Z" fill="#d4695f"><title>友邦信託：161,969（9.6%）</title></path><path d="M66 66L22.48 17.72A65 65 0 0 1 66 1Z" fill="#b9c2cf"><title>其他 6 家受托人：196,596（11.7%）</title></path></svg><ul class="pie-legend"><li><i style="background:#1f5fa8"></i><span class="lg-n" title="HSBC">HSBC</span><span class="lg-v">4,720 亿 · 28.0%</span></li><li><i style="background:#2f9e8f"></i><span class="lg-n" title="宏利">宏利</span><span class="lg-v">4,583 亿 · 27.2%</span></li><li><i style="background:#e0a13e"></i><span class="lg-n" title="銀聯信託">銀聯信託</span><span class="lg-v">2,077 亿 · 12.3%</span></li><li><i style="background:#7b6bb0"></i><span class="lg-n" title="永明">永明</span><span class="lg-v">1,873 亿 · 11.1%</span></li><li><i style="background:#d4695f"></i><span class="lg-n" title="友邦信託">友邦信託</span><span class="lg-v">1,620 亿 · 9.6%</span></li><li><i style="background:#b9c2cf"></i><span class="lg-n" title="其他 6 家受托人">其他 6 家</span><span class="lg-v">1,966 亿 · 11.7%</span></li></ul></div>
+      </div>
+      <div class="mk-panel">
+        <h3 data-i18n="风险级别分布">风险级别分布</h3>
+        <p class="ph" data-i18n="按积金局风险级别统计基金数">按积金局风险级别统计基金数</p>
+        <div class="mk-slot cols" id="mkRisk"><div class="col"><div class="cb"><i style="height:19.9%;background:#2f9e8f"></i></div><span class="cv">29</span><span class="cx">1 级</span></div><div class="col"><div class="cb"><i style="height:2.1%;background:#7fb93d"></i></div><span class="cv">3</span><span class="cx">2 级</span></div><div class="col"><div class="cb"><i style="height:29.5%;background:#d6b32a"></i></div><span class="cv">43</span><span class="cx">3 级</span></div><div class="col"><div class="cb"><i style="height:100.0%;background:#e8942f"></i></div><span class="cv">146</span><span class="cx">4 级</span></div><div class="col"><div class="cb"><i style="height:80.1%;background:#e0672f"></i></div><span class="cv">117</span><span class="cx">5 级</span></div><div class="col"><div class="cb"><i style="height:65.8%;background:#ce3b3b"></i></div><span class="cv">96</span><span class="cx">6 级</span></div><div class="col"><div class="cb"><i style="height:3.4%;background:#9e2222"></i></div><span class="cv">5</span><span class="cx">7 级</span></div></div>
+        <div class="mk-note" id="mkRiskNote">另有 12 条基金积金局未提供风险级别，未计入上图。</div>
+        <!-- 风险等级图例 -->
+        <div class="risk-legend" id="riskLegend">
+          <div class="rl-title" data-i18n="风险级别图例（1 级最低 → 7 级最高）">风险级别图例（1 级最低 → 7 级最高）</div>
+          <ul class="rl-list"><li><i style="background:#2f9e8f"></i><b>1</b><span>低风险</span><em>29</em></li><li><i style="background:#7fb93d"></i><b>2</b><span>低至中风险</span><em>3</em></li><li><i style="background:#d6b32a"></i><b>3</b><span>中低风险</span><em>43</em></li><li><i style="background:#e8942f"></i><b>4</b><span>中风险</span><em>146</em></li><li><i style="background:#e0672f"></i><b>5</b><span>中高风险</span><em>117</em></li><li><i style="background:#ce3b3b"></i><b>6</b><span>高风险</span><em>96</em></li><li><i style="background:#9e2222"></i><b>7</b><span>最高风险</span><em>5</em></li></ul>
+          <p class="rl-note" data-i18n="风险级别由积金局按基金价格波动幅度评定，1 级最低、7 级最高。色块自绿（低风险）逐级过渡至深红（高风险），仅为风险示意，与涨跌无关。">风险级别由积金局按基金价格波动幅度评定，1 级最低、7 级最高。色块自绿（低风险）逐级过渡至深红（高风险），仅为风险示意，与涨跌无关。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 最新资讯 + 历年走势（2026-10-20：资讯块替换「各类基金平均回报对比」，填补右栏空白） -->
+    <div class="mk-charts2">
+      <div class="mk-panel news-panel">
+        <div class="news-head">
+          <div>
+            <h3 data-i18n="MPF 最新资讯">MPF 最新资讯</h3>
+            <p class="ph" data-i18n="积金局最新新闻稿，点击标题直达官网原文">积金局最新新闻稿，点击标题直达官网原文</p>
+          </div>
+          <a class="news-more" href="https://www.mpfa.org.hk/tc/info-centre/press-releases" target="_blank" rel="noopener" data-i18n="查看全部 →">查看全部 →</a>
+        </div>
+        <ul class="news-list" id="newsList"><li class="news-item"><span class="news-date">13/10/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20261013" target="_blank" rel="noopener noreferrer">積金局及積金易公司主席鼓勵企業 以長遠目光加強員工退休保障<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">06/10/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20261006" target="_blank" rel="noopener noreferrer">積金局公布強積金投資回報臨時數據<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">04/10/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20261004" target="_blank" rel="noopener noreferrer">積金局主席網誌 - 「積金易」推出一站式帳戶查詢服務<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">28/09/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20260928" target="_blank" rel="noopener noreferrer">加強保障強積金計劃成員 打擊虛假提早提取強積金<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">17/09/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20260917" target="_blank" rel="noopener noreferrer">積金局暫時撤銷區智仁的強積金中介人註冊28個月<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">16/09/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20260916" target="_blank" rel="noopener noreferrer">積金局歡迎《香港特別行政區經濟和社會發展第一個五年規劃（2026-2030年）》 及《行政長官2026年施政報告》<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">01/09/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20260901" target="_blank" rel="noopener noreferrer">積金局及積金易公司發表《2025-26年報》<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">30/08/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20260830" target="_blank" rel="noopener noreferrer">積金局主席網誌 - 強積金 – 有效的退休保障<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">27/08/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20260827" target="_blank" rel="noopener noreferrer">第一期GenA.I.沙盒++參與者名單<i class="news-out">↗</i></a></li><li class="news-item"><span class="news-date">18/08/2026</span><a class="news-title" href="https://www.mpfa.org.hk/info-centre/press-releases/20260818" target="_blank" rel="noopener noreferrer">積金局發表2026年6月號《強制性公積金計劃統計摘要》季刊<i class="news-out">↗</i></a></li></ul>
+        <p class="news-note" data-i18n="来源：积金局「新闻稿」。本平台仅展示标题与日期并链接至官网原文，不转载内容。">来源：积金局「新闻稿」。本平台仅展示标题与日期并链接至官网原文，不转载内容。</p>
+      </div>
+      <div class="mk-panel">
+        <h3 data-i18n="市场整体回报走势">市场整体回报走势</h3>
+        <p class="ph" data-i18n="历年全市场算术平均与中位数回报（%）">历年全市场算术平均与中位数回报（%）</p>
+        <div class="mk-slot" id="mkYearLine"><div class="yr-tabs"><button type="button" class="yr-tab on" data-y="all">全部年份</button><button type="button" class="yr-tab" data-y="2021">2021</button><button type="button" class="yr-tab" data-y="2022">2022</button><button type="button" class="yr-tab" data-y="2023">2023</button><button type="button" class="yr-tab" data-y="2024">2024</button><button type="button" class="yr-tab" data-y="2025">2025</button></div><div class="chart-head"><ul class="chart-legend"><li><i style="background:#d93025"></i>平均回报</li><li><i class="ln-dash"></i>中位数</li></ul></div><svg class="chart-svg" viewBox="0 0 372 214" role="img" aria-label="市场整体回报走势"><line class="chart-grid" x1="32" y1="180" x2="358" y2="180"></line><text class="chart-axis" x="27" y="183.5" text-anchor="end">-20</text><line class="chart-grid" x1="32" y1="140.5" x2="358" y2="140.5"></line><text class="chart-axis" x="27" y="144" text-anchor="end">-10</text><line class="chart-grid" x1="32" y1="101" x2="358" y2="101"></line><text class="chart-axis" x="27" y="104.5" text-anchor="end">0</text><line class="chart-grid" x1="32" y1="61.5" x2="358" y2="61.5"></line><text class="chart-axis" x="27" y="65" text-anchor="end">+10</text><line class="chart-grid" x1="32" y1="22" x2="358" y2="22"></line><text class="chart-axis" x="27" y="25.5" text-anchor="end">+20</text><path d="M32 101L32 98.71L113.5 163.25L195 82.4L276.5 68.37L358 31.64L358 101Z" fill="#e8f0f9" opacity="0.85"></path><path class="line-path" d="M32 100.92L113.5 165.54L195 82.04L276.5 72.24L358 35.86" fill="none" stroke="#7a8699" stroke-width="2" stroke-dasharray="5 4" opacity="0.85" stroke-linejoin="round" stroke-linecap="round"></path><path class="line-path" d="M32 98.71L113.5 163.25L195 82.4L276.5 68.37L358 31.64" fill="none" stroke="#1a6fb5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></path><line class="chart-zero" x1="32" y1="101" x2="358" y2="101"></line><text class="chart-xlab" x="32" y="196" text-anchor="middle">2021</text><circle cx="32" cy="100.92" r="3" fill="#fff" stroke="#7a8699" stroke-width="1.6"><title>2021 中位数：+0.02%</title></circle><circle cx="32" cy="98.71" r="4.2" fill="#d93025" stroke="#fff" stroke-width="1.6"><title>2021 平均回报：+0.58%（217 / 188，427）</title></circle><text class="line-val up" x="48" y="89.71" text-anchor="middle">+0.58%</text><text class="chart-xlab" x="113.5" y="196" text-anchor="middle">2022</text><circle cx="113.5" cy="165.54" r="3" fill="#fff" stroke="#7a8699" stroke-width="1.6"><title>2022 中位数：-16.34%</title></circle><circle cx="113.5" cy="163.25" r="4.2" fill="#12996b" stroke="#fff" stroke-width="1.6"><title>2022 平均回报：-15.76%（31 / 402，433）</title></circle><text class="line-val down" x="113.5" y="179.25" text-anchor="middle">-15.76%</text><text class="chart-xlab" x="195" y="196" text-anchor="middle">2023</text><circle cx="195" cy="82.04" r="3" fill="#fff" stroke="#7a8699" stroke-width="1.6"><title>2023 中位数：+4.80%</title></circle><circle cx="195" cy="82.4" r="4.2" fill="#d93025" stroke="#fff" stroke-width="1.6"><title>2023 平均回报：+4.71%（357 / 78，435）</title></circle><text class="line-val up" x="195" y="73.4" text-anchor="middle">+4.71%</text><text class="chart-xlab" x="276.5" y="196" text-anchor="middle">2024</text><circle cx="276.5" cy="72.24" r="3" fill="#fff" stroke="#7a8699" stroke-width="1.6"><title>2024 中位数：+7.28%</title></circle><circle cx="276.5" cy="68.37" r="4.2" fill="#d93025" stroke="#fff" stroke-width="1.6"><title>2024 平均回报：+8.26%（408 / 38，446）</title></circle><text class="line-val up" x="276.5" y="59.37" text-anchor="middle">+8.26%</text><text class="chart-xlab" x="358" y="196" text-anchor="middle">2025</text><circle cx="358" cy="35.86" r="3" fill="#fff" stroke="#7a8699" stroke-width="1.6"><title>2025 中位数：+16.49%</title></circle><circle cx="358" cy="31.64" r="4.2" fill="#d93025" stroke="#fff" stroke-width="1.6"><title>2025 平均回报：+17.56%（446 / 0，446）</title></circle><text class="line-val up" x="342" y="22.64" text-anchor="middle">+17.56%</text></svg><p class="chart-foot">历年回报取自积金局「曆年回報」列；各年参与统计的基金数见悬停提示。官方最新月度数据（过去 12 个月）见下方「积金局最新公布」。</p></div>
+        <!-- 市场解读：2026-10-20 移入右栏，填满资讯块带来的高度差 -->
+        <div class="mk-read mk-slot" id="mkRead"><p>截至 2026-09-30，香港强积金市场共 24 个计划、11 家受托人，合计 1.68 万亿 港元资产。按资产规模计，股票基金 占比最高：169 条、8,013 亿 港元，占全市场 47.6%。按基金数目计最多的是 混合资产基金（191 条）。</p><p>全市场近 1 年平均回报 +7.62%，中位数 +6.32%；447 条有回报数据的基金中 351 条录得正回报，占比 79%。最近一个完整曆年（2025）全市场平均回报 +17.56%，446 条中有 446 条录得正回报。以上均由积金局公布的官方数值汇总；涉及年率化、自算走势等衍生指标处均已另行注明口径。</p></div>
+      </div>
+    </div>
+
+    <!-- 积金局最新月度公布（按月更新；官方口径为「過去 12 個月」） -->
+    <div class="mk-official">
+      <div class="mk-panel">
+        <div class="mo-head">
+          <h3 data-i18n="积金局最新公布 · 按月更新">积金局最新公布 · 按月更新</h3>
+          <a class="mo-src" id="moSrc" href="https://www.mpfa.org.hk/tc/info-centre/press-releases/20261006" target="_blank" rel="noopener">数据截至 2026-09-30 · 2026-10-06 公布 ↗</a>
+        </div>
+        <p class="ph" data-i18n="各基金种类的过去 12 个月年率化净回报（已扣除收费及费用）；「最高／最低」为该类别内个别基金的区间">各基金种类的过去 12 个月年率化净回报（已扣除收费及费用）；「最高／最低」为该类别内个别基金的区间</p>
+        <div class="mk-slot" id="mkOfficial"><div class="mo-flex"><div class="mo-left"><div class="mo-list"><div class="mo-row" data-tip="股票基金：「過去 12 個月」+10.3%；该类别内个别基金的最高为 +98.4%、最低为 -15.7%；自制度实施以来 5.1% p.a.；自 DIS 推出以来 7% p.a."><div class="mo-name">股票基金<small>资产占比 48%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:87.3%;background:var(--up)"></i></div><div class="mo-val up">+10.3%<small>类别内最高 +98.4% ／ 最低 -15.7%</small></div></div><div class="mo-row" data-tip="混合资产基金：「過去 12 個月」+8.5%；该类别内个别基金的最高为 +22.5%、最低为 -1.9%；自制度实施以来 4.7% p.a.；自 DIS 推出以来 5.4% p.a."><div class="mo-name">混合资产基金<small>资产占比 34%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:72.0%;background:var(--up)"></i></div><div class="mo-val up">+8.5%<small>类别内最高 +22.5% ／ 最低 -1.9%</small></div></div><div class="mo-row sub" data-tip="DIS 核心累积基金：「過去 12 個月」+9.5%；该类别内个别基金的最高为 +22.5%、最低为 +8.5%；自 DIS 推出以来 7.1% p.a."><div class="mo-name">DIS 核心累积基金<small>资产占比 9%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:80.5%;background:var(--up)"></i></div><div class="mo-val up">+9.5%<small>类别内最高 +22.5% ／ 最低 +8.5%</small></div></div><div class="mo-row sub" data-tip="DIS 65岁后基金：「過去 12 個月」+1.7%；该类别内个别基金的最高为 +7%、最低为 +1.1%；自 DIS 推出以来 2.4% p.a."><div class="mo-name">DIS 65岁后基金<small>资产占比 3%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:14.4%;background:var(--up)"></i></div><div class="mo-val up">+1.7%<small>类别内最高 +7% ／ 最低 +1.1%</small></div></div><div class="mo-row sub" data-tip="其他（混合資產基金中非 DIS 部分（官方原表如此））：「過去 12 個月」+8.8%；该类别内个别基金的最高为 +22%、最低为 -1.9%；自制度实施以来 4.7% p.a.；自 DIS 推出以来 5.3% p.a."><div class="mo-name">其他<small>资产占比 22%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:74.6%;background:var(--up)"></i></div><div class="mo-val up">+8.8%<small>类别内最高 +22% ／ 最低 -1.9%</small></div></div><div class="mo-row" data-tip="债券基金：「過去 12 個月」-1.5%；该类别内个别基金的最高为 +7.6%、最低为 -3.8%；自制度实施以来 1.7% p.a.；自 DIS 推出以来 0.4% p.a."><div class="mo-name">债券基金<small>资产占比 3%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:0.0%;width:12.7%;background:var(--down)"></i></div><div class="mo-val down">-1.5%<small>类别内最高 +7.6% ／ 最低 -3.8%</small></div></div><div class="mo-row" data-tip="保证基金：「過去 12 個月」+0.8%；该类别内个别基金的最高为 +2.5%、最低为 +0.2%；自制度实施以来 1.2% p.a.；自 DIS 推出以来 0.9% p.a."><div class="mo-name">保证基金<small>资产占比 5%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:6.8%;background:var(--up)"></i></div><div class="mo-val up">+0.8%<small>类别内最高 +2.5% ／ 最低 +0.2%</small></div></div><div class="mo-row" data-tip="强积金保守基金：「過去 12 個月」+2%；该类别内个别基金的最高为 +2.2%、最低为 +1.5%；自制度实施以来 1% p.a.；自 DIS 推出以来 1.4% p.a."><div class="mo-name">强积金保守基金<small>资产占比 10%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:16.9%;background:var(--up)"></i></div><div class="mo-val up">+2.0%<small>类别内最高 +2.2% ／ 最低 +1.5%</small></div></div><div class="mo-row" data-tip="货币市场基金（非保守）：「過去 12 個月」+3.4%；该类别内个别基金的最高为 +5.5%、最低为 +1.3%；自制度实施以来 0.9% p.a.；自 DIS 推出以来 1.6% p.a."><div class="mo-name">货币市场基金（非保守）<small>资产占比 &lt;0.5%</small></div><div class="mo-track"><i class="mo-zero" style="left:12.7%"></i><i class="mo-bar" style="left:12.7%;width:28.8%;background:var(--up)"></i></div><div class="mo-val up">+3.4%<small>类别内最高 +5.5% ／ 最低 +1.3%</small></div></div></div></div><div class="mo-right"><div class="mo-pietitle">全市场资产占比</div><svg class="chart-svg pie" viewBox="0 0 188 188" width="188" height="188" role="img"><path d="M94 1A93 93 0 0 1 107.04 186.08L101.82 149.25A55.8 55.8 0 0 0 94 38.2Z" fill="#1f5fa8"><title>股票基金：48（47.8%）</title></path><path d="M107.04 186.08A93 93 0 0 1 8.86 56.57L42.92 71.54A55.8 55.8 0 0 0 101.82 149.25Z" fill="#2f9e8f"><title>混合資產基金：34（33.8%）</title></path><path d="M8.86 56.57A93 93 0 0 1 46.87 13.83L65.72 45.9A55.8 55.8 0 0 0 42.92 71.54Z" fill="#e0a13e"><title>強積金保守基金：10（10.0%）</title></path><path d="M46.87 13.83A93 93 0 0 1 73.81 3.22L81.89 39.53A55.8 55.8 0 0 0 65.72 45.9Z" fill="#7b6bb0"><title>保證基金：5（5.0%）</title></path><path d="M73.81 3.22A93 93 0 0 1 91.09 1.05L92.26 38.23A55.8 55.8 0 0 0 81.89 39.53Z" fill="#d4695f"><title>債券基金：3（3.0%）</title></path><path d="M91.09 1.05A93 93 0 0 1 94 1L94 38.2A55.8 55.8 0 0 0 92.26 38.23Z" fill="#6b7f99"><title>貨幣市場基金（非保守）：&lt;1（&lt;0.5%）</title></path><text class="pie-c1" x="94" y="94" text-anchor="middle">全市场</text><text class="pie-c2" x="94" y="110" text-anchor="middle">基金资产</text></svg><ul class="pie-legend"><li><i style="background:#1f5fa8"></i><span class="lg-n" title="股票基金">股票基金</span><span class="lg-v">48.0%</span></li><li><i style="background:#2f9e8f"></i><span class="lg-n" title="混合資產基金">混合資產基金</span><span class="lg-v">34.0%</span></li><li><i style="background:#e0a13e"></i><span class="lg-n" title="強積金保守基金">強積金保守基金</span><span class="lg-v">10.0%</span></li><li><i style="background:#7b6bb0"></i><span class="lg-n" title="保證基金">保證基金</span><span class="lg-v">5.0%</span></li><li><i style="background:#d4695f"></i><span class="lg-n" title="債券基金">債券基金</span><span class="lg-v">3.0%</span></li><li><i style="background:#6b7f99"></i><span class="lg-n" title="貨幣市場基金（非保守）">貨幣市場基金（非保守）</span><span class="lg-v">&lt;0.5%</span></li></ul></div></div><p class="chart-foot">积金局按月公布：本期 2026-10-06 发布、数据截至 2026-09-30；官方口径为「過去 12 個月」年率化净回报（已扣除收费及费用）；条形自 0% 基准线向两侧延伸（红条向右、绿条向左，竖向虚线为 0% 基准）。</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="mk-src" data-i18n="数据来源：香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表；单位资产净值、业绩与持仓另取自各计划受托人／保荐人官网。">数据来源：香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表；单位资产净值、业绩与持仓另取自各计划受托人／保荐人官网。</div>
+</section>
+
+<!-- 市场排行榜 -->
+<section class="mk mk-alt">
+  <div class="mk-wrap">
+    <div class="mk-head">
+      <h2 data-i18n="市场排行榜">市场排行榜</h2>
+      <p data-i18n="由官方数值直接排序，每榜取前 5 名；同一只基金的各个单位类别只取一次，避免同一基金霸榜。">由官方数值直接排序，每榜取前 5 名；同一只基金的各个单位类别只取一次，避免同一基金霸榜。</p>
+    </div>
+    <div class="mk-tops">
+      <div class="mk-top"><h3 data-i18n="近 1 年回报领先">近 1 年回报领先</h3><a class="mk-more" href="/index.html?rk=ann1#ann1"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="年率化回报 · 由高至低">年率化回报 · 由高至低</p>
+        <ol class="mk-slot" id="mkTop1"><li><span class="r r1">1</span><span class="n" title="海通韓國基金 - A類別 · 海通MPF退休金">海通韓國基金 - A類別</span><span class="t">HSBC</span><span class="v up">+56.61%</span></li><li><span class="r r2">2</span><span class="n" title="海通韓國基金 - T類別 · 海通MPF退休金">海通韓國基金 - T類別</span><span class="t">HSBC</span><span class="v up">+56.59%</span></li><li><span class="r r3">3</span><span class="n" title="海通亞太基金 - T類別 · 海通MPF退休金">海通亞太基金 - T類別</span><span class="t">HSBC</span><span class="v up">+34.03%</span></li><li><span class="r r0">4</span><span class="n" title="海通亞太基金 - A類別 · 海通MPF退休金">海通亞太基金 - A類別</span><span class="t">HSBC</span><span class="v up">+34.01%</span></li><li><span class="r r0">5</span><span class="n" title="安聯亞洲基金 - 單位T · 宏利退休精選（強積金）計劃">安聯亞洲基金 - 單位T</span><span class="t">銀聯信託</span><span class="v up">+30.27%</span></li></ol></div>
+      <div class="mk-top"><h3 data-i18n="近 5 年回报领先">近 5 年回报领先</h3><a class="mk-more" href="/index.html?rk=ann5#ann5"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="年率化回报 · 由高至低">年率化回报 · 由高至低</p>
+        <ol class="mk-slot" id="mkTop4"><li><span class="r r1">1</span><span class="n" title="海通韓國基金 - A類別 · 海通MPF退休金">海通韓國基金 - A類別</span><span class="t">HSBC</span><span class="v up">+16.72%</span></li><li><span class="r r2">2</span><span class="n" title="海通韓國基金 - T類別 · 海通MPF退休金">海通韓國基金 - T類別</span><span class="t">HSBC</span><span class="v up">+16.71%</span></li><li><span class="r r3">3</span><span class="n" title="海通環球分散基金 - T類別 · 海通MPF退休金">海通環球分散基金 - T類別</span><span class="t">HSBC</span><span class="v up">+13.92%</span></li><li><span class="r r0">4</span><span class="n" title="海通環球分散基金 - A類別 · 海通MPF退休金">海通環球分散基金 - A類別</span><span class="t">HSBC</span><span class="v up">+13.81%</span></li><li><span class="r r0">5</span><span class="n" title="宏利MPF日本股票基金 · 宏利環球精選（強積金）計劃">宏利MPF日本股票基金</span><span class="t">宏利</span><span class="v up">+13.23%</span></li></ol></div>
+      <div class="mk-top"><h3 data-i18n="推出至今累积回报">推出至今累积回报</h3><a class="mk-more" href="/index.html?rk=cumLaunch#cumLaunch"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="自基金推出日起累积 · 由高至低">自基金推出日起累积 · 由高至低</p>
+        <ol class="mk-slot" id="mkTop5"><li><span class="r r1">1</span><span class="n" title="海通韓國基金 · 海通MPF退休金">海通韓國基金</span><span class="t">HSBC</span><span class="v up">+787.60%</span></li><li><span class="r r2">2</span><span class="n" title="海通香港特區基金 · 海通MPF退休金">海通香港特區基金</span><span class="t">HSBC</span><span class="v up">+761.10%</span></li><li><span class="r r3">3</span><span class="n" title="安聯亞洲基金 · 宏利退休精選（強積金）計劃">安聯亞洲基金</span><span class="t">銀聯信託</span><span class="v up">+635.38%</span></li><li><span class="r r0">4</span><span class="n" title="信安亞洲股票基金 · BCT強積金計劃800系列">信安亞洲股票基金</span><span class="t">銀聯信託</span><span class="v up">+594.43%</span></li><li><span class="r r0">5</span><span class="n" title="永明強積金香港股票基金 · 永明彩虹強積金計劃">永明強積金香港股票基金</span><span class="t">永明</span><span class="v up">+572.49%</span></li></ol></div>
+      <div class="mk-top"><h3 data-i18n="规模领先">规模领先</h3><a class="mk-more" href="/index.html?rk=size#size"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="基金资产规模 · 由大至小">基金资产规模 · 由大至小</p>
+        <ol class="mk-slot" id="mkTop2"><li><span class="r r1">1</span><span class="n" title="宏利MPF康健護理基金 · 宏利環球精選（強積金）計劃">宏利MPF康健護理基金</span><span class="t">宏利</span><span class="v ">543 亿</span></li><li><span class="r r2">2</span><span class="n" title="宏利MPF北美股票基金 · 宏利環球精選（強積金）計劃">宏利MPF北美股票基金</span><span class="t">宏利</span><span class="v ">470 亿</span></li><li><span class="r r3">3</span><span class="n" title="強積金保守基金 · 滙豐強積金智選計劃">強積金保守基金</span><span class="t">HSBC</span><span class="v ">401 亿</span></li><li><span class="r r0">4</span><span class="n" title="宏利MPF中華威力基金 · 宏利環球精選（強積金）計劃">宏利MPF中華威力基金</span><span class="t">宏利</span><span class="v ">397 亿</span></li><li><span class="r r0">5</span><span class="n" title="宏利MPF核心累積基金 · 宏利環球精選（強積金）計劃">宏利MPF核心累積基金</span><span class="t">宏利</span><span class="v ">379 亿</span></li></ol></div>
+      <div class="mk-top"><h3 data-i18n="总开支最低">总开支最低</h3><a class="mk-more" href="/index.html?rk=fer#fer"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="基金开支比率 FER · 由低至高">基金开支比率 FER · 由低至高</p>
+        <ol class="mk-slot" id="mkTop3"><li><span class="r r1">1</span><span class="n" title="中銀保誠強積金人民幣及港元貨幣市場基金 · 中銀保誠簡易強積金計劃">中銀保誠強積金人民幣及港元貨幣市場基金</span><span class="t">中銀保誠</span><span class="v ">0.54%</span></li><li><span class="r r2">2</span><span class="n" title="施羅德強積金核心累積基金 · 新地強積金僱主營辦計劃">施羅德強積金核心累積基金</span><span class="t">渣打信托</span><span class="v ">0.56%</span></li><li><span class="r r3">3</span><span class="n" title="施羅德強積金65歲後基金 · 新地強積金僱主營辦計劃">施羅德強積金65歲後基金</span><span class="t">渣打信托</span><span class="v ">0.56%</span></li><li><span class="r r0">4</span><span class="n" title="東亞香港追蹤指數基金 · 東亞（強積金）集成信託計劃">東亞香港追蹤指數基金</span><span class="t">東亞</span><span class="v ">0.58%</span></li><li><span class="r r0">5</span><span class="n" title="東亞香港追蹤指數基金 · 東亞（強積金）行業計劃">東亞香港追蹤指數基金</span><span class="t">東亞</span><span class="v ">0.58%</span></li></ol></div>
+      <div class="mk-top"><h3 data-i18n="低风险优选">低风险优选</h3><a class="mk-more" href="/index.html?rk=risk#risk"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="积金局风险级别最低 · 规模较大者优先">积金局风险级别最低 · 规模较大者优先</p>
+        <ol class="mk-slot" id="mkTop6"><li><span class="r r1">1</span><span class="n" title="強積金保守基金 · 滙豐強積金智選計劃">強積金保守基金</span><span class="t">HSBC</span><span class="v ">1 级</span></li><li><span class="r r2">2</span><span class="n" title="宏利MPF利息基金 · 宏利環球精選（強積金）計劃">宏利MPF利息基金</span><span class="t">宏利</span><span class="v ">1 级</span></li><li><span class="r r3">3</span><span class="n" title="宏利MPF保守基金 · 宏利環球精選（強積金）計劃">宏利MPF保守基金</span><span class="t">宏利</span><span class="v ">1 级</span></li><li><span class="r r0">4</span><span class="n" title="永明強積金保守基金 · 永明彩虹強積金計劃">永明強積金保守基金</span><span class="t">永明</span><span class="v ">1 级</span></li><li><span class="r r0">5</span><span class="n" title="中銀保誠強積金保守基金 · 中銀保誠簡易強積金計劃">中銀保誠強積金保守基金</span><span class="t">中銀保誠</span><span class="v ">1 级</span></li></ol></div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="biz about">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-i18n="广州精研数据有限公司">广州精研数据有限公司</h2>
+      <p data-i18n="成立于 2023 年，紧抓粤港澳大湾区融合发展机遇，专注大湾区数据服务——连接双城 · 搭建桥梁。专业 · 高效 · 安全 · 省心。">成立于 2023 年，紧抓粤港澳大湾区融合发展机遇，专注大湾区数据服务——连接双城 · 搭建桥梁。专业 · 高效 · 安全 · 省心。</p>
+    </div>
+
+    <!-- 公司简介四条（成立时间／公司愿景／团队实力／业务版图） -->
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="成立时间">成立时间</h4></div>
+        <p class="ac-t" data-i18n="紧抓机遇，应运而生">紧抓机遇，应运而生</p>
+        <p data-i18n="公司成立于 2023 年，紧抓粤港澳大湾区融合发展的时代机遇，专注大湾区数据服务，为香港机构提供合规的数据清洗、分析及内地市场拓展支持。">公司成立于 2023 年，紧抓粤港澳大湾区融合发展的时代机遇，专注大湾区数据服务，为香港机构提供合规的数据清洗、分析及内地市场拓展支持。</p>
+      </div>
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="公司愿景">公司愿景</h4></div>
+        <p class="ac-t" data-i18n="连接双城，搭建桥梁">连接双城，搭建桥梁</p>
+        <p data-i18n="聚焦粤港澳大湾区数据服务领域，致力于搭建内地与香港青年的深度对话桥梁，促进两地青年在文化、职业与发展层面的交流互鉴，推动区域人才协同融合。">聚焦粤港澳大湾区数据服务领域，致力于搭建内地与香港青年的深度对话桥梁，促进两地青年在文化、职业与发展层面的交流互鉴，推动区域人才协同融合。</p>
+      </div>
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="团队实力">团队实力</h4></div>
+        <p class="ac-t" data-i18n="精英汇聚，人才基石">精英汇聚，人才基石</p>
+        <p data-i18n="汇聚内地 985/211 院校及香港顶尖高校的优秀人才，组建专业、多元的复合型服务团队，已成功向行业输送百余名兼具两地背景的高素质专业人才，夯实发展根基。">汇聚内地 985/211 院校及香港顶尖高校的优秀人才，组建专业、多元的复合型服务团队，已成功向行业输送百余名兼具两地背景的高素质专业人才，夯实发展根基。</p>
+      </div>
+      <div class="about-card">
+        <div class="ac-h"><h4 data-i18n="业务版图">业务版图</h4></div>
+        <p class="ac-t" data-i18n="多元服务，全面覆盖">多元服务，全面覆盖</p>
+        <p data-i18n="提供保险数据支持、北上养老规划咨询服务，推出免费 MPF 行政服务，并与双盈财富深度合作开展专业 MPF 投资咨询，构建一站式、全链条的专业数据与咨询服务体系。">提供保险数据支持、北上养老规划咨询服务，推出免费 MPF 行政服务，并与双盈财富深度合作开展专业 MPF 投资咨询，构建一站式、全链条的专业数据与咨询服务体系。</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="六大核心优势">六大核心优势</h3>
+    <div class="adv-grid">
+      <div class="adv-card"><div class="ai" style="background:#e6f1fb;color:#185fa5">⏱</div>
+        <h4 data-i18n="时效性">时效性</h4><p data-i18n="办理开户通常 3-4 周内完成，其他服务尽可能快速办理。">办理开户通常 3-4 周内完成，其他服务尽可能快速办理。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#e1f5ee;color:#0f6e56">🎯</div>
+        <h4 data-i18n="专业性">专业性</h4><p data-i18n="专注于 MPF 服务，行业深耕 10+ 年，行政服务类型多种。">专注于 MPF 服务，行业深耕 10+ 年，行政服务类型多种。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#eaf3de;color:#3b6d11">🛡️</div>
+        <h4 data-i18n="安全性">安全性</h4><p data-i18n="持有强积金中介人牌照，操作完全合法，客户资料绝对保密。">持有强积金中介人牌照，操作完全合法，客户资料绝对保密。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#eceafa;color:#5a4ba8">🔁</div>
+        <h4 data-i18n="延续性">延续性</h4><p data-i18n="持续跟进服务，完善的客户管理系统，不惧流失。">持续跟进服务，完善的客户管理系统，不惧流失。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#fdeeee;color:#b3392c">🤝</div>
+        <h4 data-i18n="客户体验">客户体验</h4><p data-i18n="工作时间固定上下班、不会失联；不推销任何保险、不争夺渠道。">工作时间固定上下班、不会失联；不推销任何保险、不争夺渠道。</p></div>
+      <div class="adv-card"><div class="ai" style="background:#faeeda;color:#854f0b">💰</div>
+        <h4 data-i18n="经济性">经济性</h4><p data-i18n="对客户、对渠道完全免费，保证无隐形消费。">对客户、对渠道完全免费，保证无隐形消费。</p></div>
+    </div>
+
+    <h3 class="sub-h"><span data-i18n="免费 MPF 行政服务">免费 MPF 行政服务</span><small data-i18n="全周期专人对接，拒绝隐形收费">全周期专人对接，拒绝隐形收费</small></h3>
+    <div class="flow-grid">
+      <div class="flow-step"><div class="fn">1</div><h4 data-i18n="开户前咨询服务">开户前咨询服务</h4>
+        <p data-i18n="强积金开设所需的平台是什么？如何开设强积金计划？强积金的供应商有哪些？如何查看自己的强积金？">强积金开设所需的平台是什么？如何开设强积金计划？强积金的供应商有哪些？如何查看自己的强积金？</p></div>
+      <div class="flow-step"><div class="fn">2</div><h4 data-i18n="开户中代办服务">开户中代办服务</h4>
+        <p data-i18n="协助注册积金易账号；协助准备强积金开设材料；跟进缴款事宜（如 DDA 授权）；跟进积金易发出的信件及报表；跟进电话查询积金易服务。">协助注册积金易账号；协助准备强积金开设材料；跟进缴款事宜（如 DDA 授权）；跟进积金易发出的信件及报表；跟进电话查询积金易服务。</p></div>
+      <div class="flow-step"><div class="fn">3</div><h4 data-i18n="开户后持续服务">开户后持续服务</h4>
+        <p data-i18n="更改登记地址；供款记录调取；供款补全；强积金账户整合；更改供款周期／金额。">更改登记地址；供款记录调取；供款补全；强积金账户整合；更改供款周期／金额。</p></div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="战略合作伙伴">战略合作伙伴</h3>
+    <div class="partner">
+      <div class="pi">🤝</div>
+      <div>
+        <h4 data-i18n="双盈专业财富管理有限公司（APW）">双盈专业财富管理有限公司（APW）</h4>
+        <p data-i18n="双盈专业财富管理有限公司（APW）是一家专注香港强积金（MPF）服务的专业机构，拥有逾 10 年资产投资经验。我们以科学投资策略和严格风控体系为核心，帮助客户在退休储蓄中获取超越市场平均的回报。">双盈专业财富管理有限公司（APW）是一家专注香港强积金（MPF）服务的专业机构，拥有逾 10 年资产投资经验。我们以科学投资策略和严格风控体系为核心，帮助客户在退休储蓄中获取超越市场平均的回报。</p>
+        <div class="p-stats">
+          <span><b data-i18n="数亿">数亿</b><small data-i18n="资产服务规模">资产服务规模</small></span>
+          <span><b>10+ <small data-i18n="年">年</small></b><small data-i18n="专注强积金领域">专注强积金领域</small></span>
+          <span><b>IC001045</b><small data-i18n="强积金中介人牌照 注册编号">强积金中介人牌照 注册编号</small></span>
+          <span><b data-i18n="科学策略 · 严格风控">科学策略 · 严格风控</b><small data-i18n="核心优势">核心优势</small></span>
+        </div>
+        <span class="ptag" data-i18n="合作内容：强积金开户与投资咨询服务">合作内容：强积金开户与投资咨询服务</span>
+      </div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="服务承诺">服务承诺</h3>
+    <div class="promise-grid">
+      <div class="promise-card"><h4 data-i18n="数据准确性承诺">数据准确性承诺</h4>
+        <p data-i18n="所有数值均来自积金局及各受托人官网公开发布的数据，只做求和与算术平均，不做任何推算或补全。">所有数值均来自积金局及各受托人官网公开发布的数据，只做求和与算术平均，不做任何推算或补全。</p></div>
+      <div class="promise-card"><h4 data-i18n="中立性承诺">中立性承诺</h4>
+        <p data-i18n="不偏好任何保险公司、受托人或产品，排名完全由官方数值决定，不接受任何形式的排名干预。">不偏好任何保险公司、受托人或产品，排名完全由官方数值决定，不接受任何形式的排名干预。</p></div>
+      <div class="promise-card"><h4 data-i18n="隐私保护承诺">隐私保护承诺</h4>
+        <p data-i18n="平台不收集任何个人身份信息，不设置登录，不向任何第三方出售或共享用户数据。">平台不收集任何个人身份信息，不设置登录，不向任何第三方出售或共享用户数据。</p></div>
+      <div class="promise-card"><h4 data-i18n="持续更新承诺">持续更新承诺</h4>
+        <p data-i18n="数据每日自动同步，官网改版或来源失效时自动告警并沿用最近一次核对结果，绝不静默失效。">数据每日自动同步，官网改版或来源失效时自动告警并沿用最近一次核对结果，绝不静默失效。</p></div>
+    </div>
+
+    <h3 class="sub-h" data-i18n="业务板块">业务板块</h3>
+    <div class="biz-grid">
+      <div class="biz-card">
+        <div class="biz-ic ic-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
+        </div>
+        <h3><span data-i18n="强积金行政服务">强积金行政服务</span> <span class="free" data-i18n="免费">免费</span></h3>
+        <p data-i18n="开户前咨询、开户中代办、开户后持续跟进：注册积金易账号、材料准备、缴款跟进、账户整合，全周期专人对接，无隐形收费。">开户前咨询、开户中代办、开户后持续跟进：注册积金易账号、材料准备、缴款跟进、账户整合，全周期专人对接，无隐形收费。</p>
+      </div>
+      <div class="biz-card">
+        <div class="biz-ic ic-teal">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+        <h3 data-i18n="强积金投资咨询">强积金投资咨询</h3>
+        <p data-i18n="与战略合作伙伴双盈财富管理有限公司深度合作，逾 10 年资产投资经验，以科学投资策略与严格风控体系服务退休储蓄。">与战略合作伙伴双盈财富管理有限公司深度合作，逾 10 年资产投资经验，以科学投资策略与严格风控体系服务退休储蓄。</p>
+      </div>
+      <div class="biz-card">
+        <div class="biz-ic ic-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m7 15 4-6 4 3 5-8"></path></svg>
+        </div>
+        <h3 data-i18n="保险数据支持">保险数据支持</h3>
+        <p data-i18n="为香港机构提供合规的数据清洗、整理与分析服务，以扎实的数据基座支撑业务决策与内地市场拓展。">为香港机构提供合规的数据清洗、整理与分析服务，以扎实的数据基座支撑业务决策与内地市场拓展。</p>
+      </div>
+      <div class="biz-card">
+        <div class="biz-ic ic-amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        </div>
+        <h3 data-i18n="北上养老规划咨询">北上养老规划咨询</h3>
+        <p data-i18n="面向大湾区居民提供跨境养老规划咨询服务，助力两地生活无缝衔接。">面向大湾区居民提供跨境养老规划咨询服务，助力两地生活无缝衔接。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 数据平台 -->
+<section class="plat">
+  <div class="wrap plat-grid">
+    <div class="plat-copy">
+      <h2 data-i18n="自建强积金数据平台">自建强积金数据平台</h2>
+      <p data-i18n="全市场 451 条成分基金逐只收录（按单位类别逐行统计；积金局官网页面标注的 382 只，系将同一基金的各个单位类别合并后的计数），数据取自香港积金局「強積金基金平台」，每日自动同步、未经增删，免费开放给每一位客户。">全市场 451 条成分基金逐只收录（按单位类别逐行统计；积金局官网页面标注的 382 只，系将同一基金的各个单位类别合并后的计数），数据取自香港积金局「強積金基金平台」，每日自动同步、未经增删，免费开放给每一位客户。</p>
+      <ul class="plat-list">
+        <li data-i18n="关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选">关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选</li>
+        <li data-i18n="21 个维度榜单 · 类别冠军 · 勾选对比">21 个维度榜单 · 类别冠军 · 勾选对比</li>
+        <li data-i18n="移动端适配 · 繁体／简体／英文切换 · 数据每日自动同步">移动端适配 · 繁体／简体／英文切换 · 数据每日自动同步</li>
+      </ul>
+      <div class="plat-btns">
+        <a class="btn solid" href="/index.html#db" data-i18n="进入基金最新数据 →">进入基金最新数据 →</a>
+        <a class="btn line" href="/index.html?rk=ann1#rank" data-i18n="查看 MPFA 榜单 →">查看 MPFA 榜单 →</a>
+      </div>
+    </div>
+    <div class="plat-img">
+      <img src="img/bridge.webp" alt="连接内地与香港的数据桥梁" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<footer class="foot home-foot">
+  <div class="wrap">
+    <div class="foot-brand">
+      <img src="img/logo.png" alt="JING YAN" class="foot-logo" loading="lazy">
+      <div>
+        <b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b>
+        <div class="muted" data-i18n="专业 · 高效 · 安全 · 省心 —— 期待与您共创大湾区发展新机遇">专业 · 高效 · 安全 · 省心 —— 期待与您共创大湾区发展新机遇</div>
+      </div>
+    </div>
+    <div class="foot-links">
+      <a href="/index.html" data-i18n="强积金资料库">强积金资料库</a>
+      <a href="/index.html?rk=ann1#rank" data-i18n="MPFA 基金榜单">MPFA 基金榜单</a>
+      <a href="/analysis.html" data-i18n="MPF基金可视化对比">MPF基金可视化对比</a>
+    </div>
+    <div class="disclaimer">
+      <b data-i18n="风险提示与免责声明：">风险提示与免责声明：</b><span data-i18n="本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。">本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。</span>
+    </div>
+    <details class="foot-fold" id="foldLinks">
+      <summary><span class="ff-a" data-i18n="友情链接 · 官方数据来源">友情链接 · 官方数据来源</span><span class="ff-arrow">▾</span></summary>
+      <div class="ff-body"><div class="friend-links"><div class="fr-title">友情链接 · 官方数据来源</div><ul class="fr-list"><li><a href="https://mfp.mpfa.org.hk/tch/mpp_list.jsp" target="_blank" rel="noopener">积金局 · 强积金基金平台（基金列表）<span>本站基金列表与各项数据的官方来源</span></a></li><li><a href="https://www.mpfa.org.hk/" target="_blank" rel="noopener">积金局 · 官方网站<span>强制性公积金计划管理局</span></a></li><li><a href="https://www.empf.org.hk/page/fund-prices" target="_blank" rel="noopener">积金易平台 · 基金价格<span>官方汇总的各强积金计划基金价格链接</span></a></li></ul><div class="fr-sub">各计划受托人／保荐人官网基金价格页（单位资产净值核对来源）</div><ul class="fr-list fr-sm"><li><a href="https://www.ooogroup.xyz/mpf_price.html" target="_blank" rel="noopener">AMTD強積金計劃（銀聯信託）<span>净值截至 2026-10-14 · 16 条</span></a></li><li><a href="https://www.hsbc.com.hk/zh-hk/mpf/tool/unit-prices/" target="_blank" rel="noopener">滙豐強積金智選計劃（滙豐銀行）<span>净值截至 2026-10-15 · 20 条</span></a></li><li><a href="https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/" target="_blank" rel="noopener">恒生強積金智選計劃（恒生銀行）<span>净值截至 2026-10-15 · 20 条</span></a></li><li><a href="https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc" target="_blank" rel="noopener">東亞（強積金）集成信託計劃（東亞銀行）<span>净值截至 2026-10-15 · 17 条</span></a></li><li><a href="https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc" target="_blank" rel="noopener">東亞（強積金）享惠計劃（東亞銀行）<span>净值截至 2026-10-15 · 11 条</span></a></li><li><a href="https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc" target="_blank" rel="noopener">東亞（強積金）行業計劃（東亞銀行）<span>净值截至 2026-10-15 · 12 条</span></a></li><li><a href="https://www.bocpt.com/homepage/zh-hk/my-choice-mpf/fund-price-enquiry/" target="_blank" rel="noopener">我的強積金計劃（中銀保誠）<span>净值截至 2026-10-15 · 17 条</span></a></li><li><a href="https://www.bocpt.com/homepage/easy-choice-mpf/fund-price-enquiry/" target="_blank" rel="noopener">中銀保誠簡易強積金計劃（中銀保誠）<span>净值截至 2026-10-15 · 17 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-1" target="_blank" rel="noopener">BCT積金之選（銀聯信託）<span>净值截至 2026-10-15 · 26 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-2" target="_blank" rel="noopener">BCT強積金策略計劃（銀聯信託）<span>净值截至 2026-10-15 · 26 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-3" target="_blank" rel="noopener">BCT強積金計劃800系列（銀聯信託）<span>净值截至 2026-10-15 · 28 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-4" target="_blank" rel="noopener">BCT強積金—明智之選（銀聯信託）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-5" target="_blank" rel="noopener">BCT強積金—易富之選（銀聯信託）<span>净值截至 2026-10-15 · 10 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-6" target="_blank" rel="noopener">BCT（強積金）行業計劃（銀聯信託）<span>净值截至 2026-10-15 · 12 条</span></a></li><li><a href="https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/" target="_blank" rel="noopener">永明彩虹強積金計劃（永明）<span>净值截至 2026-10-15 · 31 条</span></a></li><li><a href="https://www.aia.com.hk/zh-hk/products/mpf/list" target="_blank" rel="noopener">友邦強積金優選計劃（友邦信托）<span>净值截至 2026-10-14 · 20 条</span></a></li><li><a href="https://www.yflife.com/tc/Hong-Kong/Corporate/MPF/Fund-Price-History/" target="_blank" rel="noopener">萬全強制性公積金計劃（萬通信託）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://www.bocomtrust.com.hk/BankCommSite/shtml/trust/tw/2600764/2600785/2600787/2600908/2600910/list.shtml" target="_blank" rel="noopener">交通銀行愉盈退休強積金計劃（交通銀行信託）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW" target="_blank" rel="noopener">中國人壽強積金集成信託計劃（中國人壽信託）<span>10 条</span></a></li><li><a href="https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2" target="_blank" rel="noopener">宏利環球精選（強積金）計劃（宏利）<span>净值截至 2026-10-15 · 28 条</span></a></li><li><a href="https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist" target="_blank" rel="noopener">宏利退休精選（強積金）計劃（宏利）<span>净值截至 2026-10-14 · 39 条</span></a></li><li><a href="https://www.htisec.com/asm/tc/mpf.jsp?type=1" target="_blank" rel="noopener">海通MPF退休金（海通國際投資經理）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://www.etnet.com.hk/www/tc/mpf/" target="_blank" rel="noopener">etnet 環富通（官方價，逐日）<span>净值截至 2026-10-14 · 106 条</span></a></li></ul></div></div>
+    </details>
+    <div class="copyright" data-i18n="© 2026 广州精研数据有限公司 · 保留所有权利">© 2026 广州精研数据有限公司 · 保留所有权利</div>
+  </div>
+</footer>
+
+<button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg>
+</button>
+
+<script src="i18n.js?v=1792470114000"></script>
+<script src="zhmap.js?v=1792470114000"></script>
+<script src="trend.js?v=1792470114000"></script>
+<script src="common.js?v=1792470114000"></script><button type="button" class="dca-fab" aria-label="供款计算器"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"></rect><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"></path></svg><span>供款计算器</span></button><div class="dca-wrap" hidden=""><div class="dca-box" role="dialog" aria-modal="true"><div class="dca-head"><b>供款（定投）计算器</b><button type="button" class="dca-x" aria-label="关闭">×</button></div><div class="dca-body"><div class="dca-row"><label>每月供款（港元）</label><input type="number" id="dcaAmt" min="100" step="100" value="2000"><label>开始月份</label><div class="dca-ym" id="dcaYm"><button type="button" class="dca-ym-btn" id="dcaYmBtn" aria-expanded="false"><span id="dcaYmText">2020 年 1 月</span><em>▾</em></button></div></div><div class="dca-ym-pop" id="dcaYmPop" hidden=""><div class="dca-ym-years" id="dcaYmYears"><button type="button" class="dca-ym-y" data-y="2026">2026</button><button type="button" class="dca-ym-y" data-y="2025">2025</button><button type="button" class="dca-ym-y" data-y="2024">2024</button><button type="button" class="dca-ym-y" data-y="2023">2023</button><button type="button" class="dca-ym-y" data-y="2022">2022</button><button type="button" class="dca-ym-y" data-y="2021">2021</button><button type="button" class="dca-ym-y on" data-y="2020">2020</button><button type="button" class="dca-ym-y" data-y="2019">2019</button><button type="button" class="dca-ym-y" data-y="2018">2018</button><button type="button" class="dca-ym-y" data-y="2017">2017</button><button type="button" class="dca-ym-y" data-y="2016">2016</button><button type="button" class="dca-ym-y" data-y="2015">2015</button><button type="button" class="dca-ym-y" data-y="2014">2014</button><button type="button" class="dca-ym-y" data-y="2013">2013</button><button type="button" class="dca-ym-y" data-y="2012">2012</button><button type="button" class="dca-ym-y" data-y="2011">2011</button><button type="button" class="dca-ym-y" data-y="2010">2010</button><button type="button" class="dca-ym-y" data-y="2009">2009</button><button type="button" class="dca-ym-y" data-y="2008">2008</button><button type="button" class="dca-ym-y" data-y="2007">2007</button><button type="button" class="dca-ym-y" data-y="2006">2006</button><button type="button" class="dca-ym-y" data-y="2005">2005</button><button type="button" class="dca-ym-y" data-y="2004">2004</button><button type="button" class="dca-ym-y" data-y="2003">2003</button><button type="button" class="dca-ym-y" data-y="2002">2002</button><button type="button" class="dca-ym-y" data-y="2001">2001</button><button type="button" class="dca-ym-y" data-y="2000">2000</button></div><div class="dca-ym-months" id="dcaYmMonths"><button type="button" class="dca-ym-m on" data-m="1">1 月</button><button type="button" class="dca-ym-m" data-m="2">2 月</button><button type="button" class="dca-ym-m" data-m="3">3 月</button><button type="button" class="dca-ym-m" data-m="4">4 月</button><button type="button" class="dca-ym-m" data-m="5">5 月</button><button type="button" class="dca-ym-m" data-m="6">6 月</button><button type="button" class="dca-ym-m" data-m="7">7 月</button><button type="button" class="dca-ym-m" data-m="8">8 月</button><button type="button" class="dca-ym-m" data-m="9">9 月</button><button type="button" class="dca-ym-m" data-m="10">10 月</button><button type="button" class="dca-ym-m" data-m="11">11 月</button><button type="button" class="dca-ym-m" data-m="12">12 月</button></div></div><div class="dca-funds" id="dcaFunds"></div><div class="dca-actions"><button type="button" class="btn ghost sm" id="dcaAdd">+ 添加基金（最多 10 只）</button><button type="button" class="btn sm" id="dcaGo">开始计算</button></div><p class="dca-tip">按月内最后一个交易日的单位净值买入，不计分红再投资与费用；结果仅供示意，实际以受托人结单为准。</p></div><div class="dca-result" id="dcaRes"></div><div class="dca-picker" id="dcaPicker" hidden=""><div class="dca-pk-head"><span>选择基金</span><button type="button" class="dca-pk-x" aria-label="关闭">×</button></div><input type="search" class="dca-pk-search" id="dcaPkSearch" placeholder="搜索基金名称 / 计划 / 受托人"><div class="dca-pk-cats" id="dcaPkCats"></div><div class="dca-pk-list" id="dcaPkList"></div></div></div></div>
+<script src="home.js?v=1792470114000"></script>
+<script src="heat.js"></script>
+<script>renderFriends();</script>
+
+
+
+</body></html>

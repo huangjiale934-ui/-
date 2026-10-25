@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <script src="api-adapter.js?v=20261025a"></script>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230f4c81%27/%3E%3Cpath d=%27M6 22 L12 14 L17 18 L26 8%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="MPF基金分析 · 广州精研数据有限公司">MPF基金分析 · 广州精研数据有限公司</title>
+<meta name="description" content="香港强积金（MPF）基金分析：左侧按发行人（受托人）浏览全市场 451 条成分基金的单位净值、风险级别、基金规模与开支比率，支持搜索排序与逐只基金分析。数据取自香港积金局与各受托人官网，每日自动同步。">
+<link rel="stylesheet" href="b.css?p=analysis&v=20261021b">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo">
+      <img class="logo-img" src="img/logo.png" alt="JING YAN 精研">
+      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</span></div>
+    </div>
+    <nav class="nav"></nav>
+    <div class="lang-sw" id="langSw" role="group" aria-label="语言"><button type="button" data-lang="zh-Hans">简</button><button type="button" data-lang="zh-Hant">繁</button><button type="button" data-lang="en">EN</button></div>
+    <div class="hdr-right">
+      <div class="ver-chip" id="verChip"><span data-i18n="数据版本">数据版本</span><b>—</b></div>
+      <div class="upd">
+        <span class="dot"></span>
+        <span class="t">数据加载中…</span>
+        <span class="cnt"></span>
+      </div>
+      <button class="btn-refresh" data-i18n-title="立即同步最新数据">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
+        </svg><span class="rt" data-i18n="更新数据">更新数据</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap an-wrap">
+  <div class="page-head">
+    <h1 data-i18n="MPF基金可视化对比">MPF基金可视化对比</h1>
+  </div>
+
+  <!-- 主视图：左侧发行人栏 + 走势图 + 该发行人基金列表 -->
+  <div class="an-view" id="anCompare">
+    <div class="an-layout">
+      <aside class="an-side">
+        <div class="an-side-title" data-i18n="MPF基金可视化对比">MPF基金可视化对比</div>
+        <nav class="an-prov" id="anProv" aria-label="发行人"></nav>
+        <div class="an-side-note" data-i18n="点选发行人筛选基金列表">点选发行人筛选基金列表</div>
+      </aside>
+      <main class="an-main">
+        <div class="loading"></div>
+        <div class="an-badge an-badge-line" id="anBadge">—</div>
+        <section class="card tr-card" id="anTrendBox"></section>
+
+        <!-- 该发行人的全部基金列表（与资料库同口径，按规模降序） -->
+        <div class="card an-tablecard an-listcard">
+          <div class="an-lh">
+            <div class="an-lh-t" id="anListTitle">—</div>
+            <div class="an-lh-r" data-i18n="勾选方框加入对比 · 点表头可排序 · 点基金名查看详情">按基金规模降序 · 点表头可排序 · 点基金名查看详情</div>
+          </div>
+          <div class="table-scroll">
+            <table class="data an-table">
+              <thead><tr id="anThead">
+                <th class="fselcol" style="width:1%;min-width:1%;padding:0 2px 0 12px"></th>
+                <th data-i18n-parts class="sortable fz" data-lsk="fund" data-defdir="1">基金名称 <span class="arrow">↕</span></th>
+                <th data-i18n-parts class="sortable r" data-lsk="nav" data-defdir="-1">单位净值 <span class="arrow">↕</span></th>
+                <th data-i18n-parts class="sortable r" data-lsk="d1" data-defdir="-1">日涨跌幅 <span class="arrow">↕</span></th>
+                <th data-i18n-parts class="sortable r" data-lsk="ytd" data-defdir="-1">年初至今 <span class="arrow">↕</span></th>
+                <th data-i18n-parts class="sortable r" data-lsk="ann1" data-defdir="-1">近1年<br><small>年率化</small> <span class="arrow">↕</span></th>
+                <th data-i18n-parts class="sortable c" data-lsk="risk" data-defdir="1">风险级别 <span class="arrow">↕</span></th>
+                <th data-i18n-parts class="sortable r" data-lsk="size" data-defdir="-1">基金规模<br><small>亿港元</small> <span class="arrow">↕</span></th>
+                <th data-i18n-parts class="sortable c" data-lsk="navAsOf" data-defdir="-1">更新日期 <span class="arrow">↕</span></th>
+              </tr></thead>
+              <tbody id="anTbody2"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- 基金分析视图（点击「查看具体基金分析」后展示） -->
+  <div class="an-view" id="anDetail" hidden></div>
+
+  <div class="ndcard" id="navDistCard" hidden></div>
+
+  <div class="foot">
+    <div class="foot-legal">
+      <b data-i18n="数据来源与免责声明：">数据来源与免责声明：</b><span data-i18n="本站数据来自香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表，由广州精研数据有限公司整理并每日自动同步（数值与原始资料一致，未经加工）；单位资产净值、业绩与持仓等数据另取自各计划受托人／保荐人官网。本网页所载资料仅供参考，不构成任何投资建议或要约邀请；基金过往表现并非未来表现的指引，投资涉及风险，强积金成员应参阅相关计划的销售文件及基金便览。广州精研数据有限公司力求资料准确可靠，但不对资料的准确性、完整性及适时性作出任何保证。">本站数据来自香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表，由广州精研数据有限公司整理并每日自动同步（数值与原始资料一致，未经加工）；单位资产净值、业绩与持仓等数据另取自各计划受托人／保荐人官网。本网页所载资料仅供参考，不构成任何投资建议或要约邀请；基金过往表现并非未来表现的指引，投资涉及风险，强积金成员应参阅相关计划的销售文件及基金便览。广州精研数据有限公司力求资料准确可靠，但不对资料的准确性、完整性及适时性作出任何保证。</span>
+    </div>
+    <details class="foot-fold" id="foldSpec">
+      <summary>
+        <span class="ff-b"><span data-i18n="本次净值核对时间：">本次净值核对时间：</span><b id="navCheckAt">—</b></span>
+        <span class="ff-a" data-i18n="数据统计口径说明">数据统计口径说明</span>
+        <span class="ff-arrow">▾</span>
+      </summary>
+      <div class="ff-body">
+        <div class="src-note src-note-top" id="srcNoteTop"></div>
+        <div class="src-note" id="srcNote"></div>
+      </div>
+    </details>
+    <details class="foot-fold" id="foldLinks">
+      <summary><span class="ff-a" data-i18n="友情链接 · 官方数据来源">友情链接 · 官方数据来源</span><span class="ff-arrow">▾</span></summary>
+      <div class="ff-body"><div class="friend-links"></div></div>
+    </details>
+    <div class="copyright" data-i18n="© 2026 广州精研数据有限公司 · 保留所有权利">© 2026 广州精研数据有限公司 · 保留所有权利</div>
+  </div>
+</div>
+
+<!-- 对比栏（跨页保持；来源：common.js CMPX） -->
+<div class="cmp" id="cmp">
+  <div class="cmp-inner">
+    <div class="cmp-lab"><span data-i18n="对比栏">对比栏</span><b id="cmpN">0</b></div>
+    <div class="cmp-list" id="cmpList"></div>
+    <button class="btn sm" onclick="openCmp()" data-i18n="开始对比">开始对比</button>
+    <button class="btn ghost sm" onclick="clearCmp()" data-i18n="清空">清空</button>
+  </div>
+</div>
+
+<!-- 对比弹窗 -->
+<div class="cmp-modal" id="cmpModal">
+  <div class="cmp-box">
+    <div class="hd">
+      <h3 data-i18n="基金对比">基金对比</h3>
+      <button class="close-x" onclick="closeCmp()">×</button>
+    </div>
+    <div class="cmp-trend" id="cmpTrend"></div>
+    <div class="bd"><div class="table-scroll" id="cmpBody"></div></div>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div><h3 id="mTitle"></h3><div class="muted" id="mSub" style="font-size:12px"></div></div>
+      <div class="m-tools">
+        <button type="button" class="btn ghost sm" id="mExpand" data-i18n="放大" data-i18n-title="放大到独立分析页">⤢ 放大</button>
+        <button type="button" class="btn ghost sm" id="mExport" data-i18n="导出" data-i18n-title="导出本基金数据（CSV）">导出</button>
+        <button type="button" class="btn ghost sm" id="mShare" data-i18n="分享" data-i18n-title="复制本基金分享链接">分享</button>
+        <button class="close-x" onclick="closeModal()">×</button>
+      </div>
+    </div>
+    <div class="modal-bd" id="mBody"></div>
+  </div>
+</div>
+
+<script src="b.js?p=analysis&v=20261021b"></script>
+<script src="analysis.js?v=20261013"></script>
+<button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></button>
+</body>
+</html>

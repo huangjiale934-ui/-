@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <script src="api-adapter.js?v=20261025a"></script>
+<meta charset="utf-8">
+<title>强积金排名 → 强积金资料库（排名榜单）</title>
+<meta http-equiv="refresh" content="0;url=/index.html?rk=1#ann1">
+<script>
+/* 2026-10-14：排名页已并入「强积金资料库」的「排名榜单」标签。
+   旧链接（含 #ann1 等榜单锚点）在此重定向到合并后的页面，并把榜单 id 同步为 hash。 */
+(function () {
+  var h = (location.hash || '').replace(/^#/, '');
+  var id = /^[A-Za-z0-9]+$/.test(h) ? h : '1';
+  location.replace('index.html?rk=' + id + (id === '1' ? '#ann1' : '#' + id));
+})();
+</script>
+</head>
+<body>
+<p>排名榜单已并入「强积金资料库」。正在跳转…如未自动跳转，<a href="index.html?rk=1#ann1">点此进入</a>。</p>
+</body>
+</html>

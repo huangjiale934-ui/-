@@ -1,0 +1,474 @@
+/* 板块一：强积金资料库 */
+(function () {
+  const S = { key: 'size', dir: 'desc', page: 1, size: 10 };
+  const F = { kw: '', type: '', sub: '', trustee: '', risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' };
+  let ROWS = [];
+  let YEARS = [];
+
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+  const SORT_LABEL = {
+    fund: '成分基金名称', trustee: '发行人', typeFull: '基金种类',
+    size: '基金规模', risk: '风险级别', nav: '单位资产净值',
+    ann1: '近1年年率化回报', ann5: '近5年年率化回报', ann10: '近10年年率化回报',
+    annLaunch: '推出至今年率化回报', mgmtFee: '基金管理费', launchTs: '推出日期',  /* 渲染时 TT() */
+  };
+
+  /* 2026-10-22（用户要求）：排名维度卡片改三态，且默认不选中任何维度
+     ① 点一次 = 该维度默认方向（多为最大在前） ② 再点 = 反向 ③ 第三次 = 取消，回名次顺序 */
+  function bindSelfTabs() {
+    const box = document.querySelector('#selfTabs');
+    if (!box || box.__bound) return;
+    box.__bound = 1;
+    let chipKey = '';
+    const paintChips = () => {
+      box.querySelectorAll('.st').forEach((n) => {
+        const on = !!chipKey && n.dataset.k === chipKey;
+        n.classList.toggle('on', on);
+        n.classList.toggle('asc', on && S.dir === 'asc');
+        n.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    };
+    paintChips();
+    box.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('.st') : null;
+      if (!b) return;
+      const k = b.dataset.k;
+      const first = b.dataset.dir || 'desc';
+      const second = first === 'asc' ? 'desc' : 'asc';
+      if (chipKey !== k) { chipKey = k; S.key = k; S.dir = first; }
+      else if (S.dir === first) { S.dir = second; }
+      else { chipKey = ''; S.key = 'size'; S.dir = 'desc'; }   // ③ 取消 → 默认规模/名次顺序
+      S.page = 1;
+      paintChips();
+      /* 卡片与表头互斥：点卡片后清掉表头箭头，避免两处同时显示「已排序」 */
+      const th = document.getElementById('thead');
+      if (th) th.querySelectorAll('th.sorted').forEach((n) => {
+        n.classList.remove('sorted');
+        const a = n.querySelector('.arrow');
+        if (a) a.textContent = '↕';
+      });
+      render();
+    });
+  }
+
+  function init() {
+    mountHeader('db');
+    loadData((d) => {
+      YEARS = d.years || [];
+      buildFilters();
+      buildMobileSort();
+      makeSorter($$('#thead th'), S, render);
+      bindAll();
+      initDualScroll('#tscroll', '#topScroll', '#scrollGhost');
+      window.__onRefresh = () => { buildFilters(); render(); };
+      bindSelfTabs();
+      render();
+      /* 2026-10-19：本页改为「最新净值口径」列表——补入自算指标（日涨跌/年初至今/近1年/近3年/回撤） */
+      if (window.ensurePerf) {
+        window.ensurePerf().then((j) => {
+          const pf = (j && j.funds) || {};
+          DATA.funds.forEach((x) => {
+            const p = pf[String(x.id)];
+            if (!p) return;
+            x.selfD1 = p.d1; x.selfYtd = p.ytd; x.selfY1 = p.y1;
+            x.selfW1 = p.w1; x.selfM1 = p.m1;
+            x.selfY3a = p.y3a; x.selfY5a = p.y5a;
+            x.selfMdd5 = p.mdd5 != null ? p.mdd5 : null;
+            x.selfMdd = p.mdd1 != null ? p.mdd1 : p.mdd;
+            x.vol1 = p.vol1; x.vol3 = p.vol3; x.sharpe1 = p.sharpe1; x.posM12 = p.posM12;
+            const hy = j && j.meta && j.meta.hsi ? j.meta.hsi.y1 : null;
+            x.excess1 = (p.y1 != null && hy != null) ? Math.round((p.y1 - hy) * 100) / 100 : null;
+          });
+          render();
+        }).catch(() => {});
+      }
+      bindNavDateDist();
+    });
+    // 语言切换后重绘整表（表头 data-l 标签、详情按钮、净值悬浮说明等）
+    document.addEventListener('mpf:lang', () => { if (DATA.count) render(); });
+  }
+
+  /* 2026-10-24（领导要求）：列表下方的「净值估值日」卡片 → 点击筛选（供 common.js 的卡片调用） */
+  window.mpfSetNavDate = function (v) {
+    F.navDate = v;
+    window.__MPF_NAVDATE = v;
+    S.page = 1;
+    document.querySelectorAll('.ndk').forEach((el) => el.classList.toggle('on', el.getAttribute('data-navdate') === F.navDate && !!F.navDate));
+    render();
+  };
+
+  /** 口径说明里的「净值估值日分布」标签 → 点击筛选（再点取消） */
+  function bindNavDateDist() {
+    if (document.__navDistBound) return;
+    document.__navDistBound = 1;
+    document.addEventListener('click', (e) => {
+      const b = e.target && e.target.closest ? e.target.closest('.ndk[data-navdate]') : null;
+      if (!b) return;
+      const v = b.getAttribute('data-navdate');
+      F.navDate = F.navDate === v ? '' : v;
+      document.querySelectorAll('.ndk').forEach((el) => el.classList.toggle('on', el.getAttribute('data-navdate') === F.navDate && !!F.navDate));
+      S.page = 1;
+      render();
+    });
+  }
+
+  function buildFilters() {
+    const f = DATA.funds;
+    fill('#fType', uniq(f.map((x) => x.type)), (v) => typeLabel(v));
+    fill('#fTrustee', uniq(f.map((x) => x.trustee)));
+    fill('#fRisk', uniq(f.map((x) => x.risk)).sort((a, b) => a - b), (v) => TQ('风险级别 {n}', { n: v }));
+    fillSub();
+  }
+
+  function fillSub() {
+    const f = DATA.funds.filter((x) => !F.type || x.type === F.type);
+    fill('#fSub', uniq(f.map((x) => x.subtype)), (v) => typeLabel(v));
+    $('#fSub').value = F.sub;
+  }
+
+  function fill(sel, arr, fmt) {
+    const el = $(sel);
+    const cur = el.value;
+    el.innerHTML = '<option value="">' + el.options[0].text + '</option>';
+    arr.sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'));
+    arr.forEach((v) => {
+      const o = document.createElement('option');
+      o.value = v;
+      o.textContent = fmt ? fmt(v) : v;
+      el.appendChild(o);
+    });
+    if (arr.indexOf(cur) >= 0 || arr.map(String).indexOf(String(cur)) >= 0) el.value = cur;
+  }
+
+  function buildMobileSort() {
+    const el = $('#mSortKey');
+    el.innerHTML = Object.keys(SORT_LABEL).map((k) => '<option value="' + k + '">' + TT(SORT_LABEL[k]) + '</option>').join('');
+    el.value = S.key;
+    el.addEventListener('change', () => { S.key = el.value; S.page = 1; render(); });
+    $('#mSortDir').addEventListener('click', () => {
+      S.dir = S.dir === 'asc' ? 'desc' : 'asc';
+      $('#mSortDir').textContent = S.dir === 'asc' ? TT('升序 ↑') : TT('降序 ↓');
+      render();
+    });
+  }
+
+  /** 导出当前筛选结果（全部行，非仅当前页，CSV；Excel 直接打开） */
+  function exportIdx() {
+    const head = [TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('发行人'), TT('风险级别'),
+      TT('单位资产净值'), TT('净值估值日'), TT('近1年年率化回报'), TT('近5年年率化回报'), TT('近10年年率化回报'),
+      TT('推出至今年率化回报'), TQ('基金规模（{u}）', { u: TT('百万港元') }), TT('基金管理费 %'), TT('最近期基金开支比率'), TT('推出日期')];
+    const body = ROWS.map((x) => [
+      x.fundBase || x.fund,
+      x.unit || '',
+      typeLabel(x.type) + (x.subtype ? ' / ' + typeLabel(x.subtype) : ''),
+      x.scheme,
+      x.trustee,
+      x.risk == null ? '' : x.risk,
+      x.nav == null ? '' : x.nav,
+      x.navAsOf || '',
+      x.ann1 == null ? '' : x.ann1,
+      x.ann5 == null ? '' : x.ann5,
+      x.ann10 == null ? '' : x.ann10,
+      x.annLaunch == null ? '' : x.annLaunch,
+      x.size == null ? '' : x.size,
+      x.mgmtFee == null ? '' : feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee),
+      x.fer == null ? '' : x.fer,
+      x.launch || '',
+    ]);
+    csvDownload(csvSourceNote().concat([head], body), 'MPF资料库_' + TT('数据截至') + '_' + (DATA.dataAsOf || '') + '.csv');
+  }
+
+  /** 重置全部筛选（含估值日标签，2026-10-14） */
+  function resetAll() {
+    Object.assign(F, { kw: '', type: '', sub: '', trustee: '', risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' });
+    ['#kw', '#fType', '#fTrustee', '#fRisk', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
+    $('#fRetDim').value = 'ann1';
+    document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
+    fillSub(); S.page = 1; render();
+  }
+  window.clearAllFilters = resetAll;   // 空态「一键清除」入口（2026-10-14）
+
+  /* ---------- 列设置（2026-10-14）：勾选显示列 + 精简模式 ---------- */
+  /* 2026-10-19：列序对齐「基金最新数据」表格（名次 + 自算指标） */
+  const COL_DEFS = [
+    { i: 1, k: 'rank', n: '名次', lock: true },
+    { i: 2, k: 'cmp', n: '对比', lock: true },
+    { i: 3, k: 'fund', n: '成分基金' },
+    { i: 4, k: 'trustee', n: '发行人（受托人）' },
+    { i: 5, k: 'type', n: '基金种类' },
+    { i: 6, k: 'risk', n: '风险级别' },
+    { i: 7, k: 'nav', n: '单位资产净值' },
+    { i: 8, k: 'selfD1', n: '日涨跌' },
+    { i: 9, k: 'selfM1', n: '近1个月' },
+    { i: 10, k: 'selfYtd', n: '年初至今' },
+    { i: 11, k: 'selfY1', n: '近1年' },
+    { i: 12, k: 'selfY3a', n: '近3年年化' },
+    { i: 13, k: 'selfMdd', n: '近1年最大回撤' },
+    { i: 14, k: 'vol1', n: '年化波动率（近1年）' },
+    { i: 15, k: 'sharpe1', n: '夏普比率（近1年）' },
+    { i: 16, k: 'excess1', n: '超额收益（对恒指）' },
+    { i: 17, k: 'posM12', n: '正收益月份占比' },
+    { i: 18, k: 'size', n: '基金规模' },
+    { i: 19, k: 'mgmtFee', n: '基金管理费' },
+    { i: 20, k: 'launchTs', n: '推出日期' },
+    { i: 21, k: 'ops', n: '操作' },
+  ];
+  /* 2026-10-19：默认显示列（按领导最新指定截图）：
+     名次/对比/成分基金/发行人/风险级别/单位资产净值/日涨跌/近1个月/年初至今/近3年年化/
+     近1年最大回撤/基金规模/操作 —— 其余列（种类、近1年、波动率、夏普、超额、正收益月份、管理费、推出日期）放列设置 */
+  /* 2026-10-22（用户要求）：「近1年」改为默认列，其余列不变 */
+  const COL_DEFAULT = ['rank', 'cmp', 'fund', 'trustee', 'risk', 'nav',
+    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfY3a', 'selfMdd', 'size', 'ops'];
+  const COL_SLIM = ['rank', 'cmp', 'fund', 'risk', 'nav', 'selfY1', 'size', 'ops'];
+  let colSet = null;
+  try { const raw = localStorage.getItem('mpf-cols-v5'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
+  if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
+  function applyCols(save) {
+    if (save !== false) { try { localStorage.setItem('mpf-cols-v5', JSON.stringify([...colSet])); } catch (e) {} }
+    const css = COL_DEFS.filter((c) => !c.lock && !colSet.has(c.k))
+      .map((c) => '#fundTable tr > *:nth-child(' + c.i + ') { display: none !important; }').join('\n');
+    let st = document.getElementById('colStyle');
+    if (!st) { st = document.createElement('style'); st.id = 'colStyle'; document.head.appendChild(st); }
+    st.textContent = css;
+    const slimOn = COL_SLIM.every((k) => colSet.has(k)) && COL_DEFS.every((c) => COL_SLIM.indexOf(c.k) >= 0 || !colSet.has(c.k));
+    const bS = document.getElementById('colSlim');
+    if (bS) bS.classList.toggle('on', slimOn);
+    const bA = document.getElementById('colAll');
+    if (bA) bA.classList.toggle('on', !slimOn && colSet.size === COL_DEFS.length);
+    const box = document.getElementById('colChecks');
+    if (box) box.querySelectorAll('input').forEach((cb) => { cb.checked = colSet.has(cb.value); });
+  }
+  function initColUI() {
+    const host = document.querySelector('#idxExport') && document.querySelector('#idxExport').parentNode;
+    if (!host || document.getElementById('colBtn')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'btn ghost sm'; btn.id = 'colBtn';
+    btn.textContent = TT('列设置');
+    btn.setAttribute('data-i18n', '列设置');
+    host.insertBefore(btn, document.querySelector('#idxExport'));
+    const pop = document.createElement('div');
+    pop.id = 'colPop'; pop.hidden = true;
+    pop.innerHTML = '<div class="cp-t">' + TT('显示列') + '<span class="cp-x" id="colClose">×</span></div>' +
+      '<div class="cp-btns"><button type="button" class="cp-b" id="colSlim">' + TT('精简模式') + '</button>' +
+      '<button type="button" class="cp-b" id="colAll">' + TT('全部列') + '</button></div>' +
+      '<div class="cp-list" id="colChecks">' + COL_DEFS.map((c) =>
+        '<label' + (c.lock ? ' class="cp-lock"' : '') + '><input type="checkbox" value="' + c.k + '"' + (c.lock ? ' disabled checked' : '') + '>' + TT(c.n) + '</label>').join('') + '</div>';
+    host.parentNode.insertBefore(pop, host.nextSibling);
+    btn.addEventListener('click', (e) => { e.stopPropagation(); pop.hidden = !pop.hidden; applyCols(false); });
+    document.getElementById('colClose').addEventListener('click', () => { pop.hidden = true; });
+    document.addEventListener('click', (e) => { if (!pop.hidden && !e.target.closest('#colPop') && e.target.id !== 'colBtn') pop.hidden = true; });
+    document.getElementById('colSlim').addEventListener('click', () => { colSet = new Set(COL_SLIM); applyCols(); });
+    document.getElementById('colAll').addEventListener('click', () => { colSet = new Set(COL_DEFS.map((c) => c.k)); applyCols(); });
+    pop.querySelectorAll('#colChecks input').forEach((cb) => cb.addEventListener('change', () => {
+      if (cb.checked) colSet.add(cb.value); else colSet.delete(cb.value);
+      applyCols();
+    }));
+    applyCols(false);
+  }
+
+  function bindAll() {
+    bind();
+    initColUI();
+  }
+
+  function bind() {
+    $('#kw').addEventListener('input', debounce(() => {
+      F.kw = $('#kw').value.trim(); S.page = 1; render();
+      /* 首次输入时懒加载英文名，到货后自动重绘（简繁英互通） */
+      ensureNamesEn().then(() => render());
+    }, 200));
+    $('#fType').addEventListener('change', () => { F.type = $('#fType').value; F.sub = ''; fillSub(); S.page = 1; render(); });
+    $('#fSub').addEventListener('change', () => { F.sub = $('#fSub').value; S.page = 1; render(); });
+    $('#fTrustee').addEventListener('change', () => { F.trustee = $('#fTrustee').value; S.page = 1; render(); });
+    $('#fRisk').addEventListener('change', () => { F.risk = $('#fRisk').value; S.page = 1; render(); });
+    $('#fRetDim').addEventListener('change', () => { F.retDim = $('#fRetDim').value; S.page = 1; render(); });
+    [['#fRetMin', 'retMin'], ['#fRetMax', 'retMax'], ['#fDdMin', 'ddMin'], ['#fDdMax', 'ddMax'], ['#fFeeMax', 'feeMax']]
+      .forEach(([sel, k]) => $(sel).addEventListener('input', debounce(() => { F[k] = $(sel).value; S.page = 1; render(); }, 300)));
+    $('#btnReset').addEventListener('click', resetAll);   /* 2026-10-14：复用 resetAll（含估值日标签） */
+    $('#perPage').addEventListener('change', () => {
+      S.size = parseInt($('#perPage').value, 10) || 10;
+      S.page = 1;
+      render();
+    });
+    $('#idxExport').addEventListener('click', exportIdx);
+  }
+
+  function debounce(fn, ms) {
+    let t; return function () { clearTimeout(t); t = setTimeout(fn, ms); };
+  }
+
+  function filtered() {
+    const kw = toSimp(F.kw).toLowerCase();
+    return DATA.funds.filter((x) => {
+      if (F.type && x.type !== F.type) return false;
+      if (F.sub && x.subtype !== F.sub) return false;
+      if (F.trustee && x.trustee !== F.trustee) return false;
+      if (F.risk !== '' && String(x.risk) !== String(F.risk)) return false;
+      if (F.retMin !== '' && !(x[F.retDim] != null && x[F.retDim] >= parseFloat(F.retMin))) return false;
+      if (F.retMax !== '' && !(x[F.retDim] != null && x[F.retDim] <= parseFloat(F.retMax))) return false;
+      /* 2026-10-19：与参考版式一致——「最大回撤区间」按近5年最差年度（worstYear）筛 */
+      if (F.ddMin !== '' && !(x.worstYear != null && x.worstYear >= parseFloat(F.ddMin))) return false;
+      if (F.ddMax !== '' && !(x.worstYear != null && x.worstYear <= parseFloat(F.ddMax))) return false;
+      if (F.feeMax !== '' && !(x.mgmtFee != null && x.mgmtFee <= parseFloat(F.feeMax))) return false;
+      // 净值估值日筛选：'none' = 有净值但官网未静态公布估值日；具体日期 = navAsOf 精确匹配
+      if (F.navDate === 'none') {
+        if (!(x.navStatus === 'verified' && x.nav != null && !x.navAsOf)) return false;
+      } else if (F.navDate) {
+        // 与分布标签同口径：仅统计「已核实且有净值」的条目（na 条目的 navAsOf 可能是残留值）
+        if (!(x.navStatus === 'verified' && x.nav != null && x.navAsOf === F.navDate)) return false;
+      }
+      // 关键词：简繁互通 + 英文名（common.js fundMatch）
+      if (!fundMatch(x, kw)) return false;
+      return true;
+    });
+  }
+
+  function render() {
+    ROWS = sortRows(filtered(), S.key, S.dir);
+    const total = ROWS.length;
+    $('#cnt').textContent = total;
+    $('#loading').style.display = 'none';
+    renderStats(ROWS);
+    renderChips();
+
+    const pages = Math.max(1, Math.ceil(total / S.size));
+    if (S.page > pages) S.page = pages;
+    const st = (S.page - 1) * S.size;
+    const page = ROWS.slice(st, st + S.size);
+
+    $('#tbody').innerHTML = page.length
+      ? page.map((x, i) => rowHtml(x, st + i + 1)).join('')
+      : '<tr><td colspan="14"><div class="empty">' + TT('没有符合条件的基金，请放宽筛选条件') +
+        ' <button type="button" class="btn sm" style="margin-left:10px" onclick="window.clearAllFilters && clearAllFilters()">' + TT('一键清除全部筛选') + '</button></div></td></tr>';
+
+    // 表格内勾选 → 加入/移出对比（与排名页共用 CMPX；页底对比栏随之出现）
+    $$('#tbody input[data-cmp]').forEach((c) => c.addEventListener('change', () => {
+      if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
+      renderCmpBar();
+    }));
+
+    /* 2026-10-23（核验报告）：筛选后明确写「已筛选」，避免把「全市场 451」误读成计数没刷新 */
+    $('#cntTip').textContent = total === DATA.count ? TT('（全市场）') : TQ('（已筛选结果，全市场共 {n} 条）', { n: DATA.count });
+    renderPager(pages, total);
+    if (window.__syncTableScroll) window.__syncTableScroll();
+  }
+
+  function rowHtml(x, rk) {
+    return '<tr data-id="' + esc(x.id) + '">' +
+      '<td class="c rank-cell" data-l="' + TT('名次') + '">' + (rk || '') + '</td>' +
+      '<td class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>' +
+      '<td class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) + (x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '') + '</div>' +
+        '<div class="sub-line">' + esc(typeLabel(x.subtype || x.type)) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div></td>' +
+      '<td data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
+      '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span></td>' +
+      '<td data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>' +
+      '<td data-l="' + TT('单位资产净值') + '" class="r num">' + navCell(x) + '</td>' +
+      '<td data-l="' + TT('日涨跌') + '" class="r num ' + cls(x.selfD1) + '">' + pct(x.selfD1) + '</td>' +
+      '<td data-l="' + TT('近1个月') + '" class="r num ' + cls(x.selfM1) + '">' + pct(x.selfM1) + '</td>' +
+      '<td data-l="' + TT('年初至今') + '" class="r num ' + cls(x.selfYtd) + '">' + pct(x.selfYtd) + '</td>' +
+      '<td data-l="' + TT('近1年') + '" class="r num ' + cls(x.selfY1) + '">' + pct(x.selfY1) + '</td>' +
+      '<td data-l="' + TT('近3年年化') + '" class="r num ' + cls(x.selfY3a) + '">' + pct(x.selfY3a) + '</td>' +
+      '<td data-l="' + TT('近1年最大回撤') + '" class="r num down">' + pct(x.selfMdd) + '</td>' +
+      '<td data-l="' + TT('年化波动率（近1年）') + '" class="r num">' + pct(x.vol1) + '</td>' +
+      '<td data-l="' + TT('夏普比率（近1年）') + '" class="r num">' + (x.sharpe1 == null ? '—' : x.sharpe1.toFixed(2)) + '</td>' +
+      '<td data-l="' + TT('超额收益（对恒指·近1年）') + '" class="r num ' + cls(x.excess1) + '">' + pct(x.excess1) + '</td>' +
+      '<td data-l="' + TT('正收益月份占比') + '" class="r num">' + (x.posM12 == null ? '—' : x.posM12.toFixed(0) + '%') + '</td>' +
+      '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
+      (function () {
+        const more = x.feeMore && x.feeMore.mgmtFee;
+        const tip = more ? feeTip(TT('基金管理费'), more) : '';
+        return '<td data-l="' + TT('基金管理费 %') + '" class="r num"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + feeText(x.mgmtFee, more) + '</td>';
+      })() +
+      '<td data-l="' + TT('推出日期') + '" class="num">' + esc(x.launch || '—') + '</td>' +
+      '<td data-l="' + TT('操作') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
+      TT('详情') + '</button></td>' +
+      '</tr>';
+  }
+
+  function renderStats(rows) {
+    const f = DATA.funds;
+    const avg = (k) => {
+      const a = rows.map((x) => x[k]).filter((v) => v != null);
+      return a.length ? a.reduce((s, v) => s + v, 0) / a.length : null;
+    };
+    const pos = rows.filter((x) => x.ann1 != null && x.ann1 > 0).length;
+    const tot = rows.filter((x) => x.ann1 != null).length;
+    const big = rows.reduce((m, x) => (x.size != null && x.size > (m ? m.size : 0) ? x : m), null);
+    $('#stats').innerHTML = [
+      card(TT('基金数量'), rows.length, TT('条'), TQ('全市场共 {n} 条', { n: f.length })),
+      card(TT('发行人数量'), uniq(rows.map((x) => x.trustee)).length, TT('家'), TT('受托人／保荐人')),
+      card(TT('基金种类'), uniq(rows.map((x) => x.type)).length, TT('类'), TQ('{n} 个细类', { n: uniq(rows.map((x) => x.subtype)).length })),
+      card(TT('近1年平均回报'), pct(avg('ann1')), '', TT('已剔除无数据基金')),
+      card(TT('近1年上涨占比'), tot ? Math.round((pos / tot) * 100) : 0, '%', TQ('{n} / {m} 条录得正回报', { n: pos, m: tot })),
+      card(TT('规模最大基金'), big ? big.fund : '—', '', big ? nf(big.size, 0) + ' ' + TT('百万港元') + ' · ' + big.trustee : ''),
+    ].join('');
+  }
+
+  function card(k, v, unit, s) {
+    return '<div class="stat"><div class="k">' + k + '</div><div class="v num">' + v + '<small>' + unit + '</small></div><div class="s">' + esc(s) + '</div></div>';
+  }
+
+  function renderChips() {
+    const c = [];
+    if (F.kw) c.push([TQ('关键词：{v}', { v: F.kw }), 'kw']);
+    if (F.type) c.push([TQ('种类：{v}', { v: typeLabel(F.type) }), 'type']);
+    if (F.sub) c.push([TQ('细类：{v}', { v: typeLabel(F.sub) }), 'sub']);
+    if (F.trustee) c.push([TQ('发行人：{v}', { v: F.trustee }), 'trustee']);
+    if (F.risk !== '') c.push([TQ('风险：{v}', { v: F.risk }), 'risk']);
+    if (F.retMin !== '' || F.retMax !== '') c.push([dimName(F.retDim) + '：' + (F.retMin || TT('不限')) + ' ~ ' + (F.retMax || TT('不限')), 'ret']);
+    if (F.ddMin !== '' || F.ddMax !== '') c.push([TQ('最大回撤(近5年)：{a} ~ {b}', { a: F.ddMin || TT('不限'), b: F.ddMax || TT('不限') }), 'dd']);
+    if (F.feeMax !== '') c.push([TQ('管理费 ≤ {v}%', { v: F.feeMax }), 'fee']);
+    if (F.navDate) c.push([TQ('估值日：{v}', { v: F.navDate === 'none' ? TT('无估值日') : F.navDate.slice(5).replace('-', '/') }), 'navDate']);
+    $('#chips').innerHTML = c.length
+      ? '<span class="muted" style="font-size:12px">' + TT('已选条件：') + '</span>' +
+        c.map((x) => '<span class="chip">' + esc(x[0]) + '<span class="x" data-c="' + x[1] + '">×</span></span>').join('')
+      : '<span class="muted" style="font-size:12px">' + TT('未设置筛选条件，当前显示全市场基金') + '</span>';
+    $$('#chips .x').forEach((b) => b.addEventListener('click', () => {
+      const k = b.dataset.c;
+      if (k === 'kw') { F.kw = ''; $('#kw').value = ''; }
+      if (k === 'type') { F.type = ''; $('#fType').value = ''; fillSub(); }
+      if (k === 'sub') { F.sub = ''; fillSub(); }
+      if (k === 'trustee') { F.trustee = ''; $('#fTrustee').value = ''; }
+      if (k === 'risk') { F.risk = ''; $('#fRisk').value = ''; }
+      if (k === 'ret') { F.retMin = F.retMax = ''; $('#fRetMin').value = ''; $('#fRetMax').value = ''; }
+      if (k === 'dd') { F.ddMin = F.ddMax = ''; $('#fDdMin').value = ''; $('#fDdMax').value = ''; }
+      if (k === 'fee') { F.feeMax = ''; $('#fFeeMax').value = ''; }
+      if (k === 'navDate') {
+        F.navDate = '';
+        document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
+      }
+      S.page = 1; render();
+    }));
+  }
+
+  function dimName(k) {
+    return TT({ ann1: '近1年回报', ann5: '近5年年化', ann10: '近10年年化', annLaunch: '推出至今年化', cum1: '近1年累积' }[k] || k);
+  }
+
+  function renderPager(pages, total) {
+    if (pages <= 1) { $('#pager').innerHTML = total ? '<span class="info">' + TQ('共 {n} 条', { n: total }) + '</span>' : ''; return; }
+    let h = '<button data-p="' + (S.page - 1) + '"' + (S.page === 1 ? ' disabled' : '') + '>' + TT('上一页') + '</button>';
+    const win = 2;
+    const list = [];
+    for (let i = 1; i <= pages; i++) {
+      if (i === 1 || i === pages || Math.abs(i - S.page) <= win) list.push(i);
+      else if (list[list.length - 1] !== '…') list.push('…');
+    }
+    list.forEach((i) => {
+      if (i === '…') h += '<button disabled>…</button>';
+      else h += '<button data-p="' + i + '" class="' + (i === S.page ? 'on' : '') + '">' + i + '</button>';
+    });
+    h += '<button data-p="' + (S.page + 1) + '"' + (S.page === pages ? ' disabled' : '') + '>' + TT('下一页') + '</button>';
+    h += '<span class="info">' + TQ('第 {p} / {n} 页 · 共 {t} 条', { p: S.page, n: pages, t: total }) + '</span>';
+    $('#pager').innerHTML = h;
+    $$('#pager button[data-p]').forEach((b) => b.addEventListener('click', () => {
+      const p = parseInt(b.dataset.p, 10);
+      if (p >= 1 && p <= pages) { S.page = p; render(); window.scrollTo({ top: 220, behavior: 'smooth' }); }
+    }));
+  }
+
+  init();
+})();

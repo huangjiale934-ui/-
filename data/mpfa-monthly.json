@@ -1,0 +1,17 @@
+{
+  "publishedAt": "2026-10-06",
+  "asOf": "2026-09-30",
+  "source": "https://www.mpfa.org.hk/tc/info-centre/press-releases/20261006",
+  "sourceLabel": "積金局新聞稿（2026-10-06）",
+  "rows": [
+    { "key": "equity",   "name": "股票基金",              "sub": false, "share": 48,  "m12": 10.3, "m12Hi": 98.4, "m12Lo": -15.7, "since": 5.1, "dis": 7.0 },
+    { "key": "mixed",    "name": "混合資產基金",           "sub": false, "share": 34,  "m12": 8.5,  "m12Hi": 22.5, "m12Lo": -1.9,  "since": 4.7, "dis": 5.4 },
+    { "key": "disCore",  "name": "DIS 核心累積基金",       "sub": true,  "share": 9,   "m12": 9.5,  "m12Hi": 22.5, "m12Lo": 8.5,   "since": null, "dis": 7.1 },
+    { "key": "dis65",    "name": "DIS 65歲後基金",        "sub": true,  "share": 3,   "m12": 1.7,  "m12Hi": 7.0,  "m12Lo": 1.1,   "since": null, "dis": 2.4 },
+    { "key": "mixedOth", "name": "其他",                  "sub": true,  "share": 22,  "m12": 8.8,  "m12Hi": 22.0, "m12Lo": -1.9,  "since": 4.7, "dis": 5.3, "note": "混合資產基金中非 DIS 部分（官方原表如此）" },
+    { "key": "bond",     "name": "債券基金",              "sub": false, "share": 3,   "m12": -1.5, "m12Hi": 7.6,  "m12Lo": -3.8,  "since": 1.7, "dis": 0.4 },
+    { "key": "guar",     "name": "保證基金",              "sub": false, "share": 5,   "m12": 0.8,  "m12Hi": 2.5,  "m12Lo": 0.2,   "since": 1.2, "dis": 0.9 },
+    { "key": "cons",     "name": "強積金保守基金",         "sub": false, "share": 10,  "m12": 2.0,  "m12Hi": 2.2,  "m12Lo": 1.5,   "since": 1.0, "dis": 1.4 },
+    { "key": "mmf",      "name": "貨幣市場基金（非保守）",  "sub": false, "share": 0.5, "shareLt": true, "m12": 3.4,  "m12Hi": 5.5,  "m12Lo": 1.3,   "since": 0.9, "dis": 1.6 }
+  ]
+}

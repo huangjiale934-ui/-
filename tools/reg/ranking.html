@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="fx-ready"><head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230f4c81%27/%3E%3Cpath d=%27M6 22 L12 14 L17 18 L26 8%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="强积金资料库 · 广州精研数据有限公司">强积金资料库 · 广州精研数据有限公司</title>
+<meta name="description" content="香港强积金（MPF）全市场基金资料库，数据覆盖全市场成分基金，支持关键词搜索、基金种类、发行人、涨跌幅、最大回撤筛选。">
+<link rel="stylesheet" href="style.css?v=1792470114000">
+<link rel="stylesheet" href="analysis.css?v=1792470114000">
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:true,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'8c2dfc0a1e074ad982a66da18996828f'
+    });
+  }catch(e){}
+})();
+</script><style id="rkColStyle">#rkTable tr > *:nth-child(1) { display: table-cell !important; }
+#rkTable tr > *:nth-child(2) { display: table-cell !important; }
+#rkTable tr > *:nth-child(3) { display: table-cell !important; }
+#rkTable tr > *:nth-child(4) { display: table-cell !important; }
+#rkTable tr > *:nth-child(5) { display: table-cell !important; }
+#rkTable tr > *:nth-child(6) { display: table-cell !important; }
+#rkTable tr > *:nth-child(7) { display: table-cell !important; }
+#rkTable tr > *:nth-child(8) { display: table-cell !important; }
+#rkTable tr > *:nth-child(9) { display: table-cell !important; }
+#rkTable tr > *:nth-child(10) { display: table-cell !important; }
+#rkTable tr > *:nth-child(11) { display: table-cell !important; }
+#rkTable tr > *:nth-child(12) { display: none !important; }
+#rkTable tr > *:nth-child(13) { display: none !important; }
+#rkTable tr > *:nth-child(14) { display: none !important; }
+#rkTable tr > *:nth-child(15) { display: none !important; }
+#rkTable tr > *:nth-child(16) { display: none !important; }
+#rkTable tr > *:nth-child(17) { display: none !important; }
+#rkTable tr > *:nth-child(18) { display: none !important; }
+#rkTable tr > *:nth-child(19) { display: none !important; }
+#rkTable tr > *:nth-child(20) { display: none !important; }
+#rkTable tr > *:nth-child(21) { display: none !important; }
+#rkTable tr > *:nth-child(22) { display: table-cell !important; }
+#rkTable tr > *:nth-child(23) { display: table-cell !important; }</style><style id="colStyle">#fundTable tr > *:nth-child(5) { display: none !important; }
+#fundTable tr > *:nth-child(11) { display: none !important; }
+#fundTable tr > *:nth-child(14) { display: none !important; }
+#fundTable tr > *:nth-child(15) { display: none !important; }
+#fundTable tr > *:nth-child(16) { display: none !important; }
+#fundTable tr > *:nth-child(17) { display: none !important; }
+#fundTable tr > *:nth-child(19) { display: none !important; }
+#fundTable tr > *:nth-child(20) { display: none !important; }</style></head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="logo">
+      <img class="logo-img" src="img/logo.png" alt="JING YAN 精研">
+      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</span></div>
+    </div>
+    <nav class="nav"><a href="/" class="">首页</a><a href="/index.html" class="on">强积金资料库</a><a href="/analysis.html" class="">MPF基金可视化对比</a></nav>
+    <div class="lang-sw" id="langSw" role="group" aria-label="语言"><button type="button" data-lang="zh-Hans" class="on">简</button><button type="button" data-lang="zh-Hant">繁</button><button type="button" data-lang="en">EN</button></div>
+    <div class="hdr-right">
+      <div class="ver-chip" id="verChip" data-tip="官方资料（积金局）：2026-09-30
+单位净值（发行人官网）：最新 2026-10-15
+自算指标（日涨跌 / 年初至今 / 区间涨幅 / 回撤）基于官网净值序列，未含分红再投资与费用调整。" aria-label="官方资料（积金局）：2026-09-30
+单位净值（发行人官网）：最新 2026-10-15
+自算指标（日涨跌 / 年初至今 / 区间涨幅 / 回撤）基于官网净值序列，未含分红再投资与费用调整。"><span data-i18n="数据版本">数据版本</span><b>2026-10-20</b></div>
+      <div class="upd">
+        <span class="dot"></span>
+        <!-- 状态行完全由 JS 接管（缓存命中时若带 data-i18n 会被静态值覆盖，导致一直显示"数据加载中"） -->
+        <span class="t">数据更新 2026-10-20 13:50</span>
+        <span class="cnt">451 条基金</span>
+      </div>
+      <button class="btn-refresh" data-i18n-title="立即同步最新数据" title="立即同步最新数据">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path>
+        </svg><span class="rt" data-i18n="更新数据">更新数据</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1 data-i18n="强积金资料库">强积金资料库</h1>
+    <p data-i18n="全市场强积金成分基金一览与排行榜 · 「基金最新数据」取自 11 家受托人官网（每日），「MPFA 基金榜单」取自积金局「強積金基金平台」（每月），由广州精研数据有限公司自动同步整理">全市场强积金成分基金一览与排行榜 · 「基金最新数据」取自 11 家受托人官网（每日），「MPFA 基金榜单」取自积金局「強積金基金平台」（每月），由广州精研数据有限公司自动同步整理</p>
+  </div>
+
+  
+  <!-- 模块切换：基金列表（资料库）/ 排名榜单（原独立页面并入，2026-10-14） -->
+  <div class="db-tabs" role="tablist" aria-label="模块切换">
+    <button type="button" class="dbt" id="dbtDb" data-dbtab="db" data-i18n="基金最新数据">基金最新数据</button>
+    <button type="button" class="dbt on" id="dbtRank" data-dbtab="rank" data-i18n="MPFA 基金榜单">MPFA 基金榜单</button>
+  </div>
+  <div id="dbSec" hidden="">
+  <p class="scope-note" id="dbScopeNote">本表数据取自 11 家受托人官网（每交易日更新），排名与涨跌指标由本平台自行计算；因各发行人公布时间不一致，少数基金可能滞后 1–2 天。如需完全对齐的日度数据，请切换到「MPFA 基金榜单」查看积金局每月底发布的列表。</p>
+<div class="self-tabs" id="selfTabs">
+    <span class="stl">排名维度</span>
+    <button type="button" class="st on" data-k="selfY1" data-dir="desc">近1年</button>
+    <button type="button" class="st" data-k="selfD1" data-dir="desc">日涨跌</button>
+    <button type="button" class="st" data-k="selfW1" data-dir="desc">近1周</button>
+    <button type="button" class="st" data-k="selfM1" data-dir="desc">近1月</button>
+    <button type="button" class="st" data-k="selfYtd" data-dir="desc">年初至今</button>
+    <button type="button" class="st" data-k="selfY3a" data-dir="desc">近3年年化</button>
+    <button type="button" class="st" data-k="selfY5a" data-dir="desc">近5年年化</button>
+    <button type="button" class="st" data-k="selfMdd" data-dir="desc">近1年回撤</button>
+    <button type="button" class="st" data-k="selfMdd5" data-dir="desc">近5年回撤</button>
+    <!-- 2026-10-19：新增自算维度（风险调整 / 波动 / 胜率 / 超额） -->
+    <button type="button" class="st" data-k="sharpe1" data-dir="desc">夏普比率</button>
+    <button type="button" class="st" data-k="vol1" data-dir="asc">年化波动率</button>
+    <button type="button" class="st" data-k="vol3" data-dir="asc">3年波幅</button>
+    <button type="button" class="st" data-k="posM12" data-dir="desc">正收益月份</button>
+    <button type="button" class="st" data-k="excess1" data-dir="desc">超额收益（恒指）</button>
+  </div>
+  <div class="stats" id="stats"><div class="stat"><div class="k">基金数量</div><div class="v num">451<small>条</small></div><div class="s">全市场共 451 条</div></div><div class="stat"><div class="k">发行人数量</div><div class="v num">11<small>家</small></div><div class="s">受托人／保荐人</div></div><div class="stat"><div class="k">基金种类</div><div class="v num">6<small>类</small></div><div class="s">21 个细类</div></div><div class="stat"><div class="k">近1年平均回报</div><div class="v num">+7.62%<small></small></div><div class="s">已剔除无数据基金</div></div><div class="stat"><div class="k">近1年上涨占比</div><div class="v num">79<small>%</small></div><div class="s">351 / 447 条录得正回报</div></div><div class="stat"><div class="k">规模最大基金</div><div class="v num">宏利MPF康健護理基金<small></small></div><div class="s">54,283 百万港元 · 宏利</div></div></div>
+
+  <div class="card filters">
+    <div class="f-row f-row-main">
+      <div class="f-item search-box">
+        <label data-i18n-parts="">关键词搜索</label>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <input type="text" id="kw" data-i18n-ph="基金名称／计划名称／受托人（支持简体／繁体／英文）" placeholder="基金名称／计划名称／受托人（支持简体／繁体／英文）">
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金种类</label>
+        <select id="fType"><option value="">全部种类</option><option value="保證基金">保证基金</option><option value="股票基金">股票基金</option><option value="混合資產基金">混合资产基金</option><option value="貨幣市場基金 — 不包括強積金保守基金">货币市场基金 — 不包括强积金保守基金</option><option value="貨幣市場基金 — 強積金保守基金">货币市场基金 — 强积金保守基金</option><option value="債券基金">债券基金</option></select>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金细类</label>
+        <select id="fSub"><option value="">全部细类</option><option value="21% 至 40% 股票">21% 至 40% 股票</option><option value="41% 至 60% 股票">41% 至 60% 股票</option><option value="61% 至 80% 股票">61% 至 80% 股票</option><option value="81% 至 100% 股票">81% 至 100% 股票</option><option value="大中華股票基金">大中华股票基金</option><option value="港元債券基金">港元债券基金</option><option value="環球股票基金">环球股票基金</option><option value="環球債券基金">环球债券基金</option><option value="美國股票基金">美国股票基金</option><option value="歐洲股票基金">欧洲股票基金</option><option value="人民幣債券基金">人民币债券基金</option><option value="日本股票基金">日本股票基金</option><option value="未分類股票基金">未分类股票基金</option><option value="未分類混合資產基金">未分类混合资产基金</option><option value="香港股票基金">香港股票基金</option><option value="香港股票基金（追蹤指數）">香港股票基金（追踪指数）</option><option value="亞洲股票基金">亚洲股票基金</option><option value="亞洲債券基金">亚洲债券基金</option><option value="預設投資策略-65歲後基金">预设投资策略-65岁后基金</option><option value="預設投資策略-核心累積基金">预设投资策略-核心累积基金</option><option value="中國股票基金">中国股票基金</option></select>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金发行人 <span class="hint">（受托人／保荐人）</span></label>
+        <select id="fTrustee"><option value="">全部发行人</option><option value="東亞">東亞</option><option value="宏利">宏利</option><option value="交通">交通</option><option value="萬通">萬通</option><option value="銀聯信託">銀聯信託</option><option value="永明">永明</option><option value="友邦信託">友邦信託</option><option value="渣打信托">渣打信托</option><option value="中國人壽">中國人壽</option><option value="中銀保誠">中銀保誠</option><option value="HSBC">HSBC</option></select>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">风险级别</label>
+        <select id="fRisk"><option value="">全部级别</option><option value="1">风险级别 1</option><option value="2">风险级别 2</option><option value="3">风险级别 3</option><option value="4">风险级别 4</option><option value="5">风险级别 5</option><option value="6">风险级别 6</option><option value="7">风险级别 7</option></select>
+      </div>
+    </div>
+
+    <div class="f-row f-row-sub" style="margin-top:12px">
+      <div class="f-item">
+        <label data-i18n-parts="">涨跌幅区间（%）</label>
+        <div class="range">
+          <select id="fRetDim" style="min-width:118px">
+            <option data-i18n-parts="" value="ann1">近 1 年回报</option>
+            <option data-i18n-parts="" value="ann5">近 5 年年化</option>
+            <option data-i18n-parts="" value="ann10">近 10 年年化</option>
+            <option data-i18n-parts="" value="annLaunch">推出至今年化</option>
+            <option data-i18n-parts="" value="cum1">近 1 年累积</option>
+          </select>
+          <input type="number" id="fRetMin" data-i18n-ph="最小" placeholder="最小">
+          <span data-i18n="至">至</span>
+          <input type="number" id="fRetMax" data-i18n-ph="最大" placeholder="最大">
+        </div>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">最大回撤区间（%） <span class="hint">近5年最差年度</span></label>
+        <div class="range">
+          <input type="number" id="fDdMin" data-i18n-ph="如 -30" placeholder="如 -30">
+          <span data-i18n="至">至</span>
+          <input type="number" id="fDdMax" data-i18n-ph="如 0" placeholder="如 0">
+        </div>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金管理费上限（%）</label>
+        <div class="range">
+          <input type="number" id="fFeeMax" data-i18n-ph="如 0.8" placeholder="如 0.8">
+        </div>
+      </div>
+      <div class="f-item f-reset">
+        <button class="btn ghost" id="btnReset" data-i18n="重置条件">重置条件</button>
+      </div>
+    </div>
+
+    <div class="chips" id="chips"><span class="muted" style="font-size:12px">未设置筛选条件，当前显示全市场基金</span></div>
+  </div>
+
+  <div class="card">
+    <div class="f-summary">
+      <div><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">451</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip">（全市场）</span></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label data-i18n-parts="" class="muted" for="perPage" style="font-size:12px">每页显示</label>
+        <select id="perPage" style="padding:4px 8px;font-size:12.5px">
+          <option data-i18n-parts="" value="10" selected="">10 条</option>
+          <option data-i18n-parts="" value="20">20 条</option>
+          <option data-i18n-parts="" value="50">50 条</option>
+          <option data-i18n-parts="" value="100">100 条</option>
+        </select>
+        <span class="muted" style="font-size:12px" data-i18n="点击表头排序 · 点基金名称或「详情」查看资料">点击表头排序 · 点基金名称或「详情」查看资料</span>
+        <button type="button" class="btn ghost sm" id="colBtn" data-i18n="列设置">列设置</button><button class="btn ghost sm" id="idxExport" data-i18n="导出当前结果">导出当前结果</button>
+      </div><div id="colPop" hidden=""><div class="cp-t">显示列<span class="cp-x" id="colClose">×</span></div><div class="cp-btns"><button type="button" class="cp-b" id="colSlim">精简模式</button><button type="button" class="cp-b" id="colAll">全部列</button></div><div class="cp-list" id="colChecks"><label class="cp-lock"><input type="checkbox" value="rank" disabled="" checked="">名次</label><label class="cp-lock"><input type="checkbox" value="cmp" disabled="" checked="">对比</label><label><input type="checkbox" value="fund">成分基金</label><label><input type="checkbox" value="trustee">发行人（受托人）</label><label><input type="checkbox" value="type">基金种类</label><label><input type="checkbox" value="risk">风险级别</label><label><input type="checkbox" value="nav">单位资产净值</label><label><input type="checkbox" value="selfD1">日涨跌</label><label><input type="checkbox" value="selfM1">近1个月</label><label><input type="checkbox" value="selfYtd">年初至今</label><label><input type="checkbox" value="selfY1">近1年</label><label><input type="checkbox" value="selfY3a">近3年年化</label><label><input type="checkbox" value="selfMdd">近1年最大回撤</label><label><input type="checkbox" value="vol1">年化波动率（近1年）</label><label><input type="checkbox" value="sharpe1">夏普比率（近1年）</label><label><input type="checkbox" value="excess1">超额收益（对恒指）</label><label><input type="checkbox" value="posM12">正收益月份占比</label><label><input type="checkbox" value="size">基金规模</label><label><input type="checkbox" value="mgmtFee">基金管理费</label><label><input type="checkbox" value="launchTs">推出日期</label><label><input type="checkbox" value="ops">操作</label></div></div>
+    </div>
+
+    <div class="m-sort">
+      <label data-i18n-parts="">排序</label>
+      <select id="mSortKey"><option value="fund">成分基金名称</option><option value="trustee">发行人</option><option value="typeFull">基金种类</option><option value="size">基金规模</option><option value="risk">风险级别</option><option value="nav">单位资产净值</option><option value="ann1">近1年年率化回报</option><option value="ann5">近5年年率化回报</option><option value="ann10">近10年年率化回报</option><option value="annLaunch">推出至今年率化回报</option><option value="mgmtFee">基金管理费</option><option value="launchTs">推出日期</option></select>
+      <button class="btn ghost sm" id="mSortDir">降序 ↓</button>
+    </div>
+
+    <div class="scroll-x" id="topScroll" aria-hidden="true" style="display: none;"><div class="scroll-ghost" id="scrollGhost" style="width: 0px;"></div></div>
+    <div class="table-scroll" id="tscroll">
+      <table class="data" id="fundTable">
+        <thead><tr id="thead">
+          <th data-i18n-parts="" class="c" style="width:56px">名次</th>
+          <th data-i18n-parts="" class="c" style="width:52px">对比</th>
+          <th data-i18n-parts="" data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="trustee" data-defdir="asc" class="sortable">发行人（受托人） <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>
+          
+          <th data-i18n-parts="" data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="nav" data-defdir="desc" class="sortable r">单位资产净值<br><small>取自各受托人官网</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="selfD1" data-defdir="desc" class="sortable r">日涨跌 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="selfM1" data-defdir="desc" class="sortable r">近1个月 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="selfYtd" data-defdir="desc" class="sortable r">年初至今 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="selfY1" data-defdir="desc" class="sortable r">近1年 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="selfY3a" data-defdir="desc" class="sortable r">近3年<br><small>年化</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="selfMdd" data-defdir="asc" class="sortable r">近1年<br><small>最大回撤</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="vol1" data-defdir="asc" class="sortable r">年化波动率<br><small>近1年</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="sharpe1" data-defdir="desc" class="sortable r">夏普比率<br><small>近1年</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="excess1" data-defdir="desc" class="sortable r">超额收益<br><small>对恒指·近1年</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="posM12" data-defdir="desc" class="sortable r">正收益<br><small>月份占比</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-i18n-title="部分基金的费用在官网以区间或「最高」形式公布，表内按原文显示；排序按区间下限" data-k="mgmtFee" data-defdir="asc" class="sortable r" title="部分基金的费用在官网以区间或「最高」形式公布，表内按原文显示；排序按区间下限">基金管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" class="c">操作</th>
+        </tr></thead>
+        <tbody id="tbody"><tr data-id="695"><td class="c rank-cell" data-l="名次">1</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="695"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('695')">宏利MPF康健護理基金</div><div class="sub-line">未分类股票基金</div></td><td data-l="发行人"><span class="tag">宏利</span></td><td data-l="基金种类"><span class="tag g">股票基金</span></td><td data-l="风险级别" class="c"><span class="risk r5" data-tip="由积金局评定：风险级别 5 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 5 级（1 级最低、7 级最高）">5</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15" aria-label="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15">36.8860</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num up">+3.06%</td><td data-l="近1个月" class="r num up">+3.09%</td><td data-l="年初至今" class="r num up">+8.64%</td><td data-l="近1年" class="r num up">+18.70%</td><td data-l="近3年年化" class="r num up">+9.72%</td><td data-l="近1年最大回撤" class="r num down">-10.39%</td><td data-l="年化波动率（近1年）" class="r num">+14.56%</td><td data-l="夏普比率（近1年）" class="r num">1.28</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+25.27%</td><td data-l="正收益月份占比" class="r num">67%</td><td data-l="基金规模（百万港元）" class="r num">54,282.77</td><td data-l="基金管理费 %" class="r num">1.59</td><td data-l="推出日期" class="num">02-04-2008</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('695')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="377"><td class="c rank-cell" data-l="名次">2</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="377"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('377')">宏利MPF北美股票基金</div><div class="sub-line">美国股票基金</div></td><td data-l="发行人"><span class="tag">宏利</span></td><td data-l="基金种类"><span class="tag g">股票基金</span></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15" aria-label="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15">38.3800</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num down">-1.43%</td><td data-l="近1个月" class="r num up">+1.86%</td><td data-l="年初至今" class="r num up">+5.26%</td><td data-l="近1年" class="r num up">+7.92%</td><td data-l="近3年年化" class="r num up">+17.04%</td><td data-l="近1年最大回撤" class="r num down">-13.23%</td><td data-l="年化波动率（近1年）" class="r num">+14.19%</td><td data-l="夏普比率（近1年）" class="r num">0.56</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+14.49%</td><td data-l="正收益月份占比" class="r num">58%</td><td data-l="基金规模（百万港元）" class="r num">47,023.88</td><td data-l="基金管理费 %" class="r num">1.44</td><td data-l="推出日期" class="num">01-12-2000</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('377')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="319"><td class="c rank-cell" data-l="名次">3</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="319"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('319')">強積金保守基金</div><div class="sub-line">货币市场基金 — 强积金保守基金</div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">货币市场基金 — 强积金保守基金</span></td><td data-l="风险级别" class="c"><span class="risk r1" data-tip="由积金局评定：风险级别 1 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 1 级（1 级最低、7 级最高）">1</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15" aria-label="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15">14.4421</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num up">+0.01%</td><td data-l="近1个月" class="r num up">+0.19%</td><td data-l="年初至今" class="r num up">+1.56%</td><td data-l="近1年" class="r num up">+2.06%</td><td data-l="近3年年化" class="r num up">+2.91%</td><td data-l="近1年最大回撤" class="r num down">-0.01%</td><td data-l="年化波动率（近1年）" class="r num">+0.21%</td><td data-l="夏普比率（近1年）" class="r num">—</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+8.63%</td><td data-l="正收益月份占比" class="r num">100%</td><td data-l="基金规模（百万港元）" class="r num">40,062.01</td><td data-l="基金管理费 %" class="r num">0.63</td><td data-l="推出日期" class="num">01-12-2000</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('319')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="375"><td class="c rank-cell" data-l="名次">4</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="375"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('375')">宏利MPF中華威力基金</div><div class="sub-line">大中华股票基金</div></td><td data-l="发行人"><span class="tag">宏利</span></td><td data-l="基金种类"><span class="tag g">股票基金</span></td><td data-l="风险级别" class="c"><span class="risk r7" data-tip="由积金局评定：风险级别 7 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 7 级（1 级最低、7 级最高）">7</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15" aria-label="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15">36.9520</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num down">-4.82%</td><td data-l="近1个月" class="r num down">-3.64%</td><td data-l="年初至今" class="r num up">+16.07%</td><td data-l="近1年" class="r num up">+16.48%</td><td data-l="近3年年化" class="r num up">+21.44%</td><td data-l="近1年最大回撤" class="r num down">-12.76%</td><td data-l="年化波动率（近1年）" class="r num">+24.49%</td><td data-l="夏普比率（近1年）" class="r num">0.67</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+23.05%</td><td data-l="正收益月份占比" class="r num">50%</td><td data-l="基金规模（百万港元）" class="r num">39,707.18</td><td data-l="基金管理费 %" class="r num">1.49</td><td data-l="推出日期" class="num">01-02-2006</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('375')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="1485"><td class="c rank-cell" data-l="名次">5</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="1485"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('1485')">宏利MPF核心累積基金</div><div class="sub-line">预设投资策略-核心累积基金</div></td><td data-l="发行人"><span class="tag">宏利</span></td><td data-l="基金种类"><span class="tag g">混合资产基金</span></td><td data-l="风险级别" class="c"><span class="risk r5" data-tip="由积金局评定：风险级别 5 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 5 级（1 级最低、7 级最高）">5</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15" aria-label="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15">19.0530</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num down">-0.48%</td><td data-l="近1个月" class="r num up">+0.33%</td><td data-l="年初至今" class="r num up">+7.00%</td><td data-l="近1年" class="r num up">+8.87%</td><td data-l="近3年年化" class="r num up">+13.02%</td><td data-l="近1年最大回撤" class="r num down">-6.18%</td><td data-l="年化波动率（近1年）" class="r num">+7.59%</td><td data-l="夏普比率（近1年）" class="r num">1.17</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+15.44%</td><td data-l="正收益月份占比" class="r num">67%</td><td data-l="基金规模（百万港元）" class="r num">37,851.53</td><td data-l="基金管理费 %" class="r num">0.59</td><td data-l="推出日期" class="num">01-04-2017</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('1485')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="365"><td class="c rank-cell" data-l="名次">6</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="365"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('365')">宏利MPF利息基金</div><div class="sub-line">保证基金</div></td><td data-l="发行人"><span class="tag">宏利</span></td><td data-l="基金种类"><span class="tag g">保证基金</span></td><td data-l="风险级别" class="c"><span class="risk r1" data-tip="由积金局评定：风险级别 1 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 1 级（1 级最低、7 级最高）">1</span></td><td data-l="单位资产净值" class="r num"><span class="nav-na" data-tip="该基金为官方注明不提供单位资产净值的保证基金／非单位化基金" aria-label="该基金为官方注明不提供单位资产净值的保证基金／非单位化基金">不适用</span></td><td data-l="日涨跌" class="r num flat">—</td><td data-l="近1个月" class="r num flat">—</td><td data-l="年初至今" class="r num flat">—</td><td data-l="近1年" class="r num flat">—</td><td data-l="近3年年化" class="r num flat">—</td><td data-l="近1年最大回撤" class="r num down">—</td><td data-l="年化波动率（近1年）" class="r num">—</td><td data-l="夏普比率（近1年）" class="r num">—</td><td data-l="超额收益（对恒指·近1年）" class="r num flat">—</td><td data-l="正收益月份占比" class="r num">—</td><td data-l="基金规模（百万港元）" class="r num">37,144.76</td><td data-l="基金管理费 %" class="r num">1.44</td><td data-l="推出日期" class="num">01-12-2000</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('365')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="325"><td class="c rank-cell" data-l="名次">7</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="325"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('325')">恒指基金</div><div class="sub-line">香港股票基金（追踪指数）</div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">股票基金</span></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15" aria-label="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15">28.6510</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num down">-1.04%</td><td data-l="近1个月" class="r num down">-2.36%</td><td data-l="年初至今" class="r num down">-4.18%</td><td data-l="近1年" class="r num down">-5.00%</td><td data-l="近3年年化" class="r num up">+13.53%</td><td data-l="近1年最大回撤" class="r num down">-17.88%</td><td data-l="年化波动率（近1年）" class="r num">+18.13%</td><td data-l="夏普比率（近1年）" class="r num">-0.28</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+1.57%</td><td data-l="正收益月份占比" class="r num">25%</td><td data-l="基金规模（百万港元）" class="r num">34,465.22</td><td data-l="基金管理费 %" class="r num" data-tip="官网原文：基金管理费「最高 0.61% p.a.」">最高 0.61</td><td data-l="推出日期" class="num">01-12-2000</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('325')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="317"><td class="c rank-cell" data-l="名次">8</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="317"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('317')">增長基金</div><div class="sub-line">81% 至 100% 股票</div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">混合资产基金</span></td><td data-l="风险级别" class="c"><span class="risk r5" data-tip="由积金局评定：风险级别 5 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 5 级（1 级最低、7 级最高）">5</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15" aria-label="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15">32.2747</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num down">-0.84%</td><td data-l="近1个月" class="r num down">-2.49%</td><td data-l="年初至今" class="r num up">+6.59%</td><td data-l="近1年" class="r num up">+9.04%</td><td data-l="近3年年化" class="r num up">+15.29%</td><td data-l="近1年最大回撤" class="r num down">-9.36%</td><td data-l="年化波动率（近1年）" class="r num">+13.36%</td><td data-l="夏普比率（近1年）" class="r num">0.68</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+15.61%</td><td data-l="正收益月份占比" class="r num">58%</td><td data-l="基金规模（百万港元）" class="r num">33,103.78</td><td data-l="基金管理费 %" class="r num">1.24</td><td data-l="推出日期" class="num">01-12-2000</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('317')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="318"><td class="c rank-cell" data-l="名次">9</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="318"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('318')">核心累積基金</div><div class="sub-line">预设投资策略-核心累积基金</div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">混合资产基金</span></td><td data-l="风险级别" class="c"><span class="risk r4" data-tip="由积金局评定：风险级别 4 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 4 级（1 级最低、7 级最高）">4</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15" aria-label="已核对官方来源：滙豐強積金智選計劃（滙豐銀行）　净值截至 2026-10-15">31.7405</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num up">+0.05%</td><td data-l="近1个月" class="r num down">-0.01%</td><td data-l="年初至今" class="r num up">+7.45%</td><td data-l="近1年" class="r num up">+9.56%</td><td data-l="近3年年化" class="r num up">+12.69%</td><td data-l="近1年最大回撤" class="r num down">-6.46%</td><td data-l="年化波动率（近1年）" class="r num">+8.09%</td><td data-l="夏普比率（近1年）" class="r num">1.18</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+16.13%</td><td data-l="正收益月份占比" class="r num">67%</td><td data-l="基金规模（百万港元）" class="r num">33,029.85</td><td data-l="基金管理费 %" class="r num">0.67</td><td data-l="推出日期" class="num">01-12-2000</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('318')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr data-id="376"><td class="c rank-cell" data-l="名次">10</td><td class="c" data-l="对比"><input type="checkbox" data-cmp="376"></td><td class="f-main fz" data-l="成分基金"><div class="fund-name" style="cursor:pointer" onclick="openDetail('376')">宏利MPF進取基金</div><div class="sub-line">81% 至 100% 股票</div></td><td data-l="发行人"><span class="tag">宏利</span></td><td data-l="基金种类"><span class="tag g">混合资产基金</span></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="单位资产净值" class="r num"><div class="nav-v num" data-tip="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15" aria-label="已核对官方来源：宏利環球精選（強積金）計劃（宏利）　净值截至 2026-10-15">29.8170</div><div class="nav-d">10/15</div></td><td data-l="日涨跌" class="r num down">-2.20%</td><td data-l="近1个月" class="r num down">-2.56%</td><td data-l="年初至今" class="r num up">+6.62%</td><td data-l="近1年" class="r num up">+9.63%</td><td data-l="近3年年化" class="r num up">+14.79%</td><td data-l="近1年最大回撤" class="r num down">-9.45%</td><td data-l="年化波动率（近1年）" class="r num">+13.02%</td><td data-l="夏普比率（近1年）" class="r num">0.74</td><td data-l="超额收益（对恒指·近1年）" class="r num up">+16.20%</td><td data-l="正收益月份占比" class="r num">58%</td><td data-l="基金规模（百万港元）" class="r num">31,561.39</td><td data-l="基金管理费 %" class="r num">1.44</td><td data-l="推出日期" class="num">01-12-2000</td><td data-l="操作" class="c"><button class="btn-detail" onclick="openDetail('376')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr></tbody>
+      </table>
+    </div>
+    <div class="loading" id="loading" style="display: none;"><div class="spinner"></div><span data-i18n="正在同步最新数据…">正在同步最新数据…</span></div>
+    <div class="pager" id="pager"><button data-p="0" disabled="">上一页</button><button data-p="1" class="on">1</button><button data-p="2" class="">2</button><button data-p="3" class="">3</button><button disabled="">…</button><button data-p="46" class="">46</button><button data-p="2">下一页</button><span class="info">第 1 / 46 页 · 共 451 条</span></div>
+  </div>
+
+    </div>
+
+  <div id="rkSec">
+  <p class="scope-note scope-mpfa" id="rkScopeNote">本页数据全部来自积金局「強積金基金平台」，目前更新至 <b id="rkScopeDate">2026-09-30</b>。</p>
+<div class="tabs-head">
+    <span class="th-note" id="rkTabsNote">共 <b>17</b> 个排名维度 · 5 组 · 点击任意标签切换</span>
+    <button type="button" class="th-toggle" id="rkTabsToggle">点此展开全部</button>
+  </div>
+  <div class="tabs mini" id="rkTabs"><div class="tab-group on-group"><span class="tg-label">收益表现</span><div class="tg-items"><button class="tab on" data-b="ann1">近 1 年回报榜</button><button class="tab" data-b="ann5">近 5 年年化榜</button><button class="tab" data-b="ann10">近 10 年年化榜</button><button class="tab" data-b="annLaunch">推出至今榜</button><button class="tab" data-b="calYear">历年回报榜</button></div></div><div class="tab-group"><span class="tg-label">累积回报</span><div class="tg-items"><button class="tab" data-b="cum1">近 1 年累积</button><button class="tab" data-b="cum5">近 5 年累积</button><button class="tab" data-b="cum10">近 10 年累积</button><button class="tab" data-b="cumLaunch">推出至今累积</button></div></div><div class="tab-group"><span class="tg-label">风险与成本</span><div class="tg-items"><button class="tab" data-b="worstYear">抗跌榜</button><button class="tab" data-b="risk">稳健低风险榜</button><button class="tab" data-b="mgmtFee">低管理费榜</button><button class="tab" data-b="fer">最低总开支榜</button></div></div><div class="tab-group"><span class="tg-label">规模与特色</span><div class="tg-items"><button class="tab" data-b="size">基金规模榜</button><button class="tab" data-b="launchTs">新锐基金榜</button></div></div><div class="tab-group"><span class="tg-label">聚合视角</span><div class="tg-items"><button class="tab" data-b="trusteeAgg">发行人实力榜</button><button class="tab" data-b="champion">各细类冠军榜</button></div></div></div>
+  <div class="tabs year-tabs" id="rkYearSwitch" style="display:none"></div>
+
+  <div class="card filters rk-filters" style="margin-bottom:14px">
+    <div style="display:none"><h2 id="rkBoardTitle">近 1 年回报榜</h2><div class="desc" id="rkBoardDesc">按积金局公布的最近 1 年年率化回报由高至低排名 · 数据截至积金局最新公布</div></div>
+    <div class="f-row f-row-main">
+      <div class="f-item search-box">
+        <label data-i18n-parts="">关键词搜索</label>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+        </svg>
+        <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称／受托人（支持简体／繁体／英文）" placeholder="基金名称／计划名称／受托人（支持简体／繁体／英文）">
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金种类</label>
+        <select id="rkRType"><option value="">全部种类</option><option value="保證基金">保證基金</option><option value="股票基金">股票基金</option><option value="混合資產基金">混合資產基金</option><option value="貨幣市場基金 — 不包括強積金保守基金">貨幣市場基金 — 不包括強積金保守基金</option><option value="貨幣市場基金 — 強積金保守基金">貨幣市場基金 — 強積金保守基金</option><option value="債券基金">債券基金</option></select>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金细类</label>
+        <select id="rkRSub"><option data-i18n-parts="" value="">全部细类</option><option value="21% 至 40% 股票">21% 至 40% 股票</option><option value="41% 至 60% 股票">41% 至 60% 股票</option><option value="61% 至 80% 股票">61% 至 80% 股票</option><option value="81% 至 100% 股票">81% 至 100% 股票</option><option value="中國股票基金">中国股票基金</option><option value="亞洲債券基金">亚洲债券基金</option><option value="亞洲股票基金">亚洲股票基金</option><option value="人民幣債券基金">人民币债券基金</option><option value="大中華股票基金">大中华股票基金</option><option value="日本股票基金">日本股票基金</option><option value="未分類混合資產基金">未分类混合资产基金</option><option value="未分類股票基金">未分类股票基金</option><option value="歐洲股票基金">欧洲股票基金</option><option value="港元債券基金">港元债券基金</option><option value="環球債券基金">环球债券基金</option><option value="環球股票基金">环球股票基金</option><option value="美國股票基金">美国股票基金</option><option value="預設投資策略-65歲後基金">预设投资策略-65岁后基金</option><option value="預設投資策略-核心累積基金">预设投资策略-核心累积基金</option><option value="香港股票基金">香港股票基金</option><option value="香港股票基金（追蹤指數）">香港股票基金（追踪指数）</option></select>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金发行人 <span class="hint">（受托人／保荐人）</span></label>
+        <select id="rkRTrustee"><option value="">全部发行人</option><option value="東亞">東亞</option><option value="宏利">宏利</option><option value="交通">交通</option><option value="萬通">萬通</option><option value="銀聯信託">銀聯信託</option><option value="永明">永明</option><option value="友邦信託">友邦信託</option><option value="渣打信托">渣打信托</option><option value="中國人壽">中國人壽</option><option value="中銀保誠">中銀保誠</option><option value="HSBC">HSBC</option></select>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">风险级别</label>
+        <select id="rkRRisk"><option data-i18n-parts="" value="">全部级别</option><option value="1">1 级</option><option value="2">2 级</option><option value="3">3 级</option><option value="4">4 级</option><option value="5">5 级</option><option value="6">6 级</option><option value="7">7 级</option></select>
+      </div>
+    </div>
+
+    <div class="f-row f-row-sub">
+      <div class="f-item">
+        <label data-i18n-parts="">涨跌幅区间（%）</label>
+        <div class="range">
+          <select id="rkRRetDim">
+            <option data-i18n-parts="" value="ann1">近 1 年回报</option>
+            <option data-i18n-parts="" value="ann5">近 5 年年化</option>
+            <option data-i18n-parts="" value="ann10">近 10 年年化</option>
+            <option data-i18n-parts="" value="annLaunch">推出至今年化</option>
+            <option data-i18n-parts="" value="cum1">近 1 年累积</option>
+          </select>
+          <input type="number" id="rkRRetMin" data-i18n-ph="最小" placeholder="最小">
+          <span data-i18n="至">至</span>
+          <input type="number" id="rkRRetMax" data-i18n-ph="最大" placeholder="最大">
+        </div>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">最大回撤区间（%） <span class="hint">近5年最差年度</span></label>
+        <div class="range">
+          <input type="number" id="rkRDdMin" data-i18n-ph="如 -30" placeholder="如 -30">
+          <span data-i18n="至">至</span>
+          <input type="number" id="rkRDdMax" data-i18n-ph="如 0" placeholder="如 0">
+        </div>
+      </div>
+      <div class="f-item">
+        <label data-i18n-parts="">基金管理费上限（%）</label>
+        <div class="range">
+          <input type="number" id="rkRFeeMax" data-i18n-ph="如 0.8" placeholder="如 0.8">
+        </div>
+      </div>
+      <div class="f-item f-reset">
+        <button class="btn ghost" id="rkRReset" data-i18n="重置条件">重置条件</button>
+      </div>
+    </div>
+
+    <div class="chips" id="rkRChips"><span class="muted" style="font-size:12px">未设置筛选条件，当前显示全市场基金</span></div>
+  </div>
+
+  <div class="card">
+    <div class="f-summary">
+      <div><span data-i18n="当前榜单共">当前榜单共</span> <b id="rkRcnt">447</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip">（显示前 10 名）</span></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label class="muted" for="rkRTop" style="font-size:12px" data-i18n-parts="">每页显示</label>
+        <select id="rkRTop" style="padding:4px 8px;font-size:12.5px">
+          <option data-i18n-parts="" value="10" selected="">10 条</option>
+          <option data-i18n-parts="" value="20">20 条</option>
+          <option data-i18n-parts="" value="50">50 条</option>
+          <option data-i18n-parts="" value="100">100 条</option>
+          <option data-i18n-parts="" value="9999">全部</option>
+        </select>
+        <span class="muted" style="font-size:12px" data-i18n="点击表头可排序 · 勾选基金加入对比 · 点「详情」查看基金完整资料">点击表头可排序 · 勾选基金加入对比 · 点「详情」查看基金完整资料</span>
+        <div class="rk-cols" id="rkColBtnWrap"><button type="button" class="btn ghost sm" id="rkColBtn">列设置</button>
+          <div class="rk-colpop" id="rkColPop" hidden="">
+            <!-- 2026-10-19：改为逐列勾选（与「基金最新数据」列设置同款），内容由 rank.js 按当前榜单动态生成 -->
+            <div class="cp-btns"><button type="button" class="cp-b" id="rkColAll">全部列</button><button type="button" class="cp-b" id="rkColSlim">精简模式</button></div>
+            <div class="cp-list" id="rkColChecks"><label class="cp-lock"><input type="checkbox" value="rank" checked="" disabled="">名次</label><label class="cp-lock"><input type="checkbox" value="fund" checked="" disabled="">成分基金</label><label><input type="checkbox" value="trustee" checked="">发行人</label><label><input type="checkbox" value="type" checked="">基金种类</label><label><input type="checkbox" value="risk" checked="">风险级别</label><label><input type="checkbox" value="size" checked="">基金规模</label><label><input type="checkbox" value="ann1" checked="">近1年年率化</label><label><input type="checkbox" value="ann5" checked="">近5年年率化</label><label><input type="checkbox" value="ann10" checked="">近10年年率化</label><label><input type="checkbox" value="annLaunch" checked="">推出至今年率化</label><label><input type="checkbox" value="mgmtFee" checked="">管理费</label><label><input type="checkbox" value="cum1">近1年累积</label><label><input type="checkbox" value="cum5">近5年累积</label><label><input type="checkbox" value="cum10">近10年累积</label><label><input type="checkbox" value="cumLaunch">推出至今累积</label><label><input type="checkbox" value="cal2021">2021 年回报</label><label><input type="checkbox" value="cal2022">2022 年回报</label><label><input type="checkbox" value="cal2023">2023 年回报</label><label><input type="checkbox" value="cal2024">2024 年回报</label><label><input type="checkbox" value="cal2025">2025 年回报</label><label class="cp-lock"><input type="checkbox" value="cmp" checked="" disabled="">对比</label><label class="cp-lock"><input type="checkbox" value="ops" checked="" disabled="">详情</label></div>
+          </div>
+        </div>
+        <button class="btn ghost sm" id="rkRExport" data-i18n="导出当前结果">导出当前结果</button>
+      </div>
+    </div>
+    <div class="m-sort">
+      <label data-i18n-parts="">排序</label>
+      <select id="rkMSortKey"><option value="ann1">近1年年率化</option><option value="ann5">近5年年率化</option><option value="ann10">近10年年率化</option><option value="annLaunch">推出至今年率化</option><option value="worstYear">近5年最差年度</option><option value="mgmtFee">基金管理费</option><option value="size">基金规模</option><option value="risk">风险级别</option><option value="nav">单位资产净值</option><option value="calYear">历年回报</option></select>
+      <button class="btn ghost sm" id="rkMSortDir">降序 ↓</button>
+    </div>
+    <div class="scroll-x" id="rkTopScroll" aria-hidden="true" style="display: none;"><div class="scroll-ghost" id="rkScrollGhost" style="width: 1342px;"></div></div>
+    <div class="table-scroll" id="rkTscroll">
+      <table class="data" id="rkTable">
+        <thead><tr id="rkThead">
+          <th data-i18n-parts="" class="c" style="width:56px">名次</th>
+          <th data-i18n-parts="" data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="trustee" data-defdir="asc" class="sortable">发行人 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="risk" data-defdir="asc" class="sortable c">风险 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="ann1" data-defdir="desc" class="sortable r sorted">近1年<br>年率化 <span class="arrow">↓</span></th>
+          <th data-i18n-parts="" data-k="ann5" data-defdir="desc" class="sortable r">近5年<br>年率化 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="ann10" data-defdir="desc" class="sortable r">近10年<br>年率化 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="annLaunch" data-defdir="desc" class="sortable r">推出至今<br>年率化 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="mgmtFee" data-defdir="asc" class="sortable r">管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" id="rkThCalYear" data-k="calYear" data-defdir="desc" class="sortable r" style="display:none">历年<br>回报 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cum1" data-defdir="desc" class="sortable r rk-opt o-cum">近1年<br>累积 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cum5" data-defdir="desc" class="sortable r rk-opt o-cum">近5年<br>累积 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cum10" data-defdir="desc" class="sortable r rk-opt o-cum">近10年<br>累积 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cumLaunch" data-defdir="desc" class="sortable r rk-opt o-cum">推出至今<br>累积 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cal2021" data-defdir="desc" class="sortable r rk-opt o-cal">2021 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cal2022" data-defdir="desc" class="sortable r rk-opt o-cal">2022 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cal2023" data-defdir="desc" class="sortable r rk-opt o-cal">2023 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cal2024" data-defdir="desc" class="sortable r rk-opt o-cal">2024 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" data-k="cal2025" data-defdir="desc" class="sortable r rk-opt o-cal">2025 <span class="arrow">↕</span></th>
+          <th data-i18n-parts="" class="c" style="width:56px">对比</th>
+          <th data-i18n-parts="" class="c" style="width:86px">详情</th>
+        </tr></thead>
+        <tbody id="rkTbody"><tr><td class="c" data-l="名次"><span class="medal g1">1</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">海通韓國基金 - A類別</div><div class="sub-line">海通MPF退休金 · 2 个单位类别</div><div class="bar"><i style="left:0;width:100.0%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">未分类股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r7" data-tip="由积金局评定：风险级别 7 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 7 级（1 级最低、7 级最高）">7</span></td><td data-l="基金规模（百万港元）" class="r num">12.32</td><td data-l="近1年年率化" class="r num up">+98.35%</td><td data-l="近5年年率化" class="r num up">+21.24%</td><td data-l="近10年年率化" class="r num up">+10.30%</td><td data-l="推出至今年率化" class="r num up">+8.48%</td><td data-l="基金管理费 %" class="r num">0.72</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+98.35%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+161.92%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+166.50%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+706.70%</td><td data-l="2021" class="r num rk-opt o-cal down">-1.65%</td><td data-l="2022" class="r num rk-opt o-cal down">-24.30%</td><td data-l="2023" class="r num rk-opt o-cal up">+16.69%</td><td data-l="2024" class="r num rk-opt o-cal down">-8.23%</td><td data-l="2025" class="r num rk-opt o-cal up">+84.85%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="284"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('284')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="medal g2">2</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">海通韓國基金 - T類別</div><div class="sub-line">海通MPF退休金 · 2 个单位类别</div><div class="bar"><i style="left:0;width:100.0%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">未分类股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r7" data-tip="由积金局评定：风险级别 7 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 7 级（1 级最低、7 级最高）">7</span></td><td data-l="基金规模（百万港元）" class="r num">230.26</td><td data-l="近1年年率化" class="r num up">+98.35%</td><td data-l="近5年年率化" class="r num up">+21.24%</td><td data-l="近10年年率化" class="r num up">+10.30%</td><td data-l="推出至今年率化" class="r num up">+8.88%</td><td data-l="基金管理费 %" class="r num">0.72</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+98.35%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+161.91%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+166.55%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+787.60%</td><td data-l="2021" class="r num rk-opt o-cal down">-1.65%</td><td data-l="2022" class="r num rk-opt o-cal down">-24.29%</td><td data-l="2023" class="r num rk-opt o-cal up">+16.68%</td><td data-l="2024" class="r num rk-opt o-cal down">-8.21%</td><td data-l="2025" class="r num rk-opt o-cal up">+84.79%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="285"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('285')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="medal g3">3</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">海通亞太基金 - T類別</div><div class="sub-line">海通MPF退休金 · 2 个单位类别</div><div class="bar"><i style="left:0;width:49.0%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r5" data-tip="由积金局评定：风险级别 5 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 5 级（1 级最低、7 级最高）">5</span></td><td data-l="基金规模（百万港元）" class="r num">94.73</td><td data-l="近1年年率化" class="r num up">+48.21%</td><td data-l="近5年年率化" class="r num up">+11.26%</td><td data-l="近10年年率化" class="r num up">+6.49%</td><td data-l="推出至今年率化" class="r num up">+5.60%</td><td data-l="基金管理费 %" class="r num">1.09</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+48.21%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+70.50%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+87.49%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+304.60%</td><td data-l="2021" class="r num rk-opt o-cal up">+0.92%</td><td data-l="2022" class="r num rk-opt o-cal down">-22.70%</td><td data-l="2023" class="r num rk-opt o-cal up">+2.79%</td><td data-l="2024" class="r num rk-opt o-cal up">+13.37%</td><td data-l="2025" class="r num rk-opt o-cal up">+29.66%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="283"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('283')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="rank-cell">4</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">海通亞太基金 - A類別</div><div class="sub-line">海通MPF退休金 · 2 个单位类别</div><div class="bar"><i style="left:0;width:49.0%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r5" data-tip="由积金局评定：风险级别 5 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 5 级（1 级最低、7 级最高）">5</span></td><td data-l="基金规模（百万港元）" class="r num">26.55</td><td data-l="近1年年率化" class="r num up">+48.17%</td><td data-l="近5年年率化" class="r num up">+11.21%</td><td data-l="近10年年率化" class="r num up">+6.43%</td><td data-l="推出至今年率化" class="r num up">+5.02%</td><td data-l="基金管理费 %" class="r num">1.12</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+48.17%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+70.10%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+86.53%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+251.60%</td><td data-l="2021" class="r num rk-opt o-cal up">+0.86%</td><td data-l="2022" class="r num rk-opt o-cal down">-22.73%</td><td data-l="2023" class="r num rk-opt o-cal up">+2.77%</td><td data-l="2024" class="r num rk-opt o-cal up">+13.26%</td><td data-l="2025" class="r num rk-opt o-cal up">+29.66%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="282"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('282')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="rank-cell">5</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">東亞 (強積金) 亞洲股票基金</div><div class="sub-line">東亞（強積金）集成信託計劃</div><div class="bar"><i style="left:0;width:45.1%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">東亞</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="基金规模（百万港元）" class="r num">1,577.78</td><td data-l="近1年年率化" class="r num up">+44.33%</td><td data-l="近5年年率化" class="r num up">+10.30%</td><td data-l="近10年年率化" class="r num up">+10.35%</td><td data-l="推出至今年率化" class="r num up">+8.07%</td><td data-l="基金管理费 %" class="r num">1.18 – 1.92</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+44.33%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+63.27%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+167.77%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+414.30%</td><td data-l="2021" class="r num rk-opt o-cal down">-0.17%</td><td data-l="2022" class="r num rk-opt o-cal down">-24.86%</td><td data-l="2023" class="r num rk-opt o-cal up">+4.82%</td><td data-l="2024" class="r num rk-opt o-cal up">+14.26%</td><td data-l="2025" class="r num rk-opt o-cal up">+33.60%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="221"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('221')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="rank-cell">6</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">東亞 (行業計劃) 亞洲股票基金</div><div class="sub-line">東亞（強積金）行業計劃</div><div class="bar"><i style="left:0;width:44.9%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">東亞</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="基金规模（百万港元）" class="r num">717.73</td><td data-l="近1年年率化" class="r num up">+44.19%</td><td data-l="近5年年率化" class="r num up">+10.27%</td><td data-l="近10年年率化" class="r num up">+10.32%</td><td data-l="推出至今年率化" class="r num up">+7.76%</td><td data-l="基金管理费 %" class="r num">1.18 – 1.92</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+44.19%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+63.06%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+167.06%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+199.50%</td><td data-l="2021" class="r num rk-opt o-cal up">+0.03%</td><td data-l="2022" class="r num rk-opt o-cal down">-24.41%</td><td data-l="2023" class="r num rk-opt o-cal up">+4.75%</td><td data-l="2024" class="r num rk-opt o-cal up">+14.05%</td><td data-l="2025" class="r num rk-opt o-cal up">+33.14%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="899"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('899')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="rank-cell">7</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">東亞亞洲股票基金</div><div class="sub-line">東亞（強積金）享惠計劃</div><div class="bar"><i style="left:0;width:44.4%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">東亞</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="基金规模（百万港元）" class="r num">19.26</td><td data-l="近1年年率化" class="r num up">+43.71%</td><td data-l="近5年年率化" class="r num up">+10.41%</td><td data-l="近10年年率化" class="r num up">+9.95%</td><td data-l="推出至今年率化" class="r num up">+7.48%</td><td data-l="基金管理费 %" class="r num">0.90</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+43.71%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+64.07%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+158.28%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+173.43%</td><td data-l="2021" class="r num rk-opt o-cal down">-4.33%</td><td data-l="2022" class="r num rk-opt o-cal down">-24.21%</td><td data-l="2023" class="r num rk-opt o-cal up">+4.82%</td><td data-l="2024" class="r num rk-opt o-cal up">+13.23%</td><td data-l="2025" class="r num rk-opt o-cal up">+34.32%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="1044"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('1044')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="rank-cell">8</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">我的亞洲股票基金</div><div class="sub-line">我的強積金計劃</div><div class="bar"><i style="left:0;width:41.8%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">中銀保誠</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="基金规模（百万港元）" class="r num">316.82</td><td data-l="近1年年率化" class="r num up">+41.08%</td><td data-l="近5年年率化" class="r num up">+9.40%</td><td data-l="近10年年率化" class="r num up">+9.28%</td><td data-l="推出至今年率化" class="r num up">+7.55%</td><td data-l="基金管理费 %" class="r num">0.88</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+41.08%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+56.74%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+142.86%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+225.00%</td><td data-l="2021" class="r num rk-opt o-cal down">-2.96%</td><td data-l="2022" class="r num rk-opt o-cal down">-21.24%</td><td data-l="2023" class="r num rk-opt o-cal up">+10.03%</td><td data-l="2024" class="r num rk-opt o-cal up">+11.87%</td><td data-l="2025" class="r num rk-opt o-cal up">+23.65%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="820"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('820')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="rank-cell">9</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">亞太股票基金</div><div class="sub-line">富達退休集成信託</div><div class="bar"><i style="left:0;width:41.4%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">HSBC</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="基金规模（百万港元）" class="r num">7,139.69</td><td data-l="近1年年率化" class="r num up">+40.75%</td><td data-l="近5年年率化" class="r num up">+8.98%</td><td data-l="近10年年率化" class="r num up">+8.81%</td><td data-l="推出至今年率化" class="r num up">+7.95%</td><td data-l="基金管理费 %" class="r num">最高 1.28</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+40.75%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+53.71%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+132.57%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+367.94%</td><td data-l="2021" class="r num rk-opt o-cal down">-3.38%</td><td data-l="2022" class="r num rk-opt o-cal down">-21.62%</td><td data-l="2023" class="r num rk-opt o-cal up">+9.54%</td><td data-l="2024" class="r num rk-opt o-cal up">+11.43%</td><td data-l="2025" class="r num rk-opt o-cal up">+23.17%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="278"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('278')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr><tr><td class="c" data-l="名次"><span class="rank-cell">10</span></td><td class="f-main fz" data-l="成分基金"><div class="fund-name">永明強積金亞洲股票基金 - B類</div><div class="sub-line">永明彩虹強積金計劃 · 2 个单位类别</div><div class="bar"><i style="left:0;width:39.7%;background:var(--up)"></i></div></td><td data-l="发行人"><span class="tag">永明</span></td><td data-l="基金种类"><span class="tag g">股票基金</span><div class="sub-line">亚洲股票基金</div></td><td data-l="风险级别" class="c"><span class="risk r6" data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）" aria-label="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">6</span></td><td data-l="基金规模（百万港元）" class="r num">7,938.34</td><td data-l="近1年年率化" class="r num up">+39.03%</td><td data-l="近5年年率化" class="r num up">+6.06%</td><td data-l="近10年年率化" class="r num up">+7.96%</td><td data-l="推出至今年率化" class="r num up">+5.57%</td><td data-l="基金管理费 %" class="r num">最高 1.52</td><td data-l="2025 年回报" class="r num flat"></td><td data-l="近1年累积" class="r num rk-opt o-cum up">+39.03%</td><td data-l="近5年累积" class="r num rk-opt o-cum up">+34.25%</td><td data-l="近10年累积" class="r num rk-opt o-cum up">+115.15%</td><td data-l="推出至今累积" class="r num rk-opt o-cum up">+174.04%</td><td data-l="2021" class="r num rk-opt o-cal down">-6.78%</td><td data-l="2022" class="r num rk-opt o-cal down">-21.90%</td><td data-l="2023" class="r num rk-opt o-cal up">+1.26%</td><td data-l="2024" class="r num rk-opt o-cal up">+3.98%</td><td data-l="2025" class="r num rk-opt o-cal up">+25.82%</td><td data-l="对比" class="c"><input type="checkbox" data-cmp="690"></td><td data-l="详情" class="c"><button class="btn-detail" onclick="openDetail('690')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>详情</button></td></tr></tbody>
+      </table>
+    </div>
+    <div class="loading" id="rkLoading" style="display: none;"><div class="spinner"></div><span data-i18n="正在同步最新数据…">正在同步最新数据…</span></div>
+  </div>
+
+  <div class="card" style="margin:14px 0">
+    <div class="board-head" style="border-bottom:none">
+      <div><h2 style="font-size:15px" id="rkChampTitle">各类别冠军</h2><div class="desc" id="rkChampDesc">按当前排名指标，各基金种类中表现最好的基金</div></div>
+    </div>
+    <div style="padding:0 16px 16px"><div class="podium" id="rkChampions"><div class="pod p1"><div class="no">股票基金 冠军</div><div class="nm">海通韓國基金 - A類別</div><div class="tr">HSBC</div><div class="val num up">+98.35%</div><div class="meta"><span data-tip="由积金局评定：风险级别 7 级（1 级最低、7 级最高）">风险 7 级</span><span>规模 12 百万</span><span>近1年 +98.35%</span></div></div><div class="pod p2"><div class="no">混合资产基金 冠军</div><div class="nm">海通核心累積基金 - A類別</div><div class="tr">HSBC</div><div class="val num up">+22.49%</div><div class="meta"><span data-tip="由积金局评定：风险级别 6 级（1 级最低、7 级最高）">风险 6 级</span><span>规模 44 百万</span><span>近1年 +22.49%</span></div></div><div class="pod p3"><div class="no">债券基金 冠军</div><div class="nm">人民幣債券基金</div><div class="tr">HSBC</div><div class="val num up">+7.64%</div><div class="meta"><span data-tip="由积金局评定：风险级别 3 级（1 级最低、7 级最高）">风险 3 级</span><span>规模 671 百万</span><span>近1年 +7.64%</span></div></div><div class="pod p4"><div class="no">货币市场基金 — 不包括强积金保守基金 冠军</div><div class="nm">中銀保誠強積金人民幣及港元貨幣市場基金</div><div class="tr">中銀保誠</div><div class="val num up">+5.53%</div><div class="meta"><span data-tip="由积金局评定：风险级别 3 级（1 级最低、7 级最高）">风险 3 级</span><span>规模 1,609 百万</span><span>近1年 +5.53%</span></div></div><div class="pod p5"><div class="no">货币市场基金 — 强积金保守基金 冠军</div><div class="nm">宏利MPF保守基金</div><div class="tr">宏利</div><div class="val num up">+2.19%</div><div class="meta"><span data-tip="由积金局评定：风险级别 1 级（1 级最低、7 级最高）">风险 1 级</span><span>规模 23,650 百万</span><span>近1年 +2.19%</span></div></div><div class="pod p6"><div class="no">保证基金 冠军</div><div class="nm">保證組合</div><div class="tr">友邦信託</div><div class="val num up">+1.61%</div><div class="meta"><span data-tip="由积金局评定：风险级别 1 级（1 级最低、7 级最高）">风险 1 级</span><span>规模 10,729 百万</span><span>近1年 +1.61%</span></div></div></div></div>
+  </div>
+
+  
+  </div>
+
+  <div class="foot">
+    <div class="foot-legal">
+      <b data-i18n="数据来源与免责声明：">数据来源与免责声明：</b><span data-i18n="本站数据来自香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表，由广州精研数据有限公司整理并每日自动同步（数值与原始资料一致，未经加工）；单位资产净值、业绩与持仓等数据另取自各计划受托人／保荐人官网。本网页所载资料仅供参考，不构成任何投资建议或要约邀请；基金过往表现并非未来表现的指引，投资涉及风险，强积金成员应参阅相关计划的销售文件及基金便览。广州精研数据有限公司力求资料准确可靠，但不对资料的准确性、完整性及适时性作出任何保证。">本站数据来自香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表，由广州精研数据有限公司整理并每日自动同步（数值与原始资料一致，未经加工）；单位资产净值、业绩与持仓等数据另取自各计划受托人／保荐人官网。本网页所载资料仅供参考，不构成任何投资建议或要约邀请；基金过往表现并非未来表现的指引，投资涉及风险，强积金成员应参阅相关计划的销售文件及基金便览。广州精研数据有限公司力求资料准确可靠，但不对资料的准确性、完整性及适时性作出任何保证。</span>
+    </div>
+    <details class="foot-fold" id="foldSpec">
+      <summary>
+        <span class="ff-b"><span data-i18n="本次净值核对时间：">本次净值核对时间：</span><b id="navCheckAt">2026/10/20 00:17:46</b></span>
+        <span class="ff-a" data-i18n="数据统计口径说明">数据统计口径说明</span>
+        <span class="ff-arrow">▾</span>
+      </summary>
+      <div class="ff-body">
+        <div class="src-note src-note-top" id="srcNoteTop"><div class="navdist">净值估值日分布：<b class="ndk" data-navdate="2026-10-15">10/15 ×330</b><b class="ndk" data-navdate="2026-10-14">10/14 ×98</b><b class="ndk" data-navdate="2026-10-13">10/13 ×9</b><b class="ndk" data-navdate="2026-09-30">09/30 ×10</b><b class="ndk" data-navdate="none">无估值日 ×1</b><i class="ndhint">（点击任一标签只看对应条目）</i></div><div class="risk-mini"><b>风险级别说明（1–7 级）：</b><ul class="rlm-list"><li><i style="background:#2f9e8f"></i>1 低风险</li><li><i style="background:#7fb93d"></i>2 低至中风险</li><li><i style="background:#d6b32a"></i>3 中低风险</li><li><i style="background:#e8942f"></i>4 中风险</li><li><i style="background:#e0672f"></i>5 中高风险</li><li><i style="background:#ce3b3b"></i>6 高风险</li><li><i style="background:#9e2222"></i>7 最高风险</li></ul><p class="rlm-note">风险级别由积金局按基金过往波幅评定，1 级最低、7 级最高；色块仅用于区分级别，绿色不代表「跌」、红色不代表「涨」。</p></div></div>
+        <div class="src-note" id="srcNote">本页收录 <b>451</b> 条成分基金 · 11 家受托人 · 24 个强积金计划，积金局资料截至 <b>2026-09-30</b>。<div class="note-diff">关于「451 条」与官网「382 只」的口径差异：积金局基金资讯表<b>每一行对应一个「单位类别」</b>（同一只成分基金可同时设有 A 类、B 类、D 类等单位，收费与净值各自不同），本站逐行完整收录，故为 451 条；官网页面顶部标注的「已選擇的成分基金總數: 382」是把同一只基金的各个单位类别<b>合并成一只基金</b>后的计数。两者并无矛盾，本站提供「详情」可查看该基金各个单位类别的分别数据。</div><div class="note-nav"><b>单位资产净值（NAV）的数据来源与日期：</b>积金局「強積金基金平台」的基金资讯表<b>本身不提供单位资产净值</b>，因此净值一律逐一取自各计划<b>受托人／保荐人官网</b>每日公布的官方数值，本次已完成核实 <b>448</b> / 451 条（99.3%），另有 <b>2</b> 条为官方注明不提供单位价格的保证基金／非单位化基金，显示「<span class="nav-na">不适用</span>」，其余 <b>1</b> 条暂未能从其官网公开页面取得，一律显示「<span class="nav-pending">待核实</span>」，不以任何推测数值代替。<br><b>请注意两套数据的日期口径不同：</b>本表的<b>基金规模、风险级别、各项回报、基金开支比率、管理费</b>等指标取自积金局基金资讯表，其资料截至日为 <b>2026-09-30</b>（由积金局统一更新，通常滞后若干周）；而<b>单位资产净值</b>由各受托人在官网逐日公布，本次取到的估值日集中在 <b>2026-10-14 ~ 2026-10-15</b>，每一行净值右下方均标注了该基金自己的估值日。两者更新频率不同属正常现象，本站不因日期差异而对任何数值做推算或对齐。<br><span class="muted">其中 中國人壽強積金集成信託計劃 的官网把估值日放在异步脚本中生成，静态页面读不到日期，故这几只只显示净值、不显示估值日（净值本身仍取自其官网）。</span><br><span class="nav-alert"><b>⚠ 来源告警（自动检测）：</b>富達退休集成信託（富達）：源文件缺失，本次未能读取该官网（上次 0 条 → 本次 0 条）；新地強積金僱主營辦計劃（新鴻基地產）：源文件缺失，本次未能读取该官网（上次 0 条 → 本次 0 条）。受影响的基金本次已暂时显示「<span class="nav-pending">待核实</span>」，本站绝不以推测值代替。每日同步任务会重新尝试该来源，恢复正常后告警自动解除。</span></div></div>
+      </div>
+    </details>
+    <details class="foot-fold" id="foldLinks">
+      <summary><span class="ff-a" data-i18n="友情链接 · 官方数据来源">友情链接 · 官方数据来源</span><span class="ff-arrow">▾</span></summary>
+      <div class="ff-body"><div class="friend-links"><div class="fr-title">友情链接 · 官方数据来源</div><ul class="fr-list"><li><a href="https://mfp.mpfa.org.hk/tch/mpp_list.jsp" target="_blank" rel="noopener">积金局 · 强积金基金平台（基金列表）<span>本站基金列表与各项数据的官方来源</span></a></li><li><a href="https://www.mpfa.org.hk/" target="_blank" rel="noopener">积金局 · 官方网站<span>强制性公积金计划管理局</span></a></li><li><a href="https://www.empf.org.hk/page/fund-prices" target="_blank" rel="noopener">积金易平台 · 基金价格<span>官方汇总的各强积金计划基金价格链接</span></a></li></ul><div class="fr-sub">各计划受托人／保荐人官网基金价格页（单位资产净值核对来源）</div><ul class="fr-list fr-sm"><li><a href="https://www.ooogroup.xyz/mpf_price.html" target="_blank" rel="noopener">AMTD強積金計劃（銀聯信託）<span>净值截至 2026-10-14 · 16 条</span></a></li><li><a href="https://www.hsbc.com.hk/zh-hk/mpf/tool/unit-prices/" target="_blank" rel="noopener">滙豐強積金智選計劃（滙豐銀行）<span>净值截至 2026-10-15 · 20 条</span></a></li><li><a href="https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/" target="_blank" rel="noopener">恒生強積金智選計劃（恒生銀行）<span>净值截至 2026-10-15 · 20 条</span></a></li><li><a href="https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc" target="_blank" rel="noopener">東亞（強積金）集成信託計劃（東亞銀行）<span>净值截至 2026-10-15 · 17 条</span></a></li><li><a href="https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc" target="_blank" rel="noopener">東亞（強積金）享惠計劃（東亞銀行）<span>净值截至 2026-10-15 · 11 条</span></a></li><li><a href="https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc" target="_blank" rel="noopener">東亞（強積金）行業計劃（東亞銀行）<span>净值截至 2026-10-15 · 12 条</span></a></li><li><a href="https://www.bocpt.com/homepage/zh-hk/my-choice-mpf/fund-price-enquiry/" target="_blank" rel="noopener">我的強積金計劃（中銀保誠）<span>净值截至 2026-10-15 · 17 条</span></a></li><li><a href="https://www.bocpt.com/homepage/easy-choice-mpf/fund-price-enquiry/" target="_blank" rel="noopener">中銀保誠簡易強積金計劃（中銀保誠）<span>净值截至 2026-10-15 · 17 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-1" target="_blank" rel="noopener">BCT積金之選（銀聯信託）<span>净值截至 2026-10-15 · 26 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-2" target="_blank" rel="noopener">BCT強積金策略計劃（銀聯信託）<span>净值截至 2026-10-15 · 26 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-3" target="_blank" rel="noopener">BCT強積金計劃800系列（銀聯信託）<span>净值截至 2026-10-15 · 28 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-4" target="_blank" rel="noopener">BCT強積金—明智之選（銀聯信託）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-5" target="_blank" rel="noopener">BCT強積金—易富之選（銀聯信託）<span>净值截至 2026-10-15 · 10 条</span></a></li><li><a href="https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-6" target="_blank" rel="noopener">BCT（強積金）行業計劃（銀聯信託）<span>净值截至 2026-10-15 · 12 条</span></a></li><li><a href="https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/" target="_blank" rel="noopener">永明彩虹強積金計劃（永明）<span>净值截至 2026-10-15 · 31 条</span></a></li><li><a href="https://www.aia.com.hk/zh-hk/products/mpf/list" target="_blank" rel="noopener">友邦強積金優選計劃（友邦信托）<span>净值截至 2026-10-14 · 20 条</span></a></li><li><a href="https://www.yflife.com/tc/Hong-Kong/Corporate/MPF/Fund-Price-History/" target="_blank" rel="noopener">萬全強制性公積金計劃（萬通信託）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://www.bocomtrust.com.hk/BankCommSite/shtml/trust/tw/2600764/2600785/2600787/2600908/2600910/list.shtml" target="_blank" rel="noopener">交通銀行愉盈退休強積金計劃（交通銀行信託）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW" target="_blank" rel="noopener">中國人壽強積金集成信託計劃（中國人壽信託）<span>10 条</span></a></li><li><a href="https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2" target="_blank" rel="noopener">宏利環球精選（強積金）計劃（宏利）<span>净值截至 2026-10-15 · 28 条</span></a></li><li><a href="https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist" target="_blank" rel="noopener">宏利退休精選（強積金）計劃（宏利）<span>净值截至 2026-10-14 · 39 条</span></a></li><li><a href="https://www.htisec.com/asm/tc/mpf.jsp?type=1" target="_blank" rel="noopener">海通MPF退休金（海通國際投資經理）<span>净值截至 2026-10-15 · 14 条</span></a></li><li><a href="https://www.etnet.com.hk/www/tc/mpf/" target="_blank" rel="noopener">etnet 環富通（官方價，逐日）<span>净值截至 2026-10-14 · 106 条</span></a></li></ul></div></div>
+    </details>
+    <div class="copyright" data-i18n="© 2026 广州精研数据有限公司 · 保留所有权利">© 2026 广州精研数据有限公司 · 保留所有权利</div>
+  </div>
+</div>
+
+<!-- 对比栏（与排名页共用，跨页保持；来源：common.js CMPX） -->
+<div class="cmp" id="cmp">
+  <div class="cmp-inner">
+    <div class="cmp-lab"><span data-i18n="对比栏">对比栏</span><b id="cmpN">0</b></div>
+    <div class="cmp-list" id="cmpList"></div>
+    <button class="btn sm" onclick="openCmp()" data-i18n="开始对比">开始对比</button>
+    <button class="btn ghost sm" onclick="clearCmp()" data-i18n="清空">清空</button>
+  </div>
+</div>
+
+<!-- 对比弹窗 -->
+<div class="cmp-modal" id="cmpModal">
+  <div class="cmp-box">
+    <div class="hd">
+      <h3 data-i18n="基金对比">基金对比</h3>
+      <button class="close-x" onclick="closeCmp()">×</button>
+    </div>
+    <div class="cmp-trend" id="cmpTrend"></div>
+    <div class="bd"><div class="table-scroll" id="cmpBody"></div></div>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div><h3 id="mTitle"></h3><div class="muted" id="mSub" style="font-size:12px"></div></div>
+      <div class="m-tools">
+        <button type="button" class="btn ghost sm" id="mExpand" data-i18n="放大" data-i18n-title="放大到独立分析页" title="放大到独立分析页">放大</button>
+        <button type="button" class="btn ghost sm" id="mExport" data-i18n="导出" data-i18n-title="导出本基金数据（CSV）" title="导出本基金数据（CSV）">导出</button>
+        <button type="button" class="btn ghost sm" id="mShare" data-i18n="分享" data-i18n-title="复制本基金分享链接" title="复制本基金分享链接">分享</button>
+        <button class="close-x" onclick="closeModal()">×</button>
+      </div>
+    </div>
+    <div class="modal-bd" id="mBody"></div>
+  </div>
+</div>
+
+<script src="i18n.js?v=1792470114000"></script>
+<script src="zhmap.js?v=1792470114000"></script>
+<script src="zhmap.js?v=1792470114000"></script>
+<script src="trend.js?v=1792470114000"></script>
+<script src="common.js?v=1792470114000"></script><button type="button" class="dca-fab" aria-label="供款计算器"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"></rect><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"></path></svg><span>供款计算器</span></button><div class="dca-wrap" hidden=""><div class="dca-box" role="dialog" aria-modal="true"><div class="dca-head"><b>供款（定投）计算器</b><button type="button" class="dca-x" aria-label="关闭">×</button></div><div class="dca-body"><div class="dca-row"><label>每月供款（港元）</label><input type="number" id="dcaAmt" min="100" step="100" value="2000"><label>开始月份</label><div class="dca-ym" id="dcaYm"><button type="button" class="dca-ym-btn" id="dcaYmBtn" aria-expanded="false"><span id="dcaYmText">2020 年 1 月</span><em>▾</em></button></div></div><div class="dca-ym-pop" id="dcaYmPop" hidden=""><div class="dca-ym-years" id="dcaYmYears"><button type="button" class="dca-ym-y" data-y="2026">2026</button><button type="button" class="dca-ym-y" data-y="2025">2025</button><button type="button" class="dca-ym-y" data-y="2024">2024</button><button type="button" class="dca-ym-y" data-y="2023">2023</button><button type="button" class="dca-ym-y" data-y="2022">2022</button><button type="button" class="dca-ym-y" data-y="2021">2021</button><button type="button" class="dca-ym-y on" data-y="2020">2020</button><button type="button" class="dca-ym-y" data-y="2019">2019</button><button type="button" class="dca-ym-y" data-y="2018">2018</button><button type="button" class="dca-ym-y" data-y="2017">2017</button><button type="button" class="dca-ym-y" data-y="2016">2016</button><button type="button" class="dca-ym-y" data-y="2015">2015</button><button type="button" class="dca-ym-y" data-y="2014">2014</button><button type="button" class="dca-ym-y" data-y="2013">2013</button><button type="button" class="dca-ym-y" data-y="2012">2012</button><button type="button" class="dca-ym-y" data-y="2011">2011</button><button type="button" class="dca-ym-y" data-y="2010">2010</button><button type="button" class="dca-ym-y" data-y="2009">2009</button><button type="button" class="dca-ym-y" data-y="2008">2008</button><button type="button" class="dca-ym-y" data-y="2007">2007</button><button type="button" class="dca-ym-y" data-y="2006">2006</button><button type="button" class="dca-ym-y" data-y="2005">2005</button><button type="button" class="dca-ym-y" data-y="2004">2004</button><button type="button" class="dca-ym-y" data-y="2003">2003</button><button type="button" class="dca-ym-y" data-y="2002">2002</button><button type="button" class="dca-ym-y" data-y="2001">2001</button><button type="button" class="dca-ym-y" data-y="2000">2000</button></div><div class="dca-ym-months" id="dcaYmMonths"><button type="button" class="dca-ym-m on" data-m="1">1 月</button><button type="button" class="dca-ym-m" data-m="2">2 月</button><button type="button" class="dca-ym-m" data-m="3">3 月</button><button type="button" class="dca-ym-m" data-m="4">4 月</button><button type="button" class="dca-ym-m" data-m="5">5 月</button><button type="button" class="dca-ym-m" data-m="6">6 月</button><button type="button" class="dca-ym-m" data-m="7">7 月</button><button type="button" class="dca-ym-m" data-m="8">8 月</button><button type="button" class="dca-ym-m" data-m="9">9 月</button><button type="button" class="dca-ym-m" data-m="10">10 月</button><button type="button" class="dca-ym-m" data-m="11">11 月</button><button type="button" class="dca-ym-m" data-m="12">12 月</button></div></div><div class="dca-funds" id="dcaFunds"></div><div class="dca-actions"><button type="button" class="btn ghost sm" id="dcaAdd">+ 添加基金（最多 10 只）</button><button type="button" class="btn sm" id="dcaGo">开始计算</button></div><p class="dca-tip">按月内最后一个交易日的单位净值买入，不计分红再投资与费用；结果仅供示意，实际以受托人结单为准。</p></div><div class="dca-result" id="dcaRes"></div><div class="dca-picker" id="dcaPicker" hidden=""><div class="dca-pk-head"><span>选择基金</span><button type="button" class="dca-pk-x" aria-label="关闭">×</button></div><input type="search" class="dca-pk-search" id="dcaPkSearch" placeholder="搜索基金名称 / 计划 / 受托人"><div class="dca-pk-cats" id="dcaPkCats"></div><div class="dca-pk-list" id="dcaPkList"></div></div></div></div>
+<script src="app.js?v=1792470114000"></script>
+<script src="rank.js?v=1792470114000"></script>
+<button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="m5 12 7-7 7 7"></path></svg></button>
+
+<!-- 板块切换（db-tabs-script）：支持 ?rk=<榜单id> 深链、#db/#rank 锚点与刷新记忆 -->
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search);
+  var hash0 = (location.hash || '').replace(/^#/, '');
+  var BOARDS = /^(ann1|ann5|ann10|annLaunch|calYear|cum1|cum5|cum10|cumLaunch|mdd|risk|fer|size|launchTs|trusteeAgg|champion|selfW1|selfYtd|selfY1|selfMdd)$/;
+  var want = qs.get('rk') ? 'rank' : (hash0 === 'rank' || BOARDS.test(hash0) ? 'rank' : (hash0 === 'db' ? 'db' : 'db'));
+  function show(tab, keepHash) {
+    var isRank = tab === 'rank';
+    var db = document.getElementById('dbSec'), rkSec = document.getElementById('rkSec');
+    if (!db || !rkSec) return;
+    db.hidden = isRank;
+    rkSec.hidden = !isRank;
+    var b1 = document.getElementById('dbtDb'), b2 = document.getElementById('dbtRank');
+    if (b1) b1.classList.toggle('on', !isRank);
+    if (b2) b2.classList.toggle('on', isRank);
+    /* 刷新记忆：切换时写 hash（榜单深链则保留原 hash 不动） */
+    if (!keepHash) { try { history.replaceState(null, '', isRank ? '#rank' : '#db'); } catch (e) {} }
+    try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+    if (window.__syncTableScroll) window.__syncTableScroll();
+  }
+  var b1 = document.getElementById('dbtDb'), b2 = document.getElementById('dbtRank');
+  if (b1) b1.addEventListener('click', function () { show('db'); });
+  if (b2) b2.addEventListener('click', function () { show('rank'); });
+  show(want, !!qs.get('rk') || BOARDS.test(hash0));
+})();
+</script>
+
+
+</body></html>

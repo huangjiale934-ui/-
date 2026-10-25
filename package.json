@@ -1,0 +1,12 @@
+{
+  "name": "mpf-platform",
+  "version": "1.0.0",
+  "description": "广州精研数据有限公司 · 香港强积金数据平台（数据源：香港积金局官网）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

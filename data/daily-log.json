@@ -1,0 +1,56 @@
+[
+ {
+  "date": "2026-10-11",
+  "syncAt": "2026-10-11T14:06:55.335Z",
+  "count": 451,
+  "dataAsOf": "2026-08-31",
+  "navVerified": 449,
+  "navNa": 2,
+  "avgAnn1": 12.9
+ },
+ {
+  "date": "2026-10-13",
+  "syncAt": "2026-10-13T08:59:12.482Z",
+  "count": 451,
+  "dataAsOf": "2026-09-30",
+  "navVerified": 449,
+  "navNa": 2,
+  "avgAnn1": 7.62
+ },
+ {
+  "date": "2026-10-17",
+  "syncAt": "2026-10-17T08:00:03.059Z",
+  "count": 451,
+  "dataAsOf": "2026-09-30",
+  "navVerified": 449,
+  "navNa": 2,
+  "avgAnn1": 7.62
+ },
+ {
+  "date": "2026-10-18",
+  "syncAt": "2026-10-18T04:20:44.017Z",
+  "count": 451,
+  "dataAsOf": "2026-09-30",
+  "navVerified": 449,
+  "navNa": 2,
+  "avgAnn1": 7.62
+ },
+ {
+  "date": "2026-10-19",
+  "syncAt": "2026-10-19T16:19:05.656Z",
+  "count": 451,
+  "dataAsOf": "2026-09-30",
+  "navVerified": 448,
+  "navNa": 2,
+  "avgAnn1": 7.62
+ },
+ {
+  "date": "2026-10-23",
+  "syncAt": "2026-10-23T12:59:24.880Z",
+  "count": 451,
+  "dataAsOf": "2026-09-30",
+  "navVerified": 449,
+  "navNa": 2,
+  "avgAnn1": 7.62
+ }
+]
