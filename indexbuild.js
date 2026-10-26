@@ -75,6 +75,25 @@ async function fetchIndex(it) {
   return { ...it, series: thinSeries(series) };
 }
 
+/* 2026-10-26 新增：腾讯港股日线（备用源）。
+   背景：东财 push2his 对 100.HSI 会整体返回空（本机 IP 限流），导致恒指长期停在 10-22，
+   而 HSCEI/HSTECH 偶发能通 → 三只港股指数尾部不一致，进而污染「交易日历」巡检窗口。
+   腾讯接口不受此限，返回 [日期, 开, 收, 高, 低, …]，收盘价取下标 2，单次最多 2000 点。 */
+function fetchTxTail(code, n) {
+  const url = 'https://web.ifzq.gtimg.cn/appstock/app/hkfqkline/get?param=' + code + ',day,,,' + n + ',qfq';
+  return get(url).then((raw) => {
+    const j = JSON.parse(raw);
+    const d = j && j.data && j.data[code];
+    const arr = (d && (d.day || d.qfqday)) || [];
+    const out = [];
+    arr.forEach((x) => {
+      const dt = x[0], c = parseFloat(x[2]);
+      if (dt && isFinite(c) && c > 0) out.push([dt, c]);
+    });
+    return out;
+  });
+}
+
 (async () => {
   const items = {};
   for (const it of INDICES) {
@@ -111,32 +130,58 @@ async function fetchIndex(it) {
     }
     await new Promise((r) => setTimeout(r, 400));
   }
-  /* 2026-10-26 修 4-08：HSI 落后同源其他指数（HSCEI/HSTECH）≥1 个交易日时再重抓一次——
-     HSI 是全站交易日历（gap-check/连续性扫描），尾部缺口会让巡检窗口整体前移 */
-  try {
-    const tailOf = (k) => (items[k] && items[k].series) ? items[k].series[items[k].series.length - 1][0] : '';
-    const hsiTail = tailOf('HSI');
-    const others = ['HSCEI', 'HSTECH'].map(tailOf).filter(Boolean);
-    if (hsiTail && others.length && others.some((d) => d > hsiTail)) {
-      console.log('  [!] HSI 末点 ' + hsiTail + ' 落后同源指数（' + others.join('/') + '），重抓 HSI…');
-      const it = INDICES.find((x) => x.key === 'HSI');
-      const r2 = await fetchIndex(it);
-      if (r2.series.length && r2.series[r2.series.length - 1][0] > hsiTail) {
-        items.HSI = {
-          code: it.code, name: it.name, nameEn: it.nameEn,
-          first: r2.series[0][0], asOf: r2.series[r2.series.length - 1][0],
-          points: r2.series.length, series: r2.series,
+  /* 2026-10-26 修（恒指停在 10-22 的根因）：东财对港股三指数经常整体返回空/尾点缺失，
+     用腾讯港股日线补尾——① 缺的日期追加 ② 与末点同日则以腾讯收盘价覆盖（东财尾点可能是收盘前快照）。 */
+  for (const [k, txCode] of Object.entries({ HSI: 'hkHSI', HSCEI: 'hkHSCEI', HSTECH: 'hkHSTECH' })) {
+    try {
+      const tail = await fetchTxTail(txCode, 60);
+      if (!tail.length) { console.log('  [!] ' + k + ' 腾讯补点为空'); continue; }
+      const def = INDICES.find((x) => x.key === k);
+      if (!items[k]) {
+        items[k] = {
+          code: def.code, name: def.name, nameEn: def.nameEn,
+          first: tail[0][0], asOf: tail[tail.length - 1][0], points: tail.length, series: tail,
         };
-        console.log('  ✔ HSI 补齐至 ' + r2.series[r2.series.length - 1][0]);
-      } else {
-        console.log('  [!] HSI 重抓仍为 ' + (r2.series.length ? r2.series[r2.series.length - 1][0] : '空') + '（官方接口尾部延迟，保留现值）');
+        console.log('  ✔ ' + k + ' 腾讯建序列 ' + tail[0][0] + ' → ' + tail[tail.length - 1][0]);
+        continue;
       }
-    }
-  } catch (e) { console.log('  [!] HSI 补齐检查失败: ' + e.message); }
-  /* 2026-10-19：抓取失败的指数不能丢——先并入磁盘上已有的序列 */
+      const s = items[k].series;
+      const lastD = s.length ? s[s.length - 1][0] : '';
+      const map = new Map(s.map(([d, v]) => [d, v]));
+      let add = 0, fix = 0;
+      tail.forEach(([d, v]) => {
+        if (!map.has(d)) { map.set(d, v); add++; }
+        else if (d >= lastD) { if (map.get(d) !== v) fix++; map.set(d, v); }
+      });
+      const merged = [...map.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+      items[k].series = merged;
+      items[k].points = merged.length;
+      items[k].asOf = merged[merged.length - 1][0];
+      if (add || fix) console.log('  ✔ ' + k + ' 腾讯补点：新增 ' + add + ' 日 / 校正 ' + fix + ' 日 → ' + items[k].asOf);
+    } catch (e) { console.log('  [!] ' + k + ' 腾讯补点失败: ' + e.message); }
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  /* 2026-10-19：抓取失败的指数不能丢——先并入磁盘上已有的序列
+     2026-10-26 修正：不能只在「本次完全没抓到」时并入。东财整体挂掉时，腾讯补点会先生成一个
+     仅 60 点的短序列，旧逻辑只保留这 60 点 → 20 年历史被截断。改为「按序列合并」：
+     旧序列全部保留，新序列覆盖同一天的值，再按日期排序。 */
   try {
     const old = JSON.parse(fs.readFileSync(OUT, 'utf8'));
-    Object.keys(old.items || {}).forEach((k) => { if (!items[k]) items[k] = old.items[k]; });
+    Object.keys(old.items || {}).forEach((k) => {
+      const o = old.items[k];
+      if (!items[k]) { items[k] = o; return; }
+      const cur = items[k];
+      if (!o.series || !o.series.length) return;
+      if (cur.series.length >= o.series.length) return;   /* 新序列更全，无需合并 */
+      const map = new Map(o.series.map(([d, v]) => [d, v]));
+      cur.series.forEach(([d, v]) => map.set(d, v));
+      const merged = [...map.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
+      cur.series = merged;
+      cur.points = merged.length;
+      cur.first = merged[0][0];
+      cur.asOf = merged[merged.length - 1][0];
+      console.log('  · ' + k + ' 历史合并：' + o.series.length + ' + 补点 → ' + merged.length + ' 点（至 ' + cur.asOf + '）');
+    });
   } catch (e) { /* 首次运行无旧文件 */ }
   const obj = {
     updatedAt: Date.now(),
