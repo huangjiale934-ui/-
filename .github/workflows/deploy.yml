@@ -58,6 +58,7 @@ jobs:
           python aia_ingest2.py || echo "!! 友邦失敗"
           python fetch-shkp-hist.py || echo "!! 新地失敗"
           python yflife_daily.py || echo "!! 萬通失敗"
+          python news_fetch.py || echo "!! 積金局新聞稿失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
 
       - name: 積金局月度業績（每月 5 號後官方更新；失敗保留舊數據）

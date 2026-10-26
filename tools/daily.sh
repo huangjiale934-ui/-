@@ -65,6 +65,7 @@ soft_step "3/9 東亞日度历史" "$PY" fetch-bea-hist.py
 # 原来只跑宏利/東亞，滙豐、中銀保誠、友邦、萬通、銀聯等 hist 会停在上一次运行日，
 # 导出表就出现「前面有值、最后几格空白」。脚本内含快照合并，不会截断历史。
 soft_step "3.5/9 各发行人历史近端补齐" bash tools/hist-topup.sh recent
+soft_step "3.6/9 積金局新聞稿" "$PY" news_fetch.py
 soft_step "4/9 BCT 便览持仓" "$PY" bct_ffs_auto.py
 soft_step "5/9 资产分布解析" "$PY" alloc_fill.py
 step "6/9 重算自算指标" node navperf.js

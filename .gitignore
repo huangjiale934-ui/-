@@ -46,7 +46,6 @@ ht_holdings.py
 mpfhk_alloc.py
 mpfhk_holdings.py
 mpfindex.js
-news_fetch.py
 report-coverage.js
 alloc_fill.py
 docs/

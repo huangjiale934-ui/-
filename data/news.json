@@ -1,8 +1,13 @@
 {
- "updatedAt": 1792481202925,
+ "updatedAt": 1792998405854,
  "source": "積金局「新聞稿」",
  "sourceUrl": "https://www.mpfa.org.hk/tc/info-centre/press-releases",
  "items": [
+  {
+   "date": "25/10/2026",
+   "title": "積金局主席網誌 - 強積金「 全自由行」新篇章",
+   "url": "https://www.mpfa.org.hk/info-centre/press-releases/20261025"
+  },
   {
    "date": "13/10/2026",
    "title": "積金局及積金易公司主席鼓勵企業 以長遠目光加強員工退休保障",
@@ -87,11 +92,6 @@
    "date": "15/06/2026",
    "title": "積金局提醒公眾慎防虛假網站",
    "url": "https://www.mpfa.org.hk/info-centre/press-releases/20260615"
-  },
-  {
-   "date": "11/06/2026",
-   "title": "積金易公司提醒強積金計劃成員切勿偽造或使用虛假文書非法提早提取強積金",
-   "url": "https://www.mpfa.org.hk/info-centre/press-releases/20260611"
   }
  ]
 }
