@@ -488,6 +488,9 @@
     ann10: (x) => '<td data-c="ann10" data-l="' + TT('近10年年率化') + '" class="r num ' + cls(x.ann10) + '">' + pct(x.ann10) + '</td>',
     annLaunch: (x) => '<td data-c="annLaunch" data-l="' + TT('推出至今年率化') + '" class="r num ' + cls(x.annLaunch) + '">' + pct(x.annLaunch) + '</td>',
     size: (x) => '<td data-c="size" data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>',
+    worstYear: (x) => '<td data-c="worstYear" data-l="' + TT('近5年最差年度') + '" class="r num ' + cls(x.worstYear) + '">' + pct(x.worstYear) + '</td>',
+    fer: (x) => '<td data-c="fer" data-l="' + TT('总开支比率') + '" class="r num">' + (x.fer == null ? '—' : x.fer.toFixed(2) + '%') + '</td>',
+    launchTs: (x) => '<td data-c="launchTs" data-l="' + TT('推出日期') + '" class="num">' + esc(x.launch || '—') + '</td>',
     mgmtFee: (x) => '<td data-c="mgmtFee" data-l="' + TT('基金管理费 %') + '" class="r num">' + feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee) + '</td>',
     calYear: (x) => '<td data-c="calYear" data-l="' + TQ('{y} 年回报', { y: S.calYear }) + '" class="r num ' + cls(window.__rkIsCal ? x.calYear : null) + '">' + (window.__rkIsCal ? '<b>' + pct(x.calYear) + '</b>' : '') + '</td>',
     cum1: (x) => '<td data-c="cum1" data-l="' + TT('近1年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum1) + '">' + pct(x.cum1) + '</td>',
@@ -516,6 +519,9 @@
     ann10: '<th data-c="ann10" data-i18n-parts data-k="ann10" data-defdir="desc" class="sortable r">近10年<br>年率化 <span class="arrow">↕</span></th>',
     annLaunch: '<th data-c="annLaunch" data-i18n-parts data-k="annLaunch" data-defdir="desc" class="sortable r">推出至今<br>年率化 <span class="arrow">↕</span></th>',
     size: '<th data-c="size" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
+    worstYear: '<th data-c="worstYear" data-i18n-parts data-k="worstYear" data-defdir="desc" class="sortable r">近5年<br><small>最差年度</small> <span class="arrow">↕</span></th>',
+    fer: '<th data-c="fer" data-i18n-parts data-k="fer" data-defdir="asc" class="sortable r">总开支比率<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    launchTs: '<th data-c="launchTs" data-i18n-parts data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>',
     mgmtFee: '<th data-c="mgmtFee" data-i18n-parts data-k="mgmtFee" data-defdir="asc" class="sortable r">管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
     calYear: '<th data-c="calYear" data-i18n-parts id="rkThCalYear" data-k="calYear" data-defdir="desc" class="sortable r">历年<br>回报 <span class="arrow">↕</span></th>',
     cum1: '<th data-c="cum1" data-i18n-parts data-k="cum1" data-defdir="desc" class="sortable r rk-opt o-cum">近1年<br>累积 <span class="arrow">↕</span></th>',
@@ -623,7 +629,7 @@
     if (tblEl) {
       tblEl.querySelectorAll('.dim-hl').forEach((n) => n.classList.remove('dim-hl'));
       const mk = (!b.agg && b.metric) ? b.metric : '';
-      if (mk && mk !== 'risk' && mk !== 'calYear') {
+      if (mk) {   /* 含「稳健低风险榜 / 历年回报榜」——维度本身就是该列时也高亮 */
         tblEl.querySelectorAll('#rkThead [data-c="' + mk + '"], #rkTbody [data-c="' + mk + '"]')
           .forEach((n) => n.classList.add('dim-hl'));
       }
@@ -816,7 +822,7 @@
     const tbl = document.querySelector('#rkTable');
     const box = document.querySelector('#rkColChecks');
     if (!btn || !pop || !tbl || !box) return;
-    const KEY = 'mpf-rk-cols-v3';   /* 2026-10-26 升版：默认列变化（管理费移出）需对老用户重置 */
+    const KEY = 'mpf-rk-cols-v4';   /* 2026-10-26 升版：新增抗跌/总开支/新锐列，需对老用户重置隐藏集 */
 
     /* 列定义：k=列键、n=显示名、lock=必显 */
     const FUND = [
@@ -825,6 +831,9 @@
       ['type', '基金种类', 0], ['risk', '风险级别', 0],
       ['ann1', '近1年年率化', 0], ['ann5', '近5年年率化', 0], ['ann10', '近10年年率化', 0],
       ['annLaunch', '推出至今年率化', 0], ['size', '基金规模', 0], ['mgmtFee', '管理费', 0],
+      /* 2026-10-26：补齐「抗跌榜 / 总开支 / 新锐榜」对应列——此前这 3 个标签点了只排序、不出列，
+         用户看到的就是「点了没反应」 */
+      ['worstYear', '近5年最差年度', 0], ['fer', '总开支比率', 0], ['launchTs', '推出日期', 0],
       ['calYear', '历年回报（当年）', 1],   /* 仅历年榜显示，跟随榜单逻辑 */
       ['cum1', '近1年累积', 0], ['cum5', '近5年累积', 0], ['cum10', '近10年累积', 0],
       ['cumLaunch', '推出至今累积', 0],
@@ -847,9 +856,10 @@
       ['cmp', '对比', 1], ['ops', '详情', 1],
     ];
     const MODES = { fund: FUND, agg: AGG, self: SELF };
-    const DEFAULT_OFF = ['cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee',
+    const DEFAULT_OFF = ['cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee', 'worstYear', 'fer', 'launchTs',
       'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025'];
     const SLIM_OFF = ['trustee', 'type', 'risk', 'size', 'ann5', 'ann10', 'annLaunch', 'mgmtFee',
+      'worstYear', 'fer', 'launchTs',
       'cum1', 'cum5', 'cum10', 'cumLaunch', 'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025',
       'selfW1', 'selfY3a', 'selfY5a', 'selfMdd5', 'count', 'sizeSum', 'ann5Avg', 'ann10Avg',
       'annLaunchAvg', 'navRate'];
@@ -868,7 +878,7 @@
       const visible = () => FUND.map(([k]) => k).filter((k) => (k === 'calYear' ? isCal : !off.has(k)));
       let order = visible();
       const mk = window.__rkMetric || '';
-      if (mk && mk !== 'risk' && mk !== 'calYear' && FUND.some(([k]) => k === mk)) {
+      if (mk && mk !== 'risk' && FUND.some(([k]) => k === mk)) {
         if (off.has(mk)) {
           off.delete(mk);
           window.__rkDimRevealed = window.__rkDimRevealed || new Set();
