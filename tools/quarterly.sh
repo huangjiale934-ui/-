@@ -17,6 +17,10 @@ NODE="C:/Users/11718/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
 LOG="data/holdings-update.log"
 echo "[$(date '+%F %H:%M')] 季度持仓刷新开始" >> "$LOG"
 
+# 2026-10-26 新增：写盘事务——本链路有 8+ 个解析器直接覆盖 holdings 条目，
+# 一旦某个解析器退化（当日 BCT 空名称/分布塌缩），过去只能人工 diff 回滚。
+"$NODE" tools/holdings-txn.js save >> "$LOG" 2>&1
+
 run() {
   local name="$1"; shift
   if "$@" >> "$LOG" 2>&1; then echo "  ✔ $name" >> "$LOG"; else echo "  ✘ $name" >> "$LOG"; fi
@@ -75,6 +79,11 @@ fetch_pdf "富達MT00288" "https://www.mpfa.org.hk/assets/FF/MT00288.pdf" tmp/ff
 # 未自动化；永明 SLR：官网 JS 拼接，需 Chrome 人工下载后跑 sunlife_holdings.py --force。
 # AMTD：由自动化任务提示词单独处理（Chrome 下载 Google Drive）。
 
+if "$NODE" tools/holdings-txn.js check --restore >> "$LOG" 2>&1; then
+  echo "  ✔ 持仓事务校验：零退化" >> "$LOG"
+else
+  echo "  ⚠ 持仓事务校验：检测到退化，已回滚到抓取前快照" >> "$LOG"
+fi
 "$NODE" tools/holdings-normalize.js >> "$LOG" 2>&1
 "$NODE" tools/holdings-guard.js --fix >> "$LOG" 2>&1
 echo "[$(date '+%F %H:%M')] 季度持仓刷新结束" >> "$LOG"

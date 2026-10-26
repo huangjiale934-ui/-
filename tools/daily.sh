@@ -26,6 +26,12 @@ export PYTHONUTF8=1
 NODE_DIR="C:/Users/11718/.workbuddy/binaries/node/versions/22.22.2-6"
 case ":$PATH:" in *":$NODE_DIR:"*) ;; *) export PATH="$NODE_DIR:$PATH" ;; esac
 command -v node >/dev/null 2>&1 || export PATH="/c/Users/11718/.workbuddy/binaries/node/versions/22.22.2-6:$PATH"
+# 2026-10-26 修（阻断性）：write_ustat 用了 $NODE，但脚本只定义过 NODE_DIR →
+# set -u 下首行即 "NODE: unbound variable" 退出（10-26 22:30 计划任务仅跑 2 秒）。
+# 这里显式补上可执行的 node 路径（找不到时退回 NODE_DIR，仍找不到则不写状态文件）。
+NODE="$(command -v node 2>/dev/null || true)"
+[ -n "${NODE:-}" ] || NODE="$NODE_DIR/node.exe"
+[ -x "$NODE" ] || [ -f "$NODE" ] || NODE=""
 LOG="tmp/daily-$(date +%Y%m%d-%H%M).log"
 mkdir -p tmp
 exec > >(tee -a "$LOG") 2>&1
@@ -49,6 +55,7 @@ soft_step() {
 # 2026-10-26（用户要求）：更新进行中状态写盘 → /api/status → 前端顶部提示栏
 USTAT="data/update-status.json"
 write_ustat() {
+  [ -n "${NODE:-}" ] || return 0
   "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" >/dev/null 2>&1 || true
 }
 USTART=$(date +%s)
@@ -70,6 +77,9 @@ step() {
 }
 
 soft_step "1/9 抓发行人最新净值" node navbuild.js --render
+# 2026-10-26 新增：富達独立兜底。navbuild 内嵌富達解析连续 3 天返回 0 只（页面恒 38KB），
+# 而独立脚本 fetch-fidelity-hist.py 正常 → 固化进链路，避免每天靠人工补。
+soft_step "1.2/9 富達历史（独立脚本兜底）" "$PY" fetch-fidelity-hist.py
 soft_step "1.8/9 宏利历史增量" "$PY" fetch-manulife-hist.py
 soft_step "2/9 etnet 日度补漏" "$PY" nav-etnet.py
 soft_step "3/9 東亞日度历史" "$PY" fetch-bea-hist.py
@@ -78,8 +88,12 @@ soft_step "3/9 東亞日度历史" "$PY" fetch-bea-hist.py
 # 导出表就出现「前面有值、最后几格空白」。脚本内含快照合并，不会截断历史。
 soft_step "3.5/9 各发行人历史近端补齐" bash tools/hist-topup.sh recent
 soft_step "3.6/9 積金局新聞稿" "$PY" news_fetch.py
+# 2026-10-26 新增：持仓写入事务——BCT / 资产分布两步会整条覆盖 holdings 条目，
+# 解析退化（空名称/分布塌缩）过去要人工 diff 回滚，这里抓取前快照、写后自动判定并回滚。
+node tools/holdings-txn.js save
 soft_step "4/9 BCT 便览持仓" "$PY" bct_ffs_auto.py
 soft_step "5/9 资产分布解析" "$PY" alloc_fill.py
+node tools/holdings-txn.js check --restore || echo "!!! 持仓事务：已检测到退化并回滚到抓取前快照"
 step "6/9 重算自算指标" node navperf.js
 step "6.5/9 修正 n.a. 被写成 0 的字段" node tools/fix-nulls.js
 step "7/9 指数补齐" node indexbuild.js
@@ -96,6 +110,12 @@ if [ "${1:-}" = "--no-deploy" ]; then
   echo "（--no-deploy：跳过发布）"
   exit 0
 fi
+
+# 2026-10-26 新增：推送数据到 GitHub（视为「发布」的一部分，故放在 --no-deploy 之后）。
+# 原因：GitHub Actions 的 schedule 自建仓以来从未触发（近 30 次运行全是 push 事件），
+# 云端站点会一直停在上一次手工推送的数据。这里以本机为权威源兜底推送，
+# push 事件本身会触发 Pages 构建；若云端 schedule 日后恢复，双方数据一致时本步自动跳过。
+soft_step "10/10 同步数据到 GitHub" bash tools/sync-github.sh
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
 
 # 2026-10-26：更新结束状态（提示栏收起）

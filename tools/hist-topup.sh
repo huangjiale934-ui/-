@@ -69,8 +69,11 @@ case "$want" in
 esac
 
 # 永明 / 中國人壽 / 交通（日度接口，通常已是最新，补齐兜底）
+# 2026-10-26：永明 31 只近 4 天第 3 次 1200s 超时 → 近端模式改走 --from（脚本内部与已有历史合并，
+# 不会截断），并放宽到 2400s 兜底；全量仍保留 1200s 以上的长超时。
 case "$want" in
-  full|recent|sunlife)   [ -f fetch-sunlife-hist.py ]   && run "永明 31 只" 1200 "$PY" fetch-sunlife-hist.py ;;
+  full|sunlife)  [ -f fetch-sunlife-hist.py ] && run "永明 31 只（全量）" 2400 "$PY" fetch-sunlife-hist.py ;;
+  recent)        [ -f fetch-sunlife-hist.py ] && run "永明 31 只（近端 $SINCE）" 2400 "$PY" fetch-sunlife-hist.py --from "$SINCE" ;;
 esac
 case "$want" in
   full|recent|chinalife) [ -f fetch-chinalife-hist.py ] && run "中國人壽 10 只" 900 "$PY" fetch-chinalife-hist.py ;;

@@ -43,6 +43,8 @@ jobs:
 
       - name: 抓取發行人官網數據（失敗保留舊數據）
         run: |
+          # 2026-10-26：持仓写入事务——抓取前快照，写后自动判定退化并回滚（与本机 daily.sh 同口径）
+          node tools/holdings-txn.js save
           # 逐渠道軟失敗：單渠道失敗只記錄，不中斷（與本機 daily.sh 同哲學）
           node navbuild.js || echo "!! navbuild 官網快照失敗"
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
@@ -70,6 +72,9 @@ jobs:
           node indexbuild.js
           node tools/fix-nulls.js
           node tools/merge-nav.js
+          # 2026-10-26：先判定持仓是否退化（退化则整档回滚），再做规范化与守卫——
+          # 避免「坏数据已落盘、守卫只告警」的旧问题在云端复现
+          node tools/holdings-txn.js check --restore || echo "!! 檢測到持倉退化，已回滾到抓取前快照"
           node tools/holdings-normalize.js
           node tools/holdings-guard.js
           node tools/nav-consistency.js
