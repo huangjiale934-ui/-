@@ -79,7 +79,9 @@ async function fetchIndex(it) {
   const items = {};
   for (const it of INDICES) {
     try {
-      const r = await fetchIndex(it);
+      let r = await fetchIndex(it);
+      /* 2026-10-26 修 4-08：空数据/首尾异常时重试一次（东财接口偶发尾部缺当日） */
+      if (!r.series.length) r = await fetchIndex(it);
       if (!r.series.length) { console.log('  [!] ' + it.key + ' 空数据，跳过'); continue; }
       items[it.key] = {
         code: it.code, name: it.name, nameEn: it.nameEn,
@@ -93,6 +95,28 @@ async function fetchIndex(it) {
     }
     await new Promise((r) => setTimeout(r, 400));
   }
+  /* 2026-10-26 修 4-08：HSI 落后同源其他指数（HSCEI/HSTECH）≥1 个交易日时再重抓一次——
+     HSI 是全站交易日历（gap-check/连续性扫描），尾部缺口会让巡检窗口整体前移 */
+  try {
+    const tailOf = (k) => (items[k] && items[k].series) ? items[k].series[items[k].series.length - 1][0] : '';
+    const hsiTail = tailOf('HSI');
+    const others = ['HSCEI', 'HSTECH'].map(tailOf).filter(Boolean);
+    if (hsiTail && others.length && others.some((d) => d > hsiTail)) {
+      console.log('  [!] HSI 末点 ' + hsiTail + ' 落后同源指数（' + others.join('/') + '），重抓 HSI…');
+      const it = INDICES.find((x) => x.key === 'HSI');
+      const r2 = await fetchIndex(it);
+      if (r2.series.length && r2.series[r2.series.length - 1][0] > hsiTail) {
+        items.HSI = {
+          code: it.code, name: it.name, nameEn: it.nameEn,
+          first: r2.series[0][0], asOf: r2.series[r2.series.length - 1][0],
+          points: r2.series.length, series: r2.series,
+        };
+        console.log('  ✔ HSI 补齐至 ' + r2.series[r2.series.length - 1][0]);
+      } else {
+        console.log('  [!] HSI 重抓仍为 ' + (r2.series.length ? r2.series[r2.series.length - 1][0] : '空') + '（官方接口尾部延迟，保留现值）');
+      }
+    }
+  } catch (e) { console.log('  [!] HSI 补齐检查失败: ' + e.message); }
   /* 2026-10-19：抓取失败的指数不能丢——先并入磁盘上已有的序列 */
   try {
     const old = JSON.parse(fs.readFileSync(OUT, 'utf8'));

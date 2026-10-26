@@ -7,10 +7,28 @@
 const fs = require('fs');
 const path = require('path');
 const SITE = (process.env.MPF_SITE || 'https://mpf-data.app.workbuddy.host').replace(/\/$/, '');
+/* 2026-10-26 修 4-05：--local 模式（GitHub Actions 用）——数据全部本地读档，
+   跳过「站点可达 / 净值日滞后 / 计算器线上抽样」三项依赖线上 API 的检查，
+   保留三处一致 / top10 五规则 / allocSum / 缺日巡检 / 渠道一致性四类数据哨兵 */
+const LOCAL = process.argv.includes('--local');
 const OUT_DIR = path.join(__dirname, '..', 'data', 'health');
 
 /* 2026-10-24：加超时与重试。此前一次连接被掐断（terminated）就让整次体检 exit 2。 */
+const LOCAL_FILES = {
+  '/api/funds': '../data/funds.json',
+  '/api/holdings': '../data/holdings.json',
+  '/api/navperf': '../data/nav-perf.json',
+};
 const get = async (p, tries = 3) => {
+  if (LOCAL) {
+    const rel = LOCAL_FILES[p.split('?')[0]];
+    if (!rel) return { status: 0, json: null };
+    try {
+      return { status: 200, json: JSON.parse(fs.readFileSync(path.join(__dirname, rel), 'utf8')) };
+    } catch (e) {
+      return { status: 0, json: null };
+    }
+  }
   let lastErr = '';
   for (let i = 0; i < tries; i++) {
     try {
@@ -41,10 +59,11 @@ const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
   const add = (level, msg) => issues.push({ level, msg });
 
   const st = await get('/api/status');
-  if (st.status !== 200 || !st.json) add('critical', '状态接口不可用 HTTP ' + st.status);
+  if (!LOCAL && (st.status !== 200 || !st.json)) add('critical', '状态接口不可用 HTTP ' + st.status);
   const s = st.json || {};
   if (s.error) add('warn', '抓取错误：' + s.error);
-  if (s.navLatest && days(s.navLatest, hkToday()) > 3) add('critical', '净值日滞后：' + s.navLatest + '（今天 ' + hkToday() + '）');
+  if (!LOCAL && s.navLatest && days(s.navLatest, hkToday()) > 3) add('critical', '净值日滞后：' + s.navLatest + '（今天 ' + hkToday() + '）');
+  if (LOCAL) add('ok', '--local 模式：已跳过站点可达/净值日滞后/计算器线上抽样');
 
   const funds = await get('/api/funds');
   const fl = (funds.json && funds.json.funds) || [];
@@ -151,6 +170,9 @@ const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
   } catch (e) {}
   if (srcMismatch) add('warn', 'navSource 与 hist 来源不一致 ' + srcMismatch + ' 只（首个 ' + srcMissId + '；官网渠道应优先）');
 
+  if (LOCAL) {
+    add('ok', '计算器抽样回归：--local 模式跳过（依赖线上 API 对照，Actions 内不可用；全量验证由独立核验承担）');
+  } else
   /* ⑤ 计算器抽样回归：20 只 × 5 组本地独立重算（月最后交易日买入 → 份额累计 → 期末按最新净值估值），
         抽 3 组打线上 /api/dca 端到端比对 */
   try {
@@ -201,7 +223,9 @@ const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
   if (unsorted) add('critical', '十大持仓未降序 ' + unsorted + ' 只');
   if (noDate) add('warn', '无报告期 ' + noDate + ' 只');
 
-  for (const p of ['/', '/index.html', '/analysis.html']) {
+  if (LOCAL) {
+    add('ok', '--local：跳过页面可达检查（Actions 构建期站点尚未发布）');
+  } else for (const p of ['/', '/index.html', '/analysis.html']) {
     const r = await get(p);
     if (r.status !== 200) add('critical', '页面打不开 ' + p + ' HTTP ' + r.status);
     else if (r.txt.length < 3000) add('warn', '页面内容异常短 ' + p);

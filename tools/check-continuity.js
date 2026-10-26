@@ -12,13 +12,16 @@ const D = path.join(__dirname, '..', 'data');
 
 const idx = JSON.parse(fs.readFileSync(path.join(D, 'index.json'), 'utf8'));
 const hsi = (idx.items.HSI.series || []).map((x) => x[0]);
+/* 4-08 复盘：曾试过并入 HSCEI 并集，但 10-23 是指数当日值而基金 NAV 渠道 T+1/T+2 才发布，
+   会制造大面积「缺日」误报 → 巡检日历必须用纯 HSI（与基金 NAV 发布节奏一致）。
+   HSI 自身尾部缺日由 indexbuild 的重试补齐修数据，而不是改日历。 */
 const cal = new Set(hsi);
 const funds = JSON.parse(fs.readFileSync(path.join(D, 'funds.json'), 'utf8')).funds;
 
 /* 官方口徑/渠道豁免（與 gap-check WAIVE_DAYS、報告 2-27 一致） */
 const SCHEME_EXEMPT = [
   { re: /新地/, why: '月度 PDF' },
-  { re: /渣打/, why: '月頻（待確認）' },
+  { re: /渣打|新地/, why: '季頻批量發布（SHKP ESS Fund Price PDF，2026-10-26 1-11 口徑）' },
   { re: /AMTD/, why: 'etnet 渠道固有缺口' },
 ];
 /* 官網序列固有缺失（全量重抓後仍缺，官網即如此）：2026-10-25 核定 */

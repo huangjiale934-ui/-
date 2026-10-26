@@ -72,6 +72,9 @@ jobs:
           node tools/holdings-normalize.js
           node tools/holdings-guard.js
           node tools/nav-consistency.js
+          # 2026-10-26 修 4-05：补齐本机 health-check 覆盖的四类哨兵（缺日/渠道一致/allocSum/三处一致本地版）
+          node tools/gap-check.js
+          node tools/health-check.js --local
 
       - name: 提交數據變更
         run: |

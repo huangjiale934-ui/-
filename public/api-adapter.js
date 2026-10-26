@@ -32,11 +32,23 @@
     return j;
   }
   async function calcDca(q) {
-    const amount = parseFloat(q.amount);
+    /* 2026-10-26 修 4-02：与 server.js 参数处理逐行对齐——
+       ①end 缺省=上一月（G5：开始月为本月则跟随开始月）②缺省权重=100 ③同一基金重复出现权重相加 */
+    const amount = parseFloat(q.amount) || 0;
     const start = (q.start || '').slice(0, 7);
-    const end = (q.end || '').slice(0, 7);
+    const nowD = new Date(Date.now() + 8 * 3600e3);
+    const prevYM = new Date(nowD.getFullYear(), nowD.getMonth() - 1, 1);
+    const defEnd = prevYM.getFullYear() + '-' + String(prevYM.getMonth() + 1).padStart(2, '0');
+    const endQ = (q.end || '').slice(0, 7);
+    let end = endQ || defEnd;
+    if (!endQ && start && /^\d{4}-(0[1-9]|1[0-2])$/.test(start) && end < start) end = start;
     const YM = /^\d{4}-(0[1-9]|1[0-2])$/;
-    const raw = (q.funds || '').split(',').map((x) => x.split(':')).filter((a) => a[0]);
+    const agg = new Map();
+    (q.funds || '').split(',').map((x) => x.split(':')).filter((a) => a[0]).forEach((a) => {
+      const w = (a[1] === undefined || a[1] === '') ? 100 : (parseFloat(a[1]) || 0);
+      agg.set(a[0], (agg.get(a[0]) || 0) + w);
+    });
+    const raw = Array.from(agg.entries()).map(([id, w]) => [id, String(w)]);
     if (!(amount >= 100) || !YM.test(start) || !YM.test(end) || !raw.length) {
       return { ok: false, error: amount < 100 ? '每月供款至少 100 港元' : '参数不完整或月份格式错误（应为 YYYY-MM）' };
     }
@@ -127,7 +139,8 @@
     if (!probeP) {
       probeP = (async () => {
         try {
-          const r = await origFetch('/api/status?_probe=' + Date.now(), { cache: 'no-store' });
+          /* 相对探测：WorkBuddy 根路径 → /api/status(200 JSON=live)；Pages /-/ → /-/api/status(404=static)。消除绝对路径在 Pages 上的 404 噪音（4-09） */
+          const r = await origFetch('api/status?_probe=' + Date.now(), { cache: 'no-store' });
           const ct = (r.headers.get('content-type') || '');
           if (r.ok && ct.indexOf('json') >= 0) { MODE = 'live'; return MODE; }
         } catch (e) { /* Pages 上 /api/status 404 → 走静态 */ }

@@ -11,6 +11,9 @@ const D = path.join(__dirname, '..', 'data');
 
 const idx = JSON.parse(fs.readFileSync(path.join(D, 'index.json'), 'utf8'));
 const hsi = (idx.items.HSI.series || []).map((x) => x[0]);
+/* 4-08 复盘：曾试过并入 HSCEI 并集，但 10-23 是指数当日值而基金 NAV 渠道 T+1/T+2 才发布，
+   会制造大面积「缺日」误报 → 巡检日历必须用纯 HSI（与基金 NAV 发布节奏一致）。
+   HSI 自身尾部缺日由 indexbuild 的重试补齐修数据，而不是改日历。 */
 /* 只检查「已过 T+1 宽限」的交易日：最新 1 个交易日当天多数发行人还没发布，不算缺 */
 const recent = hsi.slice(-7, -1);
 /* 已证实的渠道固有缺口豁免（2026-10-25 修 P1-4：原 /^AMTD/ 全跳让 etnet 日源 16 只缺日对巡检不可见；
@@ -36,7 +39,7 @@ funds.forEach((f) => {
   miss.forEach((d) => byIssuer[key].days.add(d));
 });
 
-/* 非日更来源（月度 PDF）不参与巡检/自动补抓。
+/* 非日更来源不参与巡检/自动补抓。渣打信托（新地 SHKP ESS Fund Price PDF）实为**季度批量发布**（1-11 核验口径，净值止 09-30 属正常，navStale 已在详情页明示）。
    2026-10-25 修 P1-4：原 /^AMTD/ 全跳导致 etnet 日源 16 只缺日对巡检不可见；
    现只跳真正的月频来源（新地/SHKP），AMTD 参与巡检但豁免 etnet 渠道已证实的固有缺口，
    未来补上渠道后从 WAIVE_DAYS 移除即可恢复告警。 */

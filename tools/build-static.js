@@ -110,6 +110,15 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   }
   console.log('b.js/b.css 拼装 + HTML 引用改写完成');
 
+  /* 2026-10-26 断言（核验 2-01/2-02）：产物 HTML 中不得再出现 href="/"（Pages 子路径会 404 死链） */
+  for (const h of htmls) {
+    const hp = path.join(SITE, h);
+    if (fs.existsSync(hp) && /href="\/"/.test(fs.readFileSync(hp, 'utf8'))) {
+      throw new Error('构建断言失败: ' + h + ' 仍含 href="/" —— 请改为相对路径');
+    }
+  }
+  console.log('href="/" 断言通过');
+
   console.log('public/* 已拷贝');
 
   /* 5) 根路径定位：Pages 上 / → index.html（已拷）✓ */

@@ -499,7 +499,7 @@ const server = http.createServer(async (req, res) => {
       200,
       JSON.stringify({
         updatedAt: cache.updatedAt,
-        updatedAtText: new Date(cache.updatedAt).toLocaleString('zh-CN', { hour12: false }),
+        updatedAtText: new Date(cache.updatedAt).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Hong_Kong' }),
         source: cache.source,
         dataAsOf: cache.dataAsOf || '',
         years: cache.years,
@@ -835,7 +835,7 @@ const server = http.createServer(async (req, res) => {
       JSON.stringify({
         ok: true,
         updatedAt: cache.updatedAt,
-        updatedAtText: new Date(cache.updatedAt).toLocaleString('zh-CN', { hour12: false }),
+        updatedAtText: new Date(cache.updatedAt).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Hong_Kong' }),
         count: cache.count,
         error: lastError,
       })
@@ -908,7 +908,7 @@ const server = http.createServer(async (req, res) => {
         refreshingSince: refreshingSince, // 诊断：本次刷新开始时刻
         hasData: !!cache,
         updatedAt: cache ? cache.updatedAt : null,
-        updatedAtText: cache ? new Date(cache.updatedAt).toLocaleString('zh-CN', { hour12: false }) : '',
+        updatedAtText: cache ? new Date(cache.updatedAt).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Hong_Kong' }) : '',
         dataAsOf: cache ? cache.dataAsOf || '' : '',
         count: cache ? cache.count : 0,
         unitRows: cache ? cache.unitRows || cache.count : 0,

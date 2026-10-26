@@ -171,19 +171,27 @@ fd.funds.forEach((f) => {
 
 /* 按实际 navSource 重建来源统计（G7） */
 (function rebuildSources() {
+  /* 2026-10-26 修 4-06：na 基金不再计入 verified（此前「宏利環球精選 n=1 verified=1」实为 na 的 365）；
+     汇总 verified/na 同步按本地明细重算（fixNaWithHist 修正后 scrape 时刻的计数已过期，
+     此前汇总 449 vs 明细 450 vs 渠道合计 451 三者不一致） */
   const bySrc = {};
+  let sumVerified = 0, sumNa = 0;
   fd.funds.forEach((f) => {
     const raw = String(f.navSource || '').trim();
     if (!raw) return;
     const key = raw.split('｜')[0].trim();
-    const g = bySrc[key] = bySrc[key] || { name: key, n: 0, asOf: '', na: 0 };
+    const g = bySrc[key] = bySrc[key] || { name: key, n: 0, asOf: '', verified: 0, na: 0 };
     g.n++;
+    if (f.navStatus === 'na') { g.na++; sumNa++; } else { g.verified++; sumVerified++; }
     if (f.navAsOf && f.navAsOf > g.asOf) g.asOf = f.navAsOf;
   });
   const list = Object.values(bySrc).sort((a, b) => b.n - a.n);
   if (fd.navStat) {
-    fd.navStat.sources = list.map((g) => ({ name: g.name, label: g.name, n: g.n, asOf: g.asOf, verified: g.n, na: g.na }));
+    fd.navStat.sources = list.map((g) => ({ name: g.name, label: g.name, n: g.n, asOf: g.asOf, verified: g.verified, na: g.na }));
     fd.navStat.bySource = list;
+    fd.navStat.verified = sumVerified;
+    fd.navStat.na = sumNa;
+    fd.navStat.unmatched = fd.funds.length - sumVerified - sumNa;
   }
 })();
 

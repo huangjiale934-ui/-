@@ -654,6 +654,16 @@ function makeSorter(thList, state, onSort) {
       if (a) a.textContent = '↕';
       if (o.hasAttribute('data-k')) o.setAttribute('aria-sort', 'none');
     });
+    /* 2026-10-26 修 2-04：取消态=回到默认序列，也是三态之一——恢复默认列的箭头标记，
+       否则默认列（如 size desc）的「降序」肉眼不可见（aria-sort 在 none/asc 间跳） */
+    thList.forEach((o) => {
+      if (o.dataset.k === D0.key) {
+        o.classList.add('sorted');
+        const a = o.querySelector('.arrow');
+        if (a) a.textContent = D0.dir === 'desc' ? '↓' : '↑';
+        if (o.hasAttribute('data-k')) o.setAttribute('aria-sort', D0.dir);
+      }
+    });
     /* 表头排序与「排名维度」卡片互斥：表头动过之后，卡片不再显示选中态 */
     const tabs = document.querySelector('#selfTabs');
     if (tabs) tabs.querySelectorAll('.st').forEach((n) => { n.classList.remove('on'); n.classList.remove('asc'); });
