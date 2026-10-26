@@ -126,6 +126,8 @@
     window.__rkMode = mode;
     window.__rkIsCal = !!isCal;
     if (typeof window.__rkApplyCols === 'function') window.__rkApplyCols();
+    /* 表头被快照还原后 data-c 丢失 → 重新打标（维度联动依赖 data-c 定位） */
+    if (typeof window.__rkStampCols === 'function') window.__rkStampCols();
   }
 
   /** 自算榜表头（列结构与基金榜一致，但指标列全部换成自算口径，不再依赖积金局） */
@@ -197,17 +199,26 @@
       syncTg();
     }
 
-    $$('#rkTabs .tab').forEach((t) => t.addEventListener('click', () => {
-      S.board = t.dataset.b;
-      S.sortKey = null; S.sortDir = null;
-      if (history.replaceState) history.replaceState(null, '', '#' + t.dataset.b);
-      $$('#rkTabs .tab').forEach((o) => o.classList.remove('on'));
-      t.classList.add('on');
-      $$('#rkTabs .tab-group').forEach((el) => el.classList.remove('on-group'));
-      if (t.closest('.tab-group')) t.closest('.tab-group').classList.add('on-group');
-      renderYearSwitch();
-      render();
-    }));
+    /* 2026-10-26 修（既有 bug）：tab 的 click 原本逐元素绑定，但 navperf 到达后 buildTabs()
+       会重建标签元素 → 重建后的标签全部失去监听（点击无效）。改为容器事件委托，一劳永逸。 */
+    const rkTabsEl = $('#rkTabs');
+    if (rkTabsEl && !rkTabsEl.__tabBound) {
+      rkTabsEl.__tabBound = 1;
+      rkTabsEl.addEventListener('click', (e) => {
+        const t = e.target.closest ? e.target.closest('.tab') : null;
+        if (!t || !t.dataset.b) return;
+        S.board = t.dataset.b;
+        S.sortKey = null; S.sortDir = null;
+        if (history.replaceState) history.replaceState(null, '', '#' + t.dataset.b);
+        $$('#rkTabs .tab').forEach((o) => o.classList.remove('on'));
+        t.classList.add('on');
+        $$('#rkTabs .tab-group').forEach((el) => el.classList.remove('on-group'));
+        if (t.closest('.tab-group')) t.closest('.tab-group').classList.add('on-group');
+        renderYearSwitch();
+        render();
+        if (window.__rkApplyDim) window.__rkApplyDim();   /* 2026-10-26：维度 → 列联动 */
+      });
+    }
     renderYearSwitch();
   }
 
@@ -499,7 +510,6 @@
         '<td data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
         '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>' +
         '<td data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>' +
-        '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
         (b.self
           ? SELF_COLS.map(([k, n]) =>
               k === 'selfMdd' || k === 'selfMdd5'
@@ -509,6 +519,7 @@
             '<td data-l="' + TT('近5年年率化') + '" class="r num ' + cls(x.ann5) + '">' + pct(x.ann5) + '</td>' +
             '<td data-l="' + TT('近10年年率化') + '" class="r num ' + cls(x.ann10) + '">' + pct(x.ann10) + '</td>' +
             '<td data-l="' + TT('推出至今年率化') + '" class="r num ' + cls(x.annLaunch) + '">' + pct(x.annLaunch) + '</td>' +
+            '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
             '<td data-l="' + TT('基金管理费 %') + '" class="r num">' + feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee) + '</td>' +
             /* 2026-10-19：历年回报列固定在表头第 12 位（管理费之后）；始终渲染以与 nth-child 对齐 */
             '<td data-l="' + TQ('{y} 年回报', { y: S.calYear }) + '" class="r num ' + cls(isCal ? x.calYear : null) + '">' +
@@ -534,6 +545,7 @@
       renderCmpBar();
     }));
 
+    if (window.__rkStampCols) window.__rkStampCols();   /* 2026-10-26：按当前模式给 th/td 打 data-c */
     syncHeader(key, dir);
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
@@ -721,14 +733,15 @@
     const tbl = document.querySelector('#rkTable');
     const box = document.querySelector('#rkColChecks');
     if (!btn || !pop || !tbl || !box) return;
-    const KEY = 'mpf-rk-cols-v2';
+    const KEY = 'mpf-rk-cols-v3';   /* 2026-10-26 升版：默认列变化（管理费移出）需对老用户重置 */
 
     /* 列定义：k=列键、n=显示名、lock=必显 */
     const FUND = [
+      /* 2026-10-26（用户要求）：基金规模列移到回报组之后（原管理费位置），管理费移出默认显示 */
       ['rank', '名次', 1], ['fund', '成分基金', 1], ['trustee', '发行人', 0],
-      ['type', '基金种类', 0], ['risk', '风险级别', 0], ['size', '基金规模', 0],
+      ['type', '基金种类', 0], ['risk', '风险级别', 0],
       ['ann1', '近1年年率化', 0], ['ann5', '近5年年率化', 0], ['ann10', '近10年年率化', 0],
-      ['annLaunch', '推出至今年率化', 0], ['mgmtFee', '管理费', 0],
+      ['annLaunch', '推出至今年率化', 0], ['size', '基金规模', 0], ['mgmtFee', '管理费', 0],
       ['calYear', '历年回报（当年）', 1],   /* 仅历年榜显示，跟随榜单逻辑 */
       ['cum1', '近1年累积', 0], ['cum5', '近5年累积', 0], ['cum10', '近10年累积', 0],
       ['cumLaunch', '推出至今累积', 0],
@@ -751,7 +764,7 @@
       ['cmp', '对比', 1], ['ops', '详情', 1],
     ];
     const MODES = { fund: FUND, agg: AGG, self: SELF };
-    const DEFAULT_OFF = ['cum1', 'cum5', 'cum10', 'cumLaunch',
+    const DEFAULT_OFF = ['cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee',
       'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025'];
     const SLIM_OFF = ['trustee', 'type', 'risk', 'size', 'ann5', 'ann10', 'annLaunch', 'mgmtFee',
       'cum1', 'cum5', 'cum10', 'cumLaunch', 'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025',
@@ -765,21 +778,19 @@
     const curMode = () => (window.__rkMode && MODES[window.__rkMode]) ? window.__rkMode : 'fund';
 
     function apply() {
+      /* 2026-10-26：改用 data-c 属性选择器（列显隐与 DOM 位置解耦——维度联动需要物理移动列） */
       const mode = curMode();
       const defs = MODES[mode];
       const isCal = !!window.__rkIsCal;
-      let idx = 0;
       const rules = [];
       defs.forEach(([k, , lock]) => {
-        idx++;   /* 始终递增：表格 DOM 恒有该列（历年榜单元格在未选年份时为空占位） */
         if (k === 'calYear') {
           /* 历年回报列只在「历年回报榜」显示，由当前榜单决定，不受列设置影响 */
-          rules.push('#rkTable tr > *:nth-child(' + idx + ') { display: ' + (isCal ? 'table-cell' : 'none') + ' !important; }');
+          rules.push('#rkTable [data-c="calYear"] { display: ' + (isCal ? 'table-cell' : 'none') + ' !important; }');
           return;
         }
         const hide = !lock && off.has(k);
-        if (hide) rules.push('#rkTable tr > *:nth-child(' + idx + ') { display: none !important; }');
-        else rules.push('#rkTable tr > *:nth-child(' + idx + ') { display: table-cell !important; }');
+        rules.push('#rkTable [data-c="' + k + '"] { display: ' + (hide ? 'none' : 'table-cell') + ' !important; }');
       });
       let st = document.getElementById('rkColStyle');
       if (!st) { st = document.createElement('style'); st.id = 'rkColStyle'; document.head.appendChild(st); }
@@ -787,6 +798,48 @@
       try { localStorage.setItem(KEY, JSON.stringify([...off])); } catch (e) {}
     }
     window.__rkApplyCols = apply;
+
+    /* ---------- 2026-10-26（用户要求）：排名维度 → 列联动 ----------
+       点击维度标签时：对应列自动显示、物理移动到「风险」列右边、并高亮。
+       列一旦放出保持显示（用户可在列设置收回）；高亮跟随当前维度。 */
+    function stampCols() {
+      const defs = MODES[curMode()];
+      const thead = document.querySelector('#rkThead');
+      if (thead) [...thead.children].forEach((th, i) => {
+        if (defs[i]) th.dataset.c = th.dataset.k || defs[i][0];
+      });
+      const tb = document.querySelector('#rkTbody');
+      if (tb) [...tb.children].forEach((tr) => {
+        if (tr.children.length !== defs.length) return;   /* 空态行跳过 */
+        [...tr.children].forEach((td, i) => { if (defs[i]) td.dataset.c = defs[i][0]; });
+      });
+    }
+    window.__rkStampCols = stampCols;
+
+    window.__rkApplyDim = function () {
+      const b = cur();
+      const key = (b && !b.agg) ? b.metric : '';
+      const tbl = document.querySelector('#rkTable');
+      if (!tbl) return;
+      tbl.querySelectorAll('.dim-hl').forEach((n) => n.classList.remove('dim-hl'));
+      /* 无对应列的维度（抗跌/总开支/新锐/聚合）只排序，不做列联动 */
+      if (!key || key === 'risk' || key === 'calYear' || key === 'worstYear' || key === 'fer' || key === 'launchTs') return;
+      const defs = MODES[curMode()];
+      if (!defs.find(([k]) => k === key)) return;
+      off.delete(key);
+      apply();
+      const move = (row) => {
+        const cells = [...row.children];
+        const src = cells.find((c) => c.dataset.c === key);
+        const risk = cells.find((c) => c.dataset.c === 'risk');
+        if (src && risk && src !== risk.nextElementSibling) risk.after(src);
+      };
+      const thead = document.querySelector('#rkThead');
+      if (thead) move(thead);
+      const tb = document.querySelector('#rkTbody');
+      if (tb) [...tb.children].forEach(move);
+      tbl.querySelectorAll('[data-c="' + key + '"]').forEach((n) => n.classList.add('dim-hl'));
+    };
 
     function buildList() {
       const defs = MODES[curMode()];

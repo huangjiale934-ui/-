@@ -82,6 +82,8 @@ async function fetchIndex(it) {
       let r = await fetchIndex(it);
       /* 2026-10-26 修 4-08：空数据/首尾异常时重试一次（东财接口偶发尾部缺当日） */
       if (!r.series.length) r = await fetchIndex(it);
+      /* 2026-10-26：东财限流（socket hang up）是随机的——失败后隔 2.5s 再试一次，命中率显著提高 */
+      if (!r.series.length) { await new Promise((x) => setTimeout(x, 2500)); try { r = await fetchIndex(it); } catch (e2) {} }
       if (!r.series.length) { console.log('  [!] ' + it.key + ' 空数据，跳过'); continue; }
       items[it.key] = {
         code: it.code, name: it.name, nameEn: it.nameEn,
@@ -91,7 +93,21 @@ async function fetchIndex(it) {
       console.log('  ✔ ' + it.key.padEnd(7) + it.name.padEnd(10) + ' ' +
         r.series[0][0] + ' → ' + r.series[r.series.length - 1][0] + '  (' + r.series.length + ' 点)');
     } catch (e) {
-      console.log('  [!] ' + it.key + ' 失败: ' + e.message);
+      /* 限流重试：等 2.5s 再抓一次（2026-10-26 实测东财限流是按请求随机） */
+      await new Promise((x) => setTimeout(x, 2500));
+      try {
+        const r2 = await fetchIndex(it);
+        if (r2.series.length) {
+          items[it.key] = {
+            code: it.code, name: it.name, nameEn: it.nameEn,
+            first: r2.series[0][0], asOf: r2.series[r2.series.length - 1][0],
+            points: r2.series.length, series: r2.series,
+          };
+          console.log('  ✔ ' + it.key + '（重试成功）' + r2.series[r2.series.length - 1][0] + '  (' + r2.series.length + ' 点)');
+        } else console.log('  [!] ' + it.key + ' 失败: ' + e.message);
+      } catch (e2) {
+        console.log('  [!] ' + it.key + ' 失败: ' + e.message);
+      }
     }
     await new Promise((r) => setTimeout(r, 400));
   }

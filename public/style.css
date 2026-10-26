@@ -1668,3 +1668,7 @@ body.has-updbar { padding-top: 34px; }
 .ndc.on { background: var(--brand, #0866bb); border-color: var(--brand, #0866bb); color: #fff; }
 .ndc.on span { color: rgba(255,255,255,.85); }
 @media (max-width: 430px) { .ndc { padding: 5px 10px; font-size: 12px; } }
+
+/* 2026-10-26（用户要求）：排名维度联动列高亮（浅蓝底，两个表共用） */
+#rkTable .dim-hl, #fundTable .dim-hl { background: #eaf3fd !important; }
+#rkTable thead .dim-hl, #fundTable thead .dim-hl { background: #d7e8fa !important; font-weight: 700; }

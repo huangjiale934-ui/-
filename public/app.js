@@ -17,6 +17,38 @@
 
   /* 2026-10-22（用户要求）：排名维度卡片改三态，且默认不选中任何维度
      ① 点一次 = 该维度默认方向（多为最大在前） ② 再点 = 反向 ③ 第三次 = 取消，回名次顺序 */
+  /* 2026-10-26（用户要求）：排名维度 → 列联动（「基金最新数据」表）
+     点击维度卡：对应列自动显示（含默认隐藏的列）、物理移动到「风险」列右边、高亮 */
+  function stampFundCols() {
+    const thead = document.getElementById('thead');
+    if (thead) [...thead.children].forEach((th, i) => { if (COL_DEFS[i]) th.dataset.c = th.dataset.k || COL_DEFS[i].k; });
+    const tb = document.getElementById('tbody');
+    if (tb) [...tb.children].forEach((tr) => {
+      if (tr.children.length !== COL_DEFS.length) return;   /* 空态/骨架行跳过 */
+      [...tr.children].forEach((td, i) => { if (COL_DEFS[i]) td.dataset.c = COL_DEFS[i].k; });
+    });
+  }
+  window.__stampFundCols = stampFundCols;
+  function applyFundDim(key) {
+    const tbl = document.getElementById('fundTable');
+    if (!tbl) return;
+    tbl.querySelectorAll('.dim-hl').forEach((n) => n.classList.remove('dim-hl'));
+    const def = COL_DEFS.find((c) => c.k === key);
+    if (!def || key === 'risk' || def.lock) return;   /* 无对应列/风险列本身/锁定列不联动 */
+    if (!colSet.has(key)) { colSet.add(key); applyCols(); }
+    const move = (row) => {
+      const cells = [...row.children];
+      const src = cells.find((c) => c.dataset.c === key);
+      const risk = cells.find((c) => c.dataset.c === 'risk');
+      if (src && risk && src !== risk.nextElementSibling) risk.after(src);
+    };
+    const thead = document.getElementById('thead');
+    if (thead) move(thead);
+    const tb = document.getElementById('tbody');
+    if (tb) [...tb.children].forEach(move);
+    tbl.querySelectorAll('[data-c="' + key + '"]').forEach((n) => n.classList.add('dim-hl'));
+  }
+
   function bindSelfTabs() {
     const box = document.querySelector('#selfTabs');
     if (!box || box.__bound) return;
@@ -50,6 +82,7 @@
         if (a) a.textContent = '↕';
       });
       render();
+      applyFundDim(chipKey ? k : '');   /* 2026-10-26：维度 → 列联动（取消时只清高亮） */
     });
   }
 
@@ -228,7 +261,8 @@
   function applyCols(save) {
     if (save !== false) { try { localStorage.setItem('mpf-cols-v5', JSON.stringify([...colSet])); } catch (e) {} }
     const css = COL_DEFS.filter((c) => !c.lock && !colSet.has(c.k))
-      .map((c) => '#fundTable tr > *:nth-child(' + c.i + ') { display: none !important; }').join('\n');
+      /* 2026-10-26：改 data-c 属性选择器（列显隐与 DOM 位置解耦——维度联动需要物理移动列） */
+      .map((c) => '#fundTable [data-c="' + c.k + '"] { display: none !important; }').join('\n');
     let st = document.getElementById('colStyle');
     if (!st) { st = document.createElement('style'); st.id = 'colStyle'; document.head.appendChild(st); }
     st.textContent = css;
@@ -343,6 +377,7 @@
       : '<tr><td colspan="14"><div class="empty">' + TT('没有符合条件的基金，请放宽筛选条件') +
         ' <button type="button" class="btn sm" style="margin-left:10px" onclick="window.clearAllFilters && clearAllFilters()">' + TT('一键清除全部筛选') + '</button></div></td></tr>';
 
+    if (window.__stampFundCols) window.__stampFundCols();   /* 2026-10-26：按 COL_DEFS 给 th/td 打 data-c */
     // 表格内勾选 → 加入/移出对比（与排名页共用 CMPX；页底对比栏随之出现）
     $$('#tbody input[data-cmp]').forEach((c) => c.addEventListener('change', () => {
       if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
