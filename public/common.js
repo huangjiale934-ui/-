@@ -128,6 +128,50 @@ async function loadData(onDone, attempt, force) {
  *  说明：不再触发服务端抓取——线上服务器无法稳定直连积金局官网，数据更新由本机
  *  同步任务（每晚自动 / 手动「同步数据」）负责推送；此按钮保证每次点击都有反馈。 */
 async function refreshData(cb) {
+  /* 2026-10-26（用户要求）：顶部更新提示栏——任何数据更新进行中/完成时提示 */
+  (function initUpdateBanner() {
+    if (document.getElementById('updateBanner')) return;
+    const header = document.querySelector('.nav') && document.querySelector('.nav').closest('header') || document.querySelector('header') || document.body;
+    const bar = document.createElement('div');
+    bar.id = 'updateBanner';
+    bar.style.cssText = 'display:none;padding:8px 16px;font-size:13px;text-align:center;font-family:inherit';
+    header.after ? header.after(bar) : header.parentNode.insertBefore(bar, header.nextSibling);
+    const hkNow = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
+    const hkDate = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+    function show(html, bg, fg) {
+      bar.style.display = 'block'; bar.style.background = bg; bar.style.color = fg;
+      bar.innerHTML = html;
+    }
+    function hide() { bar.style.display = 'none'; }
+    let lastPhase = '';
+    function check() {
+      fetch('/api/status').then((r) => r.json()).then((j) => {
+        const u = j && j.updateStatus;
+        if (u && u.phase === 'running') {
+          lastPhase = 'running';
+          show('⏳ <b>数据更新进行中</b>' + (u.step ? '（' + u.step + '）' : '') + (u.startedAt ? ' · 开始于 ' + u.startedAt : '') + ' — 页面当前展示的是上一次完成的数据', '#fff7e0', '#8a6100');
+        } else if (u && u.phase === 'done' && lastPhase === 'running') {
+          lastPhase = 'done';
+          show('✅ <b>数据更新完成</b>' + (u.finishedAt ? '（' + u.finishedAt + ' 完成）' : '') + ' — 刷新页面查看最新数据', '#e8f6e8', '#1c6b1c');
+          setTimeout(hide, 8000);
+        } else if (u && u.phase === 'error') {
+          lastPhase = 'error';
+          show('⚠️ <b>本次数据更新未全部成功</b>（' + (u.step || '') + '）— 已保留上一次的完整数据', '#fdeaea', '#8b1a1a');
+        } else if (j && j.refreshing) {
+          show('⏳ <b>数据刷新中</b>…', '#fff7e0', '#8a6100');
+        } else {
+          /* GitHub 静态站：每日 22:40 更新窗口的北京时间提示（无法实时感知云端任务，按时间窗提示） */
+          const t = hkNow();
+          if (t >= '22:35' && t <= '23:15') {
+            show('⏳ <b>每日数据更新进行中</b>（每日 22:40 自动执行）— 当前展示的是更新前数据', '#fff7e0', '#8a6100');
+          } else hide();
+        }
+      }).catch(() => {});
+    }
+    check();
+    setInterval(check, 45000);
+  })();
+
   const btn = document.querySelector('.btn-refresh');
   const rt = btn ? btn.querySelector('.rt') : null;
   if (btn) {

@@ -115,19 +115,22 @@
 
   function applyHeader(b, isCal) {
     const mode = b.self ? 'self' : (b.agg === 'trustee' ? 'agg' : 'fund');
-    if (mode !== HEAD_MODE) {
-      $('#rkThead').innerHTML = mode === 'agg' ? aggHead() : (mode === 'self' ? selfHead() : FUND_HEAD);
-      HEAD_MODE = mode;
-      bindHeadSort();
+    let fundOrder = null;
+    if (mode === 'fund') {
+      /* 2026-10-26 重做：fund 表头按可见列顺序数组生成（与行渲染同源，不会错位） */
+      fundOrder = rkVisibleOrder();
+      $('#rkThead').innerHTML = fundOrder.map((k) => TH_FUND[k]).join('');
+      window.__rkOrder = fundOrder;
+    } else if (mode !== HEAD_MODE) {
+      $('#rkThead').innerHTML = mode === 'agg' ? aggHead() : selfHead();
     }
+    if (mode !== HEAD_MODE || mode === 'fund') { HEAD_MODE = mode; bindHeadSort(); }
     const thCal = $('#rkThCalYear');
     if (thCal) thCal.style.display = mode === 'fund' && isCal ? '' : 'none';
-    /* 2026-10-19：列设置按当前榜单模式重新套用（各模式列数不同） */
     window.__rkMode = mode;
     window.__rkIsCal = !!isCal;
     if (typeof window.__rkApplyCols === 'function') window.__rkApplyCols();
-    /* 表头被快照还原后 data-c 丢失 → 重新打标（维度联动依赖 data-c 定位） */
-    if (typeof window.__rkStampCols === 'function') window.__rkStampCols();
+    return fundOrder;
   }
 
   /** 自算榜表头（列结构与基金榜一致，但指标列全部换成自算口径，不再依赖积金局） */
@@ -207,7 +210,12 @@
       rkTabsEl.addEventListener('click', (e) => {
         const t = e.target.closest ? e.target.closest('.tab') : null;
         if (!t || !t.dataset.b) return;
-        S.board = t.dataset.b;
+        /* 2026-10-26（用户要求）三态：点击当前已选榜 = 取消选中，回默认榜 ann1；
+           任何切换都先归还维度联动放出的列（非默认列回到隐藏，默认列回原位） */
+        const isSame = S.board === t.dataset.b;
+        if (typeof cancelDimRevealed === 'function') cancelDimRevealed();
+        S.board = isSame ? 'ann1' : t.dataset.b;
+        if (isSame) { t.classList.remove('on'); const at = document.querySelector('#rkTabs .tab[data-b="ann1"]'); if (at) at.classList.add('on'); }
         S.sortKey = null; S.sortDir = null;
         if (history.replaceState) history.replaceState(null, '', '#' + t.dataset.b);
         $$('#rkTabs .tab').forEach((o) => o.classList.remove('on'));
@@ -455,6 +463,92 @@
     }));
   }
 
+  /* ═══ 2026-10-26 重做：列顺序数组单源（修复表头/表体错位）═══
+     thead 与 tbody 由同一个可见列顺序数组生成；维度联动=改数组而非移动 DOM。 */
+  const CELL_FUND = {
+    rank: (x, medal, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' + medal + '</td>',
+    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div>' +
+      '<div class="sub-line">' + esc(x.scheme) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div>' +
+      barHTML(cur(), x, window.__rkRanked || null) + '</td>',
+    trustee: (x) => '<td data-c="trustee" data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
+    type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>',
+    risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
+    ann1: (x) => '<td data-c="ann1" data-l="' + TT('近1年年率化') + '" class="r num ' + cls(x.ann1) + '">' + pct(x.ann1) + '</td>',
+    ann5: (x) => '<td data-c="ann5" data-l="' + TT('近5年年率化') + '" class="r num ' + cls(x.ann5) + '">' + pct(x.ann5) + '</td>',
+    ann10: (x) => '<td data-c="ann10" data-l="' + TT('近10年年率化') + '" class="r num ' + cls(x.ann10) + '">' + pct(x.ann10) + '</td>',
+    annLaunch: (x) => '<td data-c="annLaunch" data-l="' + TT('推出至今年率化') + '" class="r num ' + cls(x.annLaunch) + '">' + pct(x.annLaunch) + '</td>',
+    size: (x) => '<td data-c="size" data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>',
+    mgmtFee: (x) => '<td data-c="mgmtFee" data-l="' + TT('基金管理费 %') + '" class="r num">' + feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee) + '</td>',
+    calYear: (x) => '<td data-c="calYear" data-l="' + TQ('{y} 年回报', { y: S.calYear }) + '" class="r num ' + cls(window.__rkIsCal ? x.calYear : null) + '">' + (window.__rkIsCal ? '<b>' + pct(x.calYear) + '</b>' : '') + '</td>',
+    cum1: (x) => '<td data-c="cum1" data-l="' + TT('近1年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum1) + '">' + pct(x.cum1) + '</td>',
+    cum5: (x) => '<td data-c="cum5" data-l="' + TT('近5年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum5) + '">' + pct(x.cum5) + '</td>',
+    cum10: (x) => '<td data-c="cum10" data-l="' + TT('近10年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum10) + '">' + pct(x.cum10) + '</td>',
+    cumLaunch: (x) => '<td data-c="cumLaunch" data-l="' + TT('推出至今累积') + '" class="r num rk-opt o-cum ' + cls(x.cumLaunch) + '">' + pct(x.cumLaunch) + '</td>',
+    cal2021: (x) => calCell(x, '2021'), cal2022: (x) => calCell(x, '2022'), cal2023: (x) => calCell(x, '2023'),
+    cal2024: (x) => calCell(x, '2024'), cal2025: (x) => calCell(x, '2025'),
+    cmp: (x) => '<td data-c="cmp" data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
+    ops: (x) => '<td data-c="ops" data-l="' + TT('详情') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
+      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
+      TT('详情') + '</button></td>',
+  };
+  function calCell(x, y) {
+    const v = x.cal && x.cal[y] != null ? x.cal[y] : null;
+    return '<td data-c="cal' + y + '" data-l="' + y + '" class="r num rk-opt o-cal ' + cls(v) + '">' + pct(v) + '</td>';
+  }
+  const TH_FUND = {
+    rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
+    fund: '<th data-c="fund" data-i18n-parts class="f-main fz">成分基金</th>',
+    trustee: '<th data-c="trustee" data-i18n-parts>发行人</th>',
+    type: '<th data-c="type" data-i18n-parts>基金种类</th>',
+    risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险级别 <span class="arrow">↕</span></th>',
+    ann1: '<th data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>',
+    ann5: '<th data-c="ann5" data-i18n-parts data-k="ann5" data-defdir="desc" class="sortable r">近5年<br>年率化 <span class="arrow">↕</span></th>',
+    ann10: '<th data-c="ann10" data-i18n-parts data-k="ann10" data-defdir="desc" class="sortable r">近10年<br>年率化 <span class="arrow">↕</span></th>',
+    annLaunch: '<th data-c="annLaunch" data-i18n-parts data-k="annLaunch" data-defdir="desc" class="sortable r">推出至今<br>年率化 <span class="arrow">↕</span></th>',
+    size: '<th data-c="size" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
+    mgmtFee: '<th data-c="mgmtFee" data-i18n-parts data-k="mgmtFee" data-defdir="asc" class="sortable r">管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    calYear: '<th data-c="calYear" data-i18n-parts id="rkThCalYear" data-k="calYear" data-defdir="desc" class="sortable r">历年<br>回报 <span class="arrow">↕</span></th>',
+    cum1: '<th data-c="cum1" data-i18n-parts data-k="cum1" data-defdir="desc" class="sortable r rk-opt o-cum">近1年<br>累积 <span class="arrow">↕</span></th>',
+    cum5: '<th data-c="cum5" data-i18n-parts data-k="cum5" data-defdir="desc" class="sortable r rk-opt o-cum">近5年<br>累积 <span class="arrow">↕</span></th>',
+    cum10: '<th data-c="cum10" data-i18n-parts data-k="cum10" data-defdir="desc" class="sortable r rk-opt o-cum">近10年<br>累积 <span class="arrow">↕</span></th>',
+    cumLaunch: '<th data-c="cumLaunch" data-i18n-parts data-k="cumLaunch" data-defdir="desc" class="sortable r rk-opt o-cum">推出至今<br>累积 <span class="arrow">↕</span></th>',
+    cal2021: '<th data-c="cal2021" data-i18n-parts data-k="cal2021" data-defdir="desc" class="sortable r rk-opt o-cal">2021 <span class="arrow">↕</span></th>',
+    cal2022: '<th data-c="cal2022" data-i18n-parts data-k="cal2022" data-defdir="desc" class="sortable r rk-opt o-cal">2022 <span class="arrow">↕</span></th>',
+    cal2023: '<th data-c="cal2023" data-i18n-parts data-k="cal2023" data-defdir="desc" class="sortable r rk-opt o-cal">2023 <span class="arrow">↕</span></th>',
+    cal2024: '<th data-c="cal2024" data-i18n-parts data-k="cal2024" data-defdir="desc" class="sortable r rk-opt o-cal">2024 <span class="arrow">↕</span></th>',
+    cal2025: '<th data-c="cal2025" data-i18n-parts data-k="cal2025" data-defdir="desc" class="sortable r rk-opt o-cal">2025 <span class="arrow">↕</span></th>',
+    cmp: '<th data-c="cmp" data-i18n-parts class="c">对比</th>',
+    ops: '<th data-c="ops" data-i18n-parts class="c">详情</th>',
+  };
+
+  /* 可见列顺序：FUND defs ∩ off（calYear 仅历年榜）；维度 metric 插到「风险」列右侧 */
+  function rkVisibleOrder() {
+    const b = cur();
+    const isCal = !!window.__rkIsCal;
+    let order = FUND.map(([k]) => k).filter((k) => {
+      if (k === 'calYear') return isCal;
+      return !off.has(k);
+    });
+    const mk = (b && !b.agg) ? b.metric : '';
+    if (mk && mk !== 'risk' && mk !== 'calYear' && FUND.find(([k]) => k === mk)) {
+      /* 2026-10-26：维度列强制显示并登记（取消/切换榜单时由 cancelDimRevealed 归还隐藏状态） */
+      off.delete(mk);
+      window.__rkDimRevealed = window.__rkDimRevealed || new Set();
+      window.__rkDimRevealed.add(mk);
+      if (order.indexOf(mk) >= 0) {
+        order = order.filter((k) => k !== mk);
+        const ri = order.indexOf('risk');
+        if (ri >= 0) order.splice(ri + 1, 0, mk);
+      }
+    }
+    return order;
+  }
+  /* 取消维度联动：联动放出的列归还隐藏状态（默认列不受影响） */
+  function cancelDimRevealed() {
+    (window.__rkDimRevealed || new Set()).forEach((k) => off.add(k));
+    window.__rkDimRevealed = new Set();
+  }
+
   function render() {
     const b = cur();
     const isCal = b.id === 'calYear';
@@ -465,7 +559,7 @@
       (b.self
         ? TQ('数据截至各发行人官网最新净值日（已接入 {n} 只）', { n: PERFD && PERFD.funds ? Object.keys(PERFD.funds).length : 0 })
         : TT('数据截至积金局最新公布'));
-    applyHeader(b, isCal);
+    const rkOrder = applyHeader(b, isCal);   /* fund 模式返回可见列顺序（表头已同步注入） */
     renderRankChips();
     const thCal = $('#rkThCalYear');
     if (isCal && thCal && thCal.firstChild) thCal.firstChild.textContent = TQ('{y} 年', { y: S.calYear });
@@ -503,49 +597,34 @@
       const mv = x[b.metric];
       const share = maxBar(shown, b.metric, x);
       return '<tr>' +
-        '<td class="c" data-l="' + TT('名次') + '">' + medal + '</td>' +
-        '<td class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div>' +
-          '<div class="sub-line">' + esc(x.scheme) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div>' +
-          barHTML(b, x, ranked) + '</td>' +
-        '<td data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
-        '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>' +
-        '<td data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>' +
         (b.self
-          ? SELF_COLS.map(([k, n]) =>
+          ? /* 自算榜行：固定前段（与 selfHead 对齐） */
+            '<td class="c" data-l="' + TT('名次') + '">' + medal + '</td>' +
+            '<td class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div>' +
+              '<div class="sub-line">' + esc(x.scheme) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div>' +
+              barHTML(b, x, ranked) + '</td>' +
+            '<td data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
+            '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>' +
+            '<td data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>' +
+            '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
+            SELF_COLS.map(([k, n]) =>
               k === 'selfMdd' || k === 'selfMdd5'
                 ? '<td data-l="' + TT(n) + '" class="r num down">' + pct(x[k]) + '</td>'
-                : '<td data-l="' + TT(n) + '" class="r num ' + cls(x[k]) + '">' + pct(x[k]) + '</td>').join('')
-          : '<td data-l="' + TT('近1年年率化') + '" class="r num ' + cls(x.ann1) + '">' + pct(x.ann1) + '</td>' +
-            '<td data-l="' + TT('近5年年率化') + '" class="r num ' + cls(x.ann5) + '">' + pct(x.ann5) + '</td>' +
-            '<td data-l="' + TT('近10年年率化') + '" class="r num ' + cls(x.ann10) + '">' + pct(x.ann10) + '</td>' +
-            '<td data-l="' + TT('推出至今年率化') + '" class="r num ' + cls(x.annLaunch) + '">' + pct(x.annLaunch) + '</td>' +
-            '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
-            '<td data-l="' + TT('基金管理费 %') + '" class="r num">' + feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee) + '</td>' +
-            /* 2026-10-19：历年回报列固定在表头第 12 位（管理费之后）；始终渲染以与 nth-child 对齐 */
-            '<td data-l="' + TQ('{y} 年回报', { y: S.calYear }) + '" class="r num ' + cls(isCal ? x.calYear : null) + '">' +
-              (isCal ? '<b>' + pct(x.calYear) + '</b>' : '') + '</td>') +
-        /* 2026-10-19：可选列（默认隐藏，列设置里打开）——累积回报 + 历年回报 2021–2025 */
-        '<td data-l="' + TT('近1年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum1) + '">' + pct(x.cum1) + '</td>' +
-        '<td data-l="' + TT('近5年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum5) + '">' + pct(x.cum5) + '</td>' +
-        '<td data-l="' + TT('近10年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum10) + '">' + pct(x.cum10) + '</td>' +
-        '<td data-l="' + TT('推出至今累积') + '" class="r num rk-opt o-cum ' + cls(x.cumLaunch) + '">' + pct(x.cumLaunch) + '</td>' +
-        ['2021', '2022', '2023', '2024', '2025'].map((y) => {
-          const v = x.cal && x.cal[y] != null ? x.cal[y] : null;
-          return '<td data-l="' + y + '" class="r num rk-opt o-cal ' + cls(v) + '">' + pct(v) + '</td>';
-        }).join('') +
-        '<td data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>' +
-        '<td data-l="' + TT('详情') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
-          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
-          TT('详情') + '</button></td>' +
-        '</tr>';
-    }).join('') : '<tr><td colspan="' + (isCal ? 14 : (b.self ? 17 : 13)) + '"><div class="empty">' + TT('当前条件下没有可排名的基金') + '</div></td></tr>';
+                : '<td data-l="' + TT(n) + '" class="r num ' + cls(x[k]) + '">' + pct(x[k]) + '</td>').join('') +
+            '<td data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>' +
+            '<td data-l="' + TT('详情') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
+              '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
+              TT('详情') + '</button></td>'
+          : /* 基金榜行：按可见列顺序数组渲染（表头/表体同源，物理上不会错位） */
+            rkOrder.map((k) => CELL_FUND[k](x, medal, rk)).join('')
+        ) + '</tr>';
+    }).join('') : '<tr><td colspan="' + (b.self ? 17 : (rkOrder || []).length || 13) + '"><div class="empty">' + TT('当前条件下没有可排名的基金') + '</div></td></tr>';
 
     $$('#rkTbody input[data-cmp]').forEach((c) => c.addEventListener('change', () => {
       if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
       renderCmpBar();
     }));
 
-    if (window.__rkStampCols) window.__rkStampCols();   /* 2026-10-26：按当前模式给 th/td 打 data-c */
     syncHeader(key, dir);
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
@@ -778,19 +857,21 @@
     const curMode = () => (window.__rkMode && MODES[window.__rkMode]) ? window.__rkMode : 'fund';
 
     function apply() {
-      /* 2026-10-26：改用 data-c 属性选择器（列显隐与 DOM 位置解耦——维度联动需要物理移动列） */
+      /* 2026-10-26：fund 榜已 order 化（隐藏列不渲染，无需 CSS）；self/agg 榜保留 nth-child 规则 */
       const mode = curMode();
       const defs = MODES[mode];
       const isCal = !!window.__rkIsCal;
+      if (mode === 'fund') {
+        try { localStorage.setItem(KEY, JSON.stringify([...off])); } catch (e) {}
+        return;
+      }
+      let idx = 0;
       const rules = [];
       defs.forEach(([k, , lock]) => {
-        if (k === 'calYear') {
-          /* 历年回报列只在「历年回报榜」显示，由当前榜单决定，不受列设置影响 */
-          rules.push('#rkTable [data-c="calYear"] { display: ' + (isCal ? 'table-cell' : 'none') + ' !important; }');
-          return;
-        }
+        idx++;
         const hide = !lock && off.has(k);
-        rules.push('#rkTable [data-c="' + k + '"] { display: ' + (hide ? 'none' : 'table-cell') + ' !important; }');
+        if (hide) rules.push('#rkTable tr > *:nth-child(' + idx + ') { display: none !important; }');
+        else rules.push('#rkTable tr > *:nth-child(' + idx + ') { display: table-cell !important; }');
       });
       let st = document.getElementById('rkColStyle');
       if (!st) { st = document.createElement('style'); st.id = 'rkColStyle'; document.head.appendChild(st); }

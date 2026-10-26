@@ -17,43 +17,12 @@
 
   /* 2026-10-22（用户要求）：排名维度卡片改三态，且默认不选中任何维度
      ① 点一次 = 该维度默认方向（多为最大在前） ② 再点 = 反向 ③ 第三次 = 取消，回名次顺序 */
-  /* 2026-10-26（用户要求）：排名维度 → 列联动（「基金最新数据」表）
-     点击维度卡：对应列自动显示（含默认隐藏的列）、物理移动到「风险」列右边、高亮 */
-  function stampFundCols() {
-    const thead = document.getElementById('thead');
-    if (thead) [...thead.children].forEach((th, i) => { if (COL_DEFS[i]) th.dataset.c = th.dataset.k || COL_DEFS[i].k; });
-    const tb = document.getElementById('tbody');
-    if (tb) [...tb.children].forEach((tr) => {
-      if (tr.children.length !== COL_DEFS.length) return;   /* 空态/骨架行跳过 */
-      [...tr.children].forEach((td, i) => { if (COL_DEFS[i]) td.dataset.c = COL_DEFS[i].k; });
-    });
-  }
-  window.__stampFundCols = stampFundCols;
-  function applyFundDim(key) {
-    const tbl = document.getElementById('fundTable');
-    if (!tbl) return;
-    tbl.querySelectorAll('.dim-hl').forEach((n) => n.classList.remove('dim-hl'));
-    const def = COL_DEFS.find((c) => c.k === key);
-    if (!def || key === 'risk' || def.lock) return;   /* 无对应列/风险列本身/锁定列不联动 */
-    if (!colSet.has(key)) { colSet.add(key); applyCols(); }
-    const move = (row) => {
-      const cells = [...row.children];
-      const src = cells.find((c) => c.dataset.c === key);
-      const risk = cells.find((c) => c.dataset.c === 'risk');
-      if (src && risk && src !== risk.nextElementSibling) risk.after(src);
-    };
-    const thead = document.getElementById('thead');
-    if (thead) move(thead);
-    const tb = document.getElementById('tbody');
-    if (tb) [...tb.children].forEach(move);
-    tbl.querySelectorAll('[data-c="' + key + '"]').forEach((n) => n.classList.add('dim-hl'));
-  }
-
   function bindSelfTabs() {
     const box = document.querySelector('#selfTabs');
     if (!box || box.__bound) return;
     box.__bound = 1;
     let chipKey = '';
+    const dimRevealedF = new Set();   /* 2026-10-26：由维度联动放出（非默认）的列——取消/切换时归还 */
     const paintChips = () => {
       box.querySelectorAll('.st').forEach((n) => {
         const on = !!chipKey && n.dataset.k === chipKey;
@@ -63,15 +32,23 @@
       });
     };
     paintChips();
+    window.__dimActive = false;   /* 初始无维度选中 */
     box.addEventListener('click', (e) => {
       const b = e.target.closest ? e.target.closest('.st') : null;
       if (!b) return;
       const k = b.dataset.k;
+      /* 2026-10-26（用户要求）：切换维度前，先归还此前由联动放出的非默认列（回到隐藏/原位） */
+      dimRevealedF.forEach((kk) => colSet.delete(kk));
+      dimRevealedF.clear();
       const first = b.dataset.dir || 'desc';
       const second = first === 'asc' ? 'desc' : 'asc';
       if (chipKey !== k) { chipKey = k; S.key = k; S.dir = first; }
       else if (S.dir === first) { S.dir = second; }
-      else { chipKey = ''; S.key = 'size'; S.dir = 'desc'; }   // ③ 取消 → 默认规模/名次顺序
+      else { chipKey = ''; S.key = 'size'; S.dir = 'desc'; }   // ③ 取消 → 默认规模/名次顺序；非默认列已归还隐藏
+      /* 联动放出：维度列加入显示集合并登记（取消/切换时归还） */
+      if (chipKey && COL_DEFS.find((c) => c.k === k) && !COL_DEFAULT.find((c) => c === k)) {
+        if (!colSet.has(k)) { colSet.add(k); dimRevealedF.add(k); }
+      }
       S.page = 1;
       paintChips();
       /* 卡片与表头互斥：点卡片后清掉表头箭头，避免两处同时显示「已排序」 */
@@ -81,8 +58,8 @@
         const a = n.querySelector('.arrow');
         if (a) a.textContent = '↕';
       });
+      window.__dimActive = !!chipKey;   /* 2026-10-26：维度激活标记 → visibleOrder 插队 + render 高亮 */
       render();
-      applyFundDim(chipKey ? k : '');   /* 2026-10-26：维度 → 列联动（取消时只清高亮） */
     });
   }
 
@@ -256,16 +233,14 @@
     'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfY3a', 'selfMdd', 'size', 'ops'];
   const COL_SLIM = ['rank', 'cmp', 'fund', 'risk', 'nav', 'selfY1', 'size', 'ops'];
   let colSet = null;
-  try { const raw = localStorage.getItem('mpf-cols-v5'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
+  try { const raw = localStorage.getItem('mpf-cols-v6'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
   if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
   function applyCols(save) {
-    if (save !== false) { try { localStorage.setItem('mpf-cols-v5', JSON.stringify([...colSet])); } catch (e) {} }
-    const css = COL_DEFS.filter((c) => !c.lock && !colSet.has(c.k))
-      /* 2026-10-26：改 data-c 属性选择器（列显隐与 DOM 位置解耦——维度联动需要物理移动列） */
-      .map((c) => '#fundTable [data-c="' + c.k + '"] { display: none !important; }').join('\n');
-    let st = document.getElementById('colStyle');
-    if (!st) { st = document.createElement('style'); st.id = 'colStyle'; document.head.appendChild(st); }
-    st.textContent = css;
+    if (save !== false) { try { localStorage.setItem('mpf-cols-v6', JSON.stringify([...colSet])); } catch (e) {} }
+    /* 2026-10-26 重做：列显隐改为「不渲染」（visibleOrder 过滤），不再用 CSS 隐藏——
+       与维度列插队机制统一，从机制上杜绝表头/表体错位 */
+    try { localStorage.removeItem('mpf-cols-v5'); } catch (e) {}
+    if (typeof DATA !== 'undefined' && DATA && DATA.funds) render();   /* 列设置变更立即生效 */
     const slimOn = COL_SLIM.every((k) => colSet.has(k)) && COL_DEFS.every((c) => COL_SLIM.indexOf(c.k) >= 0 || !colSet.has(c.k));
     const bS = document.getElementById('colSlim');
     if (bS) bS.classList.toggle('on', slimOn);
@@ -360,6 +335,7 @@
   }
 
   function render() {
+    if (!DATA || !DATA.funds) return;   /* applyCols 可能在数据加载前触发 */
     ROWS = sortRows(filtered(), S.key, S.dir);
     const total = ROWS.length;
     $('#cnt').textContent = total;
@@ -367,17 +343,26 @@
     renderStats(ROWS);
     renderChips();
 
+    /* 2026-10-26 重做：可见列顺序单源——表头与表体由同一数组生成，物理上不可能错位 */
+    const order = visibleOrder();
+    renderThead(order);
+
     const pages = Math.max(1, Math.ceil(total / S.size));
     if (S.page > pages) S.page = pages;
     const st = (S.page - 1) * S.size;
     const page = ROWS.slice(st, st + S.size);
 
     $('#tbody').innerHTML = page.length
-      ? page.map((x, i) => rowHtml(x, st + i + 1)).join('')
-      : '<tr><td colspan="14"><div class="empty">' + TT('没有符合条件的基金，请放宽筛选条件') +
+      ? page.map((x, i) => rowHtml(x, st + i + 1, order)).join('')
+      : '<tr><td colspan="' + order.length + '"><div class="empty">' + TT('没有符合条件的基金，请放宽筛选条件') +
         ' <button type="button" class="btn sm" style="margin-left:10px" onclick="window.clearAllFilters && clearAllFilters()">' + TT('一键清除全部筛选') + '</button></div></td></tr>';
 
-    if (window.__stampFundCols) window.__stampFundCols();   /* 2026-10-26：按 COL_DEFS 给 th/td 打 data-c */
+    /* 表头由本函数重建 → 三态排序监听需随之重绑（元素是新的，无旧监听残留） */
+    makeSorter($$('#thead th'), S, render);
+    /* 维度高亮：维度激活时给对应列的 th/td 加标记 */
+    if (window.__dimActive && S.key && S.key !== 'size') {
+      $$('#fundTable [data-c="' + S.key + '"]').forEach((n) => n.classList.add('dim-hl'));
+    }
     // 表格内勾选 → 加入/移出对比（与排名页共用 CMPX；页底对比栏随之出现）
     $$('#tbody input[data-cmp]').forEach((c) => c.addEventListener('change', () => {
       if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
@@ -390,38 +375,85 @@
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
 
-  function rowHtml(x, rk) {
-    return '<tr data-id="' + esc(x.id) + '">' +
-      '<td class="c rank-cell" data-l="' + TT('名次') + '">' + (rk || '') + '</td>' +
-      '<td class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>' +
-      '<td class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) + (x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '') + '</div>' +
-        '<div class="sub-line">' + esc(typeLabel(x.subtype || x.type)) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div></td>' +
-      '<td data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
-      '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span></td>' +
-      '<td data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>' +
-      '<td data-l="' + TT('单位资产净值') + '" class="r num">' + navCell(x) + '</td>' +
-      '<td data-l="' + TT('日涨跌') + '" class="r num ' + cls(x.selfD1) + '">' + pct(x.selfD1) + '</td>' +
-      '<td data-l="' + TT('近1个月') + '" class="r num ' + cls(x.selfM1) + '">' + pct(x.selfM1) + '</td>' +
-      '<td data-l="' + TT('年初至今') + '" class="r num ' + cls(x.selfYtd) + '">' + pct(x.selfYtd) + '</td>' +
-      '<td data-l="' + TT('近1年') + '" class="r num ' + cls(x.selfY1) + '">' + pct(x.selfY1) + '</td>' +
-      '<td data-l="' + TT('近3年年化') + '" class="r num ' + cls(x.selfY3a) + '">' + pct(x.selfY3a) + '</td>' +
-      '<td data-l="' + TT('近1年最大回撤') + '" class="r num down">' + pct(x.selfMdd) + '</td>' +
-      '<td data-l="' + TT('年化波动率（近1年）') + '" class="r num">' + pct(x.vol1) + '</td>' +
-      '<td data-l="' + TT('夏普比率（近1年）') + '" class="r num">' + (x.sharpe1 == null ? '—' : x.sharpe1.toFixed(2)) + '</td>' +
-      '<td data-l="' + TT('超额收益（对恒指·近1年）') + '" class="r num ' + cls(x.excess1) + '">' + pct(x.excess1) + '</td>' +
-      '<td data-l="' + TT('正收益月份占比') + '" class="r num">' + (x.posM12 == null ? '—' : x.posM12.toFixed(0) + '%') + '</td>' +
-      '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
-      (function () {
-        const more = x.feeMore && x.feeMore.mgmtFee;
-        const tip = more ? feeTip(TT('基金管理费'), more) : '';
-        return '<td data-l="' + TT('基金管理费 %') + '" class="r num"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + feeText(x.mgmtFee, more) + '</td>';
-      })() +
-      '<td data-l="' + TT('推出日期') + '" class="num">' + esc(x.launch || '—') + '</td>' +
-      '<td data-l="' + TT('操作') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
+  /* ═══ 2026-10-26 重做：列顺序数组单源 ═══
+     此前「移动 thead 的 DOM」方案在 tbody 重渲染后表头/表体错位（数据装反）——已废弃。
+     现在 thead 与 tbody 都由同一个可见列顺序数组生成，物理上不可能错位。 */
+  const CELL_FNS = {
+    rank: (x, rk) => '<td data-c="rank" class="c rank-cell" data-l="' + TT('名次') + '">' + (rk || '') + '</td>',
+    cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
+    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) + (x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '') + '</div>' +
+      '<div class="sub-line">' + esc(typeLabel(x.subtype || x.type)) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div></td>',
+    trustee: (x) => '<td data-c="trustee" data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
+    type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span></td>',
+    risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
+    nav: (x) => '<td data-c="nav" data-l="' + TT('单位资产净值') + '" class="r num">' + navCell(x) + '</td>',
+    selfD1: (x) => '<td data-c="selfD1" data-l="' + TT('日涨跌') + '" class="r num ' + cls(x.selfD1) + '">' + pct(x.selfD1) + '</td>',
+    selfM1: (x) => '<td data-c="selfM1" data-l="' + TT('近1个月') + '" class="r num ' + cls(x.selfM1) + '">' + pct(x.selfM1) + '</td>',
+    selfYtd: (x) => '<td data-c="selfYtd" data-l="' + TT('年初至今') + '" class="r num ' + cls(x.selfYtd) + '">' + pct(x.selfYtd) + '</td>',
+    selfY1: (x) => '<td data-c="selfY1" data-l="' + TT('近1年') + '" class="r num ' + cls(x.selfY1) + '">' + pct(x.selfY1) + '</td>',
+    selfY3a: (x) => '<td data-c="selfY3a" data-l="' + TT('近3年年化') + '" class="r num ' + cls(x.selfY3a) + '">' + pct(x.selfY3a) + '</td>',
+    selfMdd: (x) => '<td data-c="selfMdd" data-l="' + TT('近1年最大回撤') + '" class="r num down">' + pct(x.selfMdd) + '</td>',
+    vol1: (x) => '<td data-c="vol1" data-l="' + TT('年化波动率（近1年）') + '" class="r num">' + pct(x.vol1) + '</td>',
+    sharpe1: (x) => '<td data-c="sharpe1" data-l="' + TT('夏普比率（近1年）') + '" class="r num">' + (x.sharpe1 == null ? '—' : x.sharpe1.toFixed(2)) + '</td>',
+    excess1: (x) => '<td data-c="excess1" data-l="' + TT('超额收益（对恒指·近1年）') + '" class="r num ' + cls(x.excess1) + '">' + pct(x.excess1) + '</td>',
+    posM12: (x) => '<td data-c="posM12" data-l="' + TT('正收益月份占比') + '" class="r num">' + (x.posM12 == null ? '—' : x.posM12.toFixed(0) + '%') + '</td>',
+    size: (x) => '<td data-c="size" data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>',
+    mgmtFee: (x) => (function () {
+      const more = x.feeMore && x.feeMore.mgmtFee;
+      const tip = more ? feeTip(TT('基金管理费'), more) : '';
+      return '<td data-c="mgmtFee" data-l="' + TT('基金管理费 %') + '" class="r num"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + feeText(x.mgmtFee, more) + '</td>';
+    })(),
+    launchTs: (x) => '<td data-c="launchTs" data-l="' + TT('推出日期') + '" class="num">' + esc(x.launch || '—') + '</td>',
+    ops: (x) => '<td data-c="ops" data-l="' + TT('操作') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
-      TT('详情') + '</button></td>' +
-      '</tr>';
+      TT('详情') + '</button></td>',
+  };
+  /* 表头模板（与 CELL_FNS 同 key；搬自原静态 thead） */
+  const TH_HTML = {
+    rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
+    cmp: '<th data-c="cmp" data-i18n-parts class="c" style="width:52px">对比</th>',
+    fund: '<th data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>',
+    trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">发行人（受托人） <span class="arrow">↕</span></th>',
+    type: '<th data-c="type" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>',
+    risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
+    nav: '<th data-c="nav" data-i18n-parts data-k="nav" data-defdir="desc" class="sortable r">单位资产净值<br><small>取自各受托人官网</small> <span class="arrow">↕</span></th>',
+    selfD1: '<th data-c="selfD1" data-i18n-parts data-k="selfD1" data-defdir="desc" class="sortable r">日涨跌 <span class="arrow">↕</span></th>',
+    selfM1: '<th data-c="selfM1" data-i18n-parts data-k="selfM1" data-defdir="desc" class="sortable r">近1个月 <span class="arrow">↕</span></th>',
+    selfYtd: '<th data-c="selfYtd" data-i18n-parts data-k="selfYtd" data-defdir="desc" class="sortable r">年初至今 <span class="arrow">↕</span></th>',
+    selfY1: '<th data-c="selfY1" data-i18n-parts data-k="selfY1" data-defdir="desc" class="sortable r">近1年 <span class="arrow">↕</span></th>',
+    selfY3a: '<th data-c="selfY3a" data-i18n-parts data-k="selfY3a" data-defdir="desc" class="sortable r">近3年<br><small>年化</small> <span class="arrow">↕</span></th>',
+    selfMdd: '<th data-c="selfMdd" data-i18n-parts data-k="selfMdd" data-defdir="asc" class="sortable r">近1年<br><small>最大回撤</small> <span class="arrow">↕</span></th>',
+    vol1: '<th data-c="vol1" data-i18n-parts data-k="vol1" data-defdir="asc" class="sortable r">年化波动率<br><small>近1年</small> <span class="arrow">↕</span></th>',
+    sharpe1: '<th data-c="sharpe1" data-i18n-parts data-k="sharpe1" data-defdir="desc" class="sortable r">夏普比率<br><small>近1年</small> <span class="arrow">↕</span></th>',
+    excess1: '<th data-c="excess1" data-i18n-parts data-k="excess1" data-defdir="desc" class="sortable r">超额收益<br><small>对恒指·近1年</small> <span class="arrow">↕</span></th>',
+    posM12: '<th data-c="posM12" data-i18n-parts data-k="posM12" data-defdir="desc" class="sortable r">正收益<br><small>月份占比</small> <span class="arrow">↕</span></th>',
+    size: '<th data-c="size" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
+    mgmtFee: '<th data-c="mgmtFee" data-i18n-parts data-i18n-title="部分基金的费用在官网以区间或「最高」形式公布，表内按原文显示；排序按区间下限" data-k="mgmtFee" data-defdir="asc" class="sortable r">基金管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    launchTs: '<th data-c="launchTs" data-i18n-parts data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>',
+    ops: '<th data-c="ops" data-i18n-parts class="c">操作</th>',
+  };
+  /* 可见列顺序 = COL_DEFS 顺序 ∩ colSet；维度激活时把维度列插到「风险」列右侧 */
+  function visibleOrder() {
+    let order = COL_DEFS.map((c) => c.k).filter((k) => {
+      const d = COL_DEFS.find((c) => c.k === k);
+      return d.lock || colSet.has(k);
+    });
+    if (window.__dimActive && S.key && S.key !== 'size' && S.key !== 'risk' && order.indexOf(S.key) >= 0) {
+      order = order.filter((k) => k !== S.key);
+      const ri = order.indexOf('risk');
+      if (ri >= 0) order.splice(ri + 1, 0, S.key);
+    }
+    return order;
   }
+  function renderThead(order) {
+    const th = document.getElementById('thead');
+    if (th) th.innerHTML = order.map((k) => TH_HTML[k] || '').join('');
+  }
+
+  function rowHtml(x, rk, order) {
+    return '<tr data-id="' + esc(x.id) + '">' + order.map((k) => (CELL_FNS[k] || function () { return ''; })(x, rk)).join('') + '</tr>';
+  }
+
 
   function renderStats(rows) {
     const f = DATA.funds;

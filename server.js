@@ -905,6 +905,8 @@ const server = http.createServer(async (req, res) => {
       JSON.stringify({
         build: '2026-10-13-an', // 部署版本标识（供验证「新代码是否已生效」）
         refreshing: refreshing,        // 诊断：是否有刷新在途
+        /* 2026-10-26（用户要求）：更新进行中提示栏数据源（daily.sh 写盘） */
+        updateStatus: (() => { try { return JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'data', 'update-status.json'), 'utf8')); } catch (e) { return null; } })(),
         refreshingSince: refreshingSince, // 诊断：本次刷新开始时刻
         hasData: !!cache,
         updatedAt: cache ? cache.updatedAt : null,

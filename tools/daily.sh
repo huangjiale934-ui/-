@@ -37,6 +37,7 @@ soft_step() {
   local n="$1"; shift
   echo ""
   echo "--- [$n] $* ---"
+  write_ustat running "$n $*"
   "$@"
   local rc=$?
   if [ $rc -ne 0 ]; then
@@ -45,14 +46,25 @@ soft_step() {
   return 0
 }
 
+# 2026-10-26（用户要求）：更新进行中状态写盘 → /api/status → 前端顶部提示栏
+USTAT="data/update-status.json"
+write_ustat() {
+  "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" >/dev/null 2>&1 || true
+}
+USTART=$(date +%s)
+USTARTH=$(date '+%H:%M')
+write_ustat running "开始" "$USTARTH"
+
 step() {
   local n="$1"; shift
   echo ""
   echo "--- [$n] $* ---"
+  write_ustat running "$n $*"
   "$@"
   local rc=$?
   if [ $rc -ne 0 ]; then
     echo "!!! [$n] 失败（退出码 $rc），中止后续步骤，保留上次产物"
+    write_ustat error "$n 失败：$*"
     exit $rc
   fi
 }
@@ -85,3 +97,7 @@ if [ "${1:-}" = "--no-deploy" ]; then
   exit 0
 fi
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
+
+# 2026-10-26：更新结束状态（提示栏收起）
+UEND=$(date +%s)
+write_ustat done "全部完成" "" "$(date '+%H:%M')"
