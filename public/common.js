@@ -127,9 +127,9 @@ async function loadData(onDone, attempt, force) {
 /** 「更新数据」按钮：清前端缓存 + 强制重拉「最新已发布数据」，并给出明确反馈。
  *  说明：不再触发服务端抓取——线上服务器无法稳定直连积金局官网，数据更新由本机
  *  同步任务（每晚自动 / 手动「同步数据」）负责推送；此按钮保证每次点击都有反馈。 */
-async function refreshData(cb) {
-  /* 2026-10-26（用户要求）：顶部更新提示栏——任何数据更新进行中/完成时提示 */
-  (function initUpdateBanner() {
+/* 2026-10-26（用户要求）：顶部更新提示栏——任何数据更新进行中/完成时提示。
+   必须在页面载入即挂载并轮询；此前误放在 refreshData() 内部，只有点了「更新数据」才会出现。 */
+function initUpdateBanner() {
     if (document.getElementById('updateBanner')) return;
     const header = document.querySelector('.nav') && document.querySelector('.nav').closest('header') || document.querySelector('header') || document.body;
     const bar = document.createElement('div');
@@ -170,8 +170,12 @@ async function refreshData(cb) {
     }
     check();
     setInterval(check, 45000);
-  })();
+}
+/* 页面一载入就挂载提示栏（数据更新进行中时即使不刷新也能看到） */
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initUpdateBanner);
+else initUpdateBanner();
 
+async function refreshData(cb) {
   const btn = document.querySelector('.btn-refresh');
   const rt = btn ? btn.querySelector('.rt') : null;
   if (btn) {

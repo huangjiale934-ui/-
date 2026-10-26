@@ -119,6 +119,34 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   }
   console.log('href="/" 断言通过');
 
+  /* 2026-10-26 新增（致命缓存事故根因）：静态站没有 server.js 的动态 ?v=，
+     HTML 里 app.js?v=20261011a 这种手写版本号永远不变 → 部署后浏览器/CDN 仍用旧 JS
+     与新 HTML 混搭，表现为「列错位 / 整列数据变 —」。改为按文件内容哈希生成查询串，内容一变 URL 必变。 */
+  const crypto = require('crypto');
+  const hashCache = {};
+  const hv = (rel) => {
+    if (hashCache[rel]) return hashCache[rel];
+    const fp = path.join(SITE, rel);
+    if (!fs.existsSync(fp)) return null;
+    const h = crypto.createHash('md5').update(fs.readFileSync(fp)).digest('hex').slice(0, 8);
+    hashCache[rel] = h;
+    return h;
+  };
+  let rewritten = 0;
+  for (const h of htmls.concat(['404.html'])) {
+    const hp = path.join(SITE, h);
+    if (!fs.existsSync(hp)) continue;
+    let t = fs.readFileSync(hp, 'utf8');
+    t = t.replace(/(src|href)="([^"?:/]+\.(?:js|css))(?:\?[^"]*)?"/g, (m, attr, rel) => {
+      const hh = hv(rel);
+      if (!hh) return m;
+      rewritten++;
+      return attr + '="' + rel + '?v=' + hh + '"';
+    });
+    fs.writeFileSync(hp, t);
+  }
+  console.log('资源版本哈希写入完成（' + rewritten + ' 处）');
+
   console.log('public/* 已拷贝');
 
   /* 5) 根路径定位：Pages 上 / → index.html（已拷）✓ */

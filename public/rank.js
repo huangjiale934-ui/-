@@ -52,6 +52,12 @@
   let FUND_HEAD = '';   // 基金榜表头（初始 DOM 快照，切换回来时还原）
   let HEAD_MODE = '';   // 当前表头模式，避免重复重绘
   let PERFD = null;     // 自算净值指标（/api/navperf，覆盖已接入历史净值的基金）
+  /* 2026-10-26 修（致命 bug）：列定义 FUND 与隐藏集合 off 都定义在文件末尾的列设置闭包里，
+     而 rkVisibleOrder 在本闭包中直接引用 → ReferenceError: FUND is not defined，
+     整个排名榜 render() 中断（MPFA 榜 0 条、加载动画不消失）。改为「委派入口」： */
+  let RK_ORDER_IMPL = null;
+  window.__rkSetOrderImpl = function (f) { RK_ORDER_IMPL = f; };
+  window.__rkRender = function () { render(); };
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
@@ -115,6 +121,10 @@
 
   function applyHeader(b, isCal) {
     const mode = b.self ? 'self' : (b.agg === 'trustee' ? 'agg' : 'fund');
+    /* 先同步当前榜单口径，rkVisibleOrder（列设置闭包）依赖这两个标记 */
+    window.__rkMode = mode;
+    window.__rkIsCal = !!isCal;
+    window.__rkMetric = (b && !b.agg) ? b.metric : '';
     let fundOrder = null;
     if (mode === 'fund') {
       /* 2026-10-26 重做：fund 表头按可见列顺序数组生成（与行渲染同源，不会错位） */
@@ -213,18 +223,18 @@
         /* 2026-10-26（用户要求）三态：点击当前已选榜 = 取消选中，回默认榜 ann1；
            任何切换都先归还维度联动放出的列（非默认列回到隐藏，默认列回原位） */
         const isSame = S.board === t.dataset.b;
-        if (typeof cancelDimRevealed === 'function') cancelDimRevealed();
+        if (window.__rkCancelDim) window.__rkCancelDim();
         S.board = isSame ? 'ann1' : t.dataset.b;
-        if (isSame) { t.classList.remove('on'); const at = document.querySelector('#rkTabs .tab[data-b="ann1"]'); if (at) at.classList.add('on'); }
         S.sortKey = null; S.sortDir = null;
-        if (history.replaceState) history.replaceState(null, '', '#' + t.dataset.b);
-        $$('#rkTabs .tab').forEach((o) => o.classList.remove('on'));
-        t.classList.add('on');
+        if (history.replaceState) history.replaceState(null, '', '#' + S.board);
+        /* 选中态一律按 S.board 重算（取消时不能把刚点的标签又点亮） */
+        $$('#rkTabs .tab').forEach((o) => o.classList.toggle('on', o.dataset.b === S.board));
         $$('#rkTabs .tab-group').forEach((el) => el.classList.remove('on-group'));
-        if (t.closest('.tab-group')) t.closest('.tab-group').classList.add('on-group');
+        const onTab = document.querySelector('#rkTabs .tab[data-b="' + S.board + '"]');
+        if (onTab && onTab.closest('.tab-group')) onTab.closest('.tab-group').classList.add('on-group');
         renderYearSwitch();
         render();
-        if (window.__rkApplyDim) window.__rkApplyDim();   /* 2026-10-26：维度 → 列联动 */
+        /* 2026-10-26：列联动已并入 render（数组单源），不再二次移动 DOM（会造成表头/表体错位） */
       });
     }
     renderYearSwitch();
@@ -521,32 +531,13 @@
     ops: '<th data-c="ops" data-i18n-parts class="c">详情</th>',
   };
 
-  /* 可见列顺序：FUND defs ∩ off（calYear 仅历年榜）；维度 metric 插到「风险」列右侧 */
+  /* 可见列顺序：由列设置闭包实现（它掌握 FUND 定义与 off 隐藏集合），这里只做委派。
+     兜底顺序用于列设置模块尚未初始化完成的极早期渲染。 */
+  const FUND_FALLBACK = ['rank', 'fund', 'trustee', 'type', 'risk',
+    'ann1', 'ann5', 'ann10', 'annLaunch', 'size', 'cmp', 'ops'];
   function rkVisibleOrder() {
-    const b = cur();
-    const isCal = !!window.__rkIsCal;
-    let order = FUND.map(([k]) => k).filter((k) => {
-      if (k === 'calYear') return isCal;
-      return !off.has(k);
-    });
-    const mk = (b && !b.agg) ? b.metric : '';
-    if (mk && mk !== 'risk' && mk !== 'calYear' && FUND.find(([k]) => k === mk)) {
-      /* 2026-10-26：维度列强制显示并登记（取消/切换榜单时由 cancelDimRevealed 归还隐藏状态） */
-      off.delete(mk);
-      window.__rkDimRevealed = window.__rkDimRevealed || new Set();
-      window.__rkDimRevealed.add(mk);
-      if (order.indexOf(mk) >= 0) {
-        order = order.filter((k) => k !== mk);
-        const ri = order.indexOf('risk');
-        if (ri >= 0) order.splice(ri + 1, 0, mk);
-      }
-    }
-    return order;
-  }
-  /* 取消维度联动：联动放出的列归还隐藏状态（默认列不受影响） */
-  function cancelDimRevealed() {
-    (window.__rkDimRevealed || new Set()).forEach((k) => off.add(k));
-    window.__rkDimRevealed = new Set();
+    if (RK_ORDER_IMPL) return RK_ORDER_IMPL();
+    return FUND_FALLBACK.filter((k) => k !== 'trustee' && k !== 'type');
   }
 
   function render() {
@@ -567,6 +558,7 @@
 
     // 排名主榜
     const ranked = sortRows(pool(), b.metric, b.dir);
+    window.__rkRanked = ranked;   /* 2026-10-26：行内对比条需要全榜最大值（CELL_FUND 在模块作用域） */
     // 分类冠军（当前筛选下，按当前榜单指标）；区块标题随榜单类型切换（发行人榜 ≠ 各类别冠军）
     const chT = $('#rkChampTitle'), chD = $('#rkChampDesc');
     if (chT) chT.textContent = b.agg === 'trustee' ? TT('发行人综合表现') : TT('各类别冠军');
@@ -624,6 +616,18 @@
       if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
       renderCmpBar();
     }));
+
+    /* 维度列高亮（2026-10-26）：高亮当前榜单对应的列；切换榜单/取消后自动清除。
+       列的位置由 rkVisibleOrder 的数组决定，这里只加 class，不移动 DOM。 */
+    const tblEl = document.querySelector('#rkTable');
+    if (tblEl) {
+      tblEl.querySelectorAll('.dim-hl').forEach((n) => n.classList.remove('dim-hl'));
+      const mk = (!b.agg && b.metric) ? b.metric : '';
+      if (mk && mk !== 'risk' && mk !== 'calYear') {
+        tblEl.querySelectorAll('#rkThead [data-c="' + mk + '"], #rkTbody [data-c="' + mk + '"]')
+          .forEach((n) => n.classList.add('dim-hl'));
+      }
+    }
 
     syncHeader(key, dir);
     if (window.__syncTableScroll) window.__syncTableScroll();
@@ -856,6 +860,45 @@
 
     const curMode = () => (window.__rkMode && MODES[window.__rkMode]) ? window.__rkMode : 'fund';
 
+    /* ---------- 可见列顺序（供主闭包的 render 调用，数组单源） ----------
+       规则：FUND 定义顺序 ∩ 未隐藏；当前榜单的维度列强制显示、插到「风险」右一列。
+       只有在「原本隐藏」时才登记到 __rkDimRevealed，取消/切榜时归还隐藏。 */
+    function rkOrderImpl() {
+      const isCal = !!window.__rkIsCal;
+      const visible = () => FUND.map(([k]) => k).filter((k) => (k === 'calYear' ? isCal : !off.has(k)));
+      let order = visible();
+      const mk = window.__rkMetric || '';
+      if (mk && mk !== 'risk' && mk !== 'calYear' && FUND.some(([k]) => k === mk)) {
+        if (off.has(mk)) {
+          off.delete(mk);
+          window.__rkDimRevealed = window.__rkDimRevealed || new Set();
+          window.__rkDimRevealed.add(mk);
+          order = visible();
+        }
+        if (order.indexOf(mk) >= 0) {
+          order = order.filter((k) => k !== mk);
+          const ri = order.indexOf('risk');
+          if (ri >= 0) order.splice(ri + 1, 0, mk);
+        }
+      }
+      return order;
+    }
+    window.__rkSetOrderImpl(rkOrderImpl);
+
+    /* 取消维度联动：把「因维度联动而放出」的列归还隐藏（默认列不受影响） */
+    function cancelDimRevealed() {
+      const s = window.__rkDimRevealed || new Set();
+      s.forEach((k) => off.add(k));
+      window.__rkDimRevealed = new Set();
+    }
+    window.__rkCancelDim = cancelDimRevealed;
+
+    /* 列设置变更后立即重绘（fund 榜列是「不渲染」，必须重绘才生效） */
+    function applyAndRender() {
+      apply();
+      if (curMode() === 'fund' && window.__rkRender) window.__rkRender();
+    }
+
     function apply() {
       /* 2026-10-26：fund 榜已 order 化（隐藏列不渲染，无需 CSS）；self/agg 榜保留 nth-child 规则 */
       const mode = curMode();
@@ -897,30 +940,6 @@
     }
     window.__rkStampCols = stampCols;
 
-    window.__rkApplyDim = function () {
-      const b = cur();
-      const key = (b && !b.agg) ? b.metric : '';
-      const tbl = document.querySelector('#rkTable');
-      if (!tbl) return;
-      tbl.querySelectorAll('.dim-hl').forEach((n) => n.classList.remove('dim-hl'));
-      /* 无对应列的维度（抗跌/总开支/新锐/聚合）只排序，不做列联动 */
-      if (!key || key === 'risk' || key === 'calYear' || key === 'worstYear' || key === 'fer' || key === 'launchTs') return;
-      const defs = MODES[curMode()];
-      if (!defs.find(([k]) => k === key)) return;
-      off.delete(key);
-      apply();
-      const move = (row) => {
-        const cells = [...row.children];
-        const src = cells.find((c) => c.dataset.c === key);
-        const risk = cells.find((c) => c.dataset.c === 'risk');
-        if (src && risk && src !== risk.nextElementSibling) risk.after(src);
-      };
-      const thead = document.querySelector('#rkThead');
-      if (thead) move(thead);
-      const tb = document.querySelector('#rkTbody');
-      if (tb) [...tb.children].forEach(move);
-      tbl.querySelectorAll('[data-c="' + key + '"]').forEach((n) => n.classList.add('dim-hl'));
-    };
 
     function buildList() {
       const defs = MODES[curMode()];
@@ -929,7 +948,7 @@
         (lock || !off.has(k) ? ' checked' : '') + (lock ? ' disabled' : '') + '>' + n + '</label>').join('');
       box.querySelectorAll('input').forEach((cb) => cb.addEventListener('change', () => {
         if (cb.checked) off.delete(cb.value); else off.add(cb.value);
-        apply();
+        applyAndRender();
       }));
     }
 
@@ -941,14 +960,14 @@
     const bAll = document.querySelector('#rkColAll');
     if (bAll) bAll.addEventListener('click', () => {
       MODES[curMode()].forEach(([k]) => off.delete(k));
-      apply(); buildList();
+      applyAndRender(); buildList();
     });
     const bSlim = document.querySelector('#rkColSlim');
     if (bSlim) bSlim.addEventListener('click', () => {
       MODES[curMode()].forEach(([k, , lock]) => { if (lock) off.delete(k); else off.add(k); });
       SLIM_OFF.forEach((k) => off.add(k));
       MODES[curMode()].forEach(([k, , lock]) => { if (lock) off.delete(k); });
-      apply(); buildList();
+      applyAndRender(); buildList();
     });
     document.addEventListener('click', (e) => {
       if (!pop.hidden && !(e.target.closest && e.target.closest('#rkColPop')) && e.target.id !== 'rkColBtn') pop.hidden = true;
