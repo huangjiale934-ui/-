@@ -493,10 +493,10 @@
     launchTs: (x) => '<td data-c="launchTs" data-l="' + TT('推出日期') + '" class="num">' + esc(x.launch || '—') + '</td>',
     mgmtFee: (x) => '<td data-c="mgmtFee" data-l="' + TT('基金管理费 %') + '" class="r num">' + feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee) + '</td>',
     calYear: (x) => '<td data-c="calYear" data-l="' + TQ('{y} 年回报', { y: S.calYear }) + '" class="r num ' + cls(window.__rkIsCal ? x.calYear : null) + '">' + (window.__rkIsCal ? '<b>' + pct(x.calYear) + '</b>' : '') + '</td>',
-    cum1: (x) => '<td data-c="cum1" data-l="' + TT('近1年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum1) + '">' + pct(x.cum1) + '</td>',
-    cum5: (x) => '<td data-c="cum5" data-l="' + TT('近5年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum5) + '">' + pct(x.cum5) + '</td>',
-    cum10: (x) => '<td data-c="cum10" data-l="' + TT('近10年累积') + '" class="r num rk-opt o-cum ' + cls(x.cum10) + '">' + pct(x.cum10) + '</td>',
-    cumLaunch: (x) => '<td data-c="cumLaunch" data-l="' + TT('推出至今累积') + '" class="r num rk-opt o-cum ' + cls(x.cumLaunch) + '">' + pct(x.cumLaunch) + '</td>',
+    cum1: (x) => '<td data-c="cum1" data-l="' + TT('近1年累积') + '" class="r num o-cum ' + cls(x.cum1) + '">' + pct(x.cum1) + '</td>',
+    cum5: (x) => '<td data-c="cum5" data-l="' + TT('近5年累积') + '" class="r num o-cum ' + cls(x.cum5) + '">' + pct(x.cum5) + '</td>',
+    cum10: (x) => '<td data-c="cum10" data-l="' + TT('近10年累积') + '" class="r num o-cum ' + cls(x.cum10) + '">' + pct(x.cum10) + '</td>',
+    cumLaunch: (x) => '<td data-c="cumLaunch" data-l="' + TT('推出至今累积') + '" class="r num o-cum ' + cls(x.cumLaunch) + '">' + pct(x.cumLaunch) + '</td>',
     cal2021: (x) => calCell(x, '2021'), cal2022: (x) => calCell(x, '2022'), cal2023: (x) => calCell(x, '2023'),
     cal2024: (x) => calCell(x, '2024'), cal2025: (x) => calCell(x, '2025'),
     cmp: (x) => '<td data-c="cmp" data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
@@ -506,7 +506,7 @@
   };
   function calCell(x, y) {
     const v = x.cal && x.cal[y] != null ? x.cal[y] : null;
-    return '<td data-c="cal' + y + '" data-l="' + y + '" class="r num rk-opt o-cal ' + cls(v) + '">' + pct(v) + '</td>';
+    return '<td data-c="cal' + y + '" data-l="' + y + '" class="r num o-cal ' + cls(v) + '">' + pct(v) + '</td>';
   }
   const TH_FUND = {
     rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
@@ -524,15 +524,15 @@
     launchTs: '<th data-c="launchTs" data-i18n-parts data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>',
     mgmtFee: '<th data-c="mgmtFee" data-i18n-parts data-k="mgmtFee" data-defdir="asc" class="sortable r">管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
     calYear: '<th data-c="calYear" data-i18n-parts id="rkThCalYear" data-k="calYear" data-defdir="desc" class="sortable r">历年<br>回报 <span class="arrow">↕</span></th>',
-    cum1: '<th data-c="cum1" data-i18n-parts data-k="cum1" data-defdir="desc" class="sortable r rk-opt o-cum">近1年<br>累积 <span class="arrow">↕</span></th>',
-    cum5: '<th data-c="cum5" data-i18n-parts data-k="cum5" data-defdir="desc" class="sortable r rk-opt o-cum">近5年<br>累积 <span class="arrow">↕</span></th>',
-    cum10: '<th data-c="cum10" data-i18n-parts data-k="cum10" data-defdir="desc" class="sortable r rk-opt o-cum">近10年<br>累积 <span class="arrow">↕</span></th>',
-    cumLaunch: '<th data-c="cumLaunch" data-i18n-parts data-k="cumLaunch" data-defdir="desc" class="sortable r rk-opt o-cum">推出至今<br>累积 <span class="arrow">↕</span></th>',
-    cal2021: '<th data-c="cal2021" data-i18n-parts data-k="cal2021" data-defdir="desc" class="sortable r rk-opt o-cal">2021 <span class="arrow">↕</span></th>',
-    cal2022: '<th data-c="cal2022" data-i18n-parts data-k="cal2022" data-defdir="desc" class="sortable r rk-opt o-cal">2022 <span class="arrow">↕</span></th>',
-    cal2023: '<th data-c="cal2023" data-i18n-parts data-k="cal2023" data-defdir="desc" class="sortable r rk-opt o-cal">2023 <span class="arrow">↕</span></th>',
-    cal2024: '<th data-c="cal2024" data-i18n-parts data-k="cal2024" data-defdir="desc" class="sortable r rk-opt o-cal">2024 <span class="arrow">↕</span></th>',
-    cal2025: '<th data-c="cal2025" data-i18n-parts data-k="cal2025" data-defdir="desc" class="sortable r rk-opt o-cal">2025 <span class="arrow">↕</span></th>',
+    cum1: '<th data-c="cum1" data-i18n-parts data-k="cum1" data-defdir="desc" class="sortable r o-cum">近1年<br>累积 <span class="arrow">↕</span></th>',
+    cum5: '<th data-c="cum5" data-i18n-parts data-k="cum5" data-defdir="desc" class="sortable r o-cum">近5年<br>累积 <span class="arrow">↕</span></th>',
+    cum10: '<th data-c="cum10" data-i18n-parts data-k="cum10" data-defdir="desc" class="sortable r o-cum">近10年<br>累积 <span class="arrow">↕</span></th>',
+    cumLaunch: '<th data-c="cumLaunch" data-i18n-parts data-k="cumLaunch" data-defdir="desc" class="sortable r o-cum">推出至今<br>累积 <span class="arrow">↕</span></th>',
+    cal2021: '<th data-c="cal2021" data-i18n-parts data-k="cal2021" data-defdir="desc" class="sortable r o-cal">2021 <span class="arrow">↕</span></th>',
+    cal2022: '<th data-c="cal2022" data-i18n-parts data-k="cal2022" data-defdir="desc" class="sortable r o-cal">2022 <span class="arrow">↕</span></th>',
+    cal2023: '<th data-c="cal2023" data-i18n-parts data-k="cal2023" data-defdir="desc" class="sortable r o-cal">2023 <span class="arrow">↕</span></th>',
+    cal2024: '<th data-c="cal2024" data-i18n-parts data-k="cal2024" data-defdir="desc" class="sortable r o-cal">2024 <span class="arrow">↕</span></th>',
+    cal2025: '<th data-c="cal2025" data-i18n-parts data-k="cal2025" data-defdir="desc" class="sortable r o-cal">2025 <span class="arrow">↕</span></th>',
     cmp: '<th data-c="cmp" data-i18n-parts class="c">对比</th>',
     ops: '<th data-c="ops" data-i18n-parts class="c">详情</th>',
   };
@@ -915,6 +915,9 @@
       const defs = MODES[mode];
       const isCal = !!window.__rkIsCal;
       if (mode === 'fund') {
+        /* 清掉 agg/self 榜遗留的 nth-child 隐藏规则：否则切回基金榜时它们会误隐藏新放出的列 */
+        const st0 = document.getElementById('rkColStyle');
+        if (st0) st0.textContent = '';
         try { localStorage.setItem(KEY, JSON.stringify([...off])); } catch (e) {}
         return;
       }

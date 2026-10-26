@@ -1262,7 +1262,7 @@ body.an-detail .foot { display: none; }
 .self-tabs .st.on.asc::after { content: ' ↑'; }
 
 /* 2026-10-19：MPFA 榜单可选列（累积回报 / 历年回报），默认隐藏 */
-.rk-opt { display: none; }
+/* 2026-10-26 移除：列显隐改由「渲染顺序数组」控制；保留 .rk-opt 规则会让已放出的列不可见 */
 /* 2026-10-19：列设置升级为逐列勾选 —— 显隐改由 rank.js 注入的 #rkColStyle 规则控制 */
 .rk-cols { position: relative; display: inline-block; }
 .rk-colpop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; background: #fff;
