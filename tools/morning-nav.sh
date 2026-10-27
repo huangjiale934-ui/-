@@ -46,7 +46,7 @@ soft "3 東亞" "$PY" fetch-bea-hist.py
 soft "4 富達" "$PY" fetch-fidelity-hist.py
 soft "5 永明" "$PY" fetch-sunlife-hist.py --from "$SINCE"
 soft "6 滙豐/恒生" "$PY" fetch-hsbc-family.py --from "$SINCE"
-soft "7 中銀保誠" "$PY" fetch-bocpt-hist.py --from "$YMSINCE"
+soft "7 中銀保誠" "$PY" fetch-bocpt-hist.py --from "$SINCE"
 soft "8 交通" "$PY" fetch-bocom-hist.py
 soft "9 中國人壽" "$PY" fetch-chinalife-hist.py
 soft "10 友邦" "$PY" aia_ingest2.py

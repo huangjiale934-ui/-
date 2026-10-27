@@ -87,8 +87,12 @@ def query_date(s, url, code, d, retries=3):
 def main():
     start = dt.date(2021, 1, 4)
     if "--from" in sys.argv:
-        y, m, dd = sys.argv[sys.argv.index("--from") + 1].split("-")
-        start = dt.date(int(y), int(m), int(dd))
+        # 2026-10-27 修：此前只接受 YYYY-MM-DD，而 daily.sh / Actions 传的是 YYYY-MM，
+        # 直接 ValueError 退出 → 中銀保誠 34 只的增量抓取其实一直在失败（静默丢数据）。
+        parts = sys.argv[sys.argv.index("--from") + 1].split("-")
+        y, m = int(parts[0]), int(parts[1])
+        dd = int(parts[2]) if len(parts) > 2 else 1
+        start = dt.date(y, m, dd)
     dry = "--dry" in sys.argv
     os.makedirs(CACHE, exist_ok=True)
 
