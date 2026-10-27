@@ -76,7 +76,8 @@ step() {
   fi
 }
 
-soft_step "1/9 抓发行人最新净值" node navbuild.js --render
+# 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
+soft_step "1/9 抓发行人最新净值" timeout 1800 node navbuild.js --render
 # 2026-10-26 新增：富達独立兜底。navbuild 内嵌富達解析连续 3 天返回 0 只（页面恒 38KB），
 # 而独立脚本 fetch-fidelity-hist.py 正常 → 固化进链路，避免每天靠人工补。
 soft_step "1.2/9 富達历史（独立脚本兜底）" "$PY" fetch-fidelity-hist.py

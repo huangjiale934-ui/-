@@ -32,7 +32,14 @@ echo "=== 早晨净值更新开始 $(date '+%F %T') · 近端起点 $SINCE ==="
 soft() { local n="$1"; shift; echo ""; echo "--- [$n] $* ---"; "$@"; local rc=$?; [ $rc -ne 0 ] && echo "!!! [$n] 失败（$rc），跳过"; return 0; }
 
 # 1) 发行人官网快照（今日净值）
-soft "1 官网快照" node navbuild.js --render
+# 2026-10-27：实测 navbuild --render 可能卡在某个发行人页面（无输出、无限等待）。
+# 加硬超时 25 分钟；超时后继续跑后续 hist 渠道（净值主来源），不至于整条链挂死。
+# 紧急/无人值守场景可设 SKIP_NAVBUILD=1 直接跳过。
+if [ "${SKIP_NAVBUILD:-0}" = "1" ]; then
+  echo "（SKIP_NAVBUILD=1：跳过官网快照）"
+else
+  soft "1 官网快照" timeout 1500 node navbuild.js --render
+fi
 # 2) 各渠道近端历史（只补近 10 天）
 soft "2 宏利" "$PY" fetch-manulife-hist.py
 soft "3 東亞" "$PY" fetch-bea-hist.py
