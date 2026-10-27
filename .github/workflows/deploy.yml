@@ -8,6 +8,8 @@ on:
   schedule:
     # 每天北京 22:40 = UTC 14:40（週末官網無新數據時 commit 為空、不重複發布，無害）
     - cron: '40 14 * * *'
+    # 2026-10-27 新增：交易日北京 10:00 = UTC 02:00，只更新「淨值 + 自算指標」，不动指数/新闻/持仓/积金局档案
+    - cron: '0 2 * * 1-5'
   workflow_dispatch: {}
 
 permissions:
@@ -45,7 +47,19 @@ jobs:
         with:
           node-version: '22'
 
+      - name: 判定更新模式（全量 / 仅净值）
+        id: mode
+        run: |
+          if [ "${{ github.event.schedule }}" = "0 2 * * 1-5" ]; then
+            echo "light=1" >> "$GITHUB_OUTPUT"
+            echo "本次为「仅净值」模式（北京时间交易日 10:00）"
+          else
+            echo "light=0" >> "$GITHUB_OUTPUT"
+            echo "本次为「全量」模式"
+          fi
+
       - name: 抓取發行人官網數據（失敗保留舊數據）
+        if: steps.mode.outputs.light == '0'
         run: |
           # 2026-10-26：持仓写入事务——抓取前快照，写后自动判定退化并回滚（与本机 daily.sh 同口径）
           node tools/holdings-txn.js save
@@ -67,20 +81,42 @@ jobs:
           python news_fetch.py || echo "!! 積金局新聞稿失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
 
+      - name: 抓取淨值（交易日 10:00 轻量模式）
+        if: steps.mode.outputs.light == '1'
+        run: |
+          # 只抓「單位淨值」渠道；不跑指数、新闻、持仓解析、积金局档案
+          node navbuild.js || echo "!! navbuild 官網快照失敗"
+          python fetch-manulife-hist.py || echo "!! 宏利失敗"
+          python fetch-bea-hist.py || echo "!! 東亞失敗"
+          python fetch-fidelity-hist.py || echo "!! 富達失敗"
+          python fetch-sunlife-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 永明失敗"
+          python fetch-hsbc-family.py --from "$(date -d '10 days ago' +%F)" || echo "!! 滙豐/恒生失敗"
+          python fetch-bocpt-hist.py --from "$(date -d '10 days ago' +%Y-%m)" || echo "!! 中銀保誠失敗"
+          python fetch-bocom-hist.py || echo "!! 交通失敗"
+          python fetch-chinalife-hist.py || echo "!! 中國人壽失敗"
+          python aia_ingest2.py || echo "!! 友邦失敗"
+          python fetch-shkp-hist.py || echo "!! 新地失敗"
+          python yflife_daily.py || echo "!! 萬通失敗"
+          python ht_daily.py || echo "!! 海通失敗"
+          python tools/bct-recent.py || echo "!! BCT 失敗"
+
       - name: 積金局月度業績（每月 5 號後官方更新；失敗保留舊數據）
+        if: steps.mode.outputs.light == '0'
         run: node scraper.js || echo "!! 積金局抓取失敗（保留舊 dataAsOf）"
 
       - name: 重算指標與校驗
         run: |
           node navperf.js
-          node indexbuild.js
+          if [ "${{ steps.mode.outputs.light }}" = "0" ]; then node indexbuild.js; fi
           node tools/fix-nulls.js
           node tools/merge-nav.js
           # 2026-10-26：先判定持仓是否退化（退化则整档回滚），再做规范化与守卫——
           # 避免「坏数据已落盘、守卫只告警」的旧问题在云端复现
-          node tools/holdings-txn.js check --restore || echo "!! 檢測到持倉退化，已回滾到抓取前快照"
-          node tools/holdings-normalize.js
-          node tools/holdings-guard.js
+          if [ "${{ steps.mode.outputs.light }}" = "0" ]; then
+            node tools/holdings-txn.js check --restore || echo "!! 檢測到持倉退化，已回滾到抓取前快照"
+            node tools/holdings-normalize.js
+            node tools/holdings-guard.js
+          fi
           node tools/nav-consistency.js
           # 2026-10-26 修 4-05：补齐本机 health-check 覆盖的四类哨兵（缺日/渠道一致/allocSum/三处一致本地版）
           node tools/gap-check.js

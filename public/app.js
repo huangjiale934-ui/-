@@ -22,7 +22,8 @@
     if (!box || box.__bound) return;
     box.__bound = 1;
     let chipKey = '';
-    const dimRevealedF = new Set();   /* 2026-10-26：由维度联动放出（非默认）的列——取消/切换时归还 */
+    /* 2026-10-27 修（用户反馈：GitHub 站列越点越多）：维度联动放出的列改为「临时」——
+       只存在于 DIM_EXTRA，不写进 colSet、不落 localStorage，取消/切换维度即消失。 */
     const paintChips = () => {
       box.querySelectorAll('.st').forEach((n) => {
         const on = !!chipKey && n.dataset.k === chipKey;
@@ -37,18 +38,13 @@
       const b = e.target.closest ? e.target.closest('.st') : null;
       if (!b) return;
       const k = b.dataset.k;
-      /* 2026-10-26（用户要求）：切换维度前，先归还此前由联动放出的非默认列（回到隐藏/原位） */
-      dimRevealedF.forEach((kk) => colSet.delete(kk));
-      dimRevealedF.clear();
       const first = b.dataset.dir || 'desc';
       const second = first === 'asc' ? 'desc' : 'asc';
       if (chipKey !== k) { chipKey = k; S.key = k; S.dir = first; }
       else if (S.dir === first) { S.dir = second; }
-      else { chipKey = ''; S.key = 'size'; S.dir = 'desc'; }   // ③ 取消 → 默认规模/名次顺序；非默认列已归还隐藏
-      /* 联动放出：维度列加入显示集合并登记（取消/切换时归还） */
-      if (chipKey && COL_DEFS.find((c) => c.k === k) && !COL_DEFAULT.find((c) => c === k)) {
-        if (!colSet.has(k)) { colSet.add(k); dimRevealedF.add(k); }
-      }
+      else { chipKey = ''; S.key = 'size'; S.dir = 'desc'; }   // ③ 取消 → 默认规模/名次顺序
+      /* 联动放出：非默认列临时显示（不写 colSet，刷新后回到用户自己的列设置） */
+      DIM_EXTRA = (chipKey && COL_DEFS.find((c) => c.k === k) && COL_DEFAULT.indexOf(k) < 0) ? k : '';
       S.page = 1;
       paintChips();
       /* 卡片与表头互斥：点卡片后清掉表头箭头，避免两处同时显示「已排序」 */
@@ -235,21 +231,23 @@
   /* 2026-10-22（用户要求）：「近1年」改为默认列，其余列不变 */
   const COL_DEFAULT = ['rank', 'cmp', 'fund', 'trustee', 'risk', 'nav',
     'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfY3a', 'selfMdd', 'size', 'ops'];
-  const COL_SLIM = ['rank', 'cmp', 'fund', 'risk', 'nav', 'selfY1', 'size', 'ops'];
+  /* 2026-10-27（用户要求）：「精简模式」下线，改为「默认模式」——一键回到用户指定的 14 列 */
   let colSet = null;
-  try { const raw = localStorage.getItem('mpf-cols-v6'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
+  let DIM_EXTRA = '';   /* 2026-10-27：维度联动临时放出的列（不持久化） */
+  try { const raw = localStorage.getItem('mpf-cols-v7'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
   if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
   function applyCols(save) {
-    if (save !== false) { try { localStorage.setItem('mpf-cols-v6', JSON.stringify([...colSet])); } catch (e) {} }
+    if (save !== false) { try { localStorage.setItem('mpf-cols-v7', JSON.stringify([...colSet])); } catch (e) {} }
     /* 2026-10-26 重做：列显隐改为「不渲染」（visibleOrder 过滤），不再用 CSS 隐藏——
        与维度列插队机制统一，从机制上杜绝表头/表体错位 */
-    try { localStorage.removeItem('mpf-cols-v5'); } catch (e) {}
+    try { localStorage.removeItem('mpf-cols-v5'); localStorage.removeItem('mpf-cols-v6'); } catch (e) {}
     if (typeof DATA !== 'undefined' && DATA && DATA.funds) render();   /* 列设置变更立即生效 */
-    const slimOn = COL_SLIM.every((k) => colSet.has(k)) && COL_DEFS.every((c) => COL_SLIM.indexOf(c.k) >= 0 || !colSet.has(c.k));
+    const same = (a) => a.length === colSet.size && a.every((k) => colSet.has(k));
+    const defOn = same(COL_DEFAULT);
     const bS = document.getElementById('colSlim');
-    if (bS) bS.classList.toggle('on', slimOn);
+    if (bS) bS.classList.toggle('on', defOn);
     const bA = document.getElementById('colAll');
-    if (bA) bA.classList.toggle('on', !slimOn && colSet.size === COL_DEFS.length);
+    if (bA) bA.classList.toggle('on', !defOn && colSet.size === COL_DEFS.length);
     const box = document.getElementById('colChecks');
     if (box) box.querySelectorAll('input').forEach((cb) => { cb.checked = colSet.has(cb.value); });
   }
@@ -264,7 +262,7 @@
     const pop = document.createElement('div');
     pop.id = 'colPop'; pop.hidden = true;
     pop.innerHTML = '<div class="cp-t">' + TT('显示列') + '<span class="cp-x" id="colClose">×</span></div>' +
-      '<div class="cp-btns"><button type="button" class="cp-b" id="colSlim">' + TT('精简模式') + '</button>' +
+      '<div class="cp-btns"><button type="button" class="cp-b" id="colSlim">' + TT('默认模式') + '</button>' +
       '<button type="button" class="cp-b" id="colAll">' + TT('全部列') + '</button></div>' +
       '<div class="cp-list" id="colChecks">' + COL_DEFS.map((c) =>
         '<label' + (c.lock ? ' class="cp-lock"' : '') + '><input type="checkbox" value="' + c.k + '"' + (c.lock ? ' disabled checked' : '') + '>' + TT(c.n) + '</label>').join('') + '</div>';
@@ -272,7 +270,7 @@
     btn.addEventListener('click', (e) => { e.stopPropagation(); pop.hidden = !pop.hidden; applyCols(false); });
     document.getElementById('colClose').addEventListener('click', () => { pop.hidden = true; });
     document.addEventListener('click', (e) => { if (!pop.hidden && !e.target.closest('#colPop') && e.target.id !== 'colBtn') pop.hidden = true; });
-    document.getElementById('colSlim').addEventListener('click', () => { colSet = new Set(COL_SLIM); applyCols(); });
+    document.getElementById('colSlim').addEventListener('click', () => { colSet = new Set(COL_DEFAULT); applyCols(); });
     document.getElementById('colAll').addEventListener('click', () => { colSet = new Set(COL_DEFS.map((c) => c.k)); applyCols(); });
     pop.querySelectorAll('#colChecks input').forEach((cb) => cb.addEventListener('change', () => {
       if (cb.checked) colSet.add(cb.value); else colSet.delete(cb.value);
@@ -448,7 +446,7 @@
   function visibleOrder() {
     let order = COL_DEFS.map((c) => c.k).filter((k) => {
       const d = COL_DEFS.find((c) => c.k === k);
-      return d.lock || colSet.has(k);
+      return d.lock || colSet.has(k) || k === DIM_EXTRA;
     });
     if (window.__dimActive && S.key && S.key !== 'size' && S.key !== 'risk' && order.indexOf(S.key) >= 0) {
       order = order.filter((k) => k !== S.key);

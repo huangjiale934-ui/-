@@ -822,7 +822,7 @@
     const tbl = document.querySelector('#rkTable');
     const box = document.querySelector('#rkColChecks');
     if (!btn || !pop || !tbl || !box) return;
-    const KEY = 'mpf-rk-cols-v4';   /* 2026-10-26 升版：新增抗跌/总开支/新锐列，需对老用户重置隐藏集 */
+    const KEY = 'mpf-rk-cols-v5';   /* 2026-10-26 升版：新增抗跌/总开支/新锐列，需对老用户重置隐藏集 */
 
     /* 列定义：k=列键、n=显示名、lock=必显 */
     const FUND = [
@@ -875,16 +875,15 @@
        只有在「原本隐藏」时才登记到 __rkDimRevealed，取消/切榜时归还隐藏。 */
     function rkOrderImpl() {
       const isCal = !!window.__rkIsCal;
-      const visible = () => FUND.map(([k]) => k).filter((k) => (k === 'calYear' ? isCal : !off.has(k)));
+      /* extra：本次渲染临时放出的列（不进 off，不持久化） */
+      const visible = (extra) => FUND.map(([k]) => k)
+        .filter((k) => (k === 'calYear' ? isCal : (!off.has(k) || k === extra)));
       let order = visible();
       const mk = window.__rkMetric || '';
       if (mk && mk !== 'risk' && FUND.some(([k]) => k === mk)) {
-        if (off.has(mk)) {
-          off.delete(mk);
-          window.__rkDimRevealed = window.__rkDimRevealed || new Set();
-          window.__rkDimRevealed.add(mk);
-          order = visible();
-        }
+        /* 2026-10-27 修（用户反馈：点标签后列永久留下、越点越多）：
+           维度列只是「临时显示」——不修改 off、不写入 localStorage，切榜即回到用户自己的列设置 */
+        if (off.has(mk)) order = visible(mk);
         if (order.indexOf(mk) >= 0) {
           order = order.filter((k) => k !== mk);
           const ri = order.indexOf('risk');
@@ -897,8 +896,7 @@
 
     /* 取消维度联动：把「因维度联动而放出」的列归还隐藏（默认列不受影响） */
     function cancelDimRevealed() {
-      const s = window.__rkDimRevealed || new Set();
-      s.forEach((k) => off.add(k));
+      /* 2026-10-27：维度列改为临时显示后无需归还；保留函数以兼容既有调用 */
       window.__rkDimRevealed = new Set();
     }
     window.__rkCancelDim = cancelDimRevealed;
@@ -977,9 +975,8 @@
     });
     const bSlim = document.querySelector('#rkColSlim');
     if (bSlim) bSlim.addEventListener('click', () => {
-      MODES[curMode()].forEach(([k, , lock]) => { if (lock) off.delete(k); else off.add(k); });
-      SLIM_OFF.forEach((k) => off.add(k));
-      MODES[curMode()].forEach(([k, , lock]) => { if (lock) off.delete(k); });
+      /* 2026-10-27（用户要求）：「精简模式」改「默认模式」——一键回到默认列（只隐藏 DEFAULT_OFF） */
+      off = new Set(DEFAULT_OFF);
       applyAndRender(); buildList();
     });
     document.addEventListener('click', (e) => {

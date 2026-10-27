@@ -111,6 +111,7 @@
 '一键清除全部筛选': 'Clear all filters',
 '全部列': 'All columns',
 '精简模式': 'Compact',
+'默认模式': 'Default',
 '显示列': 'Visible columns',
 '列设置': 'Columns',
 '搜索结果（全库 · 支持简体 / 繁体 / 英文）': 'Search results (all funds · simplified / traditional / English)',
