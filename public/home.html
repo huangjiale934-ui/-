@@ -55,8 +55,8 @@
     <div class="hero-copy">
       <div class="hero-tag" data-i18n="香港强积金市场数据平台">香港强积金市场数据平台</div>
       <h1><span data-i18n="全市场 451 条成分基金">全市场 451 条成分基金</span><br><span data-i18n="一站看透">一站看透</span></h1>
-      <p class="hero-sub" data-i18n="收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照；单位净值取自各发行人官网每日更新，其余资料来自积金局。">收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照；单位净值取自各发行人官网每日更新，其余资料来自积金局。</p>
-      <p class="hero-slogan" data-i18n="积金局季度资料 + 发行人每日净值 · 每日自动同步 · 未经增删">积金局季度资料 + 发行人每日净值 · 每日自动同步 · 未经增删</p>
+      <p class="hero-sub" data-i18n="收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照">收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照</p>
+      <p class="hero-slogan" data-i18n="净值每日取自发行人官网，其余资料来自积金局 · 每日自动同步 · 未经增删">净值每日取自发行人官网，其余资料来自积金局 · 每日自动同步 · 未经增删</p>
       <div class="hero-btns">
         <a class="cta primary" href="index.html">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
@@ -70,6 +70,12 @@
         </a>
       </div>
     </div>
+    <!-- 2026-10-28 首屏改版：4 张关键指标卡移到右侧（2×2），下方「市场概览」不再重复 -->
+    <div class="hero-stats">
+      <div class="mk-kpi mk-slot" id="mkKpi">
+        <div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -81,12 +87,7 @@
       <div class="mk-asof mk-slot"></div>
     </div>
 
-    <!-- 关键指标 -->
-    <div class="mk-kpi mk-slot" id="mkKpi">
-      <div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div><div class="sk sk-card"></div>
-    </div>
-
-    <!-- 市场排行榜（2026-10-22：领导要求前移至「市场涨跌温度计」之前；模块内容未改动） -->
+    <!-- 市场排行榜（2026-10-22：前移至「市场涨跌温度计」之前；2026-10-28：关键指标已上移到首屏右侧） -->
     <div class="mk-rank">
       <!-- 2026-10-22（领导）：标题与说明去掉，模块整体上移；榜单内容不动 -->
       <div class="mk-tops">
