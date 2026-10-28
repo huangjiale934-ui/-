@@ -123,22 +123,35 @@ jobs:
           node tools/health-check.js --local
 
       - name: 提交數據變更
+        # 2026-10-28：本机每日 23:20 也会推一次数据，云端与本机同时提交同一批文件时 rebase 会冲突，
+        # 曾导致整个 run 在「提交」这一步失败（10:41 的定时任务就是这样挂的，站点没发布）。
+        # 现在：冲突时以「本次运行抓到的数据」为准继续 rebase；仍失败只告警，不阻断后续构建发布。
+        continue-on-error: true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config pull.rebase true
           git add data/ 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "數據無變更"
-          else
-            git commit -m "daily data update $(date -u +%F)"
-            # 2026-10-28：本机会在 23:20 左右也推一次数据（sync-github.sh），云端若无条件 push 会被拒 →
-            # 用 rebase 重试 3 次，避免「数据已提交但部署被跳过」。
-            for i in 1 2 3; do
-              if git pull --rebase --autostash origin main && git push; then
-                echo "推送成功（第 $i 次）"; break
-              fi
-              echo "推送失败（第 $i 次），重试…"; sleep 5
-            done
+            exit 0
+          fi
+          git commit -m "daily data update $(date -u +%F)"
+          ok=0
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then ok=1; echo "推送成功（第 $i 次）"; break; fi
+            echo "推送被拒（第 $i 次），rebase 后重试…"
+            git fetch origin main || true
+            if ! git rebase origin/main; then
+              # 冲突文件一律采用本次运行抓到的版本（rebase 中 theirs = 本地提交）
+              git checkout --theirs -- data 2>/dev/null || true
+              git add data 2>/dev/null || true
+              GIT_EDITOR=true git rebase --continue || git rebase --abort || true
+            fi
+            sleep 5
+          done
+          if [ "$ok" != "1" ]; then
+            echo "!! 数据回写失败（不影响本次站点发布，本机 nightly 仍会推送）"
           fi
 
   build-deploy:
