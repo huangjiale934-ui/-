@@ -961,3 +961,38 @@ body { overflow-x: clip; }
   .hero #mkKpi .mk-v { font-size: 21px; }
   .hero #mkKpi .mk-s { font-size: 10.5px; }
 }
+
+/* ==========================================================
+   2026-10-28：数据平台区块收窄 + 图文比例调平衡
+   ① 与上方「市场概览」同宽（1200px 对齐）② 图片限高，避免比文字高太多
+   ========================================================== */
+.plat { padding: 34px 0 38px; }
+.plat-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 44px;
+  align-items: center;
+}
+.plat-copy h2 { font-size: 22px; margin: 0 0 10px; }
+.plat-copy > p { font-size: 13.5px; line-height: 1.8; margin: 0 0 12px; }
+.plat-list { margin: 0 0 16px; }
+.plat-list li { font-size: 13px; padding: 3px 0 3px 20px; }
+.plat-list li::before { width: 6px; height: 6px; top: 10px; left: 2px; }
+.plat-btns { gap: 10px; }
+.plat-btns .btn { min-width: 0; padding: 10px 18px; font-size: 13.5px; }
+.plat-img { min-width: 0; }
+.plat-img img {
+  width: 100%;
+  max-height: 252px;
+  object-fit: cover;
+  object-position: center 55%;
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(20, 50, 80, 0.10);
+}
+@media (max-width: 1080px) {
+  .plat-grid { grid-template-columns: 1fr; gap: 22px; }
+  .plat-img img { max-height: 220px; }
+}
