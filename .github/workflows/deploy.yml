@@ -83,7 +83,9 @@ jobs:
           # 2026-10-26：持仓写入事务——抓取前快照，写后自动判定退化并回滚（与本机 daily.sh 同口径）
           node tools/holdings-txn.js save
           # 逐渠道軟失敗：單渠道失敗只記錄，不中斷（與本機 daily.sh 同哲學）
-          node navbuild.js --render || echo "!! navbuild 官網快照失敗"
+          # 2026-10-28：与本机同样加硬超时——某些发行人页面会让无头浏览器挂住，
+          # 云端 job 上限 90 分钟，一旦挂住整条链就等于今天没更新。
+          timeout 1500 node navbuild.js --render || echo "!! navbuild 官網快照失敗"
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
           python nav-etnet.py || echo "!! etnet 失敗"
           python fetch-bea-hist.py || echo "!! 東亞失敗"
@@ -106,7 +108,9 @@ jobs:
           # 2026-10-28：抓取前备份 hist（本次多为「近端区间覆盖写」，合并时按日期取并集）
           node tools/hist-merge-snap.js save
           # 只抓「單位淨值」渠道；不跑指数、新闻、持仓解析、积金局档案
-          node navbuild.js --render || echo "!! navbuild 官網快照失敗"
+          # 2026-10-28：与本机同样加硬超时——某些发行人页面会让无头浏览器挂住，
+          # 云端 job 上限 90 分钟，一旦挂住整条链就等于今天没更新。
+          timeout 1500 node navbuild.js --render || echo "!! navbuild 官網快照失敗"
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
           python fetch-bea-hist.py || echo "!! 東亞失敗"
           python fetch-fidelity-hist.py || echo "!! 富達失敗"

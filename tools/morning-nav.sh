@@ -50,6 +50,10 @@ else
   soft "1 官网快照" timeout 1500 node navbuild.js --render
 fi
 # 2) 各渠道近端历史（只补近 10 天）
+# 2026-10-28：下面第 5/6/7 步走的三个脚本都是「整段覆盖写」——只抓近 10 天时，
+# 会把 2015 年以来的历史冲成 5 个点（今早就是这么被截断的）。
+# 抓取前快照、抓取后按日期取并集，是这条链唯一的安全做法。
+node tools/hist-merge-snap.js save || echo "!! hist 快照失败（继续，但有可能截断历史）"
 soft "2 宏利" "$PY" fetch-manulife-hist.py
 soft "3 東亞" "$PY" fetch-bea-hist.py
 soft "4 富達" "$PY" fetch-fidelity-hist.py
@@ -65,6 +69,8 @@ soft "13 海通" "$PY" ht_daily.py
 soft "14 BCT 净值" "$PY" tools/bct-recent.py
 
 # 3) 自算指标与校准（与每日链路同口径）
+# 2026-10-28：先做 hist 并集合并，再算指标——顺序反了 ytd/mdd 就会建立在被截断的点上
+node tools/hist-merge-snap.js merge || echo "!! hist 合并失败（继续）"
 write_ustat running "重算自算指标"
 node navperf.js || { echo "!!! navperf 失败，中止"; write_ustat error "navperf 失败"; exit 1; }
 node tools/fix-nulls.js || true
