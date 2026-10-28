@@ -69,6 +69,15 @@ function merge() {
     const arr = Array.from(map.entries()).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
     if (arr.length > newSeries.length) added += arr.length - newSeries.length;
     if (arr.length !== newSeries.length || arr[0][0] !== (newSeries[0] || [])[0]) merged++;
+    /* 2026-10-28：并集与文件里已有的完全相同 → 不重写。
+       否则每次跑都会重排/重写全部 450 个 hist 文件，制造几百个「1 行变更」的假 diff，
+       git 历史被噪声淹没，也白白多传几十 MB。 */
+    const samePoint = arr.length === newSeries.length &&
+      arr.every((p, i) => p[0] === newSeries[i][0] && p[1] === newSeries[i][1]);
+    const headOk = newJ.first === (arr[0] ? arr[0][0] : '') &&
+      newJ.asOf === (arr.length ? arr[arr.length - 1][0] : '') &&
+      newJ.points === arr.length;
+    if (samePoint && headOk) return;
     newJ.series = arr;
     newJ.first = arr[0] ? arr[0][0] : '';
     newJ.asOf = arr.length ? arr[arr.length - 1][0] : '';
