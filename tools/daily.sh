@@ -101,6 +101,13 @@ step "7/9 指数补齐" node indexbuild.js
 # 2026-10-24：merge-nav 必须在最后一次写 funds.json/hist 之后执行——
 # 原先排在 1.5 位，后面步骤继续写档会覆盖对齐成果（核验 D08a：30 只净值与 hist 错位 1–2 天）
 step "8/9 净值合并校准（最后写档后执行）" node tools/merge-nav.js
+# 2026-10-29 修：merge-nav 会把「官方当日净值」追加进 data/hist/<id>.json，
+# 但 navperf 已在第 6 步跑过 → 自算指标停在被追加前的末点（云端 10-28 有 16 只 AMTD 停在 10-23）。
+# 追加后必须再算一遍，顺序不能反。
+step "8.2/9 自算指标重算（hist 追加后）" node navperf.js
+# 2026-10-29 修：merge-nav 只写 hist 文件、不更新 hist-index.json，索引会长期落后于实际序列
+# （10-28 本机 109 条、云端 25 条）。此处按文件对齐，幂等。
+step "8.4/9 历史索引对齐" node tools/hist-index-sync.js
 # 2026-10-24：链路末尾固化验收（不依赖 AI 纪律；核验 U01）
 step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js
 soft_step "9.5/9 缺日检查" node tools/gap-check.js

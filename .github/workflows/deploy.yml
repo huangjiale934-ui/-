@@ -138,6 +138,14 @@ jobs:
           if [ "${{ steps.mode.outputs.light }}" = "0" ]; then node indexbuild.js; fi
           node tools/fix-nulls.js
           node tools/merge-nav.js
+          # 2026-10-29 修：merge-nav 会把「官方当日净值」追加进 data/hist/<id>.json，
+          # 而 navperf 已在上面跑过 → 自算指标停在被追加前的末点。
+          # 实测 10-28 云端 16 只 AMTD 的 asOf 停在 10-23（净值已 10-26），
+          # 与 WorkBuddy 站相比「更新更少」就是这里造成的。追加后必须再算一遍。
+          node navperf.js
+          # 2026-10-29 修：merge-nav 只写 hist 文件、不更新 hist-index.json，
+          # 云端没有第二个人补索引 → 索引长期落后（10-28 有 25 只：AMTD 16 + 宏利退休精選 9）。
+          node tools/hist-index-sync.js
           # 2026-10-26：先判定持仓是否退化（退化则整档回滚），再做规范化与守卫——
           # 避免「坏数据已落盘、守卫只告警」的旧问题在云端复现
           if [ "${{ steps.mode.outputs.light }}" = "0" ]; then

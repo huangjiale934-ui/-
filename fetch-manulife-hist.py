@@ -96,6 +96,10 @@ def main():
         except Exception:  # noqa: BLE001
             index = {}
 
+    # 2026-10-29：改为「先全部取回落内存 → 按批次末点找出滞后只 → 二次重试 → 再写盘」。
+    # 原先是边取边写，个别单位类别（宏利退休精選的 A/B/T 三类）在云端偶发取到滞后一天
+    # 的截断序列，写完就固化了（10-28：9 只停在 10-23，本机同源已到 10-26）。
+    results = {}
     ok = fail = 0
     for i, (fid, code, scheme, name, unit) in enumerate(tasks, 1):
         series = fetch_history(code)
@@ -103,6 +107,41 @@ def main():
             fail += 1
             print("  %2d/%d  %s %s  [无数据/过短，跳过]" % (i, len(tasks), code, name))
             continue
+        results[str(fid)] = (code, scheme, name, unit, series)
+        print("  %2d/%d  %s %s   %s → %s (%d 点)" %
+              (i, len(tasks), code.ljust(6), name[:22].ljust(22), series[0][0], series[-1][0], len(series)))
+        time.sleep(0.35)  # 轻微限速，避免触发风控
+
+    if results:
+        batch_max = max(v[4][-1][0] for v in results.values())
+        laggards = [fid for fid, v in results.items() if v[4][-1][0] < batch_max]
+        if laggards:
+            print("  [i] 批次末点 %s；%d 只落后，二次重试…" % (batch_max, len(laggards)))
+            for fid in laggards:
+                code, scheme, name, unit, old = results[fid]
+                for _ in range(2):
+                    time.sleep(1.2)
+                    series = fetch_history(code, retries=2)
+                    if series and series[-1][0] > old[-1][0]:
+                        results[fid] = (code, scheme, name, unit, series)
+                        break
+            still = [fid for fid in laggards if results[fid][4][-1][0] < batch_max]
+            if still:
+                print("  [!] 重试后仍落后：%s" % ",".join(still))
+
+    for fid, (code, scheme, name, unit, series) in results.items():
+        dest = os.path.join(HIST_DIR, "%s.json" % fid)
+        # 防截断/防回退：新序列比已有文件「更短」或「末点更旧」时保留原文件
+        # （来源偶发只回最近若干天，或个别单位类别滞后一天）
+        try:
+            old = json.load(open(dest, encoding="utf-8"))
+            old_s = old.get("series") or []
+            if len(old_s) > len(series) or (old_s and old_s[-1][0] > series[-1][0]):
+                print("  [!] %s 来源序列更短/更旧（%d 点 %s < %d 点 %s），保留原文件" %
+                      (code, len(series), series[-1][0], len(old_s), old_s[-1][0] if old_s else "-"))
+                series = old_s
+        except Exception:  # noqa: BLE001
+            pass
         obj = {
             "id": str(fid),
             "code": code,
@@ -116,7 +155,7 @@ def main():
             "points": len(series),
             "series": series,
         }
-        with open(os.path.join(HIST_DIR, "%s.json" % fid), "w", encoding="utf-8") as fh:
+        with open(dest, "w", encoding="utf-8") as fh:
             json.dump(obj, fh, ensure_ascii=False, separators=(",", ":"))
         index[str(fid)] = {
             "code": code, "src": "manulife", "name": name, "unit": unit, "scheme": scheme,
@@ -124,9 +163,6 @@ def main():
             "first": series[0][0], "points": len(series),
         }
         ok += 1
-        print("  %2d/%d  %s %s   %s → %s (%d 点)" %
-              (i, len(tasks), code.ljust(6), name[:22].ljust(22), series[0][0], series[-1][0], len(series)))
-        time.sleep(0.35)  # 轻微限速，避免触发风控
 
     out = {
         "updatedAt": int(time.time() * 1000),
