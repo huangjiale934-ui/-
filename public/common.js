@@ -127,49 +127,100 @@ async function loadData(onDone, attempt, force) {
 /** 「更新数据」按钮：清前端缓存 + 强制重拉「最新已发布数据」，并给出明确反馈。
  *  说明：不再触发服务端抓取——线上服务器无法稳定直连积金局官网，数据更新由本机
  *  同步任务（每晚自动 / 手动「同步数据」）负责推送；此按钮保证每次点击都有反馈。 */
-/* 2026-10-26（用户要求）：顶部更新提示栏——任何数据更新进行中/完成时提示。
-   必须在页面载入即挂载并轮询；此前误放在 refreshData() 内部，只有点了「更新数据」才会出现。 */
+/* 2026-10-28（用户反馈：更新时顶部看不到提示）：统一为「一条」固定在页头下方的强提示条。
+   三个触发来源：
+     ① /api/status.updateStatus —— 本机每日/上午链路运行时会实时写盘（running/done/error）
+     ② /api/status.refreshing   —— 服务端手工刷新
+     ③ 静态站（GitHub Pages）无法感知云端任务 → 按北京时间窗口提示：
+        每日 22:33–23:30 全量更新；工作日 09:58–10:50 仅净值更新
+   位置：插在页头之后 + sticky（top = 页头高度），滚动时始终贴在导航下方，不遮挡也不覆盖内容。 */
 function initUpdateBanner() {
-    if (document.getElementById('updateBanner')) return;
-    const header = document.querySelector('.nav') && document.querySelector('.nav').closest('header') || document.querySelector('header') || document.body;
-    const bar = document.createElement('div');
-    bar.id = 'updateBanner';
-    bar.style.cssText = 'display:none;padding:8px 16px;font-size:13px;text-align:center;font-family:inherit';
-    header.after ? header.after(bar) : header.parentNode.insertBefore(bar, header.nextSibling);
-    const hkNow = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(11, 16);
-    const hkDate = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
-    function show(html, bg, fg) {
-      bar.style.display = 'block'; bar.style.background = bg; bar.style.color = fg;
-      bar.innerHTML = html;
-    }
-    function hide() { bar.style.display = 'none'; }
-    let lastPhase = '';
-    function check() {
-      fetch('/api/status').then((r) => r.json()).then((j) => {
-        const u = j && j.updateStatus;
-        if (u && u.phase === 'running') {
-          lastPhase = 'running';
-          show('⏳ <b>数据更新进行中</b>' + (u.step ? '（' + u.step + '）' : '') + (u.startedAt ? ' · 开始于 ' + u.startedAt : '') + ' — 页面当前展示的是上一次完成的数据', '#fff7e0', '#8a6100');
-        } else if (u && u.phase === 'done' && lastPhase === 'running') {
-          lastPhase = 'done';
-          show('✅ <b>数据更新完成</b>' + (u.finishedAt ? '（' + u.finishedAt + ' 完成）' : '') + ' — 刷新页面查看最新数据', '#e8f6e8', '#1c6b1c');
-          setTimeout(hide, 8000);
-        } else if (u && u.phase === 'error') {
-          lastPhase = 'error';
-          show('⚠️ <b>本次数据更新未全部成功</b>（' + (u.step || '') + '）— 已保留上一次的完整数据', '#fdeaea', '#8b1a1a');
-        } else if (j && j.refreshing) {
-          show('⏳ <b>数据刷新中</b>…', '#fff7e0', '#8a6100');
-        } else {
-          /* GitHub 静态站：每日 22:40 更新窗口的北京时间提示（无法实时感知云端任务，按时间窗提示） */
-          const t = hkNow();
-          if (t >= '22:35' && t <= '23:15') {
-            show('⏳ <b>每日数据更新进行中</b>（每日 22:40 自动执行）— 当前展示的是更新前数据', '#fff7e0', '#8a6100');
-          } else hide();
-        }
-      }).catch(() => {});
-    }
-    check();
-    setInterval(check, 45000);
+  if (window.__updInit) return;
+  window.__updInit = 1;
+  const header = document.querySelector('header.hdr') || document.querySelector('header');
+  const el = document.createElement('div');
+  el.id = 'updBar';
+  el.className = 'upd-bar';
+  el.innerHTML = '<span class="dot"></span><b class="lb"></b><span class="t"></span>' +
+    '<span class="meta"></span><button type="button" class="x" aria-label="关闭">×</button>';
+  if (header && header.parentNode) header.parentNode.insertBefore(el, header.nextSibling);
+  else document.body.insertBefore(el, document.body.firstChild);
+  const lbEl = el.querySelector('.lb');
+  const tEl = el.querySelector('.t');
+  const mEl = el.querySelector('.meta');
+  const xEl = el.querySelector('.x');
+  let dismissed = 0;
+  try { dismissed = +(sessionStorage.getItem('mpf-updbar-x') || 0); } catch (e) {}
+  xEl.addEventListener('click', () => {
+    el.classList.remove('show');
+    dismissed = Date.now();
+    try { sessionStorage.setItem('mpf-updbar-x', String(dismissed)); } catch (e) {}
+  });
+  const clamp = () => {
+    const h = header ? header.offsetHeight : 62;
+    el.style.top = (h || 62) + 'px';
+  };
+  clamp();
+  window.addEventListener('resize', clamp);
+  const hk = () => new Date(Date.now() + 8 * 3600e3);
+  const hm = () => hk().toISOString().slice(11, 16);
+  const hmDay = () => hk().getUTCDay();
+  let phase = '';
+  let doneTimer = 0;
+  function paint(kind, label, text, meta, closable) {
+    el.className = 'upd-bar show ' + kind + (closable ? ' closable' : '');
+    lbEl.textContent = label;
+    tEl.textContent = text || '';
+    mEl.textContent = meta || '';
+    xEl.style.display = closable ? 'block' : 'none';
+    el.style.top = ((header ? header.offsetHeight : 62) || 62) + 'px';
+  }
+  function hide() { el.className = 'upd-bar'; }
+  function check() {
+    fetch('/api/status', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      if (!j) return;
+      const u = j.updateStatus;
+      const shown = j.navLatest ? TQ('当前展示 {d} 的净值', { d: j.navLatest }) : '';
+      if (u && u.phase === 'running') {
+        phase = 'running'; clearTimeout(doneTimer);
+        paint('run', TT('数据更新进行中'), (u.step ? u.step : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · 更新完成后本页提示，无需手动刷新', false);
+        return;
+      }
+      if (j.refreshing) {
+        phase = 'running'; clearTimeout(doneTimer);
+        paint('run', TT('数据刷新中'), TT('正在重新读取最新数据…'), '', false);
+        return;
+      }
+      if (u && u.phase === 'done' && phase === 'running') {
+        phase = 'done';
+        paint('ok', TT('数据更新完成'), (u.finishedAt ? u.finishedAt + ' ' : '') + TT('全部步骤已完成'), shown + ' · ' + TT('刷新页面即可看到最新数据'), true);
+        doneTimer = setTimeout(hide, 12000);
+        return;
+      }
+      if (u && u.phase === 'error') {
+        phase = 'error';
+        paint('err', TT('本次更新未全部完成'), (u.step || ''), TT('已保留上一次的完整数据'), true);
+        return;
+      }
+      /* 静态站/无实时状态：按北京时间窗口给出「约定时间更新」提示 */
+      const t = hm();
+      const wd = hmDay();
+      const inFull = t >= '22:33' && t <= '23:30';
+      const inLight = wd >= 1 && wd <= 5 && t >= '09:58' && t <= '10:50';
+      const quiet = dismissed && Date.now() - dismissed < 30 * 60 * 1000;
+      if ((inFull || inLight) && !quiet) {
+        phase = 'window';
+        paint('info', TT('数据更新窗口'), inLight ? TT('交易日 10:00 自动更新净值与自算指标') : TT('每日 22:40 自动全量更新'),
+          shown + ' · ' + TT('更新期间页面可能显示上一次的数据'), true);
+        return;
+      }
+      phase = '';
+      hide();
+    }).catch(() => {});
+  }
+  check();
+  setInterval(check, 45000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
 }
 /* 页面一载入就挂载提示栏（数据更新进行中时即使不刷新也能看到） */
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initUpdateBanner);
@@ -2450,48 +2501,4 @@ document.addEventListener('mpf:lang', () => {
 });
 
 
-/* 2026-10-23：抓取进行中时给用户一个可见提示（领导反馈：数据在更新但页面没提示，容易被误认为数据没更新）
-   2026-10-23 二改：提示条放在页头下方（不再遮住导航），并带 × 关闭；关闭后本次会话内不再打扰。 */
-(function updateBanner() {
-  if (window.__updBanner) return;
-  window.__updBanner = 1;
-  var DISMISS = 'mpf-updbar-dismiss';
-  function make() {
-    var el = document.createElement('div');
-    el.id = 'updBar';
-    el.className = 'upd-bar';
-    el.innerHTML = '<i></i><span class="t"></span>' +
-      '<button type="button" class="x" aria-label="关闭">×</button>';
-    el.querySelector('.x').addEventListener('click', function () {
-      el.remove();
-      document.body.classList.remove('has-updbar');
-      try { sessionStorage.setItem(DISMISS, String(Date.now())); } catch (e) {}
-    });
-    document.body.appendChild(el);
-    document.body.classList.add('has-updbar');
-    return el;
-  }
-  function tick() {
-    fetch('/api/status', { cache: 'no-store' })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (st) {
-        if (!st) return;
-        var el = document.getElementById('updBar');
-        var dismissed = 0;
-        try { dismissed = +(sessionStorage.getItem(DISMISS) || 0); } catch (e) {}
-        var quiet = dismissed && Date.now() - dismissed < 30 * 60 * 1000;
-        if (st.refreshing && !quiet) {
-          if (!el) el = make();
-          var since = st.refreshingSince ? new Date(st.refreshingSince) : null;
-          var hh = since ? String(since.getHours()).padStart(2, '0') + ':' + String(since.getMinutes()).padStart(2, '0') : '';
-          el.querySelector('.t').textContent = TQ('正在从各发行人官网同步最新净值（{t} 开始），页面上的日期稍后会自动更新，无需手动刷新。', { t: hh });
-        } else if (el) {
-          el.remove();
-          document.body.classList.remove('has-updbar');
-        }
-      })
-      .catch(function () {});
-  }
-  tick();
-  setInterval(tick, 30000);
-})();
+/* 2026-10-28：旧的 #updBar 实现已并入 initUpdateBanner（统一一条，避免重复/冲突） */

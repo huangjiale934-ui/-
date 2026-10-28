@@ -50,3 +50,4 @@ report-coverage.js
 alloc_fill.py
 docs/
 data/update-status.json
+output/
