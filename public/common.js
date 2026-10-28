@@ -132,7 +132,7 @@ async function loadData(onDone, attempt, force) {
      ① /api/status.updateStatus —— 本机每日/上午链路运行时会实时写盘（running/done/error）
      ② /api/status.refreshing   —— 服务端手工刷新
      ③ 静态站（GitHub Pages）无法感知云端任务 → 按北京时间窗口提示：
-        每日 22:33–23:30 全量更新；工作日 09:58–10:50 仅净值更新
+        每日 22:33–23:30 全量更新；工作日 09:38–10:55 仅净值更新
    位置：插在页头之后 + sticky（top = 页头高度），滚动时始终贴在导航下方，不遮挡也不覆盖内容。 */
 function initUpdateBanner() {
   if (window.__updInit) return;
@@ -176,47 +176,58 @@ function initUpdateBanner() {
     el.style.top = ((header ? header.offsetHeight : 62) || 62) + 'px';
   }
   function hide() { el.className = 'upd-bar'; }
+  /* 静态站（GitHub Pages）没有 /api/status，必须走时间窗口兜底。
+     2026-10-28 修：旧代码在拿不到 j 时 `return`，静态站因此永远不显示提示条。 */
+  function inWindow() {
+    const t = hm();
+    const wd = hmDay();
+    const full = t >= '22:33' && t <= '23:30';
+    const light = wd >= 1 && wd <= 5 && t >= '09:38' && t <= '10:55';
+    return light ? 'light' : (full ? 'full' : '');
+  }
+  function paintWindow(shown) {
+    const quiet = dismissed && Date.now() - dismissed < 30 * 60 * 1000;
+    const w = inWindow();
+    if (!w || quiet) return false;
+    phase = 'window';
+    paint('info', TT('数据更新窗口'),
+      w === 'light' ? TT('交易日 09:40 开始更新净值，预计 10:20 前完成') : TT('每日 22:40 自动全量更新'),
+      (shown || '') + ' · ' + TT('更新期间页面可能显示上一次的数据'), true);
+    return true;
+  }
   function check() {
-    fetch('/api/status', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
-      if (!j) return;
-      const u = j.updateStatus;
-      const shown = j.navLatest ? TQ('当前展示 {d} 的净值', { d: j.navLatest }) : '';
-      if (u && u.phase === 'running') {
-        phase = 'running'; clearTimeout(doneTimer);
-        paint('run', TT('数据更新进行中'), (u.step ? u.step : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · 更新完成后本页提示，无需手动刷新', false);
-        return;
-      }
-      if (j.refreshing) {
-        phase = 'running'; clearTimeout(doneTimer);
-        paint('run', TT('数据刷新中'), TT('正在重新读取最新数据…'), '', false);
-        return;
-      }
-      if (u && u.phase === 'done' && phase === 'running') {
-        phase = 'done';
-        paint('ok', TT('数据更新完成'), (u.finishedAt ? u.finishedAt + ' ' : '') + TT('全部步骤已完成'), shown + ' · ' + TT('刷新页面即可看到最新数据'), true);
-        doneTimer = setTimeout(hide, 12000);
-        return;
-      }
-      if (u && u.phase === 'error') {
-        phase = 'error';
-        paint('err', TT('本次更新未全部完成'), (u.step || ''), TT('已保留上一次的完整数据'), true);
-        return;
-      }
-      /* 静态站/无实时状态：按北京时间窗口给出「约定时间更新」提示 */
-      const t = hm();
-      const wd = hmDay();
-      const inFull = t >= '22:33' && t <= '23:30';
-      const inLight = wd >= 1 && wd <= 5 && t >= '09:58' && t <= '10:50';
-      const quiet = dismissed && Date.now() - dismissed < 30 * 60 * 1000;
-      if ((inFull || inLight) && !quiet) {
-        phase = 'window';
-        paint('info', TT('数据更新窗口'), inLight ? TT('交易日 10:00 自动更新净值与自算指标') : TT('每日 22:40 自动全量更新'),
-          shown + ' · ' + TT('更新期间页面可能显示上一次的数据'), true);
-        return;
-      }
-      phase = '';
-      hide();
-    }).catch(() => {});
+    fetch('/api/status', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        const u = j && j.updateStatus;
+        const shown = j && j.navLatest ? TQ('当前展示 {d} 的净值', { d: j.navLatest }) : '';
+        if (u && u.phase === 'running') {
+          phase = 'running'; clearTimeout(doneTimer);
+          paint('run', TT('数据更新进行中'), (u.step ? u.step : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · 更新完成后本页提示，无需手动刷新', false);
+          return;
+        }
+        if (j && j.refreshing) {
+          phase = 'running'; clearTimeout(doneTimer);
+          paint('run', TT('数据刷新中'), TT('正在重新读取最新数据…'), '', false);
+          return;
+        }
+        if (u && u.phase === 'done' && phase === 'running') {
+          phase = 'done';
+          paint('ok', TT('数据更新完成'), (u.finishedAt ? u.finishedAt + ' ' : '') + TT('全部步骤已完成'), shown + ' · ' + TT('刷新页面即可看到最新数据'), true);
+          doneTimer = setTimeout(hide, 12000);
+          return;
+        }
+        /* 失败状态只在窗口内或本页亲历过 running 时展示，避免上一轮的红条挂一整天 */
+        if (u && u.phase === 'error' && (phase === 'running' || inWindow())) {
+          phase = 'error';
+          paint('err', TT('本次更新未全部完成'), (u.step || ''), TT('已保留上一次的完整数据'), true);
+          return;
+        }
+        if (paintWindow(shown)) return;
+        phase = '';
+        hide();
+      })
+      .catch(() => { paintWindow(''); });
   }
   check();
   setInterval(check, 45000);

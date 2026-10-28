@@ -112,11 +112,15 @@ if [ "${1:-}" = "--no-deploy" ]; then
   exit 0
 fi
 
-# 2026-10-26 新增：推送数据到 GitHub（视为「发布」的一部分，故放在 --no-deploy 之后）。
-# 原因：GitHub Actions 的 schedule 自建仓以来从未触发（近 30 次运行全是 push 事件），
-# 云端站点会一直停在上一次手工推送的数据。这里以本机为权威源兜底推送，
-# push 事件本身会触发 Pages 构建；若云端 schedule 日后恢复，双方数据一致时本步自动跳过。
-soft_step "10/10 同步数据到 GitHub" bash tools/sync-github.sh
+# 2026-10-28：两站独立更新 —— 本机链路只负责 WorkBuddy 站，默认不再向 GitHub 推数据。
+# GitHub 侧由云端 22:40 全量 / 09:40 仅净值自行抓取并发布；两边各写各的，避免同时写
+# data/*.json 造成 rebase 冲突（10-28 早上 10:41 的云端任务就是这样挂的）。
+# 需要人工兜底推送时显式加 --sync。
+if [ "${1:-}" = "--sync" ]; then
+  soft_step "10/10 同步数据到 GitHub" bash tools/sync-github.sh
+else
+  echo "（已跳过 GitHub 推送：两站独立更新；确需推送加 --sync）"
+fi
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
 
 # 2026-10-26：更新结束状态（提示栏收起）

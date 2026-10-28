@@ -36,6 +36,14 @@ def norm_class(s):
     return s
 
 
+def parse_vd(s):
+    """官网 VALUATION_DT（'26/10/2026'）→ date。2026-10-28 修：不再用请求日当净值日。"""
+    m = re.match(r"^(\d{1,2})/(\d{1,2})/(\d{4})$", str(s or "").strip())
+    if not m:
+        return None
+    return dt.date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+
+
 def main():
     start = dt.date(2021, 1, 4)
     if "--from" in sys.argv:
@@ -119,8 +127,12 @@ def main():
                 c = cm.group(1) if cm else (cls if cls in ("A", "B", "C", "D", "H", "T") else "")
                 fid = id_of.get((nm, c)) or id_of.get((nm, ""))
                 nav = row.get("NAV")
+                # 2026-10-28 修：以官网返回的 VALUATION_DT 为准。
+                # 当日净值未发布 / 公众假期时，接口会回传上一估值日的数据，
+                # 旧逻辑用请求日 d 落库，导致「10-28 显示 10-26 的值」这类假日期。
+                vd = parse_vd(row.get("VALUATION_DT")) or d
                 if fid and nav is not None:
-                    series.setdefault(fid, {})[d.isoformat()] = float(nav)
+                    series.setdefault(fid, {})[vd.isoformat()] = float(nav)
         if dry and n >= 3:
             break
         if n % 60 == 0:
@@ -155,10 +167,8 @@ def main():
         x = next((t for t in funds if str(t["id"]) == fid), None)
         if not x:
             continue
-        # 2026-10-22：去掉末尾的「前值填充」——官网对未发布日期返回上一交易日的价，
-        # 直接写入会让 hist 出现「10-21/22 值等于 10-20」的假日期（第三方核查新发现项）。
-        while len(arr) > 2 and abs(arr[-1][1] - arr[-2][1]) < 1e-9:
-            arr.pop()
+        # 2026-10-28：日期改为取 VALUATION_DT 后，这里不再需要「去掉末尾等值点」的补丁
+        # ——货币市场基金本来就常年同值，误删会丢真实点。历史已由 tools/rebuild-sunlife.py 重建。
         if not arr:
             continue
         obj = {"id": fid, "code": "", "name": x["fund"], "unit": x.get("unit", ""),

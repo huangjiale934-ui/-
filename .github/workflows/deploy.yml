@@ -2,14 +2,16 @@ name: deploy
 
 # push 到 main 即構建並部署 GitHub Pages；
 # 每日北京 22:40（UTC 14:40）跑一次數據更新（抓取 → 校驗 → commit → 觸發部署）。
+# 2026-10-28：本機鏈路改為「不推 GitHub」，雲端成為 GitHub 側唯一寫手，
+#             兩站各自獨立更新；提交信息含 [run-data] 可手動觸發一次數據更新。
 on:
   push:
     branches: [main]
   schedule:
     # 每天北京 22:40 = UTC 14:40（週末官網無新數據時 commit 為空、不重複發布，無害）
     - cron: '40 14 * * *'
-    # 2026-10-27 新增：交易日北京 10:00 = UTC 02:00，只更新「淨值 + 自算指標」，不动指数/新闻/持仓/积金局档案
-    - cron: '0 2 * * 1-5'
+    # 2026-10-28：交易日北京 09:45 = UTC 01:45（与本机 09:40 错开 5 分钟，避免同时打同一批官网），只更新「淨值 + 自算指標」，不动指数/新闻/持仓/积金局档案
+    - cron: '45 1 * * 1-5'
   workflow_dispatch: {}
 
 permissions:
@@ -27,8 +29,9 @@ concurrency:
 
 jobs:
   update-data:
-    # 每日排程時才抓數據；push 觸發時跳過（數據已在 commit 裡）
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # 排程 / 手动触发才抓数据；push 触发的构建跳过（数据已在 commit 里）。
+    # 例外：提交信息带 [run-data] 时也跑一次，用于手动验证云端抓取链路。
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[run-data]'))
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -47,12 +50,24 @@ jobs:
         with:
           node-version: '22'
 
+      - name: 確認無頭瀏覽器可用（官網快照必需）
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            google-chrome --version
+          elif command -v chromium >/dev/null 2>&1; then
+            chromium --version
+          else
+            echo "runner 未自带 Chrome，安装 chromium…"
+            sudo apt-get update -qq && sudo apt-get install -y -qq chromium-browser || sudo apt-get install -y -qq chromium
+            (command -v chromium-browser || command -v chromium) && echo "ok"
+          fi
+
       - name: 判定更新模式（全量 / 仅净值）
         id: mode
         run: |
-          if [ "${{ github.event.schedule }}" = "0 2 * * 1-5" ]; then
+          if [ "${{ github.event.schedule }}" = "45 1 * * 1-5" ] || [ "${{ github.event_name }}" = "push" ]; then
             echo "light=1" >> "$GITHUB_OUTPUT"
-            echo "本次为「仅净值」模式（北京时间交易日 10:00）"
+            echo "本次为「仅净值」模式（北京时间交易日 09:40）"
           else
             echo "light=0" >> "$GITHUB_OUTPUT"
             echo "本次为「全量」模式"
@@ -64,7 +79,7 @@ jobs:
           # 2026-10-26：持仓写入事务——抓取前快照，写后自动判定退化并回滚（与本机 daily.sh 同口径）
           node tools/holdings-txn.js save
           # 逐渠道軟失敗：單渠道失敗只記錄，不中斷（與本機 daily.sh 同哲學）
-          node navbuild.js || echo "!! navbuild 官網快照失敗"
+          node navbuild.js --render || echo "!! navbuild 官網快照失敗"
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
           python nav-etnet.py || echo "!! etnet 失敗"
           python fetch-bea-hist.py || echo "!! 東亞失敗"
@@ -81,11 +96,11 @@ jobs:
           python news_fetch.py || echo "!! 積金局新聞稿失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
 
-      - name: 抓取淨值（交易日 10:00 轻量模式）
+      - name: 抓取淨值（交易日 09:40 轻量模式）
         if: steps.mode.outputs.light == '1'
         run: |
           # 只抓「單位淨值」渠道；不跑指数、新闻、持仓解析、积金局档案
-          node navbuild.js || echo "!! navbuild 官網快照失敗"
+          node navbuild.js --render || echo "!! navbuild 官網快照失敗"
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
           python fetch-bea-hist.py || echo "!! 東亞失敗"
           python fetch-fidelity-hist.py || echo "!! 富達失敗"
@@ -121,6 +136,23 @@ jobs:
           # 2026-10-26 修 4-05：补齐本机 health-check 覆盖的四类哨兵（缺日/渠道一致/allocSum/三处一致本地版）
           node tools/gap-check.js
           node tools/health-check.js --local
+
+      - name: 官網快照自檢（雲端必須真的抓到頁面）
+        continue-on-error: true
+        run: |
+          node -e "
+          const n=require('./data/nav.json');
+          const src=n.sources||[];
+          const all=src.length;
+          const ok=src.filter(s=>s.count>0).length;
+          const carried=src.filter(s=>s.carried).length;
+          const alerts=(n.alerts||[]).length;
+          const line='官網來源有數據 '+ok+' / '+all+'；沿用上次 '+carried+' 個來源；告警 '+alerts+' 条；nav.updatedAt '+new Date(n.updatedAt).toISOString();
+          console.log(line);
+          try{ if(process.env.GITHUB_STEP_SUMMARY){require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY,'### 官網快照自檢\n\n'+line+'\n');} }catch(e){}
+          if(!ok){ console.error('!! 官網快照 0 條：Chrome 渲染失敗或官網訪問被攔'); process.exit(1); }
+          if(carried > all/2){ console.error('!! 超過半數來源沿用舊數據：雲端渲染大面積失敗，GitHub 站淨值不會刷新'); process.exit(1); }
+          "
 
       - name: 提交數據變更
         # 2026-10-28：本机每日 23:20 也会推一次数据，云端与本机同时提交同一批文件时 rebase 会冲突，

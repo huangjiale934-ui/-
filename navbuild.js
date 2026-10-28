@@ -15,6 +15,7 @@
  *           无法核实的一律不写入，前端显示「待核实」。
  */
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
@@ -187,7 +188,22 @@ const PAGE_LINKS = {
 };
 
 /* ============================ 渲染（可选） ============================ */
-const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+/* 2026-10-28：原来写死 Windows 路径，GitHub Actions（ubuntu）上永远「未找到 Chrome」，
+   导致云端 navbuild 一条官网快照都产不出来、只刷新 updatedAt —— 云端看着更新了其实没数据。
+   这里改为跨平台探测，可用 CHROME_PATH 环境变量覆盖。 */
+const CHROME_CANDIDATES = [
+  process.env.CHROME_PATH,
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+].filter(Boolean);
+const CHROME = CHROME_CANDIDATES.find((p) => {
+  try { return fs.existsSync(p); } catch (e) { return false; }
+}) || CHROME_CANDIDATES[0];
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
 /* BCT 等接口要求真实估值日；DATE 占位符若原样请求会返回 data:null。
@@ -214,9 +230,10 @@ function isValid(res, s) {
 
 function renderAll() {
   if (!fs.existsSync(CHROME)) {
-    console.log('[NAV] 未找到 Chrome，跳过渲染');
+    console.log('[NAV] 未找到 Chrome，跳过渲染（已尝试：' + CHROME_CANDIDATES.join(' / ') + '）');
     return false;
   }
+  console.log('[NAV] 渲染器：' + CHROME);
   fs.mkdirSync(SRC_DIR, { recursive: true });
   const done = {};
   for (const s of SOURCES) {
@@ -242,8 +259,9 @@ function renderAll() {
 
 function fetchDom(url, key, budget) {
   const ms = budget || 25000;
+  const udd = path.join(os.tmpdir(), 'nav-' + key);
   const args = ['--headless=new', '--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage',
-    '--user-data-dir=D:/tmp/nav-' + key, '--virtual-time-budget=' + ms,
+    '--user-data-dir=' + udd, '--virtual-time-budget=' + ms,
     '--window-size=1920,3000', '--user-agent=' + UA, '--dump-dom', url];
   try {
     return execFileSync(CHROME, args, { maxBuffer: 128 * 1024 * 1024, timeout: ms + 150000 }).toString();

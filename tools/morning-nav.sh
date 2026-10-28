@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # 交易日早晨「仅净值」更新（2026-10-27 新增）
-# 用途：北京时间 10:00 再跑一次，补上「前一晚 22:30 之后到今早」发行人新发布的单位净值与自算指标。
+# 用途：北京时间 09:40 再跑一次，补上「前一晚 22:30 之后到今早」发行人新发布的单位净值与自算指标。
 # 范围：只抓净值渠道 + 重算自算指标；**不更新**指数、新闻、持仓、积金局月度档案。
-# 用法：bash tools/morning-nav.sh [--no-sync]
+# 用法：bash tools/morning-nav.sh [--sync]    # 默认不推 GitHub（两站独立更新）
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
@@ -75,7 +75,13 @@ node tools/gap-check.js || true
 echo ""
 write_ustat done "早晨净值更新完成" "" "$(date '+%H:%M')"
 echo "=== 早晨净值更新完成 $(date '+%F %T')；日志：$LOG ==="
-[ "${1:-}" = "--no-sync" ] && { echo "（--no-sync：不推送 GitHub）"; exit 0; }
-# 推送数据到 GitHub（无变更会自动跳过；push 会触发 Pages 构建）
-soft "15 同步 GitHub" bash tools/sync-github.sh
+# 2026-10-28：两站独立更新 —— 本机链路只负责 WorkBuddy 站，不再向 GitHub 推数据。
+# GitHub 侧由云端 09:40 / 22:40 自行抓取并发布，避免两条链路同时写 data/*.json 打架。
+# 需要人工兜底推送时显式加 --sync。
+if [ "${1:-}" = "--sync" ]; then
+  echo "（--sync：手动推送 GitHub）"
+  soft "15 同步 GitHub" bash tools/sync-github.sh
+else
+  echo "（已跳过 GitHub 推送：两站独立更新；确需推送加 --sync）"
+fi
 echo "下一步：发布 WorkBuddy 站（由调用方执行 workbuddy_sites_deploy）"
