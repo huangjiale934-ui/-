@@ -131,7 +131,14 @@ jobs:
             echo "數據無變更"
           else
             git commit -m "daily data update $(date -u +%F)"
-            git push
+            # 2026-10-28：本机会在 23:20 左右也推一次数据（sync-github.sh），云端若无条件 push 会被拒 →
+            # 用 rebase 重试 3 次，避免「数据已提交但部署被跳过」。
+            for i in 1 2 3; do
+              if git pull --rebase --autostash origin main && git push; then
+                echo "推送成功（第 $i 次）"; break
+              fi
+              echo "推送失败（第 $i 次），重试…"; sleep 5
+            done
           fi
 
   build-deploy:

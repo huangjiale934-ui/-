@@ -29,7 +29,16 @@ SINCE=$(date -d '10 days ago' +%F 2>/dev/null || date -v-10d +%F)
 YMSINCE=$(date -d '10 days ago' +%Y-%m 2>/dev/null || date -v-10d +%Y-%m)
 echo "=== 早晨净值更新开始 $(date '+%F %T') · 近端起点 $SINCE ==="
 
-soft() { local n="$1"; shift; echo ""; echo "--- [$n] $* ---"; "$@"; local rc=$?; [ $rc -ne 0 ] && echo "!!! [$n] 失败（$rc），跳过"; return 0; }
+# 2026-10-28：与每日链路一致，把「更新中/完成/失败」写到 data/update-status.json，
+# 前端顶部提示条据此显示（此前早晨任务不写状态，用户看不到任何提示）
+USTAT="data/update-status.json"
+write_ustat() {
+  [ -n "${NODE:-}" ] || return 0
+  "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" >/dev/null 2>&1 || true
+}
+write_ustat running "早晨净值更新：启动" "$(date '+%H:%M')"
+
+soft() { local n="$1"; shift; echo ""; echo "--- [$n] $* ---"; write_ustat running "$n"; "$@"; local rc=$?; if [ $rc -ne 0 ]; then echo "!!! [$n] 失败（$rc），跳过"; write_ustat error "$n 失败（$rc）"; fi; return 0; }
 
 # 1) 发行人官网快照（今日净值）
 # 2026-10-27：实测 navbuild --render 可能卡在某个发行人页面（无输出、无限等待）。
@@ -56,13 +65,15 @@ soft "13 海通" "$PY" ht_daily.py
 soft "14 BCT 净值" "$PY" tools/bct-recent.py
 
 # 3) 自算指标与校准（与每日链路同口径）
-node navperf.js || { echo "!!! navperf 失败，中止"; exit 1; }
+write_ustat running "重算自算指标"
+node navperf.js || { echo "!!! navperf 失败，中止"; write_ustat error "navperf 失败"; exit 1; }
 node tools/fix-nulls.js || true
 node tools/merge-nav.js || { echo "!!! merge-nav 失败，中止"; exit 1; }
 node tools/nav-consistency.js || echo "!!! nav-consistency 未通过（详见输出）"
 node tools/gap-check.js || true
 
 echo ""
+write_ustat done "早晨净值更新完成" "" "$(date '+%H:%M')"
 echo "=== 早晨净值更新完成 $(date '+%F %T')；日志：$LOG ==="
 [ "${1:-}" = "--no-sync" ] && { echo "（--no-sync：不推送 GitHub）"; exit 0; }
 # 推送数据到 GitHub（无变更会自动跳过；push 会触发 Pages 构建）
