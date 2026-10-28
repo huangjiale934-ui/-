@@ -353,6 +353,28 @@ function num(s) {
 
 // 源页面未提供显式估值日时的兜底：扫描全文日期，只接受距今天 45 天内的值
 // （避免误取基金成立日、条款生效日等历史日期）
+/** 2026-10-28：净值日不可能是周六/周日 —— 官网页面只渲染了一半时，
+ *  解析器可能抓到别的日期串（云端 10-28 就把恒生 20 只标成了周日 10-25）。 */
+function isWeekend(iso) {
+  if (!iso) return false;
+  const t = Date.parse(iso + 'T00:00:00Z');
+  if (!Number.isFinite(t)) return false;
+  const w = new Date(t).getUTCDay();
+  return w === 0 || w === 6;
+}
+
+/** 不可能的净值日：周末 / 晚于今天（香港时间）/ 非法串。
+ *  2026-10-28：永明把请求日 10-28 当净值日、云端把恒生整批标成周日 10-25，
+ *  两次事故的共同点就是「解析器信了页面上的任意日期串」，这里统一收口。 */
+function badNavDate(iso) {
+  if (!iso) return false;
+  if (isWeekend(iso)) return true;
+  const t = Date.parse(iso + 'T00:00:00Z');
+  if (!Number.isFinite(t)) return true;
+  const hkToday = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+  return iso > hkToday;
+}
+
 function fallbackAsOf(raw) {
   const txt = String(raw || '');
   const now = Date.now();
@@ -363,6 +385,7 @@ function fallbackAsOf(raw) {
     const t = Date.parse(iso + 'T00:00:00Z');
     if (!Number.isFinite(t)) return;
     if (t > now + 86400e3 || t < now - span) return; // 未来或过旧
+    if (isWeekend(iso)) return; // 2026-10-28：净值日不可能是周末，直接排除
     found.push(iso);
   };
   const reDMY = /(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(20\d{2})/g;
@@ -799,6 +822,37 @@ function build() {
   try {
     if (fs.existsSync(OUT)) prev = JSON.parse(fs.readFileSync(OUT, 'utf8'));
   } catch (e) { prev = null; }
+
+  /* ---------- 不可能的净值日剔除（2026-10-28 新增）----------
+   * 云端 10-28 那次把恒生 20 只整批标成 2026-10-25（周日）：页面只渲染了一半时，
+   * 宽松的正则抓到了别的日期串。周末/未来日期绝不可能是估值日，必须就地纠正，
+   * 否则会一路写进 funds.json、nav-perf.json，前端显示「净值日 10-25」这种假数据。
+   * 纠正顺序：同来源其余正常的日期 → 上一次该来源的日期 → 留空交给 hist-index 回填。 */
+  const prevSrcAsOf = {};
+  if (prev && Array.isArray(prev.sources)) {
+    prev.sources.forEach((s) => { if (s.label) prevSrcAsOf[s.label] = s.asOf || ''; });
+  }
+  const badSeen = {};
+  items.forEach((it) => {
+    if (badNavDate(it.asOf)) {
+      (badSeen[it.src] = badSeen[it.src] || []).push(it.asOf);
+      it.asOf = '';
+    }
+  });
+  Object.keys(badSeen).forEach((k) => {
+    const cnt = {};
+    items.forEach((it) => { if (it.src === k && it.asOf) cnt[it.asOf] = (cnt[it.asOf] || 0) + 1; });
+    const best = Object.keys(cnt).sort((a, b) => (cnt[b] - cnt[a]) || (a < b ? 1 : -1))[0] || '';
+    let pick = best || prevSrcAsOf[k] || '';
+    if (badNavDate(pick)) pick = '';
+    let fixed = 0;
+    items.forEach((it) => { if (it.src === k && !it.asOf && pick) { it.asOf = pick; fixed++; } });
+    const cs = sources.find((x) => x.label === k);
+    if (cs && badNavDate(cs.asOf)) cs.asOf = pick;
+    console.log('[NAV] ⚠ ' + k + ' ' + badSeen[k].length + ' 条净值日不可能（' +
+      Array.from(new Set(badSeen[k])).join('/') + '），已改用 ' + (pick || '（留空待回填）') +
+      (fixed ? ' 共 ' + fixed + ' 条' : ''));
+  });
 
   /* ---------- 来源失效自动告警 ----------
    * 某来源本次条数归零（读取/解析失败）或较上一次骤降三成以上时记录在案，

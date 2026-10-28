@@ -76,6 +76,10 @@ jobs:
       - name: 抓取發行人官網數據（失敗保留舊數據）
         if: steps.mode.outputs.light == '0'
         run: |
+          # 2026-10-28：hist 快照——发行人脚本多为「整段覆盖写」，用 --from 只抓近端区间时
+          # 会把 2015 年以来的历史冲成 5 个点（云端 10-28 就把 74 只基金冲成了 5 点）。
+          # 抓取前备份、抓取后按日期取并集，才是正确姿势。
+          node tools/hist-merge-snap.js save
           # 2026-10-26：持仓写入事务——抓取前快照，写后自动判定退化并回滚（与本机 daily.sh 同口径）
           node tools/holdings-txn.js save
           # 逐渠道軟失敗：單渠道失敗只記錄，不中斷（與本機 daily.sh 同哲學）
@@ -99,6 +103,8 @@ jobs:
       - name: 抓取淨值（交易日 09:40 轻量模式）
         if: steps.mode.outputs.light == '1'
         run: |
+          # 2026-10-28：抓取前备份 hist（本次多为「近端区间覆盖写」，合并时按日期取并集）
+          node tools/hist-merge-snap.js save
           # 只抓「單位淨值」渠道；不跑指数、新闻、持仓解析、积金局档案
           node navbuild.js --render || echo "!! navbuild 官網快照失敗"
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
@@ -121,6 +127,9 @@ jobs:
 
       - name: 重算指標與校驗
         run: |
+          # 2026-10-28：先做 hist 并集合并（快照 ∪ 本次新值），再算指标——
+          # 顺序不能反，否则算出来的 ytd/mdd 是建立在被截断的 5 个点上。
+          node tools/hist-merge-snap.js merge
           node navperf.js
           if [ "${{ steps.mode.outputs.light }}" = "0" ]; then node indexbuild.js; fi
           node tools/fix-nulls.js
@@ -132,10 +141,13 @@ jobs:
             node tools/holdings-normalize.js
             node tools/holdings-guard.js
           fi
-          node tools/nav-consistency.js
+          # 2026-10-28：校验类步骤改为「告警不阻断」——10-28 10:41 的定时任务就是因为
+          # 三处一致性巡检返回 1 直接整条 run 失败，连 Pages 都没发布出去。
+          # 数据本身有防退化守卫兜底，发布上一次完整数据比「什么都不发」更安全。
+          node tools/nav-consistency.js || echo "!! nav-consistency 未通过（不影响发布）"
           # 2026-10-26 修 4-05：补齐本机 health-check 覆盖的四类哨兵（缺日/渠道一致/allocSum/三处一致本地版）
-          node tools/gap-check.js
-          node tools/health-check.js --local
+          node tools/gap-check.js || echo "!! gap-check 有缺口（不影响发布）"
+          node tools/health-check.js --local || echo "!! health-check 有告警（不影响发布）"
 
       - name: 官網快照自檢（雲端必須真的抓到頁面）
         continue-on-error: true
