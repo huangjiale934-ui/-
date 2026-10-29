@@ -1,5 +1,5 @@
 {
- "updatedAt": 1793206017874,
+ "updatedAt": 1793240914623,
  "sources": [
   {
    "key": "AMTD",
@@ -76,8 +76,8 @@
   {
    "key": "BCT-Pro",
    "label": "BCT積金之選（銀聯信託）",
-   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26",
-   "asOf": "2026-10-26",
+   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27",
+   "asOf": "2026-10-27",
    "count": 26,
    "na": 0,
    "page": "https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-1"
@@ -85,8 +85,8 @@
   {
    "key": "BCT-Strategic",
    "label": "BCT強積金策略計劃（銀聯信託）",
-   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26",
-   "asOf": "2026-10-26",
+   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27",
+   "asOf": "2026-10-27",
    "count": 26,
    "na": 0,
    "page": "https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-2"
@@ -94,8 +94,8 @@
   {
    "key": "BCT-S800",
    "label": "BCT強積金計劃800系列（銀聯信託）",
-   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26",
-   "asOf": "2026-10-26",
+   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27",
+   "asOf": "2026-10-27",
    "count": 28,
    "na": 0,
    "page": "https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-3"
@@ -103,8 +103,8 @@
   {
    "key": "BCT-Smart",
    "label": "BCT強積金—明智之選（銀聯信託）",
-   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26",
-   "asOf": "2026-10-26",
+   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27",
+   "asOf": "2026-10-27",
    "count": 14,
    "na": 0,
    "page": "https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-4"
@@ -112,8 +112,8 @@
   {
    "key": "BCT-Simple",
    "label": "BCT強積金—易富之選（銀聯信託）",
-   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26",
-   "asOf": "2026-10-26",
+   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27",
+   "asOf": "2026-10-27",
    "count": 10,
    "na": 0,
    "page": "https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-5"
@@ -121,8 +121,8 @@
   {
    "key": "BCT-Industry",
    "label": "BCT（強積金）行業計劃（銀聯信託）",
-   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26",
-   "asOf": "2026-10-26",
+   "url": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27",
+   "asOf": "2026-10-27",
    "count": 12,
    "na": 0,
    "page": "https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-6"
@@ -140,7 +140,7 @@
    "key": "AIA",
    "label": "友邦強積金優選計劃（友邦信托）",
    "url": "https://www.aia.com.hk/zh-hk/products/mpf/list",
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "count": 20,
    "na": 1,
    "page": "https://www.aia.com.hk/zh-hk/products/mpf/list"
@@ -185,7 +185,7 @@
    "key": "Manu-GS",
    "label": "宏利環球精選（強積金）計劃（宏利）",
    "url": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83",
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "count": 28,
    "na": 1,
    "page": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2"
@@ -194,7 +194,7 @@
    "key": "Manu-RC",
    "label": "宏利退休精選（強積金）計劃（宏利）",
    "url": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83",
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "count": 39,
    "na": 0,
    "page": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist"
@@ -1645,99 +1645,99 @@
    "scheme": "BCT積金之選",
    "fund": "BCT 中國及香港股票基金",
    "unit": "A",
-   "nav": 1.0428,
+   "nav": 1.0335,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 亞洲股票基金",
    "unit": "A",
-   "nav": 5.275,
+   "nav": 5.3029,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 歐洲股票基金",
    "unit": "A",
-   "nav": 2.0029,
+   "nav": 2.0039,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 環球股票基金",
    "unit": "A",
-   "nav": 6.0712,
+   "nav": 6.1013,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 恒指基金",
    "unit": "A",
-   "nav": 1.6209,
+   "nav": 1.6088,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 美國股票基金",
    "unit": "A",
-   "nav": 1.5741,
+   "nav": 1.5843,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 大中華股票基金",
    "unit": "A",
-   "nav": 2.1991,
+   "nav": 2.2024,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 世界股票基金",
    "unit": "A",
-   "nav": 3.7529,
+   "nav": 3.7777,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 儲蓄易2050基金",
    "unit": "A",
-   "nav": 1.1942,
+   "nav": 1.1948,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
@@ -1746,97 +1746,97 @@
    "unit": "A",
    "nav": 1.1822,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 儲蓄易2040基金",
    "unit": "A",
-   "nav": 3.5532,
+   "nav": 3.5548,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 儲蓄易2035基金",
    "unit": "A",
-   "nav": 3.3755,
+   "nav": 3.377,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 儲蓄易2030基金",
    "unit": "A",
-   "nav": 3.3392,
+   "nav": 3.34,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 儲蓄易2025基金",
    "unit": "A",
-   "nav": 2.8474,
+   "nav": 2.8481,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT E90混合資產基金",
    "unit": "A",
-   "nav": 3.4131,
+   "nav": 3.4143,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT E70混合資產基金",
    "unit": "A",
-   "nav": 2.9533,
+   "nav": 2.9535,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT E50混合資產基金",
    "unit": "A",
-   "nav": 2.5198,
+   "nav": 2.5196,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT E30混合資產基金",
    "unit": "A",
-   "nav": 2.0209,
+   "nav": 2.0204,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
@@ -1845,42 +1845,42 @@
    "unit": "A",
    "nav": 2.0395,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 核心累積基金",
    "unit": "A",
-   "nav": 1.9734,
+   "nav": 1.9788,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 65 歲後基金",
    "unit": "A",
-   "nav": 1.2735,
+   "nav": 1.2745,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 亞洲收益退休基金",
    "unit": "A",
-   "nav": 1.0179,
+   "nav": 1.0172,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
@@ -1889,31 +1889,31 @@
    "unit": "A",
    "nav": 1.1718,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 環球債券基金",
    "unit": "A",
-   "nav": 1.4622,
+   "nav": 1.4613,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT積金之選",
    "fund": "BCT 港元債券基金",
    "unit": "A",
-   "nav": 1.299,
+   "nav": 1.2989,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
@@ -1922,933 +1922,933 @@
    "unit": "A",
    "nav": 1.274,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT積金之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=pro-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順中港股票基金",
    "unit": "H",
-   "nav": 35.0216,
+   "nav": 34.7153,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順中港股票基金",
    "unit": "A",
-   "nav": 35.0218,
+   "nav": 34.7154,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順亞洲股票基金",
    "unit": "A",
-   "nav": 15.702,
+   "nav": 15.7832,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順亞洲股票基金",
    "unit": "H",
-   "nav": 15.6665,
+   "nav": 15.7475,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順恒指基金",
    "unit": "H",
-   "nav": 12.6945,
+   "nav": 12.5996,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順恒指基金",
    "unit": "A",
-   "nav": 12.6248,
+   "nav": 12.5304,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順環球追蹤指數基金",
    "unit": "H",
-   "nav": 16.3832,
+   "nav": 16.4859,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順環球追蹤指數基金",
    "unit": "A",
-   "nav": 16.3832,
+   "nav": 16.4859,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順美國追蹤指數基金",
    "unit": "H",
-   "nav": 16.7116,
+   "nav": 16.8343,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順美國追蹤指數基金",
    "unit": "A",
-   "nav": 16.7116,
+   "nav": 16.8343,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順增長基金",
    "unit": "H",
-   "nav": 35.866,
+   "nav": 35.8751,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順增長基金",
    "unit": "A",
-   "nav": 34.3633,
+   "nav": 34.3719,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順均衡基金",
    "unit": "A",
-   "nav": 29.5827,
+   "nav": 29.5846,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順均衡基金",
    "unit": "H",
-   "nav": 31.4435,
+   "nav": 31.4457,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順資本穩定基金",
    "unit": "H",
-   "nav": 24.2921,
+   "nav": 24.2843,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順資本穩定基金",
    "unit": "A",
-   "nav": 23.3101,
+   "nav": 23.3026,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順核心累積基金",
    "unit": "H",
-   "nav": 19.8529,
+   "nav": 19.9082,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順核心累積基金",
    "unit": "A",
-   "nav": 19.8529,
+   "nav": 19.9082,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順65歲後基金",
    "unit": "A",
-   "nav": 12.7197,
+   "nav": 12.7298,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順65歲後基金",
    "unit": "H",
-   "nav": 12.7197,
+   "nav": 12.7298,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順環球債券基金",
    "unit": "H",
-   "nav": 15.832,
+   "nav": 15.8222,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順環球債券基金",
    "unit": "A",
-   "nav": 15.3657,
+   "nav": 15.3561,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順人民幣債券基金",
    "unit": "H",
-   "nav": 11.7329,
+   "nav": 11.7326,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順人民幣債券基金",
    "unit": "A",
-   "nav": 11.5403,
+   "nav": 11.54,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順強積金保守基金",
    "unit": "H",
-   "nav": 13.4281,
+   "nav": 13.429,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金策略計劃",
    "fund": "景順強積金保守基金",
    "unit": "A",
-   "nav": 13.4308,
+   "nav": 13.4317,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金策略計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=strategic-mpf&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安65歲後基金",
    "unit": "N",
-   "nav": 12.8766666,
+   "nav": 12.9069334,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安亞洲債券基金",
    "unit": "N",
-   "nav": 10.2066425,
+   "nav": 10.2125047,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安亞洲股票基金",
    "unit": "D",
-   "nav": 63.2783367,
+   "nav": 63.7872481,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安亞洲股票基金",
    "unit": "I",
-   "nav": 60.393633,
+   "nav": 60.8793443,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安進取策略基金",
    "unit": "D",
-   "nav": 35.2309683,
+   "nav": 35.3655814,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安進取策略基金",
    "unit": "I",
-   "nav": 34.6107226,
+   "nav": 34.7429657,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安核心累積基金",
    "unit": "N",
-   "nav": 19.0122398,
+   "nav": 19.1009281,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安中國股票基金",
    "unit": "D",
-   "nav": 14.2405854,
+   "nav": 14.1117237,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安中國股票基金",
    "unit": "I",
-   "nav": 13.5901944,
+   "nav": 13.4672179,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安強積金保守基金",
    "unit": "N",
-   "nav": 12.8161618,
+   "nav": 12.8171121,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安環球增長基金",
    "unit": "D",
-   "nav": 35.0954562,
+   "nav": 35.2217919,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安環球增長基金",
    "unit": "I",
-   "nav": 34.0373924,
+   "nav": 34.1599192,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安香港債券基金",
    "unit": "N",
-   "nav": 12.0700207,
+   "nav": 12.0691329,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安港元儲蓄基金",
    "unit": "D",
-   "nav": 12.6449509,
+   "nav": 12.6462237,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安港元儲蓄基金",
    "unit": "I",
-   "nav": 12.5643936,
+   "nav": 12.5656584,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安香港股票基金",
    "unit": "D",
-   "nav": 27.771725,
+   "nav": 27.5092744,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安香港股票基金",
    "unit": "I",
-   "nav": 27.1263526,
+   "nav": 26.870001,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安恒指基金",
    "unit": "N",
-   "nav": 15.2993571,
+   "nav": 15.1845608,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安國際債券基金",
    "unit": "D",
-   "nav": 16.2606727,
+   "nav": 16.2658707,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安國際債券基金",
    "unit": "I",
-   "nav": 16.0843815,
+   "nav": 16.0895232,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安國際股票基金",
    "unit": "D",
-   "nav": 35.0823829,
+   "nav": 35.3449539,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安國際股票基金",
    "unit": "I",
-   "nav": 33.4888106,
+   "nav": 33.7394547,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安長線增值基金",
    "unit": "D",
-   "nav": 25.4235054,
+   "nav": 25.5041202,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安長線增值基金",
    "unit": "I",
-   "nav": 24.6572292,
+   "nav": 24.7354142,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安平穩回報基金",
    "unit": "D",
-   "nav": 21.1659638,
+   "nav": 21.2247618,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安平穩回報基金",
    "unit": "I",
-   "nav": 20.5301518,
+   "nav": 20.5871836,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安美國股票基金",
    "unit": "D",
-   "nav": 45.1414708,
+   "nav": 45.1677273,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金計劃800系列",
    "fund": "信安美國股票基金",
    "unit": "I",
-   "nav": 43.0980081,
+   "nav": 43.123076,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金計劃800系列（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=series-800&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安65歲後基金",
    "unit": "-",
-   "nav": 12.8185881,
+   "nav": 12.8484156,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安動力亞洲債券基金",
    "unit": "-",
-   "nav": 10.2603666,
+   "nav": 10.2657482,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安動力亞太股票基金",
    "unit": "-",
-   "nav": 22.265358,
+   "nav": 22.5056078,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安均衡基金",
    "unit": "-",
-   "nav": 26.8199249,
+   "nav": 26.9146091,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安核心累積基金",
    "unit": "-",
-   "nav": 18.8419971,
+   "nav": 18.9296589,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安流動基金",
    "unit": "-",
-   "nav": 12.8411372,
+   "nav": 12.841806,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安 – 強積金保守基金",
    "unit": "-",
-   "nav": 12.3471671,
+   "nav": 12.3478484,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安動力環球債券基金",
    "unit": "-",
-   "nav": 8.5333347,
+   "nav": 8.5338012,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安動力大中華股票基金",
    "unit": "-",
-   "nav": 27.8785437,
+   "nav": 27.8903678,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安動力環球股票基金",
    "unit": "-",
-   "nav": 27.9077808,
+   "nav": 28.1082382,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安增長基金",
    "unit": "-",
-   "nav": 31.2692507,
+   "nav": 31.3893498,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安動力香港股票基金",
    "unit": "-",
-   "nav": 11.0381196,
+   "nav": 10.9710527,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安 – 恒指基金",
    "unit": "-",
-   "nav": 12.5995056,
+   "nav": 12.5057313,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—明智之選",
    "fund": "信安平穩基金",
    "unit": "-",
-   "nav": 18.9659732,
+   "nav": 19.0152823,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—明智之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=smart-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安65歲後基金",
    "unit": "-",
-   "nav": 12.6620242,
+   "nav": 12.6916794,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安動力亞太股票基金",
    "unit": "-",
-   "nav": 24.6148718,
+   "nav": 24.8834657,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安均衡基金",
    "unit": "-",
-   "nav": 24.246443,
+   "nav": 24.3320307,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安核心累積基金",
    "unit": "-",
-   "nav": 18.6173039,
+   "nav": 18.7045269,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安 – 強積金保守基金",
    "unit": "-",
-   "nav": 11.9783041,
+   "nav": 11.9789613,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安動力環球債券基金",
    "unit": "-",
-   "nav": 9.6434711,
+   "nav": 9.6437942,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安動力環球股票基金",
    "unit": "-",
-   "nav": 25.2438987,
+   "nav": 25.4301743,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安增長基金",
    "unit": "-",
-   "nav": 29.7835373,
+   "nav": 29.8980355,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安動力香港股票基金",
    "unit": "-",
-   "nav": 25.2186899,
+   "nav": 25.0638114,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT強積金—易富之選",
    "fund": "信安平穩基金",
    "unit": "-",
-   "nav": 14.9408974,
+   "nav": 14.9797694,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT強積金—易富之選（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=simple-plan&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) 中國及香港股票基金",
    "unit": "A",
-   "nav": 4.0135,
+   "nav": 3.9773,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) 亞洲股票基金",
    "unit": "A",
-   "nav": 5.2584,
+   "nav": 5.2865,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) 環球股票基金",
    "unit": "A",
-   "nav": 5.2293,
+   "nav": 5.2555,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) E70混合資產基金",
    "unit": "A",
-   "nav": 2.81,
+   "nav": 2.8102,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) E50混合資產基金",
    "unit": "A",
-   "nav": 2.5073,
+   "nav": 2.5071,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) E30混合資產基金",
    "unit": "A",
-   "nav": 2.1691,
+   "nav": 2.1685,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
@@ -2857,31 +2857,31 @@
    "unit": "A",
    "nav": 1.9199,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) 核心累積基金",
    "unit": "A",
-   "nav": 1.946,
+   "nav": 1.9514,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) 65 歲後基金",
    "unit": "A",
-   "nav": 1.2662,
+   "nav": 1.2672,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
@@ -2890,31 +2890,31 @@
    "unit": "A",
    "nav": 1.1715,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) 環球債券基金",
    "unit": "A",
-   "nav": 1.2645,
+   "nav": 1.2637,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "銀聯信託",
    "scheme": "BCT（強積金）行業計劃",
    "fund": "BCT (行業) 強積金保守基金",
    "unit": "A",
-   "nav": 1.2589,
+   "nav": 1.259,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "BCT（強積金）行業計劃（銀聯信託）",
-   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-26"
+   "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-27"
   },
   {
    "trustee": "永明",
@@ -3262,9 +3262,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "美洲基金",
    "unit": "",
-   "nav": 504.39,
+   "nav": 507.31,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3273,9 +3273,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "亞歐基金",
    "unit": "",
-   "nav": 272.13,
+   "nav": 273.26,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3284,9 +3284,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "中港基金",
    "unit": "",
-   "nav": 168.82,
+   "nav": 167.51,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3295,9 +3295,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "全球基金",
    "unit": "",
-   "nav": 301.07,
+   "nav": 302.67,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3306,9 +3306,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "亞洲債券基金",
    "unit": "",
-   "nav": 118.43,
+   "nav": 118.48,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3317,9 +3317,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "環球債券基金",
    "unit": "",
-   "nav": 112.64,
+   "nav": 112.62,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3330,7 +3330,7 @@
    "unit": "",
    "nav": 127.17,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3339,9 +3339,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "中港動態資產配置基金",
    "unit": "",
-   "nav": 113.65,
+   "nav": 113.36,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3350,9 +3350,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "基金經理精選退休基金",
    "unit": "",
-   "nav": 248.12,
+   "nav": 249.09,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3361,9 +3361,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "亞洲股票基金",
    "unit": "",
-   "nav": 526.31,
+   "nav": 530.68,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3372,9 +3372,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "歐洲股票基金",
    "unit": "",
-   "nav": 417.67,
+   "nav": 418.93,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3383,9 +3383,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "大中華股票基金",
    "unit": "",
-   "nav": 387.86,
+   "nav": 384.41,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3394,9 +3394,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "北美股票基金",
    "unit": "",
-   "nav": 580.97,
+   "nav": 584.98,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3405,9 +3405,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "綠色退休基金",
    "unit": "",
-   "nav": 416.81,
+   "nav": 418.79,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3416,9 +3416,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "增長組合",
    "unit": "",
-   "nav": 409.63,
+   "nav": 410.75,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3427,9 +3427,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "均衡組合",
    "unit": "",
-   "nav": 266.96,
+   "nav": 267.41,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3438,9 +3438,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "穩定資本組合",
    "unit": "",
-   "nav": 216.25,
+   "nav": 216.49,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3449,9 +3449,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "退休收益基金",
    "unit": "",
-   "nav": 100.94,
+   "nav": 100.97,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3460,9 +3460,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "核心累積基金",
    "unit": "",
-   "nav": 1.887,
+   "nav": 1.8926,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3471,9 +3471,9 @@
    "scheme": "友邦強積金優選計劃",
    "fund": "65歲後基金",
    "unit": "",
-   "nav": 1.2292,
+   "nav": 1.2304,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3484,7 +3484,7 @@
    "unit": "",
    "nav": null,
    "na": true,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "友邦強積金優選計劃（友邦信托）",
    "srcUrl": "https://www.aia.com.hk/zh-hk/products/mpf/list"
   },
@@ -3801,7 +3801,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽強積金保守基金",
    "unit": "",
-   "nav": 12.22,
+   "nav": 12.2207,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3812,7 +3812,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽平衡基金",
    "unit": "",
-   "nav": 32.4715,
+   "nav": 32.4581,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3823,7 +3823,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽增長基金",
    "unit": "",
-   "nav": 38.2458,
+   "nav": 38.2311,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3834,7 +3834,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽樂安心保證基金*",
    "unit": "",
-   "nav": 15.1935,
+   "nav": 15.2145,
    "na": false,
    "asOf": "",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3845,7 +3845,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽樂休閒環球股票基金",
    "unit": "",
-   "nav": 21.3423,
+   "nav": 21.488,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3856,7 +3856,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽香港股票基金",
    "unit": "",
-   "nav": 16.5657,
+   "nav": 16.4262,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3867,7 +3867,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽核心累積基金",
    "unit": "",
-   "nav": 19.6757,
+   "nav": 19.7303,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3878,7 +3878,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽65歲後基金",
    "unit": "",
-   "nav": 12.5817,
+   "nav": 12.5917,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3889,7 +3889,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽大中華股票基金",
    "unit": "",
-   "nav": 10.5409,
+   "nav": 10.4084,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -3900,7 +3900,7 @@
    "scheme": "中國人壽強積金集成信託計劃",
    "fund": "中國人壽美國股票基金",
    "unit": "",
-   "nav": 13.8545,
+   "nav": 13.9451,
    "na": false,
    "asOf": "2026-10-26",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
@@ -4175,9 +4175,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF穩健基金",
    "unit": "",
-   "nav": 17.235,
+   "nav": 17.236,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4186,9 +4186,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF增長基金",
    "unit": "",
-   "nav": 26.499,
+   "nav": 26.504,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4197,9 +4197,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF進取基金",
    "unit": "",
-   "nav": 29.469,
+   "nav": 29.473,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4208,9 +4208,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF保守基金",
    "unit": "",
-   "nav": 12.793,
+   "nav": 12.794,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4219,9 +4219,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF香港股票基金",
    "unit": "",
-   "nav": 22.153,
+   "nav": 21.931,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4230,9 +4230,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF國際股票基金",
    "unit": "",
-   "nav": 31.152,
+   "nav": 31.289,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4241,9 +4241,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF亞太股票基金",
    "unit": "",
-   "nav": 45.09,
+   "nav": 45.363,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4252,9 +4252,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF歐洲股票基金",
    "unit": "",
-   "nav": 18.709,
+   "nav": 18.723,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4263,9 +4263,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF北美股票基金",
    "unit": "",
-   "nav": 37.868,
+   "nav": 38.131,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4274,9 +4274,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF日本股票基金",
    "unit": "",
-   "nav": 30.479,
+   "nav": 30.558,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4287,7 +4287,7 @@
    "unit": "",
    "nav": 15.818,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4296,9 +4296,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF國際債券基金",
    "unit": "",
-   "nav": 15.251,
+   "nav": 15.244,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4307,9 +4307,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF富達增長基金",
    "unit": "",
-   "nav": 40.04,
+   "nav": 40.024,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4318,9 +4318,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF富達平穩增長基金",
    "unit": "",
-   "nav": 25.101,
+   "nav": 25.087,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4329,9 +4329,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF中華威力基金",
    "unit": "",
-   "nav": 35.585,
+   "nav": 35.207,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4340,9 +4340,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF康健護理基金",
    "unit": "",
-   "nav": 37.708,
+   "nav": 37.687,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4351,9 +4351,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF智優裕退休基金",
    "unit": "",
-   "nav": 15.404,
+   "nav": 15.42,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4362,9 +4362,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF 2025退休基金",
    "unit": "",
-   "nav": 17.37,
+   "nav": 17.389,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4373,9 +4373,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF 2030退休基金",
    "unit": "",
-   "nav": 20.174,
+   "nav": 20.198,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4384,9 +4384,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF 2035退休基金",
    "unit": "",
-   "nav": 21.795,
+   "nav": 21.812,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4395,9 +4395,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF 2040退休基金",
    "unit": "",
-   "nav": 22.852,
+   "nav": 22.866,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4406,9 +4406,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF 2045退休基金",
    "unit": "",
-   "nav": 23.112,
+   "nav": 23.125,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4417,9 +4417,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF恒指ESG基金",
    "unit": "",
-   "nav": 13.786,
+   "nav": 13.779,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4428,9 +4428,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF可持續亞太債券基金",
    "unit": "",
-   "nav": 11.938,
+   "nav": 11.925,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4439,9 +4439,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF人民幣債券基金",
    "unit": "",
-   "nav": 13.029,
+   "nav": 13.035,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4450,9 +4450,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF核心累積基金",
    "unit": "",
-   "nav": 18.991,
+   "nav": 19.053,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4461,9 +4461,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF 65歲後基金",
    "unit": "",
-   "nav": 12.325,
+   "nav": 12.34,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4472,9 +4472,9 @@
    "scheme": "宏利環球精選（強積金）計劃",
    "fund": "宏利MPF退休收益基金",
    "unit": "",
-   "nav": 9.143,
+   "nav": 9.154,
    "na": false,
-   "asOf": "2026-10-26",
+   "asOf": "2026-10-27",
    "src": "宏利環球精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4483,9 +4483,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯亞洲基金",
    "unit": "A",
-   "nav": 87.1413,
+   "nav": 87.1941,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4494,9 +4494,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯亞洲基金",
    "unit": "B",
-   "nav": 96.0601,
+   "nav": 96.1199,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4505,9 +4505,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯亞洲基金",
    "unit": "T",
-   "nav": 97.3382,
+   "nav": 97.3988,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4516,9 +4516,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯均衡基金",
    "unit": "A",
-   "nav": 49.9815,
+   "nav": 50.0994,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4527,9 +4527,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯均衡基金",
    "unit": "B",
-   "nav": 51.75,
+   "nav": 51.8729,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4538,9 +4538,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯均衡基金",
    "unit": "T",
-   "nav": 52.5574,
+   "nav": 52.6822,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4549,9 +4549,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯穩定資本基金",
    "unit": "A",
-   "nav": 32.7811,
+   "nav": 32.8331,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4560,9 +4560,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯穩定資本基金",
    "unit": "B",
-   "nav": 34.1701,
+   "nav": 34.2248,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4571,9 +4571,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯穩定資本基金",
    "unit": "T",
-   "nav": 35.2036,
+   "nav": 35.26,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4582,9 +4582,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯靈活均衡基金",
    "unit": "A",
-   "nav": 30.0901,
+   "nav": 30.1322,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4593,9 +4593,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯靈活均衡基金",
    "unit": "B",
-   "nav": 31.4508,
+   "nav": 31.4953,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4604,9 +4604,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯靈活均衡基金",
    "unit": "T",
-   "nav": 31.9982,
+   "nav": 32.0435,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4615,9 +4615,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯大中華基金",
    "unit": "A",
-   "nav": 36.4005,
+   "nav": 36.3095,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4626,9 +4626,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯大中華基金",
    "unit": "B",
-   "nav": 44.5886,
+   "nav": 44.4779,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4637,9 +4637,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯大中華基金",
    "unit": "T",
-   "nav": 43.0114,
+   "nav": 42.9046,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4648,9 +4648,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯增長基金",
    "unit": "A",
-   "nav": 59.2115,
+   "nav": 59.3778,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4659,9 +4659,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯增長基金",
    "unit": "B",
-   "nav": 61.6287,
+   "nav": 61.8028,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4670,9 +4670,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯增長基金",
    "unit": "T",
-   "nav": 63.0077,
+   "nav": 63.1857,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4681,9 +4681,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯香港基金",
    "unit": "A",
-   "nav": 59.8558,
+   "nav": 59.9349,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4692,9 +4692,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯香港基金",
    "unit": "B",
-   "nav": 66.1855,
+   "nav": 66.274,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4703,9 +4703,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯香港基金",
    "unit": "T",
-   "nav": 67.561,
+   "nav": 67.6514,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4714,9 +4714,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金65歲後基金",
    "unit": "A",
-   "nav": 12.0832,
+   "nav": 12.1044,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4725,9 +4725,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金65歲後基金",
    "unit": "B",
-   "nav": 12.3198,
+   "nav": 12.3414,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4736,9 +4736,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金65歲後基金",
    "unit": "T",
-   "nav": 12.3198,
+   "nav": 12.3414,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4747,9 +4747,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金保守基金",
    "unit": "A",
-   "nav": 18.5073,
+   "nav": 18.5102,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4758,9 +4758,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金保守基金",
    "unit": "B",
-   "nav": 18.5165,
+   "nav": 18.5194,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4769,9 +4769,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金保守基金",
    "unit": "T",
-   "nav": 18.9024,
+   "nav": 18.9053,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4780,9 +4780,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金核心累積基金",
    "unit": "A",
-   "nav": 18.594,
+   "nav": 18.6642,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4791,9 +4791,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金核心累積基金",
    "unit": "B",
-   "nav": 19.0409,
+   "nav": 19.1128,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4802,9 +4802,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯強積金核心累積基金",
    "unit": "T",
-   "nav": 19.0409,
+   "nav": 19.1128,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4813,9 +4813,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯東方太平洋基金",
    "unit": "A",
-   "nav": 55.3896,
+   "nav": 55.3837,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4824,9 +4824,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯東方太平洋基金",
    "unit": "B",
-   "nav": 64.2525,
+   "nav": 64.2467,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4835,9 +4835,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯東方太平洋基金",
    "unit": "T",
-   "nav": 64.4214,
+   "nav": 64.4156,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4846,9 +4846,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯人民幣貨幣市場基金",
    "unit": "A",
-   "nav": 16.3382,
+   "nav": 16.346,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4857,9 +4857,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯人民幣貨幣市場基金",
    "unit": "B",
-   "nav": 16.347,
+   "nav": 16.3548,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4868,9 +4868,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯人民幣貨幣市場基金",
    "unit": "T",
-   "nav": 16.4006,
+   "nav": 16.4084,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4879,9 +4879,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯穩定增長基金",
    "unit": "A",
-   "nav": 41.1218,
+   "nav": 41.1992,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4890,9 +4890,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯穩定增長基金",
    "unit": "B",
-   "nav": 42.9594,
+   "nav": 43.0409,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4901,9 +4901,9 @@
    "scheme": "宏利退休精選（強積金）計劃",
    "fund": "安聯穩定增長基金",
    "unit": "T",
-   "nav": 44.4042,
+   "nav": 44.4885,
    "na": false,
-   "asOf": "2026-10-23",
+   "asOf": "2026-10-26",
    "src": "宏利退休精選（強積金）計劃（宏利）",
    "srcUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83"
   },
@@ -4912,7 +4912,7 @@
    "scheme": "海通MPF退休金",
    "fund": "海通強積金保守基金",
    "unit": "A",
-   "nav": 12.61,
+   "nav": 12.614,
    "na": false,
    "asOf": "2026-10-27",
    "src": "海通MPF退休金（海通國際投資經理）",
@@ -4923,7 +4923,7 @@
    "scheme": "海通MPF退休金",
    "fund": "海通強積金保守基金",
    "unit": "T",
-   "nav": 12.88,
+   "nav": 12.8763,
    "na": false,
    "asOf": "2026-10-27",
    "src": "海通MPF退休金（海通國際投資經理）",
@@ -5259,5 +5259,5 @@
    "msg": "本次抓取失败，已保留上次数据（非官方未发布；月度来源请留意下轮）"
   }
  ],
- "alertsAt": 1793206017874
+ "alertsAt": 1793240914623
 }
