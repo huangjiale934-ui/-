@@ -634,6 +634,10 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/hist-index') {
     return serveJsonFile(req, res, path.join(__dirname, 'data', 'hist-index.json'), { cache: 'public, max-age=900' });
   }
+  /* 2026-10-29（5.0）：来源官网页面映射（人工核定），供友链自愈与巡检共用 */
+  if (p === '/api/source-pages') {
+    return serveJsonFile(req, res, path.join(__dirname, 'data', 'source-pages.json'), { cache: 'public, max-age=3600' });
+  }
   // 基金英文名（积金局英文版，供简繁英搜索）
   if (p === '/api/names-en') {
     return fs.readFile(path.join(__dirname, 'data', 'names-en.json'), (err, buf) => {
@@ -1092,6 +1096,11 @@ const server = http.createServer(async (req, res) => {
       }
     });
     return;
+  }
+
+  /* 2026-10-29（5.0）：极轻量心跳——用于保活/探活，不读任何数据文件 */
+  if (p === '/api/ping') {
+    return sendRaw(req, res, 200, JSON.stringify({ ok: true, t: Date.now() }), MIME['.json'], { cache: 'no-store' });
   }
 
   if (p === '/api/probe') {

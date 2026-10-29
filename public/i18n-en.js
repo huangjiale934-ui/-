@@ -1040,6 +1040,13 @@
   '已披露合计': 'Disclosed total',
   '累计回报': 'Cumulative return',
   '年率化回报': 'Annualised return',
+  '自算口径基于发行人官网每日净值（净值日 {d}），不含分红再投资与费用调整；与积金局季频口径不可直接相减。': 'The self-calculated basis uses issuers’ daily NAVs (NAV date {d}), excluding dividend reinvestment and fee adjustments; it is not directly comparable with the MPFA quarterly basis.',
+  '积金局口径（含费含息），数据截至 {d}。年率化＝按复利折算为每年平均回报，直接取自官网公布值，非本站换算。': 'MPFA basis (net of fees, dividends reinvested), data as of {d}. Annualised figures compound the return into an average annual rate and are taken directly from official publications, not converted by this site.',
+  '积金局口径（含费含息），数据截至 {d}。与「自算指标」的净值口径统计期间与算法不同，不可直接相减。': 'MPFA basis (net of fees, dividends reinvested), data as of {d}. Periods and methods differ from the self-calculated NAV basis, so the two are not directly comparable.',
+  '基金表现': 'Fund performance',
+  '组合合计': 'Total allocation',
+  '服务唤醒中{a}（第 {n}/10 次重试，首次访问约需 30–60 秒）': 'Waking up the service{a} (retry {n}/10; the first visit can take 30–60 seconds)',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

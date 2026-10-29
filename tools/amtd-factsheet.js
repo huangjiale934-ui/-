@@ -28,6 +28,31 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 
 const argv = process.argv.slice(2);
 const MODE = argv.includes('--fetch') ? 'fetch' : (argv.includes('--list') ? 'list' : 'probe');
+/* 2026-10-29（5.0）：本机若有可用代理（如 Clash 127.0.0.1:7877），可显式指定
+   --proxy=http://127.0.0.1:7877 ，下载改走 curl；未指定则沿用原来的直连 fetch。 */
+const PROXY = (argv.find((a) => a.indexOf('--proxy=') === 0) || '').slice(8) || process.env.AMTD_PROXY || '';
+const { execFileSync } = require('child_process');
+
+function curlCode(url) {
+  try {
+    fs.mkdirSync(OUTDIR, { recursive: true });
+    const tmp = path.join(OUTDIR, '.probe');
+    /* Windows 下 /dev/null 不是合法路径，统一写临时文件再读状态码 */
+    const out = execFileSync('curl', ['-s', '-o', tmp, '-w', '%{http_code}', '--max-time', '20', '-x', PROXY, '-A', UA, url], { encoding: 'utf8' });
+    return Number(out.trim()) || 0;
+  } catch (e) { return 0; }
+}
+function curlDownload(url, outPath) {
+  try {
+    execFileSync('curl', ['-s', '-L', '--max-time', '90', '-x', PROXY, '-A', UA, '-o', outPath, url], { stdio: 'ignore' });
+    const st = fs.statSync(outPath);
+    if (st.size > 20000) {
+      const fd = fs.openSync(outPath, 'r'); const b = Buffer.alloc(5); fs.readSync(fd, b, 0, 5, 0); fs.closeSync(fd);
+      if (b.toString('latin1') === '%PDF-') return true;
+    }
+    return false;
+  } catch (e) { return false; }
+}
 
 async function withTimeout(promise, ms, label) {
   let t;
@@ -104,12 +129,14 @@ async function tryDriveDownload(id) {
     return;
   }
 
-  const googleReachable = await (async () => {
-    try {
-      const r = await withTimeout(fetch('https://drive.google.com/generate_204', { redirect: 'manual', headers: { 'User-Agent': UA } }), 10000, 'g204');
-      return r.status > 0;
-    } catch (e) { return false; }
-  })();
+  const googleReachable = PROXY
+    ? curlCode('https://drive.google.com/generate_204') > 0
+    : await (async () => {
+      try {
+        const r = await withTimeout(fetch('https://drive.google.com/generate_204', { redirect: 'manual', headers: { 'User-Agent': UA } }), 10000, 'g204');
+        return r.status > 0;
+      } catch (e) { return false; }
+    })();
 
   if (MODE === 'probe') {
     console.log('Google Drive 可达：' + (googleReachable ? '是' : '否'));
@@ -127,7 +154,12 @@ async function tryDriveDownload(id) {
   let ok = 0, fail = 0;
   for (const r of rows) {
     if (!r.id) { console.log('✗ ' + r.slug + ' 未解析到 Drive ID（HTTP ' + r.http + '）'); fail++; continue; }
-    const buf = await tryDriveDownload(r.id);
+    let buf = PROXY ? null : await tryDriveDownload(r.id);
+    if (PROXY) {
+      const p0 = path.join(OUTDIR, r.slug + '.pdf');
+      const okDl = curlDownload('https://drive.google.com/uc?export=download&confirm=t&id=' + r.id, p0);
+      if (okDl) { console.log('✓ ' + r.slug + ' → ' + p0 + ' (' + Math.round(fs.statSync(p0).size / 1024) + 'KB, via proxy)'); ok++; continue; }
+    }
     if (!buf) { console.log('✗ ' + r.slug + ' 下载失败（Drive 不可达或需授权）'); fail++; continue; }
     const p = path.join(OUTDIR, r.slug + '.pdf');
     fs.writeFileSync(p, buf);

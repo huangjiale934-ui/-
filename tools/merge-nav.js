@@ -14,6 +14,33 @@ const path = require('path');
 const { attachNav } = require('../scraper');
 
 const P = path.join(__dirname, '..', 'data', 'funds.json');
+
+/* ================= 来源官网页面（2026-10-29，5.0） =================
+ * 背景：友链此前用「该组出现最多的 navSourceUrl」反推官网页面，遇到 etnet 这种
+ * 「基金取自 AMTD 页面」的来源就会被带偏，点到别家发行人官网。
+ * 现在改为：人工核定的 data/source-pages.json 优先，未收录的才回退到众数 URL。
+ */
+const SOURCE_PAGES = (function () {
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'source-pages.json'), 'utf8')); }
+  catch (e) { return { sources: [] }; }
+})();
+
+/* 来源别名：同一家发行人在不同批次里写法不同，合并成一行（如宏利環球精選 → 宏利官网） */
+const SOURCE_ALIAS = [
+  [/宏利環球精選|宏利環球/i, '宏利官网（www.manulife.com.hk）'],
+];
+
+function canonSource(name) {
+  for (let i = 0; i < SOURCE_ALIAS.length; i++) {
+    if (SOURCE_ALIAS[i][0].test(name)) return SOURCE_ALIAS[i][1];
+  }
+  return name;
+}
+
+function sourceMeta(name) {
+  const hit = (SOURCE_PAGES.sources || []).find((s) => name.indexOf(s.match) >= 0);
+  return hit || null;
+}
 const HIST = path.join(__dirname, '..', 'data', 'hist');
 const fd = JSON.parse(fs.readFileSync(P, 'utf8'));
 const stat = attachNav(fd.funds);
@@ -179,7 +206,7 @@ fd.funds.forEach((f) => {
   fd.funds.forEach((f) => {
     const raw = String(f.navSource || '').trim();
     if (!raw) return;
-    const key = raw.split('｜')[0].trim();
+    const key = canonSource(raw.split('｜')[0].trim());
     const g = bySrc[key] = bySrc[key] || { name: key, n: 0, asOf: '', verified: 0, na: 0, urls: {} };
     g.n++;
     if (f.navStatus === 'na') { g.na++; sumNa++; } else { g.verified++; sumVerified++; }
@@ -192,7 +219,14 @@ fd.funds.forEach((f) => {
   if (fd.navStat) {
     fd.navStat.sources = list.map((g) => {
       const page = Object.entries(g.urls).sort((a, b) => b[1] - a[1])[0];
-      return { name: g.name, label: g.name, n: g.n, asOf: g.asOf, verified: g.verified, na: g.na, page: page ? page[0] : '' };
+      const meta = sourceMeta(g.name);
+      return {
+        name: g.name, label: g.name, n: g.n, asOf: g.asOf, verified: g.verified, na: g.na,
+        /* 人工核定优先；未收录时回退到该组最常见的 navSourceUrl */
+        page: (meta && meta.url) ? meta.url : (page ? page[0] : ''),
+        cadence: meta ? meta.cadence : '',
+        cadenceNote: meta ? meta.cadenceNote : '',
+      };
     });
     fd.navStat.bySource = list;
     fd.navStat.verified = sumVerified;

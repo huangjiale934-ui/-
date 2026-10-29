@@ -26,6 +26,17 @@ const warns = [];
 
 /* ---------- 1. 数据层 ---------- */
 let sources = [];
+let pageMap = [];
+try {
+  pageMap = (JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'source-pages.json'), 'utf8')).sources) || [];
+} catch (e) {
+  warns.push('source-pages.json 缺失或无法解析：' + e.message);
+}
+const cadenceOf = (name) => pageMap.find((x) => name.indexOf(x.match) >= 0) || null;
+const today = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+const daysOld = (d) => (d ? Math.round((new Date(today) - new Date(d)) / 864e5) : 9999);
+const LIMIT = { daily: 10, monthly: 50, quarterly: 130 };
+
 try {
   const fd = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'funds.json'), 'utf8'));
   sources = (fd.navStat && fd.navStat.sources) || [];
@@ -35,6 +46,15 @@ try {
     if (!/^https?:\/\//i.test(String(s.page || s.url || ''))) fails.push('来源缺官网地址：' + name);
     if (!(typeof s.n === 'number' && s.n > 0)) fails.push('来源条数 n 非数字：' + name + '（' + s.n + '）');
     if (/undefined/.test(String(s.label || s.name || ''))) fails.push('来源名称含 undefined：' + name);
+    /* 2026-10-29（5.0）：按来源更新频率判断是否超期——
+       「网站没更新」和「发行人不发布」必须分清，超期只告警，由人判断。 */
+    const cad = cadenceOf(name);
+    if (cad && cad.cadence && LIMIT[cad.cadence]) {
+      const old = daysOld(s.asOf);
+      if (old > LIMIT[cad.cadence]) {
+        warns.push('来源超期：' + name + ' 最新 ' + (s.asOf || '无') + '，已 ' + old + ' 天（' + cad.cadenceNote + '，阈值 ' + LIMIT[cad.cadence] + ' 天）');
+      }
+    }
   });
 } catch (e) {
   fails.push('读取 data/funds.json 失败：' + e.message);

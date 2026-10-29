@@ -1042,12 +1042,12 @@ chk('晚批·④持仓行情补全（holdquote.py + 有代码行 ≥400 + 有价
     return hq.indexOf('GEN_MKT') >= 0 && hq.indexOf('BAD_WORDS') >= 0 && hq.indexOf('PIN') >= 0 && code >= 400 && price >= 400;
   } catch (e) { return false; }
 })());
-chk('2026-10-29·⑤投资分布改为外移式饼图（蓝+浅绿、图例两列）', (function () {
+chk('2026-10-29·⑤投资分布改为弧带引线图（蓝色由深至浅、无图例）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
-    return c.indexOf('alr-svg') >= 0 && c.indexOf('alr-legend') >= 0 && c.indexOf('alx-grid') < 0 &&
-      st.indexOf('.alr-svg') >= 0 && st.indexOf('.alr-legend') >= 0;
+    return c.indexOf('alr2-svg') >= 0 && c.indexOf('alr2-list') >= 0 && c.indexOf('组合合计') >= 0 && c.indexOf('alx-grid') < 0 &&
+      st.indexOf('.alr2-svg') >= 0 && st.indexOf('.alr2-list') >= 0;
   } catch (e) { return false; }
 })());
 chk('晚批·⑥历年走势图缩小 20%（an-chartwrap 80%）', (function () {
@@ -1090,12 +1090,12 @@ chk('晚批·④持仓行情补全（holdquote.py + 有代码行 ≥400 + 有价
     return hq.indexOf('GEN_MKT') >= 0 && hq.indexOf('BAD_WORDS') >= 0 && hq.indexOf('PIN') >= 0 && code >= 400 && price >= 400;
   } catch (e) { return false; }
 })());
-chk('2026-10-29·⑤投资分布改为外移式饼图（蓝+浅绿、图例两列）', (function () {
+chk('2026-10-29·⑤投资分布改为弧带引线图（蓝色由深至浅、无图例）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
-    return c.indexOf('alr-svg') >= 0 && c.indexOf('alr-legend') >= 0 && c.indexOf('alx-grid') < 0 &&
-      st.indexOf('.alr-svg') >= 0 && st.indexOf('.alr-legend') >= 0;
+    return c.indexOf('alr2-svg') >= 0 && c.indexOf('alr2-list') >= 0 && c.indexOf('组合合计') >= 0 && c.indexOf('alx-grid') < 0 &&
+      st.indexOf('.alr2-svg') >= 0 && st.indexOf('.alr2-list') >= 0;
   } catch (e) { return false; }
 })());
 chk('晚批·⑥历年走势图缩小 20%（an-chartwrap 80%）', (function () {
@@ -1482,7 +1482,7 @@ chk('详情页·完整资料（基本信息/回报/费用 + 净值来源 + 图 2
     const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     /* 2026-10-20 v4：小窗与放大页共用 fundDetailHTML（fdBasic 含 fee-title / fdReturns 8 区间 / 表头 fdHead） */
     return /function fdBasic/.test(j) && /function fdPerfTabs/.test(j) && /fee-title/.test(j) &&
-      /* 2026-10-21：累计表现精简为积金局 4 个区间（近1/5/10年、推出至今） */ /function fdHead/.test(j) && /近 5 年/.test(j) && /推出至今/.test(j) && /perf-table/.test(j) &&
+      /* 2026-10-21：累计表现精简为积金局 4 个区间（近1/5/10年、推出至今） */ /function fdHead/.test(j) && /近 5 年/.test(j) && /推出至今/.test(j) && /perf-h/.test(j) && /fdPerfRow/.test(j) &&
       /\.fd-head \{/.test(css) && /#anDetail \.fd \.sect-title/.test(css);
   } catch (e) { return false; }
 })());
@@ -1540,7 +1540,7 @@ chk('详情页·完整资料（基本信息/回报/费用 + 净值来源 + 图 2
     const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     /* 2026-10-20 v4：小窗与放大页共用 fundDetailHTML（fdBasic 含 fee-title / fdReturns 8 区间 / 表头 fdHead） */
     return /function fdBasic/.test(j) && /function fdPerfTabs/.test(j) && /fee-title/.test(j) &&
-      /* 2026-10-21：累计表现精简为积金局 4 个区间（近1/5/10年、推出至今） */ /function fdHead/.test(j) && /近 5 年/.test(j) && /推出至今/.test(j) && /perf-table/.test(j) &&
+      /* 2026-10-21：累计表现精简为积金局 4 个区间（近1/5/10年、推出至今） */ /function fdHead/.test(j) && /近 5 年/.test(j) && /推出至今/.test(j) && /perf-h/.test(j) && /fdPerfRow/.test(j) &&
       /\.fd-head \{/.test(css) && /#anDetail \.fd \.sect-title/.test(css);
   } catch (e) { return false; }
 })());

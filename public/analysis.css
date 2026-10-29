@@ -590,27 +590,43 @@
 .perf-note { font-size: 11.5px; color: var(--text-3); margin: 4px 0 6px; line-height: 1.6; }
 @media (max-width: 560px) { .perf-table th, .perf-table td { padding: 9px 6px; font-size: 12.5px; } }
 
-/* ===== 2026-10-29（5.0）：表现区四栏（自算指标 / 累计回报 / 年率化 / 历年走势） ===== */
-.fd-perf { margin-top: 2px; }
+/* ===== 2026-10-29（5.0）：基金表现（四栏 + 两行横排） ===== */
+.fd-perf { margin: 34px 0 40px; }
+.fd-perf-title { font-size: 17px; margin-bottom: 10px; }
 .fd-tabs {
   display: flex; gap: 2px; flex-wrap: wrap;
-  border-bottom: 1px solid var(--border); margin: 8px 0 0;
+  border-bottom: 1px solid var(--border); margin: 4px 0 0;
 }
 .fd-tab {
   appearance: none; border: 0; background: transparent; font-family: inherit;
-  font-size: 13.5px; color: var(--text-2); padding: 9px 14px; cursor: pointer;
+  font-size: 15px; color: var(--text-2); padding: 10px 18px; cursor: pointer;
   border-bottom: 2px solid transparent; margin-bottom: -1px; border-radius: 6px 6px 0 0;
   transition: color .12s, background .12s;
 }
 .fd-tab:hover { color: var(--brand-deep); background: var(--brand-soft); }
 .fd-tab.on { color: var(--brand); font-weight: 650; border-bottom-color: var(--brand); }
 .fd-panel[hidden] { display: none !important; }
-.fd-panel { padding-top: 4px; }
+.fd-panel { padding-top: 2px; }
 .fd-perf-note { margin: 12px 2px 0; font-size: 12px; line-height: 1.75; color: var(--text-3); }
-.perf-table.perf-2col thead th small { display: block; margin-top: 2px; font-weight: 400; font-size: 10.5px; color: var(--text-3); }
-.perf-table .fd-na { color: var(--text-3); cursor: help; }
+/* 同类排名行（用户喜欢，保留但字号收小） */
+.perf-rank { display: flex; align-items: center; gap: 6px; margin: 14px 0 8px; font-size: 11.5px; color: var(--text-3); }
+.perf-rank .sc-info { font-size: 11px; }
+.fd-perf .an-selfcalc { margin-top: 0; padding-top: 0; border-top: 0; font-size: 13.5px; gap: 7px 16px; }
+.fd-perf .an-selfcalc .sc-item em { font-size: 12px; }
+/* 两行横排表：表头时间维度 + 一行数值 */
+.perf-row { margin-top: 14px; }
+.perf-h { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.perf-h th, .perf-h td { padding: 11px 8px; border-bottom: 1px solid var(--border); text-align: right; }
+.perf-h thead th { background: #f7fbff; color: var(--text-3); font-size: 12px; font-weight: 600; }
+.perf-h th:first-child, .perf-h td:first-child { text-align: left; }
+.perf-h tbody th { font-weight: 600; color: var(--text-2); font-size: 12.5px; }
+.perf-h td.num { font-variant-numeric: tabular-nums; font-weight: 650; }
+.perf-h .fd-na { color: var(--text-3); cursor: help; }
 @media (max-width: 560px) {
-  .fd-tab { padding: 8px 10px; font-size: 12.5px; }
+  .fd-perf { margin: 26px 0 30px; }
+  .fd-tab { padding: 9px 12px; font-size: 13.5px; }
+  .perf-h { font-size: 12.5px; }
+  .perf-h th, .perf-h td { padding: 9px 4px; }
   .fd-perf-note { font-size: 11.5px; }
 }
 
@@ -625,22 +641,23 @@
 .hlb-sum { display: flex; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; font-size: 12.5px; color: var(--text-2); }
 .hlb-sum b { color: var(--brand); font-variant-numeric: tabular-nums; }
 
-/* ===== 2026-10-29（5.0）：投资分布变径饼图 + 右侧两列图例 ===== */
-.alr { display: flex; align-items: center; gap: 26px; margin-top: 4px; }
-.alr-chart { flex: 0 0 200px; }
-.alr-svg { width: 200px; height: 200px; display: block; }
-.alr-c1 { font-size: 16px; font-weight: 700; fill: var(--text); }
-.alr-c2 { font-size: 10px; fill: var(--text-3); }
-.alr-legend { flex: 1; min-width: 0; max-width: 480px; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 30px; }
-.alr-legend li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; padding: 3px 0; }
-.alr-legend i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
-.alr-l { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
-.alr-legend b { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; }
-@media (max-width: 560px) {
-  .alr { flex-direction: column; align-items: stretch; gap: 12px; }
-  .alr-chart { align-self: center; }
+/* ===== 2026-10-29（5.0）：投资分布——灰色扇区 + 外圈蓝色弧带 + 引线标签 ===== */
+.alr2 { max-width: 720px; margin: 6px auto 2px; }
+.alr2-svg { width: 100%; height: auto; display: block; }
+.alr2-k { font-size: 11.5px; fill: #60758c; }
+.alr2-v { font-size: 13px; font-weight: 700; fill: #142846; }
+.alr-c1 { font-size: 22px; font-weight: 700; fill: var(--text); }
+.alr-c2 { font-size: 10.5px; fill: var(--text-3); }
+/* 窄屏：引线标签会缩到看不清，改为两列列表 */
+.alr2-list { display: none; }
+@media (max-width: 620px) {
+  .alr2 { display: none; }
+  .alr2-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; list-style: none; margin: 8px 0 0; padding: 0; }
+  .alr2-list li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; }
+  .alr2-list i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .alr2-list .alr-l { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+  .alr2-list b { font-variant-numeric: tabular-nums; color: var(--text); }
 }
-
 /* 详情页 sect-title 与小图样式补齐（an-kv 复用 .kv 布局） */
 #anDetail .an-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 
