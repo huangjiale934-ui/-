@@ -72,9 +72,9 @@ chk('首页·六张榜单各 5 条', ['#mkTop1', '#mkTop2', '#mkTop3', '#mkTop4'
 }));
 chk('首页·数据来源条（2026-10-15 更新口径）', /单位资产净值、业绩与持仓另取自各计划受托人／保荐人官网/.test(home) && !/直接汇总/.test(home));
 chk('首页·走势图年份切换 6 个标签', (home.match(/class="yr-tab( on)?"/g) || []).length === 6);
-chk('首页·公司介绍含五段+优势+服务+伙伴+承诺',
-  ['成立时间', '公司愿景', '团队实力', '业务版图', '六大核心优势', '免费 MPF 行政服务', '战略合作伙伴', '服务承诺', '业务板块']
-    .every((k) => home.indexOf(k) >= 0));
+/* 2026-10-28 用户要求删除整块「公司介绍」（成立时间/愿景/团队/业务版图、六大优势、免费行政服务、合作伙伴、承诺、业务板块）
+   → 原 5 条断言随区块下线；2026-10-29 改为反向校验：区块不得再出现 */
+chk('首页·公司介绍区块已按 2026-10-28 要求删除', home.indexOf('class="biz about"') < 0 && home.indexOf('about-grid') < 0 && home.indexOf('IC001045') < 0);
 /* 2026-10-22（领导定）：六色板改为「蓝 + 浅绿」双色 */
 /* 2026-10-22 傍晚：整体再调浅一档 */
 /* 2026-10-23：配色改为官网色板后，改为结构性校验（饼图色板存在且≥6 色） */
@@ -86,9 +86,15 @@ chk('首页·友情链接已渲染', (home.match(/class="friend-links"[\s\S]*?<\
 const idxHead = (/<thead>[\s\S]*?<\/thead>/.exec(idx) || [''])[0];
 chk('资料库·无「强积金计划」列', idxHead.indexOf('強積金計劃') < 0 && idxHead.indexOf('强积金计划') < 0);
 chk('资料库·无「近5年最差年度」列', idxHead.indexOf('最差') < 0);
-chk('资料库·推出日期列在操作列之前', (function () {
-  const a = idxHead.indexOf('推出日期'); const b = idxHead.indexOf('操作');
-  return a >= 0 && b >= 0 && a < b;
+/* 2026-10-26 起「推出日期」改为列设置中的可选列（默认 14 列不含它），断言改为：
+   列定义存在 + 操作列固定最后一列 */
+chk('资料库·推出日期为可选列且操作列在最后', (function () {
+  try {
+    const aj = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
+    const ths = idxHead.match(/<th[^>]*>[\s\S]*?<\/th>/g) || [];
+    const last = ths.length ? ths[ths.length - 1] : '';
+    return /k:\s*'launchTs',\s*n:\s*'推出日期'/.test(aj) && last.indexOf('操作') >= 0;
+  } catch (e) { return false; }
 })());
 chk('资料库·默认每页 10 行', /<option[^>]*value="10"[^>]*selected/.test(idx));
 chk('资料库·首屏渲染 10 行', (function () {
@@ -136,20 +142,11 @@ chk('首页·风险级别图例 7 级', (function () {
 })());
 chk('首页·风险图例含低风险/最高风险说明', /低風險|低风险/.test(home) && /最高風險|最高风险/.test(home));
 chk('首页·旧独立资讯区块已移除', home.indexOf('news-wrap') < 0 && home.indexOf('news-panel') >= 0);
-chk('首页·公司介绍 PPT 版五段', ['成立时间', '公司愿景', '团队实力', '业务版图'].every((k) => home.indexOf(k) >= 0));
-chk('首页·六大核心优势（PPT 版）', ['时效性', '专业性', '安全性', '延续性', '客户体验', '经济性'].every((k) => home.indexOf(k) >= 0));
-chk('首页·免费 MPF 行政服务三阶段', /开户前咨询服务[\s\S]{0,600}?开户中代办服务[\s\S]{0,600}?开户后持续服务/.test(home));
-chk('首页·战略合作伙伴含牌照编号 IC001045', /IC001045/.test(home));
+/* 2026-10-29：公司介绍 PPT 版五段 / 六大优势 / 免费服务三阶段 / 牌照编号 4 条断言
+   均针对已删除区块，改由上方「公司介绍区块已删除」一条覆盖，此处不再重复断言 */
 /* ---- 本轮：数字卡片删除 + 公司介绍改 2×2 卡片 ---- */
 const rawH = (function () { try { return fs.readFileSync(path.join(__dirname, '..', 'public', 'home.html'), 'utf8'); } catch (e) { return ''; } })();
 chk('首页·2023 四张数字卡片已删除', rawH.indexOf('class="metric"') < 0 && rawH.indexOf('m-grid in-about') < 0);
-chk('首页·公司介绍改为 about-grid 四卡', (rawH.match(/class="about-card"/g) || []).length === 4);
-chk('首页·数字卡片已出现在公司介绍标题下方', (function () {
-  const a = home.indexOf('class="biz about"');
-  const h2 = home.indexOf('广州精研数据有限公司</h2>');
-  const g = home.indexOf('class="about-grid"');
-  return a > 0 && h2 > a && g > h2;
-})());
 chk('首页·环形图图例带「条」单位（本轮统一）', /169 条 · 8,013 亿/.test(home));
 chk('首页·风险柱横轴带「级」', /<span class="cx">1 级<\/span>/.test(home));
 /* 2026-10-22：温度计改用自算净值口径后，上涨/下跌条数随净值日变动，
@@ -160,8 +157,10 @@ chk('首页·珠江新城背景图（2026-10-15 换明亮新图）', /about-gz-b
 chk('首页·背景图不透明度 >= 0.5', /opacity:\s*0\.5/.test(css));
 chk('资料库·口径说明在表格下方', idx.indexOf('srcNote') > idx.indexOf('<tbody'));
 chk('排名·口径说明在表格下方', rk.indexOf('srcNote') > rk.indexOf('<tbody'));
-chk('首页·标题为「广州精研数据有限公司」', /<h2 data-i18n="广州精研数据有限公司">广州精研数据有限公司<\/h2>/.test(home));
-chk('首页·多语言属性已覆盖', (home.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 80);
+/* 2026-10-28 首屏改版：公司名 h2 随公司介绍块一起移除，主标题改为 hero 内的 h1 双行文案 */
+chk('首页·首屏主标题为「全市场 N 条成分基金 / 一站看透」', /<h1>[\s\S]{0,240}条成分基金[\s\S]{0,240}一站看透/.test(home) && /香港强积金市场概览/.test(home));
+/* 2026-10-29：公司介绍块（含大量 data-i18n）已删除，属性总数由 80+ 降至 72，阈值相应下调 */
+chk('首页·多语言属性已覆盖', (home.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 60);
 chk('资料库·多语言属性已覆盖', (idx.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 20);
 chk('排名·多语言属性已覆盖', (rk.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 15);
 
@@ -182,7 +181,16 @@ const rawHtml = {};
 /* ---- 第七轮：语言补全 / 榜单提示 / 对比入口 / 风险小图例 / 更新时间 / 估值日提示 ---- */
 chk('首页·数据更新时间徽标', /class="upd-live"/.test(home) && /数据更新时间 <b>/.test(home));
 chk('首页·积金局资料截至徽标', /class="upd-of"/.test(home) && /积金局资料截至 <b>/.test(home));
-chk('首页·风险柱用蓝色 7 级色板', ['#eaf4fd', '#a5cbee', '#4f90d2'].every((c) => home.indexOf(c) >= 0));
+/* 2026-10-29：色板已由 CSS 内联色改为 common.js 的 MPF_RISK.colors（7 级蓝），断言改查数据源而非 DOM */
+chk('首页·风险柱用蓝色 7 级色板', (function () {
+  try {
+    const cj = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    const i = cj.indexOf('const MPF_RISK');
+    const seg = cj.slice(i, i + 400);
+    const m = /colors:\s*\[([^\]]+)\]/.exec(seg);
+    return !!m && m[1].split(',').length === 7 && /#a5cbee/.test(m[1]) && /#4f90d2/.test(m[1]);
+  } catch (e) { return false; }
+}));
 chk('排名·榜单维度提示行', /id="rkTabsNote"/.test(rk) && /共 <b>17<\/b> 个排名维度/.test(rk));
 chk('排名·展开收起按钮', /id="rkTabsToggle"/.test(rk) && /展开全部|收起全部/.test(rk));
 chk('排名·对比栏带数量徽标', /class="cmp-lab"/.test(rk) && /id="cmpN"/.test(rk));
@@ -277,7 +285,8 @@ chk('首页·榜单链接指向排名页对应榜单', (function () {
     const m = new RegExp('<ol[^>]*id="' + id + '"[\\s\\S]{0,600}?</ol>').exec(home);
     // 链接在 <ol> 之前，取卡片整段判断
     const card = new RegExp('<div class="mk-top">[\\s\\S]*?id="' + id + '"[\\s\\S]*?</div>').exec(home);
-    return card && card[0].indexOf('/index.html?rk=' + want[id] + '#' + want[id]) >= 0;
+    // 2026-10-29：GitHub Pages 部署在 /-/ 子路径，必须用相对链接；原断言强制前导斜杠反而会跳错站
+    return card && card[0].indexOf('index.html?rk=' + want[id] + '#' + want[id]) >= 0;
   });
 })());
 chk('词条·查看完整榜单（多语言）', (function () {
@@ -812,11 +821,16 @@ chk('v3·多受托人历史覆盖（BCT 系 ≥100 + 宏利系 ≥60，共 183 �
   try {
     const idx = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'hist-index.json'), 'utf8'));
     const perf = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'nav-perf.json'), 'utf8'));
-    const by = {};
-    Object.values(idx.funds).forEach((f) => { by[f.src] = (by[f.src] || 0) + 1; });
+    /* 2026-10-29：hist-index 的 src 已写成展示名（如「BCT官網（bcthk.com）」），不能用 by.bct 直取，改按关键字计数 */
+    let bctHist = 0; let manuHist = 0;
+    Object.values(idx.funds).forEach((f) => {
+      const s = String(f.src || '');
+      if (/bct/i.test(s)) bctHist += 1;
+      if (/manulife|宏利/i.test(s)) manuHist += 1;
+    });
     const pby = {};
     Object.values(perf.funds).forEach((f) => { pby[f.src] = (pby[f.src] || 0) + 1; });
-    return (by.bct || 0) >= 100 && (by.manulife || 0) >= 60 && perf.count >= 180 && (pby.bct || 0) >= 100;
+    return bctHist >= 100 && manuHist >= 60 && perf.count >= 180 && (pby.bct || 0) >= 100;
   } catch (e) { return false; }
 })());
 chk('v3·指数数据 14 个且最新（含恒生 + 上证/深证等 A 股指数）', (function () {

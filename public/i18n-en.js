@@ -1008,6 +1008,23 @@
   '全市场强积金成分基金一览与排行榜 · 「基金最新数据」取自 11 家受托人官网（每日），「MPFA 基金榜单」取自积金局「強積金基金平台」（每月），由广州精研数据有限公司自动同步整理': 'All MPF constituent funds at a glance, with rankings. "Latest fund data" is taken daily from the websites of 11 trustees; "MPFA tables" come from the MPFA fund platform (monthly). Synchronised automatically by Guangzhou Jingyan Data Co., Ltd.',
   '该官网有反爬，若打不开请在浏览器地址栏直接访问': 'This site blocks automated requests. If it does not open, paste the link directly into your browser address bar.',
   '（已筛选结果，全市场共 {n} 条）': '(filtered; {n} in the whole market)',
+
+/* —— 2026-10-29 补：顶部更新提示栏（5.0 接手时 miss.js 报缺 15 条）—— */
+  '数据更新窗口': 'Data update window',
+  '交易日 09:40 开始更新净值，预计 10:20 前完成': 'NAV updates start at 09:40 on trading days and are expected to finish by 10:20',
+  '每日 22:40 自动全量更新': 'Full update runs daily at 22:40',
+  '更新期间页面可能显示上一次的数据': 'The page may show the previous data while updating',
+  '当前展示 {d} 的净值': 'Currently showing NAV as of {d}',
+  '数据更新进行中': 'Data update in progress',
+  '数据刷新中': 'Refreshing data',
+  '正在重新读取最新数据…': 'Reloading the latest data…',
+  '数据更新完成': 'Data update complete',
+  '全部步骤已完成': 'All steps completed',
+  '刷新页面即可看到最新数据': 'Refresh the page to see the latest data',
+  '本次更新未全部完成': 'This update did not complete fully',
+  '已保留上一次的完整数据': 'The previous complete data set has been retained',
+  '总开支比率': 'Total expense ratio',
+  '近5年最大回撤': '5-year maximum drawdown',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

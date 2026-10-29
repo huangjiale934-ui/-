@@ -13,7 +13,7 @@ for pair in "home:/" "index:/index.html" "ranking:/index.html?rk=ann1" "analysis
   page="${pair#*:}"
   profile="D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\reg\\p_${name}"
   rm -rf "$DIR/p_${name}"
-  timeout 120 "$CHROME" --headless --no-sandbox --disable-gpu --hide-scrollbars \
+  timeout 120 "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --hide-scrollbars \
     --virtual-time-budget=15000 --window-size=1440,3000 --dump-dom \
     --user-data-dir="$profile" "${BASE}${page}" > "$DIR/${name}.html" 2>/dev/null
   echo "  ${name}  $(wc -c < "$DIR/${name}.html") bytes"
