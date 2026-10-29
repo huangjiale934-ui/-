@@ -1046,7 +1046,7 @@ chk('2026-10-29·⑤投资分布改为弧带引线图（蓝色由深至浅、无
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
-    return c.indexOf('alr2-svg') >= 0 && c.indexOf('alr2-list') >= 0 && c.indexOf('组合合计') >= 0 && c.indexOf('alx-grid') < 0 &&
+    return c.indexOf('alr2-svg') >= 0 && c.indexOf('alr2-list') >= 0 && c.indexOf('alr2-in') >= 0 && c.indexOf('alx-grid') < 0 &&
       st.indexOf('.alr2-svg') >= 0 && st.indexOf('.alr2-list') >= 0;
   } catch (e) { return false; }
 })());
@@ -1094,7 +1094,7 @@ chk('2026-10-29·⑤投资分布改为弧带引线图（蓝色由深至浅、无
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
-    return c.indexOf('alr2-svg') >= 0 && c.indexOf('alr2-list') >= 0 && c.indexOf('组合合计') >= 0 && c.indexOf('alx-grid') < 0 &&
+    return c.indexOf('alr2-svg') >= 0 && c.indexOf('alr2-list') >= 0 && c.indexOf('alr2-in') >= 0 && c.indexOf('alx-grid') < 0 &&
       st.indexOf('.alr2-svg') >= 0 && st.indexOf('.alr2-list') >= 0;
   } catch (e) { return false; }
 })());

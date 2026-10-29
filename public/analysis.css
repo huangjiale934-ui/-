@@ -645,6 +645,9 @@
 .alr2 { max-width: 720px; margin: 6px auto 2px; }
 .alr2-svg { width: 100%; height: auto; display: block; }
 .alr2-k { font-size: 11.5px; fill: #60758c; }
+.alr2-in { font-size: 12px; font-weight: 600; fill: #12395e; }
+.alr2-inv { font-size: 13px; font-weight: 700; fill: #12395e; }
+.alr2-in.light, .alr2-inv.light { fill: #ffffff; }
 .alr2-v { font-size: 13px; font-weight: 700; fill: #142846; }
 .alr-c1 { font-size: 22px; font-weight: 700; fill: var(--text); }
 .alr-c2 { font-size: 10.5px; fill: var(--text-3); }

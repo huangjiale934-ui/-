@@ -79,6 +79,8 @@ node tools/nav-consistency.js || echo "!!! nav-consistency 未通过（详见输
 node tools/gap-check.js || true
 # 2026-10-29（5.0）：早间同样跑链接巡检，避免友链在数据更新后退化
 node tools/link-audit.js || echo "!!! 链接巡检未通过（详见上）"
+# 2026-10-29（5.0）：早间同样跑季度哨兵
+python tools/quarterly-watch.py || echo "!!! 季度哨兵未通过（详见上）"
 
 echo ""
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致时不写 done、不发布

@@ -1047,6 +1047,13 @@
   '组合合计': 'Total allocation',
   '服务唤醒中{a}（第 {n}/10 次重试，首次访问约需 30–60 秒）': 'Waking up the service{a} (retry {n}/10; the first visit can take 30–60 seconds)',
 
+  "近 1 周": "1 week",
+  "近 1 月": "1 month",
+  "近 3 年（年化）": "3 years (annualised)",
+  "近 5 年（年化）": "5 years (annualised)",
+  '自算口径基于发行人官网每日净值（净值日 {d}），不含分红再投资与费用调整；近 3 年 / 近 5 年为年化值。与积金局季频口径不可直接相减。': 'Self-calculated from issuers’ daily NAVs (NAV date {d}), excluding dividend reinvestment and fee adjustments; 3-year and 5-year figures are annualised. Not directly comparable with the MPFA quarterly basis.',
+  'AMTD（尚乘）官网 · 每季基金概览': 'AMTD official site · quarterly fund summary',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -1719,8 +1719,10 @@ body { background: #ffffff; }
 .ndc span { color: var(--text-3); font-size: 11.5px; }
 .ndc.peak { border-color: #9dc7e8; }
 .ndc.on { background: var(--brand, #0866bb); border-color: var(--brand, #0866bb); color: #fff; }
+th.sort-on { color: var(--brand); }
+th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 2026-10-29（5.0）：右侧补风险级别图例，填掉原来的空白 */
-.ndc-body { display: flex; align-items: flex-start; justify-content: space-between; gap: 26px; }
+.ndc-body { display: flex; align-items: center; justify-content: space-between; gap: 26px; }
 .ndc-body .ndc-list { flex: 1 1 auto; min-width: 0; }
 .ndc-legend { flex: 0 0 auto; padding-left: 20px; border-left: 1px solid var(--border); }
 .ndc-legend > b { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }

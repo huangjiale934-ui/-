@@ -21,6 +21,13 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOLD = os.path.join(BASE, 'data', 'holdings.json')
 SRC = '友邦官網「基金表現回顧」PDF（月度，aia.com.hk 原件）'
 PCT = re.compile(r'^-?\d+(?:\.\d+)?%$')
+# 2026-10-29：当月 PDF 文本层在名称尾部带 \x01 等控制字符，直接入库会被 holdings-guard
+# 判为「top10 违规（控制字符）」并 exit 1 阻断发布 → 解析时统一清除 C0/C1 与零宽字符。
+CTRL = re.compile(r'[\x00-\x1f\x7f-\x9f\u200b-\u200f\u202a-\u202e\ufeff]')
+
+
+def clean(s):
+    return CTRL.sub('', s).strip()
 TARGET = {'強積金保守基金': ('134', 15), '美洲基金': ('878', 9)}
 
 
@@ -45,7 +52,7 @@ def main():
             k = 0
             while k < len(lines) - 1 and len(top) < 10:
                 if PCT.match(lines[k + 1]) and not PCT.match(lines[k]):
-                    top.append({'name': lines[k][:80], 'weight': float(lines[k + 1][:-1])})
+                    top.append({'name': clean(lines[k])[:80], 'weight': float(lines[k + 1][:-1])})
                     k += 2
                 else:
                     k += 1

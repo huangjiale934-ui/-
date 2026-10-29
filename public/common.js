@@ -682,6 +682,11 @@ function renderFriends() {
       return [s.label || s.name, srcPage(s), bits.join(' · ')];
     })
     : TRUSTEE_LINKS.map((t) => [t[0], t[1], '']);
+  /* 2026-10-29（5.0）：AMTD 的净值走 etnet，不会单独出现在 sources 里，
+     但友链 4×4 网格正好空一位，补上其官网「每季基金概览」入口。 */
+  if (src.length && !src.some((r) => /ooogroup/.test(String(r[1] || '')))) {
+    src.push(['AMTD（尚乘）官网 · 每季基金概览', 'https://www.ooogroup.xyz/locales/hk/mpf-3', '16 条 · 季更']);
+  }
   document.querySelectorAll('.friend-links').forEach((box) => {
     box.innerHTML =
       '<div class="fr-title">' + TT('友情链接 · 官方数据来源') + '</div>' +
@@ -1151,7 +1156,7 @@ function fdUnits(x) {
     '</div>';
 }
 
-/** 自算指标（横排，由近及远；模块标题由「基金表现」统一承担） */
+/** 自算指标：排名行（用户喜欢，保留小字）+ 两行表（与累计/年率化同款） */
 function fdSelf(x, pf) {
   if (!pf) {
     return '<div class="self-empty">' + TT('该基金暂无官网逐日净值序列（新成立或发行人未提供），无法计算自算指标。') + '</div>';
@@ -1161,28 +1166,9 @@ function fdSelf(x, pf) {
   if (rk) rank += ' · ' + TQ('近1年同类排名 {a}/{b}', { a: rk.sub, b: rk.subAll });
   rank += '（' + TQ('基于官网净值，数据截止至 {d}', { d: pf.asOf || '—' }) + '）';
   const tip = TQ('自算口径：基于发行人官网每日单位资产净值（净值日 {d}），未含分红再投资与费用调整；与积金局「基金回报」的统计期间与算法不同，数值可能有差异。', { d: pf.asOf || '—' });
-  const it = (k, v, t, digits) => {
-    const txt = pct(v, digits);
-    const tip2 = t || '';
-    return '<span class="sc-item"' + (tip2 ? ' data-tip="' + esc(tip2) + '" aria-label="' + esc(tip2) + '"' : '') +
-      '><em>' + k + '</em><b class="' + cls(v) + '">' + txt + '</b></span>';
-  };
-  const item = (k, v, txt) => '<span class="sc-item"><em>' + k + '</em><b class="' + cls(v) + '">' + txt + '</b></span>';
   return '<div class="perf-rank">' + rank +
-      '<i class="sc-info" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">ⓘ</i></div>' +
-    '<div class="an-selfcalc">' +
-      it(TT('日涨跌'), pf.d1, null, 3) +
-      it(TT('近1周'), pf.w1) +
-      it(TT('近1月'), pf.m1) +
-      it(TT('年初至今'), pf.ytd) +
-      it(TT('近1年'), pf.y1) +
-      it(TT('近3年年化'), pf.y3a) +
-      it(TT('近5年年化'), pf.y5a) +
-      item(TT('5年最大回撤'), pf.mdd5, pf.mdd5 != null ? pct(pf.mdd5) : '—') +
-      item(TT('3年波幅'), pf.vol3, pf.vol3 != null ? pct(pf.vol3) : '—') +
-      item(TT('夏普(1年)'), pf.sharpe1, pf.sharpe1 != null ? pf.sharpe1.toFixed(2) : '—') +
-    '</div>' +
-    fdPanelNote(TQ('自算口径基于发行人官网每日净值（净值日 {d}），不含分红再投资与费用调整；与积金局季频口径不可直接相减。', { d: (pf && pf.asOf) || '—' }));
+    '<i class="sc-info" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">ⓘ</i></div>' +
+    fdPerfRow(x, 'self', pf);
 }
 
 /* ================= 基金表现（2026-10-29 二版，5.0） =================
@@ -1203,14 +1189,20 @@ function fdPanelNote(html) {
 }
 
 /* 累计回报 / 年率化：两行表（表头时间维度 + 一行数值），仅用积金局公布值 */
-function fdPerfRow(x, kind) {
+function fdPerfRow(x, kind, pf) {
   const isAnn = kind === 'ann';
-  const cols = isAnn
-    ? [[TT('近 1 年'), x.ann1, 1], [TT('近 5 年'), x.ann5, 5], [TT('近 10 年'), x.ann10, 10], [TT('推出至今'), x.annLaunch, 0]]
-    : [[TT('近 1 年'), x.cum1, 1], [TT('近 5 年'), x.cum5, 5], [TT('近 10 年'), x.cum10, 10], [TT('推出至今'), x.cumLaunch, 0]];
-  const head = '<tr><th class="ph-corner">' + TT(isAnn ? '年率化' : '累计回报') + '</th>' +
+  const isSelf = kind === 'self';
+  /* 2026-10-29（5.0）：自算指标也做成两行表，只留常用维度（近1周→近1月→年初至今→近1年→近3年→近5年），
+     不再把回撤/波幅/夏普全塞进来；时间由近到远。 */
+  const cols = isSelf
+    ? [[TT('近 1 周'), pf && pf.w1, 0], [TT('近 1 月'), pf && pf.m1, 0], [TT('年初至今'), pf && pf.ytd, 1],
+      [TT('近 1 年'), pf && pf.y1, 1], [TT('近 3 年（年化）'), pf && pf.y3a, 3], [TT('近 5 年（年化）'), pf && pf.y5a, 5]]
+    : isAnn
+      ? [[TT('近 1 年'), x.ann1, 1], [TT('近 5 年'), x.ann5, 5], [TT('近 10 年'), x.ann10, 10], [TT('推出至今'), x.annLaunch, 0]]
+      : [[TT('近 1 年'), x.cum1, 1], [TT('近 5 年'), x.cum5, 5], [TT('近 10 年'), x.cum10, 10], [TT('推出至今'), x.cumLaunch, 0]];
+  const head = '<tr><th class="ph-corner">' + TT(isSelf ? '自算指标' : (isAnn ? '年率化' : '累计回报')) + '</th>' +
     cols.map((c) => '<th scope="col">' + c[0] + '</th>').join('') + '</tr>';
-  const body = '<tr><th scope="row">' + TT('积金局口径') + '</th>' + cols.map((c) => {
+  const body = '<tr><th scope="row">' + TT(isSelf ? '自算净值' : '积金局口径') + '</th>' + cols.map((c) => {
     const v = c[1];
     if (v == null) {
       const tip = naWhy(x, c[2], c[0]);
@@ -1219,9 +1211,11 @@ function fdPerfRow(x, kind) {
     return '<td class="num ' + cls(v) + '">' + pct(v) + '</td>';
   }).join('') + '</tr>';
   const asOf = (DATA && DATA.dataAsOf) || TT('官网最新公布日');
-  const note = isAnn
-    ? TQ('积金局口径（含费含息），数据截至 {d}。年率化＝按复利折算为每年平均回报，直接取自官网公布值，非本站换算。', { d: asOf })
-    : TQ('积金局口径（含费含息），数据截至 {d}。与「自算指标」的净值口径统计期间与算法不同，不可直接相减。', { d: asOf });
+  const note = isSelf
+    ? TQ('自算口径基于发行人官网每日净值（净值日 {d}），不含分红再投资与费用调整；近 3 年 / 近 5 年为年化值。与积金局季频口径不可直接相减。', { d: (pf && pf.asOf) || '—' })
+    : isAnn
+      ? TQ('积金局口径（含费含息），数据截至 {d}。年率化＝按复利折算为每年平均回报，直接取自官网公布值，非本站换算。', { d: asOf })
+      : TQ('积金局口径（含费含息），数据截至 {d}。与「自算指标」的净值口径统计期间与算法不同，不可直接相减。', { d: asOf });
   return '<div class="perf-row"><table class="perf-h"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' + fdPanelNote(note);
 }
 
@@ -1433,7 +1427,7 @@ window.allocBlockHTML = function (id) {
   if (otherW > 0) series.push({ label: TT('其他类别'), w: otherW, color: alColor(series.length, series.length + 1) });
   const wSum = series.reduce((a, x) => a + x.w, 0) || 1;
 
-  const W = 760, H = 344, CX = 380, CY = 172, R = 120, R0 = 60, BAND = 0.76;
+  const W = 760, H = 360, CX = 380, CY = 180, R = 124, R0 = 62, BAND = 0.76;
   const f2 = (n) => Number(n).toFixed(2);
   const pt = (r, a) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
   const sector = (r0, r1, a0, a1) => {
@@ -1446,10 +1440,14 @@ window.allocBlockHTML = function (id) {
   let acc = -Math.PI / 2;
   series.forEach((s) => {
     const ang = (s.w / wSum) * Math.PI * 2;
-    slices.push({ s: s, a0: acc, a1: acc + ang, mid: acc + ang / 2 });
+    slices.push({ s: s, a0: acc, a1: acc + ang, mid: acc + ang / 2, ang: ang });
     acc += ang;
   });
-  /* 左右分列 + 防重叠：按 y 排序后强制最小间距，超出下边界再整体回推 */
+  /* 引线只留给角度太小的扇区；大扇区直接把名称与占比写在里面（参照用户给的信息图），圆心留空 */
+  const INNER_MIN = 0.42;   /* ≈24°，再小就写不下两行字 */
+  const inner = slices.filter((o) => o.ang >= INNER_MIN);
+  const outer = slices.filter((o) => o.ang < INNER_MIN);
+
   function place(list) {
     const gap = 42; const top = 26; const bottom = H - 26;
     const arr = list.map((o) => ({ o: o, y: CY + Math.sin(o.mid) * R * 1.02 })).sort((a, b) => a.y - b.y);
@@ -1461,8 +1459,8 @@ window.allocBlockHTML = function (id) {
     }
     return arr;
   }
-  const leftSide = place(slices.filter((o) => Math.cos(o.mid) < 0));
-  const rightSide = place(slices.filter((o) => Math.cos(o.mid) >= 0));
+  const leftSide = place(outer.filter((o) => Math.cos(o.mid) < 0));
+  const rightSide = place(outer.filter((o) => Math.cos(o.mid) >= 0));
 
   let shapes = '';
   slices.forEach((o) => {
@@ -1472,6 +1470,17 @@ window.allocBlockHTML = function (id) {
       '<title>' + esc(sd.label) + ' ' + nf(sd.w, 2) + '%</title></path>';
     const dot = pt(R * 0.70, o.mid);
     shapes += '<circle cx="' + f2(dot[0]) + '" cy="' + f2(dot[1]) + '" r="2.4" fill="' + sd.color + '"/>';
+  });
+
+  /* 大扇区：名称与占比直接写在扇区里 */
+  inner.forEach((o) => {
+    const sd = o.s;
+    const p = pt(R0 * 0.55, o.mid);
+    /* 文字统一深蓝，放在灰色扇区中部——白字跨灰底和蓝带会被吃掉一半 */
+    const dark = false;
+    const name = sd.label.length > 7 ? sd.label.slice(0, 7) + '…' : sd.label;
+    shapes += '<text x="' + f2(p[0]) + '" y="' + f2(p[1] - 2) + '" text-anchor="middle" class="alr2-in' + (dark ? ' light' : '') + '">' + esc(name) + '</text>' +
+      '<text x="' + f2(p[0]) + '" y="' + f2(p[1] + 15) + '" text-anchor="middle" class="alr2-inv' + (dark ? ' light' : '') + '">' + nf(sd.w, 2) + '%</text>';
   });
 
   function labels(list, side) {
@@ -1491,9 +1500,7 @@ window.allocBlockHTML = function (id) {
   }
 
   const svg = '<svg class="alr2-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(titleText) + '">' +
-    shapes + labels(leftSide, 'left') + labels(rightSide, 'right') +
-    '<text x="' + CX + '" y="' + (CY - 3) + '" text-anchor="middle" class="alr-c1">' + nf(allocSum, 1) + '%</text>' +
-    '<text x="' + CX + '" y="' + (CY + 15) + '" text-anchor="middle" class="alr-c2">' + TT('组合合计') + '</text></svg>';
+    shapes + labels(leftSide, 'left') + labels(rightSide, 'right') + '</svg>';
 
   const mob = series.map((sd) =>
     '<li><i style="background:' + sd.color + '"></i><span class="alr-l" title="' + esc(sd.label) + '">' + esc(sd.label) + '</span><b>' + nf(sd.w, 2) + '%</b></li>').join('');

@@ -114,6 +114,8 @@ soft_step "9.5/9 缺日检查" node tools/gap-check.js
 # 2026-10-29（5.0）：链接巡检——友链 href 为空曾导致「点宏利跳回本站」，此前无任何环节检查。
 # 结构问题（空 href / 缺官网地址 / undefined）会让退出码非 0；网络 403 只告警。
 soft_step "9.7/9 链接巡检" node tools/link-audit.js
+# 2026-10-29（5.0）：季度哨兵——汇丰/恒生/AMTD 一旦发布新季便览，自动下载并写复核报告
+soft_step "9.8/9 季度便览哨兵" python tools/quarterly-watch.py
 
 echo ""
 echo "=== 数据链路完成 $(date '+%F %T')；日志：$LOG ==="

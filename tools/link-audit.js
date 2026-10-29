@@ -108,6 +108,21 @@ function probe(url) {
   }
 
   const uniqFails = Array.from(new Set(fails));
+  /* 2026-10-29（5.0）：每次巡检把结果落盘。下一轮会话开工先读它，有 fails/warns 就直接修。 */
+  try {
+    const report = {
+      generatedAt: new Date().toISOString(),
+      tool: 'link-audit',
+      ok: uniqFails.length === 0,
+      fails: uniqFails,
+      warns: Array.from(new Set(warns)),
+      sourceCount: sources.length,
+      externalCount: externals.size,
+      networkChecked: NET,
+      note: 'fails 为结构性错误（必须修）；warns 为可达性或超期提示（需判断是否为发行人未发布）',
+    };
+    fs.writeFileSync(path.join(ROOT, 'data', 'patrol-report.json'), JSON.stringify(report, null, 2));
+  } catch (e) {}
   const uniqWarns = Array.from(new Set(warns));
   uniqWarns.forEach((w) => console.log('  ! ' + w));
   if (uniqFails.length) {

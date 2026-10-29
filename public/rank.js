@@ -91,6 +91,17 @@
 
   /** 绑定表头点击排序（表头可能整体替换，故需可重复绑定）
       2026-10-22（用户要求）：三态 —— 最大 → 最小 → 取消（回该榜单默认名次） */
+  /* 2026-10-29（5.0）：三态排序一直存在，但箭头永远 ↕、看不出当前处于哪一态，
+     容易被误认为「三态没了」。这里补上可视反馈：升/降/取消分别显示 ↑/↓/↕ 并高亮该列。 */
+  function paintSortState() {
+    $$('#rkThead th[data-k]').forEach((th) => {
+      const on = S.sortKey === th.dataset.k;
+      th.classList.toggle('sort-on', on);
+      const ar = th.querySelector('.arrow');
+      if (ar) ar.textContent = on ? (S.sortDir === 'asc' ? '↑' : '↓') : '↕';
+    });
+  }
+
   function bindHeadSort() {
     $$('#rkThead th[data-k]').forEach((th) => {
       th.addEventListener('click', () => {
@@ -100,8 +111,10 @@
         else if (S.sortDir === d0) { S.sortDir = flip(d0); }
         else { S.sortKey = null; S.sortDir = null; }   // ③ 取消
         render();
+        paintSortState();
       });
     });
+    paintSortState();
   }
 
   /** 发行人实力榜列结构不同，切换榜单时整体替换表头。
