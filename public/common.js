@@ -25,8 +25,8 @@ const MPF_RISK = {
   labels: ['低风险', '低至中风险', '中低风险', '中风险', '中高风险', '高风险', '最高风险'],
   /* 2026-10-22（领导定）：7 级风险改用「蓝色由浅至深」，不再用绿→黄色相；
      风险不是涨跌，避免与「涨红跌绿」混淆，也让全站少两种颜色。 */
-  /* 2026-10-22（领导）：整体再调浅一档，1 级最浅、7 级最深 */
-  colors: ['#edf7ff', '#d7e9fa', '#c0dcf5', '#a5cbee', '#88b8e6', '#6ba4dc', '#4f90d2'],
+  /* 2026-10-29（5.0）：再加深一档，并与 style.css 的 .risk.rN 保持同一组色值 */
+  colors: ['#cfe4f5', '#a9cdec', '#7fb2de', '#559ad1', '#2e7fc0', '#1466ac', '#084e8c'],
   color(lv) {
     const i = Math.max(1, Math.min(7, Math.round(lv || 0)));
     return this.colors[i - 1];
@@ -34,6 +34,8 @@ const MPF_RISK = {
   label(lv) { return TT(this.labels[Math.max(1, Math.min(7, Math.round(lv || 0))) - 1]); },
   /** 风险级别来源提示（表格徽标 / 冠军卡统一使用）：明确由积金局评定，避免被误认为本平台判定 */
   tip(lv) { return TQ('由积金局评定：风险级别 {n} 级（1 级最低、7 级最高）', { n: lv }); },
+  /** 2026-10-29：风险级别为 n.a. 时的说明（积金局按近三年价格波幅评定，成立不足三年通常未获评级） */
+  naTip() { return TT('积金局按基金近三年价格波幅评定风险级别；该基金成立不足三年，官方尚未提供评级，故显示 n.a.（并非本站缺少数据）。'); },
   /** 7 级风险说明小图例（口径说明区用） */
   legendHTML() {
     let h = '<div class="risk-mini"><b>' + TT('风险级别说明（1–7 级）：') + '</b><ul class="rlm-list">';
@@ -637,16 +639,24 @@ const TRUSTEE_LINKS = [
 
 function li(a) {
   // a[0] 为链接标题（多为界面文案，走翻译；受托人计划名等数据值查不到词条会原样返回）
-  return '<li><a href="' + esc(a[1]) + '" target="_blank" rel="noopener">' + esc(TT(a[0])) +
-    (a[2] ? '<span>' + esc(a[2]) + '</span>' : '') + '</a></li>';
+  const href = String(a[1] || '').trim();
+  const text = esc(TT(a[0])) + (a[2] ? '<span>' + esc(a[2]) + '</span>' : '');
+  /* 2026-10-29（5.0）：URL 为空时绝不渲染 <a>——空的 href 会让浏览器跳回当前页，
+     用户点「宏利」却留在本站，看起来像链接坏了。改为纯文本并标注「暂无官网链接」。 */
+  if (!/^https?:\/\//i.test(href)) {
+    return '<li class="fr-nolink"><span class="fr-t">' + text + '</span></li>';
+  }
+  return '<li><a href="' + esc(href) + '" target="_blank" rel="noopener">' + text + '</a></li>';
 }
 
 function renderFriends() {
   const ns = DATA.navStat;
   // 优先使用 `page`（官网人类可读页面）；个别来源的 `url` 是 JSON 接口，直接点击只会看到原始数据
+  /* 2026-10-29（5.0）修：sources 的字段是 n（不是 count），且 page 为 2026-10-29 起由 merge-nav 回填；
+     两者缺失时会渲染出「undefined 条」和空 href（点宏利跳回本站的根因）。 */
   const src = (ns && ns.sources && ns.sources.length)
-    ? ns.sources.map((s) => [s.label, s.page || s.url,
-      s.asOf ? TQ('净值截至 {d} · {n} 条', { d: s.asOf, n: s.count }) : TQ('{n} 条', { n: s.count })])
+    ? ns.sources.map((s) => [s.label || s.name, s.page || s.url || '',
+      s.asOf ? TQ('净值截至 {d} · {n} 条', { d: s.asOf, n: (s.n != null ? s.n : s.count) }) : TQ('{n} 条', { n: (s.n != null ? s.n : s.count) })])
     : TRUSTEE_LINKS.map((t) => [t[0], t[1], '']);
   document.querySelectorAll('.friend-links').forEach((box) => {
     box.innerHTML =
@@ -692,6 +702,21 @@ function pct(v, d) {
   const s = nf(v, d === undefined ? 2 : d);
   return (v > 0 ? '+' : '') + s + '%';
 }
+/* 2026-10-29（5.0）：长周期指标为空时，说明「为什么是 —」——成立不足 N 年，或源站未披露。
+   仅用于悬浮提示，不改变单元格显示（仍为 —）。 */
+function naWhy(x, years, label) {
+  const launch = x && x.launch ? new Date(String(x.launch).replace(/\//g, '-')) : null;
+  if (launch && isFinite(launch.getTime())) {
+    const yrs = (Date.now() - launch.getTime()) / (365.25 * 864e5);
+    if (yrs < years) {
+      return TQ('该基金于 {d} 推出，成立不足 {n} 年，暂无{label}数据。', {
+        d: x.launch, n: years, label: label,
+      });
+    }
+  }
+  return TQ('官方尚未披露{label}数据（可能因成立时间不足或源站未提供），本站不做推算。', { label: label });
+}
+window.naWhy = naWhy;
 function cls(v) {
   if (v == null) return 'flat';
   return v > 0 ? 'up' : v < 0 ? 'down' : 'flat';
@@ -700,7 +725,12 @@ function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 function riskTag(r) {
-  if (r == null) return '<span class="muted">—</span>';
+  /* 2026-10-29：积金局对成立不足三年（未评级）的基金写 n.a.，本站随之显示 n.a. 并给悬浮说明；
+     原先显示「—」会被误读为本站缺数据 */
+  if (r == null) {
+    const tip = MPF_RISK.naTip();
+    return '<span class="risk-na" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">n.a.</span>';
+  }
   const tip = MPF_RISK.tip(r);
   return '<span class="risk r' + r + '" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">' + r + '</span>';
 }
@@ -1038,7 +1068,7 @@ function fdBasic(x) {
       '<div class="ac-kv">' +
         kv(TT('基金类别'), esc(typeLabel(x.typeFull))) +
         kv(TT('细类'), esc(x.subtype || '—')) +
-        kv(TT('风险级别'), (x.risk == null ? '—' : riskTag(x.risk) + ' <span class="rk-lbl">' + MPF_RISK.label(x.risk) + '</span>')) +
+        kv(TT('风险级别'), (x.risk == null ? riskTag(null) : riskTag(x.risk) + ' <span class="rk-lbl">' + MPF_RISK.label(x.risk) + '</span>')) +
       '</div>' +
       '<p class="ac-note">' + TT('各成分基金的投资目标与投资政策以计划说明书及官方基金页面为准；本页类别描述取自积金局基金资讯表。') + '</p>' +
     '</div>';
@@ -1125,28 +1155,103 @@ function fdSelf(x, pf) {
     '</div>';
 }
 
-/** 累计表现（8 区间，逐行标来源） */
-function fdReturns(x, pf) {
-  const cell = (v) => '<td class="num ' + cls(v) + '">' + (v == null ? '—' : pct(v)) + '</td>';
-  const row = (label, cum, ann) =>
-    '<tr><th scope="row">' + label + '</th>' + cell(cum) + cell(ann) + '</tr>';
-  /* 2026-10-21：按用户要求只保留积金局公布的 4 个区间（近1年/近5年/近10年/推出至今），
-     自算的年初至今、1/3 个月、近 3 年与上方「自算指标」重复，已移除；口径说明一并去掉。 */
-  const rows = [
-    row(TT('近 1 年'), x.cum1, x.ann1),
-    row(TT('近 5 年'), x.cum5, x.ann5),
-    row(TT('近 10 年'), x.cum10, x.ann10),
-    row(TT('推出至今'), x.cumLaunch, x.annLaunch),
-  ];
-  const asOf = (DATA && DATA.dataAsOf) || TT('官网最新公布日');
-  return '<div class="sect-title">' + TQ('累计表现（基于积金局官网月度数据，截止至 {d}）', { d: esc(asOf) }) + '</div>' +
-    '<div class="an-perf">' +
-    '<table class="perf-table"><thead><tr>' +
+/* ================= 表现区四栏（2026-10-29，5.0） =================
+ * 用户对照宏利官网后要求：先选栏目，下面只出一张表，列由近及远，并写明口径。
+ *   ① 自算指标（沿用原 sc-item 磁贴 + 同类排名 + ⓘ）
+ *   ② 累计回报：区间 × 自算净值 / 积金局，两列并列（各自标截止日）
+ *   ③ 年率化：同上，但取年率化字段
+ *   ④ 历年走势：既有柱状图 + 口径说明
+ * 之所以能比原来多出 3/5/10 年维度：nav-perf.json 本来就有 y3/y5/y10/yLaunch 与
+ * 对应年化字段，此前只放在「自算指标」一小条里，表格里只列了积金局的 1/5/10/推出至今。
+ */
+let FD_TAB = (function () {
+  /* 支持 ?fdp=cum|ann|cal 直达某一栏（便于分享与自动化截图） */
+  try {
+    const q = new URLSearchParams(location.search).get('fdp');
+    return ['self', 'cum', 'ann', 'cal'].indexOf(q) >= 0 ? q : 'self';
+  } catch (e) { return 'self'; }
+})();
+
+function fdPanelNote(html) {
+  return '<p class="fd-perf-note">' + html + '</p>';
+}
+
+function fdPerfTable(x, pf, kind) {
+  const isAnn = kind === 'ann';
+  const cell = (v, years, label) => {
+    if (v == null) {
+      const tip = naWhy(x, years || 0, TT(label));
+      return '<td class="num fd-na" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">—</td>';
+    }
+    return '<td class="num ' + cls(v) + '">' + pct(v) + '</td>';
+  };
+  const S = (k) => (pf ? pf[k] : null);
+  const rows = isAnn
+    ? [
+      [TT('近 1 年'), S('y1'), 1, x.ann1, 1],
+      [TT('近 3 年'), S('y3a'), 3, null, 3],
+      [TT('近 5 年'), S('y5a'), 5, x.ann5, 5],
+      [TT('近 10 年'), S('y10a'), 10, x.ann10, 10],
+      [TT('推出至今'), null, 0, x.annLaunch, 0],
+    ]
+    : [
+      [TT('年初至今'), S('ytd'), 1, null, 1],
+      [TT('近 1 年'), S('y1'), 1, x.cum1, 1],
+      [TT('近 3 年'), S('y3'), 3, null, 3],
+      [TT('近 5 年'), S('y5'), 5, x.cum5, 5],
+      [TT('近 10 年'), S('y10'), 10, x.cum10, 10],
+      [TT('推出至今'), S('yLaunch'), 0, x.cumLaunch, 0],
+    ];
+  const body = rows.map((r) => '<tr><th scope="row">' + r[0] + '</th>' + cell(r[1], r[2], r[0]) + cell(r[3], r[4], r[0]) + '</tr>').join('');
+  const selfAsOf = (pf && pf.asOf) || '—';
+  const mpfaAsOf = (DATA && DATA.dataAsOf) || TT('官网最新公布日');
+  return '<div class="an-perf">' +
+    '<table class="perf-table perf-2col"><thead><tr>' +
       '<th scope="col">' + TT('区间') + '</th>' +
-      '<th scope="col">' + TT('累积回报（%）') + '</th>' +
-      '<th scope="col">' + TT('年率化（% p.a.）') + '</th>' +
-    '</tr></thead><tbody>' + rows.join('') + '</tbody></table>' +
-    '</div>';
+      '<th scope="col">' + TT('自算净值') + '<br><small>' + TQ('截至 {d}', { d: selfAsOf }) + '</small></th>' +
+      '<th scope="col">' + TT('积金局') + '<br><small>' + TQ('截至 {d}', { d: esc(mpfaAsOf) }) + '</small></th>' +
+    '</tr></thead><tbody>' + body + '</tbody></table>' +
+    '</div>' +
+    fdPanelNote(isAnn
+      ? TT('年率化＝按复利折算为每年平均回报。自算列由本站按每日净值计算（不含分红再投资与费用调整）；积金局列直接取自官网公布值，非本站换算。两列不可相减。')
+      : TT('自算列按发行人官网每日单位净值计算，不含分红再投资与费用调整；积金局列含费含息、按季公布。两列统计期间与算法不同，不可相减。'));
+}
+
+function fdPerfTabs(x, pf) {
+  const tabs = [['self', '自算指标'], ['cum', '累计回报'], ['ann', '年率化回报'], ['cal', '历年走势']];
+  const notes = {
+    cal: TT('历年回报为积金局公布的日历年度回报（含费含息）；最近一年为尚未结束的年度，按年初至今计。'),
+  };
+  const panels = {
+    self: fdSelf(x, pf),
+    cum: fdPerfTable(x, pf, 'cum'),
+    ann: fdPerfTable(x, pf, 'ann'),
+    cal: '<div class="fd-cal">' + calChart(x) + '</div>' + fdPanelNote(notes.cal),
+  };
+  const btns = tabs.map(([k, label]) =>
+    '<button type="button" class="fd-tab' + (FD_TAB === k ? ' on' : '') + '" data-fdtab="' + k + '" role="tab" aria-selected="' + (FD_TAB === k) + '">' + TT(label) + '</button>').join('');
+  const panes = tabs.map(([k]) =>
+    '<div class="fd-panel" data-fdp="' + k + '"' + (FD_TAB === k ? '' : ' hidden') + '>' + panels[k] + '</div>').join('');
+  return '<div class="fd-perf"><div class="fd-tabs" role="tablist">' + btns + '</div>' + panes + '</div>';
+}
+
+/* 四个栏目的切换（事件委托，只绑定一次；小窗与放大页共用） */
+if (!window.__fdTabBound) {
+  window.__fdTabBound = true;
+  document.addEventListener('click', function (e) {
+    const btn = e.target && e.target.closest ? e.target.closest('.fd-tab') : null;
+    if (!btn) return;
+    const wrap = btn.closest('.fd-perf');
+    if (!wrap) return;
+    const k = btn.getAttribute('data-fdtab');
+    FD_TAB = k;
+    wrap.querySelectorAll('.fd-tab').forEach((b) => {
+      const on = b.getAttribute('data-fdtab') === k;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    wrap.querySelectorAll('.fd-panel').forEach((p) => { p.hidden = p.getAttribute('data-fdp') !== k; });
+  });
 }
 
 /** 持仓/分布骨架：保证「即使没有数据，模块也必须在页面上」（用户 2026-10-21 强调） */
@@ -1176,10 +1281,7 @@ window.fundDetailHTML = function (x, opts) {
     fdNavSrc(x) +
     fdBasic(x) +
     fdUnits(x) +
-    '<div id="fdSelf">' + fdSelf(x, pf) + '</div>' +
-    '<div id="fdRet">' + fdReturns(x, pf) + '</div>' +
-    '<div class="sect-title">' + TT('历年走势') + '</div>' +
-    '<div class="fd-cal">' + calChart(x) + '</div>' +
+    '<div id="fdPerf">' + fdPerfTabs(x, pf) + '</div>' +
     '<div id="fdHolds">' + fdBone('前十大持仓') + '</div>' +
     '<div id="fdAlloc">' + fdBone('投资组合分布') + '</div>' +
     '</div>';
@@ -1192,10 +1294,8 @@ window.fundDetailRefresh = function (x) {
   const tp = (window.__TPERF && window.__TPERF.funds) ? (window.__TPERF.funds[String(x.id)] || null) : null;
   const h = document.querySelector('#fdHead');
   if (h) h.outerHTML = fdHead(x, pf);
-  const s = document.querySelector('#fdSelf');
-  if (s) s.innerHTML = fdSelf(x, pf);
-  const r = document.querySelector('#fdRet');
-  if (r) r.innerHTML = fdReturns(x, pf);
+  const perf = document.querySelector('#fdPerf');
+  if (perf) perf.innerHTML = fdPerfTabs(x, pf);
 };
 
 /* ---------- 基金详情弹窗（资料库 / 排名页共用） ---------- */
@@ -1271,33 +1371,24 @@ window.holdBlockHTML = function (id) {
       '<div class="hl-note">' + TQ('数据来源：{s}；当前已接入 {n} 只基金。', { s: src, n: cnt }) + '</div>' + srcNote + '</div></div>';
   }
   const sum = d.top10.reduce((a, h) => a + (h.weight || 0), 0);
-  /* 有代码/价格明细时（未来接入行情）：七列完整表 */
-  const hasDetail = d.top10.some((h) => h.code);
-  if (hasDetail) {
-    const rows = d.top10.map((h) => '<tr>' +
-      '<td class="fz">' + esc(h.name || '') + '</td>' +
-      '<td class="c">' + esc(h.code || '') + '</td>' +
-      '<td class="r num">' + (h.price == null ? '—' : nf(h.price, 2)) + '</td>' +
-      '<td class="c">' + esc(h.unit || '') + '</td>' +
-      '<td class="r num ' + cls(h.chg) + '">' + (h.chg == null ? '—' : (h.chg > 0 ? '▲ ' : (h.chg < 0 ? '▼ ' : '')) + pct(h.chg)) + '</td>' +
-      '<td class="c">' + esc(h.date || '') + '</td>' +
-      '<td class="r num">' + (h.weight == null ? '—' : nf(h.weight, 2) + '%') + '</td></tr>').join('');
-    return '<div class="an-hold">' + title +
-      '<div class="table-scroll"><table class="data hl-table"><thead><tr>' +
-      ['中文简称', '股票代码', '收盘价', '单位', '涨跌幅', '更新日期', '投资占比'].map((k, i) => '<th class="' + (i === 0 ? 'fz' : (i === 2 || i === 4 || i === 6 ? 'r' : 'c')) + '">' + TT(k) + '</th>').join('') +
-      '</tr></thead><tbody>' + rows +
-      '<tr class="hl-sumrow"><td class="fz">' + TT('汇总') + '</td><td colspan="5"></td><td class="r num">' + nf(sum, 2) + '%</td></tr>' +
-      '</tbody></table></div>' +
-      '<div class="hl-note">' + TQ('数据来源：{s}；截至 {d}。', { s: src, d: d.asOf || '—' }) + '</div>' + srcNote + '</div></div>';
-  }
-  /* 官网仅公布「名称 + 占比」时的简洁表（照抄实习生版式：细线、名称左、占比右、汇总行） */
-  const rows2 = d.top10.map((h) => '<tr><td class="fz">' + esc(h.name || '') + '</td>' +
-    '<td class="r num">' + (h.weight == null ? '—' : nf(h.weight, 2) + '%') + '</td></tr>').join('');
+  /* 2026-10-29（5.0，用户指定）：前十大持仓改为「名称 + 占比」横向柱状图，
+     不再列股票代码 / 收盘价 / 涨跌幅 / 更新日期——这些对看强积金的人没有意义，
+     且详情页列宽有限。柱长按最大权重归一，颜色由深到浅表示持仓排名。 */
+  const HLD_BAR = ['#084e8c', '#0f5c9e', '#1669b0', '#2076c0', '#2e86c8', '#4a9bd4', '#6fb0e0', '#93c5e8', '#b8d9f2', '#cfe4f5'];
+  const maxW = Math.max.apply(null, d.top10.map((h) => h.weight || 0)) || 1;
+  const bars = d.top10.map((h, i) => {
+    const w = h.weight || 0;
+    const len = Math.max(w ? 1.5 : 0, (w / maxW) * 100);
+    return '<div class="hlb-row">' +
+      '<span class="hlb-k" title="' + esc(h.name || '') + '">' + esc(h.name || '') + '</span>' +
+      '<span class="hlb-track"><i style="width:' + len.toFixed(2) + '%;background:' + HLD_BAR[Math.min(i, 9)] + '"></i></span>' +
+      '<b class="hlb-v">' + (h.weight == null ? '—' : nf(w, 2) + '%') + '</b></div>';
+  }).join('');
   return '<div class="an-hold">' + title +
-    '<table class="data hl-table hl-simple"><thead><tr><th class="fz">' + TT('中文简称') + '</th><th class="r">' + TT('投资占比') + '</th></tr></thead>' +
-    '<tbody>' + rows2 +
-    '<tr class="hl-sumrow"><td class="fz">' + TT('汇总') + '</td><td class="r num">' + nf(sum, 2) + '%</td></tr>' +
-    '</tbody></table>' +
+    '<div class="hl-bars"><div class="hlb-head"><span>' + TT('名称') + '</span><span class="hlb-axis">' + TT('占基金资产净值比例') + '</span></div>' +
+    bars +
+    '<div class="hlb-sum"><span>' + TT('前十大合计') + '</span><b>' + nf(sum, 2) + '%</b></div>' +
+    '</div>' +
     '<div class="hl-note">' + TQ('数据来源：{s}；截至 {d}。', { s: src, d: d.asOf || '—' }) + '</div>' + srcNote + '</div></div>';
 };
 
@@ -1317,30 +1408,63 @@ window.allocBlockHTML = function (id) {
       '<div class="empty">' + TT('投资组合分布尚未接入：该计划便览可能只披露十大持仓，或本站仍在解析该版式。') + '</div>' +
       '<div class="hl-note">' + TQ('数据来源：{s}（月度）。', { s: src }) + '</div></div>';
   }
-  /* 2026-10-15 重做（二修）：百分比一律在柱外（不压柱）；仅最大项用深蓝，其余浅蓝 */
-  const max = Math.max.apply(null, d.alloc.map((a) => a.weight || 0)) || 1;
-  let axisMax = Math.max(10, Math.ceil(max / 10) * 10);
-  if (max / axisMax > 0.75) axisMax += 10;   /* 给柱外数字留位 */
-  const step = axisMax <= 30 ? 5 : 10;
-  const ticks = [];
-  for (let t = 0; t <= axisMax; t += step) ticks.push(t);
-  const grid = '<div class="alx-grid">' + ticks.map((t) => '<i style="left:' + (t / axisMax * 100).toFixed(2) + '%"></i>').join('') + '</div>';
-  const axis = '<div class="alx-axis">' + ticks.map((t) => '<span style="left:' + (t / axisMax * 100).toFixed(2) + '%">' + t + '</span>').join('') + '</div>';
-  const rows = d.alloc.map((a) => {
-    const pct = axisMax ? ((a.weight || 0) / axisMax * 100) : 0;
-    const dark = (a.weight || 0) >= max;   /* 最大项深蓝，其余浅蓝（对齐同业版式） */
-    return '<div class="alx-row"><span class="alx-k">' + esc(a.label || '') + '</span>' +
-      '<span class="alx-plot"><i class="' + (dark ? 'alx-strong' : '') + '" style="width:' + pct.toFixed(2) + '%"></i>' +
-      '<b>' + nf(a.weight, 2) + '%</b></span></div>';
-  }).join('');
+  /* 2026-10-29（5.0，用户指定）：投资分布改为「变径饼图」——占比越大，扇形外径越突出，
+     不做规整圆环；配色蓝为主、浅绿点缀。图例放右侧两列，详情页窄也能放下。 */
+  const ALC = ['#084e8c', '#1669b0', '#2e86c8', '#4a9bd4', '#7bbef4', '#8cc63f', '#b5d96b', '#d7e9b8'];
+  const items = d.alloc.slice().sort((a, b) => (b.weight || 0) - (a.weight || 0));
+  let shown = items;
+  let otherW = 0;
+  if (items.length > 8) {
+    shown = items.slice(0, 7);
+    otherW = items.slice(7).reduce((a, x) => a + (+x.weight || 0), 0);
+  }
+  const allocSum = items.reduce((a, c) => a + (+c.weight || 0), 0);
+  const series = shown.map((x, i) => ({ label: x.label || '', w: +x.weight || 0, color: ALC[i % ALC.length] }));
+  if (otherW > 0) series.push({ label: TT('其他类别'), w: otherW, color: '#d7e9b8' });
+  const wSum = series.reduce((a, x) => a + x.w, 0) || 1;
+  const maxW = Math.max.apply(null, series.map((x) => x.w)) || 1;
+  const R = 82, R0 = 44, CX = 100, CY = 100;
+  const pt = (r, a) => [(CX + r * Math.cos(a)).toFixed(2), (CY + r * Math.sin(a)).toFixed(2)];
+  let acc = -Math.PI / 2;
+  let paths = '';
+  if (series.length === 1) {
+    paths = '<circle cx="' + CX + '" cy="' + CY + '" r="' + ((R + R0) / 2).toFixed(1) + '" fill="none" stroke="' +
+      series[0].color + '" stroke-width="' + (R - R0) + '"/>';
+  } else {
+    series.forEach((s) => {
+      const ang = (s.w / wSum) * Math.PI * 2;
+      const a0 = acc;
+      const a1 = acc + ang;
+      const mid = (a0 + a1) / 2;
+      acc = a1;
+      /* 占比越大，整块向外位移越多（半径不变，面积仍按真实占比，不做失真） */
+      const off = 2 + 9 * Math.min(1, s.w / maxW);
+      const dx = (Math.cos(mid) * off).toFixed(2);
+      const dy = (Math.sin(mid) * off).toFixed(2);
+      const large = ang > Math.PI ? 1 : 0;
+      const p1 = pt(R, a0); const p2 = pt(R, a1); const p3 = pt(R0, a1); const p4 = pt(R0, a0);
+      paths += '<g transform="translate(' + dx + ',' + dy + ')"><path d="M' + p1[0] + ' ' + p1[1] + ' A' + R + ' ' + R + ' 0 ' + large + ' 1 ' + p2[0] + ' ' + p2[1] +
+        ' L' + p3[0] + ' ' + p3[1] + ' A' + R0 + ' ' + R0 + ' 0 ' + large + ' 0 ' + p4[0] + ' ' + p4[1] + ' Z" fill="' + s.color + '" stroke="#fff" stroke-width="1.4">' +
+        '<title>' + esc(s.label) + ' ' + nf(s.w, 2) + '%</title></path></g>';
+    });
+  }
+  /* 圆心显示最大类别的占比与名称，比「合计 100%」更有信息量 */
+  const lead = series.slice().sort((a, b) => b.w - a.w)[0] || { label: '', w: 0 };
+  const leadLabel = lead.label.length > 7 ? lead.label.slice(0, 7) + '…' : lead.label;
+  const svg = '<svg class="alr-svg" viewBox="0 0 200 200" role="img" aria-label="' + esc(titleText) + '">' + paths +
+    '<text x="' + CX + '" y="' + (CY - 2) + '" text-anchor="middle" class="alr-c1">' + nf(lead.w, 1) + '%</text>' +
+    '<text x="' + CX + '" y="' + (CY + 13) + '" text-anchor="middle" class="alr-c2">' + esc(leadLabel) + '</text></svg>';
+  const legend = series.map((s) =>
+    '<li><i style="background:' + s.color + '"></i><span class="alr-l" title="' + esc(s.label) + '">' + esc(s.label) + '</span>' +
+    '<b>' + nf(s.w, 2) + '%</b></li>').join('');
   /* 2026-10-23：合计校验。源便览只列主要类别时合计会明显低于 100%（本站 48 只如此，
      最低 73%），此前直接画图会让人误以为剩余部分是"其他"。这里如实标注缺口。 */
-  const allocSum = d.alloc.reduce((a, c) => a + (+c.weight || 0), 0);
   const allocGap = Math.abs(allocSum - 100) > 0.5
     ? '<div class="hl-note hl-warn">' + TQ('上图仅列出该基金便览披露的主要类别，合计 {s}%；未列出的类别（约 {g}%）未在源文件中单列，本站不做推算补齐。', { s: nf(allocSum, 2), g: nf(100 - allocSum, 2) }) + '</div>'
     : '';
   return '<div class="an-hold">' + title +
-    '<div class="alx">' + grid + rows + axis + '</div>' +
+    '<div class="alr"><div class="alr-chart">' + svg + '</div>' +
+    '<ul class="alr-legend">' + legend + '</ul></div>' +
     '<div class="hl-note">' + TQ('数据来源：{s}；截至 {d}。', { s: src, d: d.asOf || '—' }) + '</div>' + allocGap + '</div>';
 };
 

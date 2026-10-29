@@ -16,6 +16,21 @@
   --brand-soft: #edf7ff;
   --accent: #0b66b9;
   --accent-soft: #edf7ff;
+  /* 2026-10-29（5.0）：按公司官网 + logo 补齐一套更深的蓝与 logo 绿。
+     官网主蓝 #0866bb / 深蓝 #0759a0 / 浅蓝 #7bbef4；logo 绿 #c0d868（浅）、#8cc63f（可用作强调） */
+  --brand-deep: #0759a0;
+  --brand-mid: #2e86c8;
+  --brand-light: #7bbef4;
+  --brand-line: #cfe2f2;
+  --green: #8cc63f;
+  --green-deep: #5f9e2f;
+  --green-soft: #f2f7e4;
+  --chart-1: #0b5fa5;
+  --chart-2: #8cc63f;
+  --chart-3: #2e86c8;
+  --chart-4: #b5d96b;
+  --chart-5: #7bbef4;
+  --chart-6: #d7e9b8;
   --up: #d93025; /* 涨 · 红（中国市场惯例） */
   --down: #12996b; /* 跌 · 绿 */
   --flat: #7a8699;
@@ -361,11 +376,24 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
   display: inline-flex; align-items: center; justify-content: center;
   width: 20px; height: 20px; border-radius: 5px; font-size: 11px; font-weight: 650; color: #fff;
 }
-/* 7 级风险色板：与首页/图例共用同一组色（MPF_RISK.colors），
-   相邻级别色相拉开，避免小屏难以分辨；浅底两档改用深色文字保证对比度 */
-.risk.r1 { background: #2f9e8f; } .risk.r2 { background: #7fb93d; color: #1e3806; }
-.risk.r3 { background: #d6b32a; color: #3c2f00; } .risk.r4 { background: #e8942f; }
-.risk.r5 { background: #e0672f; } .risk.r6 { background: #ce3b3b; } .risk.r7 { background: #9e2222; }
+/* 7 级风险色板（2026-10-29 5.0 统一）：与 common.js 的 MPF_RISK.colors 完全一致——
+   蓝色由浅至深，1 级最浅、7 级最深；浅底三档用深蓝字保证对比度。
+   原「绿→黄→橙→红」色相与涨跌红绿混淆，已弃用。 */
+.risk.r1 { background: #cfe4f5; color: #0b3a66; }
+.risk.r2 { background: #a9cdec; color: #0b3a66; }
+.risk.r3 { background: #7fb2de; color: #082f52; }
+.risk.r4 { background: #559ad1; color: #062b4d; }
+.risk.r5 { background: #2e7fc0; }
+.risk.r6 { background: #1466ac; }
+.risk.r7 { background: #084e8c; }
+/* 风险级别 n.a.（积金局未评级）：虚线小胶囊，明确是官方未提供而非本站缺数 */
+.risk-na {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 30px; height: 20px; padding: 0 5px; border-radius: 5px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.2px;
+  color: var(--text-3); background: #f4f8fc; border: 1px dashed var(--border-strong);
+  cursor: help;
+}
 
 .bar { position: relative; height: 4px; border-radius: 2px; background: #eef1f5; overflow: hidden; margin-top: 3px; }
 .bar i { position: absolute; top: 0; height: 100%; border-radius: 2px; display: block; }
@@ -619,6 +647,12 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 .fr-list.fr-sm { grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .fr-list.fr-sm a { padding: 8px 10px; font-size: 12px; font-weight: 500; color: var(--text); background: var(--surface-2); }
 .fr-list.fr-sm a span { font-size: 11px; }
+/* 无官网 URL 的来源：不着色、不可点，避免用空 href 造成「点宏利跳回本站」 */
+.fr-list .fr-nolink .fr-t {
+  display: block; padding: 8px 10px; border: 1px dashed var(--border); border-radius: var(--radius-sm);
+  background: #fbfcfe; color: var(--text-3); font-weight: 500; font-size: 12px;
+}
+.fr-list .fr-nolink .fr-t span { display: block; margin-top: 3px; font-size: 11px; color: var(--text-3); }
 @media (max-width: 1180px) { .fr-list.fr-sm { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 900px) { .fr-list.fr-sm { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 620px) { .fr-list.fr-sm { grid-template-columns: 1fr; } }

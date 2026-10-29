@@ -789,7 +789,7 @@
         '<div class="nm">' + esc(x.fund) + '</div>' +
         '<div class="tr">' + esc(x.trustee) + '</div>' +
         '<div class="val num ' + c + '">' + label + '</div>' +
-        '<div class="meta"><span' + (x.risk == null ? '' : ' data-tip="' + esc(MPF_RISK.tip(x.risk)) + '"') + '>' + TT('风险') + ' ' + (x.risk == null ? '—' : x.risk + ' ' + TT('级')) + '</span><span>' + TQ('规模 {v} 百万', { v: nf(x.size, 0) }) + '</span><span>' + podRefText(b, x) + '</span></div>' +
+        '<div class="meta"><span' + (x.risk == null ? '' : ' data-tip="' + esc(MPF_RISK.tip(x.risk)) + '"') + '>' + TT('风险') + ' ' + (x.risk == null ? 'n.a.' : x.risk + ' ' + TT('级')) + '</span><span>' + TQ('规模 {v} 百万', { v: nf(x.size, 0) }) + '</span><span>' + podRefText(b, x) + '</span></div>' +
         '</div>';
     }).join('') : '<div class="empty" style="grid-column:1/-1">' + TT('暂无数据') + '</div>';
   }

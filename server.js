@@ -484,6 +484,62 @@ function send(res, code, body, type) {
   sendRaw(res && res.req, res, code, body, type);
 }
 
+/* ================= 数据文件「原子读写 + 上一份可用副本」 =================
+ * 2026-10-29（5.0）：用户反馈早间更新时页面有模块显示不出来。根因是数据链路一边写
+ * data/*.json、线上/本地服务一边按请求直接读文件：正好读到写了一半的文件时
+ * JSON.parse 失败，接口返回空/500，前端就把整块清空。
+ * 处理：
+ *   1) 写：先写同目录临时文件再 rename（同卷 rename 是原子操作），读者永远看到完整文件；
+ *   2) 读：解析失败短暂重试（等写盘完成），仍失败则回上一份成功解析的内容，
+ *      并带 X-Data-Fallback 头，让前端知道这是上一版数据而不是空白。
+ */
+const LAST_GOOD_JSON = new Map();
+
+function writeJsonAtomic(fp, obj) {
+  const tmp = fp + '.tmp-' + process.pid + '-' + Date.now();
+  fs.writeFileSync(tmp, typeof obj === 'string' ? obj : JSON.stringify(obj));
+  fs.renameSync(tmp, fp);
+}
+
+function serveJsonFile(req, res, file, opt) {
+  const opts = opt || {};
+  const attempt = (n) => {
+    fs.readFile(file, (err, buf) => {
+      if (!err) {
+        try {
+          JSON.parse(buf.toString('utf8'));
+          LAST_GOOD_JSON.set(file, buf);
+          return sendRaw(req, res, 200, buf, MIME['.json'], { cache: opts.cache || 'no-store' });
+        } catch (e) {
+          if (n < 3) return setTimeout(() => attempt(n + 1), 120);
+        }
+      } else if (n < 2) {
+        return setTimeout(() => attempt(n + 1), 120);
+      }
+      const last = LAST_GOOD_JSON.get(file);
+      if (last) {
+        return sendRaw(req, res, 200, last, MIME['.json'], {
+          cache: 'no-store',
+          headers: { 'X-Data-Fallback': '1', 'X-Data-Fallback-Of': path.basename(file) },
+        });
+      }
+      return sendRaw(req, res, 503, JSON.stringify({ error: '数据正在更新，请稍后重试' }), MIME['.json'], {
+        cache: 'no-store',
+        headers: { 'Retry-After': '5' },
+      });
+    });
+  };
+  attempt(0);
+}
+
+/** 启动时预热：把关键文件读进 LAST_GOOD_JSON，避免首次请求恰逢写盘时无兜底 */
+function warmJsonCache() {
+  ['nav-perf.json', 'hist-index.json', 'holdings.json', 'index.json', 'funds.json'].forEach((f) => {
+    const fp = path.join(__dirname, 'data', f);
+    try { LAST_GOOD_JSON.set(fp, fs.readFileSync(fp)); } catch (e) {}
+  });
+}
+
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, 'http://' + (req.headers.host || 'localhost'));
   const p = u.pathname;
@@ -572,17 +628,11 @@ const server = http.createServer(async (req, res) => {
 
   // 自算指标（由历史净值计算：日涨跌 / 各区间涨幅 / 最大回撤）
   if (p === '/api/navperf') {
-    return fs.readFile(path.join(__dirname, 'data', 'nav-perf.json'), (err, buf) => {
-      if (err) return send(res, 404, JSON.stringify({ error: '自算指标未生成' }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=900' });
-    });
+    return serveJsonFile(req, res, path.join(__dirname, 'data', 'nav-perf.json'), { cache: 'public, max-age=900' });
   }
   // 历史净值索引（用于发行人数据完整性标识，2026-10-17）
   if (p === '/api/hist-index') {
-    return fs.readFile(path.join(__dirname, 'data', 'hist-index.json'), (err, buf) => {
-      if (err) return send(res, 404, JSON.stringify({ error: 'hist-index 未生成' }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=900' });
-    });
+    return serveJsonFile(req, res, path.join(__dirname, 'data', 'hist-index.json'), { cache: 'public, max-age=900' });
   }
   // 基金英文名（积金局英文版，供简繁英搜索）
   if (p === '/api/names-en') {
@@ -798,17 +848,28 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/holdings') {
     /* 2026-10-20：支持 ?id= 单只查询（详情页只需 1 条，全量 433KB → 约 2KB） */
     const oneId = u.searchParams.get('id');
-    return fs.readFile(path.join(__dirname, 'data', 'holdings.json'), (err, buf) => {
+    const fp = path.join(__dirname, 'data', 'holdings.json');
+    if (!oneId) return serveJsonFile(req, res, fp, { cache: 'public, max-age=3600' });
+    return fs.readFile(fp, (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '持仓数据未生成' }));
-      if (!oneId) {
-        return sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=3600' });
-      }
       try {
         const all = JSON.parse(buf.toString('utf8'));
+        LAST_GOOD_JSON.set(fp, buf);
         const one = (all.funds || {})[String(oneId)];
         return send(res, one ? 200 : 404, JSON.stringify({ funds: one ? { [String(oneId)]: one } : {}, updatedAt: all.updatedAt }));
       } catch (e) {
-        return send(res, 500, JSON.stringify({ error: e.message }));
+        /* 写入窗口内读到半截文件：回上一份完整数据，不把 500 抛给页面 */
+        const last = LAST_GOOD_JSON.get(fp);
+        if (last) {
+          try {
+            const all = JSON.parse(last.toString('utf8'));
+            const one = (all.funds || {})[String(oneId)];
+            return sendRaw(req, res, one ? 200 : 404, JSON.stringify({ funds: one ? { [String(oneId)]: one } : {}, updatedAt: all.updatedAt }), MIME['.json'], {
+              cache: 'no-store', headers: { 'X-Data-Fallback': '1' },
+            });
+          } catch (e2) {}
+        }
+        return send(res, 503, JSON.stringify({ error: '数据正在更新，请稍后重试' }));
       }
     });
   }
@@ -996,12 +1057,13 @@ const server = http.createServer(async (req, res) => {
               obj.asOf = arr.length ? arr[arr.length - 1][0] : obj.asOf;
               obj.last = arr.length ? arr[arr.length - 1][1] : obj.last;
               obj.points = arr.length;
-              fs.writeFileSync(fp, JSON.stringify(obj));
+              /* 2026-10-29（5.0）：临时文件 + rename，读者不会读到半截 JSON */
+              writeJsonAtomic(fp, obj);
               n++;
             } catch (e) { /* 单只失败不影响其它 */ }
           });
-          if (j.navperf) {
-            try { fs.writeFileSync(path.join(__dirname, 'data', 'nav-perf.json'), JSON.stringify(j.navperf)); } catch (e) {}
+          if (j.navperf && j.navperf.funds) {
+            try { writeJsonAtomic(path.join(__dirname, 'data', 'nav-perf.json'), j.navperf); } catch (e) {}
           }
           console.log('[MPF] 已接收历史增量：' + n + ' 只');
         }
@@ -1083,6 +1145,9 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, async () => {
   console.log('[MPF] 服务启动于端口 ' + PORT);
+  /* 2026-10-29（5.0）：预热关键数据文件的「上一份可用副本」，
+     让首次请求撞上写盘窗口时也有兜底，不会返回 500/空模块 */
+  warmJsonCache();
   // 先用上一次从积金局官网抓取的快照兜底，保证页面打开即有数据，再后台拉取最新
   if (!cache) cache = loadSnapshot();
   if (cache) console.log('[MPF] 已载入本地快照：' + cache.count + ' 只基金');

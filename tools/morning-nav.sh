@@ -77,8 +77,12 @@ node tools/fix-nulls.js || true
 node tools/merge-nav.js || { echo "!!! merge-nav 失败，中止"; exit 1; }
 node tools/nav-consistency.js || echo "!!! nav-consistency 未通过（详见输出）"
 node tools/gap-check.js || true
+# 2026-10-29（5.0）：早间同样跑链接巡检，避免友链在数据更新后退化
+node tools/link-audit.js || echo "!!! 链接巡检未通过（详见上）"
 
 echo ""
+# 2026-10-29（5.0）：发布闸门——四份核心数据不一致时不写 done、不发布
+node tools/predeploy-check.js || { echo "!!! 一致性未通过，中止发布"; write_ustat error "发布前一致性未通过"; exit 1; }
 write_ustat done "早晨净值更新完成" "" "$(date '+%H:%M')"
 echo "=== 早晨净值更新完成 $(date '+%F %T')；日志：$LOG ==="
 # 2026-10-28：两站独立更新 —— 本机链路只负责 WorkBuddy 站，不再向 GitHub 推数据。

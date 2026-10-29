@@ -276,8 +276,8 @@
 '以下所有数字均由香港积金局官方公布值直接汇总——只做求和与算术平均，不做任何推算、加权或补全。':
 'All figures below are aggregated directly from MPFA published values — sums and arithmetic means only, with no estimation, weighting or imputation.',
 '市场涨跌温度计': 'Market Gauge',
-'以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，红为涨、绿为跌':
-'Based on the 1-year annualised return of all constituent funds; red = gain, green = loss',
+'以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，蓝为涨、绿为跌':
+'Based on the 1-year annualised return of all constituent funds; blue = gain, green = loss',
 '基金种类分布': 'Fund Category Mix',
 '按基金数目占比 · 右侧为规模': 'By number of funds · size on the right',
 '受托人市场份额': 'Trustee Market Share',
@@ -1025,6 +1025,21 @@
   '已保留上一次的完整数据': 'The previous complete data set has been retained',
   '总开支比率': 'Total expense ratio',
   '近5年最大回撤': '5-year maximum drawdown',
+
+/* —— 2026-10-29（5.0）：risk n.a. note + detail tabs / holdings & allocation —— */
+  '积金局按基金近三年价格波幅评定风险级别；该基金成立不足三年，官方尚未提供评级，故显示 n.a.（并非本站缺少数据）。': 'The MPFA rates risk by a fund\'s three-year price volatility. This fund is less than three years old and has not yet been rated, so it shows n.a. (the data is not missing from this site).',
+  '该基金于 {d} 推出，成立不足 {n} 年，暂无{label}数据。': 'This fund launched on {d} and has a track record of less than {n} years, so {label} data is not yet available.',
+  '官方尚未披露{label}数据（可能因成立时间不足或源站未提供），本站不做推算。': '{label} data has not been published by the official source (possibly a short track record, or the source does not disclose it). This site does not estimate it.',
+  '自算净值': 'Self-calculated NAV',
+  '年率化＝按复利折算为每年平均回报。自算列由本站按每日净值计算（不含分红再投资与费用调整）；积金局列直接取自官网公布值，非本站换算。两列不可相减。': 'Annualised figures compound the return into an average annual rate. The self-calculated column is computed by this site from daily NAVs (excluding dividend reinvestment and fee adjustments); the MPFA column is taken directly from official publications and is not converted by this site. The two columns are not subtractable.',
+  '自算列按发行人官网每日单位净值计算，不含分红再投资与费用调整；积金局列含费含息、按季公布。两列统计期间与算法不同，不可相减。': 'The self-calculated column uses issuers\' daily NAVs, excluding dividend reinvestment and fee adjustments; the MPFA column includes fees and dividends and is published quarterly. Periods and methods differ, so the two columns are not subtractable.',
+  '历年回报为积金局公布的日历年度回报（含费含息）；最近一年为尚未结束的年度，按年初至今计。': 'Calendar-year returns are published by the MPFA (net of fees, with dividends reinvested); the latest year is still in progress and is shown year-to-date.',
+  '占基金资产净值比例': '% of fund net assets',
+  '前十大合计': 'Top 10 total',
+  '其他类别': 'Other categories',
+  '已披露合计': 'Disclosed total',
+  '累计回报': 'Cumulative return',
+  '年率化回报': 'Annualised return',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

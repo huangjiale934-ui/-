@@ -44,16 +44,21 @@
     ? ['#dbeaf9', '#c3daf2', '#a9cbea', '#8fbce3', '#76acdc', '#5d9cd4']
     : PAL_OLD
       ? ['#1f5fa8', '#2f9e8f', '#e0a13e', '#7b6bb0', '#d4695f', '#6b7f99']
-      /* 2026-10-22（领导）：饼图整体调浅，蓝绿交替、明度拉开 */
-      : ['#7db8e8', '#9fdcbc', '#0866bb', '#c6ead6', '#a9cff1', '#e0f3e9'];
+      /* 2026-10-29（5.0）：整体加深一档——深蓝 / logo 绿 / 中蓝 / 浅绿 / 亮蓝 / 淡绿 */
+      : ['#0b5fa5', '#8cc63f', '#2e86c8', '#b5d96b', '#7bbef4', '#d7e9b8'];
   const PALETTE_TR = PAL_MONO
     ? ['#dbeaf9', '#c3daf2', '#a9cbea', '#8fbce3', '#76acdc', '#eef6fd']
     : PAL_OLD
       ? ['#1f5fa8', '#2f9e8f', '#e0a13e', '#7b6bb0', '#d4695f', '#b9c2cf']
-      : ['#7db8e8', '#9fdcbc', '#0866bb', '#c6ead6', '#a9cff1', '#e6f1f8'];
+      : ['#0b5fa5', '#8cc63f', '#2e86c8', '#b5d96b', '#7bbef4', '#d7e9b8'];
   const C_UP = '#d93025';   // 涨 · 红
   const C_DOWN = '#12996b'; // 跌 · 绿
   const C_FLAT = '#7a8699';
+  /* 2026-10-29（5.0，用户指定）：市场温度计单独用「品牌蓝 + logo 绿」——
+     高回报深蓝、中段亮蓝、低回报绿；仅此组件生效，站内其他涨跌仍为红涨绿跌 */
+  const T_HI = '#084e8c';
+  const T_MID = '#7bbef4';
+  const T_LO = '#5f9e2f';
 
   /* 风险级别：统一走 common.js 的 MPF_RISK（已改为蓝色由浅至深），与详情页/资料库一致 */
   const riskColor = (lv) => MPF_RISK.color(lv);
@@ -171,7 +176,7 @@
     const bulbCx = tubeX + tubeW / 2, bulbCy = tubeBot + 30, bulbR = 30;
     const pos = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
     const markY = tubeTop + tubeH * (1 - pos);
-    const col = v > 0 ? C_UP : v < 0 ? C_DOWN : C_FLAT;
+    const col = v > 0 ? T_HI : v < 0 ? T_LO : C_FLAT;
 
     const tick = (val) => {
       const p = (val - lo) / (hi - lo);
@@ -184,13 +189,13 @@
     const svg = '<svg class="thermo-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(TT('市场涨跌温度计')) + '">'
       + '<defs>'
       + '<linearGradient id="tgrad" gradientUnits="userSpaceOnUse" x1="0" y1="' + tubeTop + '" x2="0" y2="' + tubeBot + '">'
-      + '<stop offset="0" stop-color="' + C_UP + '"/><stop offset="0.5" stop-color="#e0a94a"/><stop offset="1" stop-color="' + C_DOWN + '"/>'
+      + '<stop offset="0" stop-color="' + T_HI + '"/><stop offset="0.52" stop-color="' + T_MID + '"/><stop offset="1" stop-color="' + T_LO + '"/>'
       + '</linearGradient>'
       + '<clipPath id="tclip"><rect x="' + tubeX + '" y="' + tubeTop + '" width="' + tubeW + '" height="' + tubeH + '" rx="' + tubeW / 2 + '"/></clipPath>'
       + '</defs>'
       + '<rect class="thermo-track" x="' + tubeX + '" y="' + tubeTop + '" width="' + tubeW + '" height="' + tubeH + '" rx="' + tubeW / 2 + '"/>'
       + '<g clip-path="url(#tclip)"><rect x="' + tubeX + '" y="' + fx(markY) + '" width="' + tubeW + '" height="' + fx(tubeBot - markY) + '" fill="url(#tgrad)"/></g>'
-      + '<circle class="thermo-bulb" cx="' + bulbCx + '" cy="' + bulbCy + '" r="' + bulbR + '" fill="' + C_DOWN + '"/>'
+      + '<circle class="thermo-bulb" cx="' + bulbCx + '" cy="' + bulbCy + '" r="' + bulbR + '" fill="' + T_LO + '"/>'
       + tick(hi) + tick(0) + tick(lo)
       + '<line class="mark-line" x1="' + (tubeX - 2) + '" y1="' + fx(markY) + '" x2="' + (tubeX + tubeW + 34) + '" y2="' + fx(markY) + '" stroke="' + col + '"/>'
       + '<circle class="mark-dot" cx="' + bulbCx + '" cy="' + fx(markY) + '" r="7" fill="' + col + '"/>'
@@ -604,7 +609,7 @@
     renderTop('#mkTop5', m.topCumLaunch, (x) => pctv(x.cumLaunch), (x) => x.cumLaunch);
     renderTop('#mkTop2', m.topSize, (x) => fmtSize(x.size), null);
     renderTop('#mkTop3', m.lowFee, (x) => num(x.fer, 2) + '%', null);
-    renderTop('#mkTop6', m.lowRisk, (x) => (x.risk == null ? '—' : x.risk + ' ' + TT('级')), null);
+    renderTop('#mkTop6', m.lowRisk, (x) => (x.risk == null ? 'n.a.' : x.risk + ' ' + TT('级')), null);
     try { renderSelfTop(window.__MPF_FUNDS || (typeof DATA !== 'undefined' ? DATA.funds : null)); } catch (e) {}
   }
 

@@ -590,6 +590,57 @@
 .perf-note { font-size: 11.5px; color: var(--text-3); margin: 4px 0 6px; line-height: 1.6; }
 @media (max-width: 560px) { .perf-table th, .perf-table td { padding: 9px 6px; font-size: 12.5px; } }
 
+/* ===== 2026-10-29（5.0）：表现区四栏（自算指标 / 累计回报 / 年率化 / 历年走势） ===== */
+.fd-perf { margin-top: 2px; }
+.fd-tabs {
+  display: flex; gap: 2px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border); margin: 8px 0 0;
+}
+.fd-tab {
+  appearance: none; border: 0; background: transparent; font-family: inherit;
+  font-size: 13.5px; color: var(--text-2); padding: 9px 14px; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; border-radius: 6px 6px 0 0;
+  transition: color .12s, background .12s;
+}
+.fd-tab:hover { color: var(--brand-deep); background: var(--brand-soft); }
+.fd-tab.on { color: var(--brand); font-weight: 650; border-bottom-color: var(--brand); }
+.fd-panel[hidden] { display: none !important; }
+.fd-panel { padding-top: 4px; }
+.fd-perf-note { margin: 12px 2px 0; font-size: 12px; line-height: 1.75; color: var(--text-3); }
+.perf-table.perf-2col thead th small { display: block; margin-top: 2px; font-weight: 400; font-size: 10.5px; color: var(--text-3); }
+.perf-table .fd-na { color: var(--text-3); cursor: help; }
+@media (max-width: 560px) {
+  .fd-tab { padding: 8px 10px; font-size: 12.5px; }
+  .fd-perf-note { font-size: 11.5px; }
+}
+
+/* ===== 2026-10-29（5.0）：前十大持仓横向柱状图（名称 + 占比） ===== */
+.hl-bars { margin-top: 4px; }
+.hlb-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.hlb-row { display: grid; grid-template-columns: minmax(110px, 42%) 1fr 60px; align-items: center; gap: 10px; padding: 6px 0; }
+.hlb-k { font-size: 12.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hlb-track { height: 14px; background: #f2f7fc; border-radius: 3px; overflow: hidden; }
+.hlb-track i { display: block; height: 100%; border-radius: 3px; }
+.hlb-v { text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text); }
+.hlb-sum { display: flex; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; font-size: 12.5px; color: var(--text-2); }
+.hlb-sum b { color: var(--brand); font-variant-numeric: tabular-nums; }
+
+/* ===== 2026-10-29（5.0）：投资分布变径饼图 + 右侧两列图例 ===== */
+.alr { display: flex; align-items: center; gap: 26px; margin-top: 4px; }
+.alr-chart { flex: 0 0 200px; }
+.alr-svg { width: 200px; height: 200px; display: block; }
+.alr-c1 { font-size: 16px; font-weight: 700; fill: var(--text); }
+.alr-c2 { font-size: 10px; fill: var(--text-3); }
+.alr-legend { flex: 1; min-width: 0; max-width: 480px; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 30px; }
+.alr-legend li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; padding: 3px 0; }
+.alr-legend i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.alr-l { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+.alr-legend b { font-variant-numeric: tabular-nums; color: var(--text); font-weight: 600; }
+@media (max-width: 560px) {
+  .alr { flex-direction: column; align-items: stretch; gap: 12px; }
+  .alr-chart { align-self: center; }
+}
+
 /* 详情页 sect-title 与小图样式补齐（an-kv 复用 .kv 布局） */
 #anDetail .an-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 

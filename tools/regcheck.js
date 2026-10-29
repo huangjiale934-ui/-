@@ -81,6 +81,16 @@ chk('首页·公司介绍区块已按 2026-10-28 要求删除', home.indexOf('cl
 chk('首页·饼图色板已加载（≥6 色）', (function () { try { const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.js'), 'utf8'); const m = j.match(/PALETTE = PAL_MONO[\s\S]{0,600}?\['([^\]]+)\]/); return !!m && m[1].split(',').length >= 6; } catch (e) { return false; } })());
 chk('首页·风险级别分级色说明（浅蓝→深蓝）', /色块自浅蓝（低风险）逐级过渡至深蓝（高风险）/.test(home));
 chk('首页·友情链接已渲染', (home.match(/class="friend-links"[\s\S]*?<\/div>\s*<\/div>\s*<\/footer>/) || [''])[0].indexOf('<a ') >= 0);
+/* 2026-10-29（5.0）：友链曾出现「点宏利跳回本站」——根因是 sources 缺 page、count 字段名不符，
+   渲染出空 href 与「undefined 条」。此处同时校验数据层与渲染层，daily 另有 link-audit.js 巡检。 */
+chk('友情链接·每个净值来源都有官网地址', (function () {
+  try {
+    const fd = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'funds.json'), 'utf8'));
+    const src = (fd.navStat && fd.navStat.sources) || [];
+    return src.length > 0 && src.every((s) => /^https?:\/\//i.test(String(s.page || s.url || '')) && typeof s.n === 'number');
+  } catch (e) { return false; }
+})());
+chk('友情链接·页面无空 href / 无 undefined 文案', [home, idx, rk].every((h) => h.indexOf('href=""') < 0 && h.indexOf('undefined') < 0));
 
 /* ---------------- 资料库 ---------------- */
 const idxHead = (/<thead>[\s\S]*?<\/thead>/.exec(idx) || [''])[0];
@@ -848,7 +858,7 @@ chk('v3·发行人官网业绩层（BCT 116 只 + 接口 + 详情条渲染）', 
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
     const sample = t.funds['659'];
     return t.count >= 110 && sample && sample.y1 != null && sample.cal && Object.keys(sample.cal).length >= 5 &&
-      /'\/api\/trustee-perf'/.test(s) && /function fdReturns/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8')) && /trustee-perf/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8'));
+      /'\/api\/trustee-perf'/.test(s) && /function fdPerfTabs/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8')) && /trustee-perf/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8'));
   } catch (e) { return false; }
 })());
 /* ---------------- 结果 ---------------- */
@@ -1032,12 +1042,12 @@ chk('晚批·④持仓行情补全（holdquote.py + 有代码行 ≥400 + 有价
     return hq.indexOf('GEN_MKT') >= 0 && hq.indexOf('BAD_WORDS') >= 0 && hq.indexOf('PIN') >= 0 && code >= 400 && price >= 400;
   } catch (e) { return false; }
 })());
-chk('晚批·⑤组合分布新版式（刻度网格 + 粗柱贴标 + 无灰底）', (function () {
+chk('2026-10-29·⑤投资分布改为外移式饼图（蓝+浅绿、图例两列）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
-    return c.indexOf('alx-grid') >= 0 && c.indexOf('alx-axis') >= 0 && c.indexOf('alx-plot') >= 0 &&
-      c.indexOf('axisMax') >= 0 && st.indexOf('.alx-plot i { display: block; height: 16px') >= 0;
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
+    return c.indexOf('alr-svg') >= 0 && c.indexOf('alr-legend') >= 0 && c.indexOf('alx-grid') < 0 &&
+      st.indexOf('.alr-svg') >= 0 && st.indexOf('.alr-legend') >= 0;
   } catch (e) { return false; }
 })());
 chk('晚批·⑥历年走势图缩小 20%（an-chartwrap 80%）', (function () {
@@ -1080,12 +1090,12 @@ chk('晚批·④持仓行情补全（holdquote.py + 有代码行 ≥400 + 有价
     return hq.indexOf('GEN_MKT') >= 0 && hq.indexOf('BAD_WORDS') >= 0 && hq.indexOf('PIN') >= 0 && code >= 400 && price >= 400;
   } catch (e) { return false; }
 })());
-chk('晚批·⑤组合分布新版式（刻度网格 + 粗柱贴标 + 无灰底）', (function () {
+chk('2026-10-29·⑤投资分布改为外移式饼图（蓝+浅绿、图例两列）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
-    return c.indexOf('alx-grid') >= 0 && c.indexOf('alx-axis') >= 0 && c.indexOf('alx-plot') >= 0 &&
-      c.indexOf('axisMax') >= 0 && st.indexOf('.alx-plot i { display: block; height: 16px') >= 0;
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
+    return c.indexOf('alr-svg') >= 0 && c.indexOf('alr-legend') >= 0 && c.indexOf('alx-grid') < 0 &&
+      st.indexOf('.alr-svg') >= 0 && st.indexOf('.alr-legend') >= 0;
   } catch (e) { return false; }
 })());
 chk('晚批·⑥历年走势图缩小 20%（an-chartwrap 80%）', (function () {
@@ -1109,12 +1119,12 @@ chk('深夜批·②全部区间与清空筛选同组靠右（tr-tools2 + toolbar
       t.indexOf("'</div>' +\n        '</div>' +\n        '<div class=\"tr-daterow\" hidden>' +") >= 0;
   } catch (e) { return false; }
 })());
-chk('深夜批·③组合分布：百分比柱外+最大深蓝其余浅蓝+轴留位', (function () {
+chk('2026-10-29·③前十大持仓改横向柱状图（名称+占比，不再列代码/价格）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
-    return c.indexOf('alx-strong') >= 0 && c.indexOf('if (max / axisMax > 0.75) axisMax += 10;') >= 0 &&
-      c.indexOf('alx-in') < 0 && /\.alx-plot i \{ background: #7FA8D9; \}/.test(st) && /\.alx-plot i\.alx-strong \{ background: #[0-9a-fA-F]{6}; \}/.test(st);
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
+    return c.indexOf('hl-bars') >= 0 && c.indexOf('hlb-row') >= 0 && c.indexOf('hlb-sum') >= 0 &&
+      c.indexOf("TT('股票代码')") < 0 && st.indexOf('.hlb-row') >= 0;
   } catch (e) { return false; }
 })());
 chk('深夜批·④基金列表跟随走势勾选（onSelChange + 已选过滤）', (function () {
@@ -1162,12 +1172,12 @@ chk('深夜批·②全部区间与清空筛选同组靠右（tr-tools2 + toolbar
       t.indexOf("'</div>' +\n        '</div>' +\n        '<div class=\"tr-daterow\" hidden>' +") >= 0;
   } catch (e) { return false; }
 })());
-chk('深夜批·③组合分布：百分比柱外+最大深蓝其余浅蓝+轴留位', (function () {
+chk('2026-10-29·③前十大持仓改横向柱状图（名称+占比，不再列代码/价格）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
-    return c.indexOf('alx-strong') >= 0 && c.indexOf('if (max / axisMax > 0.75) axisMax += 10;') >= 0 &&
-      c.indexOf('alx-in') < 0 && /\.alx-plot i \{ background: #7FA8D9; \}/.test(st) && /\.alx-plot i\.alx-strong \{ background: #[0-9a-fA-F]{6}; \}/.test(st);
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
+    return c.indexOf('hl-bars') >= 0 && c.indexOf('hlb-row') >= 0 && c.indexOf('hlb-sum') >= 0 &&
+      c.indexOf("TT('股票代码')") < 0 && st.indexOf('.hlb-row') >= 0;
   } catch (e) { return false; }
 })());
 chk('深夜批·④基金列表跟随走势勾选（onSelChange + 已选过滤）', (function () {
@@ -1471,7 +1481,7 @@ chk('详情页·完整资料（基本信息/回报/费用 + 净值来源 + 图 2
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     /* 2026-10-20 v4：小窗与放大页共用 fundDetailHTML（fdBasic 含 fee-title / fdReturns 8 区间 / 表头 fdHead） */
-    return /function fdBasic/.test(j) && /function fdReturns/.test(j) && /fee-title/.test(j) &&
+    return /function fdBasic/.test(j) && /function fdPerfTabs/.test(j) && /fee-title/.test(j) &&
       /* 2026-10-21：累计表现精简为积金局 4 个区间（近1/5/10年、推出至今） */ /function fdHead/.test(j) && /近 5 年/.test(j) && /推出至今/.test(j) && /perf-table/.test(j) &&
       /\.fd-head \{/.test(css) && /#anDetail \.fd \.sect-title/.test(css);
   } catch (e) { return false; }
@@ -1529,7 +1539,7 @@ chk('详情页·完整资料（基本信息/回报/费用 + 净值来源 + 图 2
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     /* 2026-10-20 v4：小窗与放大页共用 fundDetailHTML（fdBasic 含 fee-title / fdReturns 8 区间 / 表头 fdHead） */
-    return /function fdBasic/.test(j) && /function fdReturns/.test(j) && /fee-title/.test(j) &&
+    return /function fdBasic/.test(j) && /function fdPerfTabs/.test(j) && /fee-title/.test(j) &&
       /* 2026-10-21：累计表现精简为积金局 4 个区间（近1/5/10年、推出至今） */ /function fdHead/.test(j) && /近 5 年/.test(j) && /推出至今/.test(j) && /perf-table/.test(j) &&
       /\.fd-head \{/.test(css) && /#anDetail \.fd \.sect-title/.test(css);
   } catch (e) { return false; }
@@ -1641,6 +1651,35 @@ chk('1022·导出含数据完整性说明', /数据完整性/.test((function () 
 chk('1022·导出走势图横向拉长（col2 = imgCol + 15）', /col2: imgCol \+ 15/.test((function () {
   try { return fs.readFileSync(path.join(__dirname, '..', 'public', 'trend.js'), 'utf8'); } catch (e) { return ''; }
 })()));
+
+/* ===== 2026-10-29（5.0）本轮新增：风险 n.a. / 温度计蓝绿 / 表现区四栏 ===== */
+chk('2026-10-29·风险级别 n.a.（官方未评级）+ 悬浮说明', (function () {
+  try {
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
+    return c.indexOf('risk-na') >= 0 && c.indexOf('naTip()') >= 0 && c.indexOf('积金局按基金近三年价格波幅') >= 0 &&
+      /\.risk-na \{/.test(st) && /\.risk\.r7 \{ background: #084e8c/.test(st);
+  } catch (e) { return false; }
+})());
+chk('2026-10-29·温度计改蓝绿（仅此组件）', (function () {
+  try {
+    const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.js'), 'utf8');
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.css'), 'utf8');
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.html'), 'utf8');
+    return j.indexOf("const T_HI = '#084e8c'") >= 0 && j.indexOf("const T_LO = '#5f9e2f'") >= 0 &&
+      h.indexOf('蓝为涨、绿为跌') >= 0 &&
+      /\.mk-thermo-panel \.tb-up \{ background: var\(--brand-deep\); \}/.test(st);
+  } catch (e) { return false; }
+})());
+chk('2026-10-29·详情页表现区四栏（自算指标/累计回报/年率化/历年走势）', (function () {
+  try {
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
+    return c.indexOf('function fdPerfTabs') >= 0 && c.indexOf("'self', '自算指标'") >= 0 &&
+      c.indexOf("'cum', '累计回报'") >= 0 && c.indexOf("'ann', '年率化回报'") >= 0 && c.indexOf("'cal', '历年走势'") >= 0 &&
+      c.indexOf('fd-perf-note') >= 0 && /\.fd-tab\.on \{/.test(st) && /\.fd-panel\[hidden\]/.test(st);
+  } catch (e) { return false; }
+})());
 
 /* 2026-10-21：统计移到文件末尾并等待异步断言（此前放在中段，异步接口断言未计入） */
 setTimeout(() => {

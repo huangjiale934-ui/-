@@ -111,6 +111,9 @@ step "8.4/9 历史索引对齐" node tools/hist-index-sync.js
 # 2026-10-24：链路末尾固化验收（不依赖 AI 纪律；核验 U01）
 step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js
 soft_step "9.5/9 缺日检查" node tools/gap-check.js
+# 2026-10-29（5.0）：链接巡检——友链 href 为空曾导致「点宏利跳回本站」，此前无任何环节检查。
+# 结构问题（空 href / 缺官网地址 / undefined）会让退出码非 0；网络 403 只告警。
+soft_step "9.7/9 链接巡检" node tools/link-audit.js
 
 echo ""
 echo "=== 数据链路完成 $(date '+%F %T')；日志：$LOG ==="
@@ -128,6 +131,8 @@ if [ "${1:-}" = "--sync" ]; then
 else
   echo "（已跳过 GitHub 推送：两站独立更新；确需推送加 --sync）"
 fi
+# 2026-10-29（5.0）：发布闸门——四份核心数据不一致（如新 funds 配旧 nav-perf）时禁止发布
+step "10/10 发布前一致性" node tools/predeploy-check.js
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
 
 # 2026-10-26：更新结束状态（提示栏收起）

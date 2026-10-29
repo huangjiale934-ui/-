@@ -180,14 +180,20 @@ fd.funds.forEach((f) => {
     const raw = String(f.navSource || '').trim();
     if (!raw) return;
     const key = raw.split('｜')[0].trim();
-    const g = bySrc[key] = bySrc[key] || { name: key, n: 0, asOf: '', verified: 0, na: 0 };
+    const g = bySrc[key] = bySrc[key] || { name: key, n: 0, asOf: '', verified: 0, na: 0, urls: {} };
     g.n++;
     if (f.navStatus === 'na') { g.na++; sumNa++; } else { g.verified++; sumVerified++; }
     if (f.navAsOf && f.navAsOf > g.asOf) g.asOf = f.navAsOf;
+    /* 2026-10-29（5.0）：记录每组出现最多的官方页面，供「友情链接」直接跳转官网。
+       此前 sources 只有 name/n/asOf，前端拿不到 URL，href 变空 → 点击跳回本站。 */
+    if (f.navSourceUrl) g.urls[f.navSourceUrl] = (g.urls[f.navSourceUrl] || 0) + 1;
   });
   const list = Object.values(bySrc).sort((a, b) => b.n - a.n);
   if (fd.navStat) {
-    fd.navStat.sources = list.map((g) => ({ name: g.name, label: g.name, n: g.n, asOf: g.asOf, verified: g.verified, na: g.na }));
+    fd.navStat.sources = list.map((g) => {
+      const page = Object.entries(g.urls).sort((a, b) => b[1] - a[1])[0];
+      return { name: g.name, label: g.name, n: g.n, asOf: g.asOf, verified: g.verified, na: g.na, page: page ? page[0] : '' };
+    });
     fd.navStat.bySource = list;
     fd.navStat.verified = sumVerified;
     fd.navStat.na = sumNa;
