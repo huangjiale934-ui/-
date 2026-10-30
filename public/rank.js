@@ -45,8 +45,10 @@
     location.replace('index.html#db');
   }
   const S = {
-    // 2026-10-19：默认改为「自算·近1年」——积金局月报截至上月月底，比官网净值慢 2–6 周
-    board: BOARDS.some((b) => b.id === HASH0) ? HASH0 : (BOARDS.some((b) => b.id === QSB) ? QSB : 'ann1'),
+    /* 2026-10-30（用户明确要求）：取消「默认选中近1年回报榜」。打开排名页不预选任何榜单，
+       主表按基金规模降序、冠军区隐藏；点标签才进入对应榜，再次点同一标签 = 取消选中。
+       深链 ?rk= / #board 仍然有效。 */
+    board: BOARDS.some((b) => b.id === HASH0) ? HASH0 : (BOARDS.some((b) => b.id === QSB) ? QSB : ''),
     type: '', sub: '', risk: '', trustee: '', kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', top: 10, sortKey: null, sortDir: null, calYear: '',
   };
   let FUND_HEAD = '';   // 基金榜表头（初始 DOM 快照，切换回来时还原）
@@ -61,7 +63,8 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-  function cur() { return BOARDS.find((b) => b.id === S.board); }
+  const FALLBACK_BOARD = { id: '', name: '全部基金', desc: '尚未选择榜单：以下按基金资产规模由高至低排列', metric: 'size', dir: 'desc' };
+  function cur() { return BOARDS.find((b) => b.id === S.board) || FALLBACK_BOARD; }
 
   function init() {
     mountHeader('db');   /* 2026-10-15：合并页导航项为「强积金资料库」（key=db），此前传 rk 导致无高亮 */
@@ -237,7 +240,7 @@
            任何切换都先归还维度联动放出的列（非默认列回到隐藏，默认列回原位） */
         const isSame = S.board === t.dataset.b;
         if (window.__rkCancelDim) window.__rkCancelDim();
-        S.board = isSame ? 'ann1' : t.dataset.b;
+        S.board = isSame ? '' : t.dataset.b;   /* 2026-10-30：取消选中，回「全部基金」默认表 */
         S.sortKey = null; S.sortDir = null;
         if (history.replaceState) history.replaceState(null, '', '#' + S.board);
         /* 选中态一律按 S.board 重算（取消时不能把刚点的标签又点亮） */
@@ -580,6 +583,9 @@
     window.__rkRanked = ranked;   /* 2026-10-26：行内对比条需要全榜最大值（CELL_FUND 在模块作用域） */
     // 分类冠军（当前筛选下，按当前榜单指标）；区块标题随榜单类型切换（发行人榜 ≠ 各类别冠军）
     const chT = $('#rkChampTitle'), chD = $('#rkChampDesc');
+    const noBoard = !S.board;
+    const champCard = $('#rkChampCard');
+    if (champCard) champCard.style.display = noBoard ? 'none' : '';
     if (chT) chT.textContent = b.agg === 'trustee' ? TT('发行人综合表现') : TT('各类别冠军');
     if (chD) chD.textContent = b.agg === 'trustee'
       ? TT('按发行人聚合旗下成分基金，平均表现由高至低')
@@ -802,7 +808,7 @@
         '<div class="nm">' + esc(x.fund) + '</div>' +
         '<div class="tr">' + esc(x.trustee) + '</div>' +
         '<div class="val num ' + c + '">' + label + '</div>' +
-        '<div class="meta"><span' + (x.risk == null ? '' : ' data-tip="' + esc(MPF_RISK.tip(x.risk)) + '"') + '>' + TT('风险') + ' ' + (x.risk == null ? 'n.a.' : x.risk + ' ' + TT('级')) + '</span><span>' + TQ('规模 {v} 百万', { v: nf(x.size, 0) }) + '</span><span>' + podRefText(b, x) + '</span></div>' +
+        '<div class="meta"><span' + (x.risk == null ? '' : ' data-tip="' + esc(MPF_RISK.tip(x.risk)) + '"') + '>' + TT('风险') + ' ' + (x.risk == null ? 'n.a.' : x.risk + ' ' + TT('级')) + '</span><span>' + (x.size == null ? TT('规模 n.a.') : TQ('规模 {v} 百万', { v: nf(x.size, 0) })) + '</span><span>' + podRefText(b, x) + '</span></div>' +
         '</div>';
     }).join('') : '<div class="empty" style="grid-column:1/-1">' + TT('暂无数据') + '</div>';
   }

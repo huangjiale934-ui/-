@@ -1054,6 +1054,15 @@
   '自算口径基于发行人官网每日净值（净值日 {d}），不含分红再投资与费用调整；近 3 年 / 近 5 年为年化值。与积金局季频口径不可直接相减。': 'Self-calculated from issuers’ daily NAVs (NAV date {d}), excluding dividend reinvestment and fee adjustments; 3-year and 5-year figures are annualised. Not directly comparable with the MPFA quarterly basis.',
   'AMTD（尚乘）官网 · 每季基金概览': 'AMTD official site · quarterly fund summary',
 
+  '季度便览已自动更新': 'Quarterly factsheets updated automatically',
+  '已写回持仓与分布数据，请复核': 'Written into holdings & allocation — please review',
+  '积金局未公布该基金规模（新基金或官方未披露），故显示 n.a.，并非本站缺少数据。': 'The MPFA does not publish this fund’s size (new fund or not disclosed), so it shows n.a. — the data is not missing from this site.',
+  '与十大持仓同一份便览': 'Same factsheet as the top-10 holdings',
+  '投資組合': 'Portfolio',
+  '類資產': 'asset classes',
+  '數據來源：{s} · 佔基金資產淨值百分比': 'Data source: {s} · % of fund net assets',
+  '规模 n.a.': 'Size n.a.',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

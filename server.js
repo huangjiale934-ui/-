@@ -1001,6 +1001,14 @@ const server = http.createServer(async (req, res) => {
         navStat: cache
           ? cache.navStat || null
           : null,
+        /* 2026-10-30（5.0）：季度便览哨兵结果摘要——有新季自动写回时，顶栏提示复核 */
+        quarterly: (function () {
+          try {
+            const q = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'quarterly-report.json'), 'utf8'));
+            const updated = (q.groups || []).filter((g) => g.updated).map((g) => ({ name: g.name, latestPeriod: g.latestPeriod }));
+            return { generatedAt: q.generatedAt || '', updated: updated };
+          } catch (e) { return null; }
+        })(),
         // 数据来自「服务端自抓」还是「本机推送」
         origin: cache ? cache.origin || 'server' : null,
         lastServerFetchOk: lastServerFetchOk,

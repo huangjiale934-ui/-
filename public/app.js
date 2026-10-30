@@ -403,7 +403,12 @@
     sharpe1: (x) => '<td data-c="sharpe1" data-l="' + TT('夏普比率（近1年）') + '" class="r num">' + (x.sharpe1 == null ? '—' : x.sharpe1.toFixed(2)) + '</td>',
     excess1: (x) => '<td data-c="excess1" data-l="' + TT('超额收益（对恒指·近1年）') + '" class="r num ' + cls(x.excess1) + '">' + pct(x.excess1) + '</td>',
     posM12: (x) => '<td data-c="posM12" data-l="' + TT('正收益月份占比') + '" class="r num">' + (x.posM12 == null ? '—' : x.posM12.toFixed(0) + '%') + '</td>',
-    size: (x) => '<td data-c="size" data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>',
+    size: (x) => {
+      /* 2026-10-30（5.0）：规模与风险级别统一——积金局未公布时显示 n.a. 并给悬浮说明 */
+      const tip = x.size == null ? TT('积金局未公布该基金规模（新基金或官方未披露），故显示 n.a.，并非本站缺少数据。') : '';
+      return '<td data-c="size" data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' +
+        (x.size == null ? '<span class="risk-na">n.a.</span>' : nf(x.size, 2)) + '</td>';
+    },
     mgmtFee: (x) => (function () {
       const more = x.feeMore && x.feeMore.mgmtFee;
       const tip = more ? feeTip(TT('基金管理费'), more) : '';

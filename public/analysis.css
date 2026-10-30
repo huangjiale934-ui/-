@@ -641,20 +641,26 @@
 .hlb-sum { display: flex; justify-content: space-between; border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; font-size: 12.5px; color: var(--text-2); }
 .hlb-sum b { color: var(--brand); font-variant-numeric: tabular-nums; }
 
-/* ===== 2026-10-29（5.0）：投资分布——灰色扇区 + 外圈蓝色弧带 + 引线标签 ===== */
-.alr2 { max-width: 720px; margin: 6px auto 2px; }
-.alr2-svg { width: 100%; height: auto; display: block; }
-.alr2-k { font-size: 11.5px; fill: #60758c; }
-.alr2-in { font-size: 12px; font-weight: 600; fill: #12395e; }
-.alr2-inv { font-size: 13px; font-weight: 700; fill: #12395e; }
-.alr2-in.light, .alr2-inv.light { fill: #ffffff; }
-.alr2-v { font-size: 13px; font-weight: 700; fill: #142846; }
-.alr-c1 { font-size: 22px; font-weight: 700; fill: var(--text); }
-.alr-c2 { font-size: 10.5px; fill: var(--text-3); }
-/* 窄屏：引线标签会缩到看不清，改为两列列表 */
+/* ===== 2026-10-30（5.0）：投资分布——南丁格尔玫瑰图（严格按用户规格） ===== */
+.alr3 { margin: 4px 0 2px; }
+.alr3-svg { width: 100%; height: auto; display: block; }
+.alr3-seg { cursor: pointer; transition: stroke-width .12s; }
+.alr3-seg:hover, .alr3-seg.hi { stroke: #1f2933; stroke-width: 3.5; }
+.alr3-lead { transition: stroke-opacity .12s; }
+.alr3-lead.hi { stroke-opacity: 1; }
+.alr3-pct { font-size: 34px; font-weight: 700; }
+.alr3-name { font-size: 17px; font-weight: 700; fill: #1f2933; }
+.alr3-lab.hi .alr3-pct { text-decoration: underline; }
+.alr3-total { font-size: 21px; font-weight: 700; fill: #0A3D91; }
+.alr3-sub { font-size: 12px; fill: #6b7785; }
+.alr3-src { font-size: 13px; fill: #6b7785; }
+/* 数据来源行：桌面已在 SVG 左下角画出，HTML 备用行仅移动端显示 */
+.alr2-note { display: none; }
+/* 窄屏（<520px）：引线标签缩到不可读，切换为竖排列表 */
 .alr2-list { display: none; }
-@media (max-width: 620px) {
-  .alr2 { display: none; }
+@media (max-width: 520px) {
+  .alr3 { display: none; }
+  .alr2-note { display: block; }
   .alr2-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; list-style: none; margin: 8px 0 0; padding: 0; }
   .alr2-list li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; }
   .alr2-list i { width: 8px; height: 8px; border-radius: 2px; flex: none; }

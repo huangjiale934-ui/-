@@ -1014,8 +1014,8 @@ html.fx-enter body { opacity: 0; }
 .fee-note { margin: 8px 0 0; font-size: 11.5px; line-height: 1.7; color: var(--text-3); }
 
 /* ---------- 详情弹窗：积金局详情页按钮（绿色，与蓝色核对按钮区分） ---------- */
-.nav-srcnote .srcbtn-green { background: #084e8c; }
-.nav-srcnote .srcbtn-green:hover { background: #063f73; }
+.nav-srcnote .srcbtn-green { background: #2e86c8; }
+.nav-srcnote .srcbtn-green:hover { background: #2076c0; }
 
 /* ==========================================================
    资料库 / 排名合并页：模块切换（大号分段控件，2026-10-14 强化）

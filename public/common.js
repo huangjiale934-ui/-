@@ -222,6 +222,13 @@ function initUpdateBanner() {
           doneTimer = setTimeout(hide, 12000);
           return;
         }
+        /* 2026-10-30（5.0）：季度便览哨兵发现新季并自动写回 → 常驻提示复核（不自动消失） */
+        const q = j && j.quarterly;
+        if (q && q.updated && q.updated.length && phase !== 'running') {
+          const names = q.updated.map((g) => g.name + '（' + g.latestPeriod + '）').join('、');
+          paint('ok', TT('季度便览已自动更新'), names, TT('已写回持仓与分布数据，请复核'), false);
+          return;
+        }
         /* 失败状态只在窗口内或本页亲历过 running 时展示，避免上一轮的红条挂一整天 */
         if (u && u.phase === 'error' && (phase === 'running' || inWindow())) {
           phase = 'error';
@@ -1095,7 +1102,7 @@ function fdBasic(x) {
         kv(TT('所属计划'), esc(x.scheme)) +
         kv(TT('单位类别'), x.unit ? esc(x.unit) + ' ' + TT('类单位') : TT('单一类别')) +
         kv(TT('推出日期'), esc(x.launch)) +
-        kv(TT('基金规模（亿港元）'), sizeYi == null ? '—' : nf(sizeYi, 2)) +
+        kv(TT('基金规模（亿港元）'), sizeYi == null ? '<span class="risk-na" data-tip="' + esc(TT('积金局未公布该基金规模（新基金或官方未披露），故显示 n.a.，并非本站缺少数据。')) + '">n.a.</span>' : nf(sizeYi, 2)) +
         kv(TT('最近期基金开支比率'), x.fer == null ? '—' : nf(x.fer, 2) + '%') +
       '</div>' +
     '</div>';
@@ -1403,116 +1410,181 @@ window.allocBlockHTML = function (id) {
   const titleText = (d && d.allocTitle) ? TT(d.allocTitle) : TT('投资组合分布');
   const title = '<div class="sect-title"><i class="st-accent"></i>' + titleText +
     (d && d.allocLabel ? '<span class="hl-src">' + esc(d.allocLabel) + '</span>' : '') +
-    '<span class="hl-src">' + (d && d.asOf ? TQ('截至 {d}', { d: d.asOf }) : TT('报告期不详（源便览未标注）')) + '</span></div>';
+    '<span class="hl-src">' + (d && d.asOf ? TQ('截至 {d}', { d: d.asOf }) : TT('报告期不详（源便览未标注）')) + '</span>' +
+    /* 2026-10-30（5.0）：持仓与分布共用同一份便览、同一个报告期，就地标注避免被当成两套口径 */
+    (d && d.top10 && d.top10.length ? '<span class="hl-src">' + TT('与十大持仓同一份便览') + '</span>' : '') +
+    '</div>';
   if (!d || !d.alloc || !d.alloc.length) {
     return '<div class="an-hold">' + title +
       '<div class="empty">' + TT('投资组合分布尚未接入：该计划便览可能只披露十大持仓，或本站仍在解析该版式。') + '</div>' +
       '<div class="hl-note">' + TQ('数据来源：{s}（月度）。', { s: src }) + '</div></div>';
   }
-  /* 2026-10-29 二版（用户指定，参照其提供的信息图）：
-     灰色扇区打底 + 外圈蓝色渐深弧带 + 节点 + 引线，标签放圆外，不再用图例；
-     圆心写「组合合计占比」。桌面按 760×344 画布，手机改用下方两列标签，避免字被缩得看不清。 */
-  /* 色阶用同一色相、明度等差（深→浅），保证 8 片也能一眼看出层次 */
-  const alColor = (i, n) => 'hsl(208 64% ' + (28 + (n > 1 ? i / (n - 1) : 0) * 50).toFixed(1) + '%)';
-  const items = d.alloc.slice().sort((a, b) => (b.weight || 0) - (a.weight || 0));
-  let shown = items;
-  let otherW = 0;
-  if (items.length > 8) {
-    shown = items.slice(0, 7);
-    otherW = items.slice(7).reduce((a, x) => a + (+x.weight || 0), 0);
+  /* ============================================================
+     2026-10-30 三版：南丁格尔玫瑰图（严格按用户规格实现）
+     · 角度完全均分（360°/n），数值只映射半径：rOut = R×(0.56+0.44×v/max)，线性
+     · 12 点起顺时针按数值降序；白色描边 2.5px；中心留 0.28R 白孔
+     · 全蓝 8 级色阶（深→浅），按数值升序取色，n≠8 时等分插值
+     · 灰点 #78838F r=0.00214W，位于径向中点角平分线，仅作定位
+     · 引线：灰点→(R+34) 穿出→三次贝塞尔到标签列；线宽1.8、扇形同色 60% 透明
+     · 标签左右均分（差≤1），左 470/end、右 1130/start，两行：百分比 34px 蓝 + 名称 17px
+     · 中心显示真实合计（可能 >100%，禁止归一化）；>100% 时图下追加口径说明
+     · viewBox 0 0 1600 1000，无图表库，直接 SVG 字符串
+     ============================================================ */
+  const items0 = (d.alloc || []).map((a) => ({ label: String(a.label || ''), w: +a.weight || 0 }))
+    .filter((x) => isFinite(x.w) && x.w > 0);
+  items0.sort((a, b) => b.w - a.w);
+  let series = items0.slice();
+  if (series.length > 12) {
+    const head = series.slice(0, 11);
+    head.push({ label: '其他', w: series.slice(11).reduce((a, x) => a + x.w, 0) });
+    series = head.sort((a, b) => b.w - a.w);
   }
-  const allocSum = items.reduce((a, c) => a + (+c.weight || 0), 0);
-  /* 色阶按名次在整条蓝带上均匀取样，避免前几名都挤在最深的一档 */
-  const series = shown.map((x, i) => ({ label: x.label || '', w: +x.weight || 0, color: alColor(i, shown.length) }));
-  if (otherW > 0) series.push({ label: TT('其他类别'), w: otherW, color: alColor(series.length, series.length + 1) });
-  const wSum = series.reduce((a, x) => a + x.w, 0) || 1;
+  const n = series.length;
+  const allocSum = series.reduce((a, x) => a + x.w, 0);
+  const maxW = series.length ? series[0].w : 0;
 
-  const W = 760, H = 360, CX = 380, CY = 180, R = 124, R0 = 62, BAND = 0.76;
-  const f2 = (n) => Number(n).toFixed(2);
+  /* 色阶：深→浅，按数值升序取色（最小最浅、最大最深），n≠8 等分插值 */
+  const RAMP = ['#0A3D91', '#0F4FA8', '#1763C0', '#2E7BD1', '#4C8FDA', '#77A8E4', '#A0C1EE', '#C3D7F5'];
+  function hexLerp(h1, h2, t) {
+    const a = [1, 3, 5].map((k) => parseInt(h1.slice(k, k + 2), 16));
+    const b = [1, 3, 5].map((k) => parseInt(h2.slice(k, k + 2), 16));
+    return '#' + a.map((v, k) => Math.round(v + (b[k] - v) * t).toString(16).padStart(2, '0')).join('');
+  }
+  /* 升序取色：iAsc=0（最小）→ #C3D7F5 最浅；iAsc=max → #0A3D91 最深（规格二/参考参数） */
+  function rampColor(iAsc, count) {
+    if (count <= 1) return RAMP[0];
+    const pos = (iAsc / (count - 1)) * (RAMP.length - 1);
+    const k = Math.min(RAMP.length - 2, Math.floor(pos));
+    return hexLerp(RAMP[RAMP.length - 1 - k], RAMP[RAMP.length - 2 - k], pos - k);
+  }
+  series.forEach((sd, j) => { sd.color = rampColor(n - 1 - j, n); });   /* j 为降序序号：j=0 最大 → 最深 */
+
+  const W = 1600, H = 1000, CX = 800, CY = 560, R = 250, RIN = 70, LEAD_R = 284;
+  const f2 = (v) => Number(v).toFixed(2);
   const pt = (r, a) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
   const sector = (r0, r1, a0, a1) => {
     const large = (a1 - a0) > Math.PI ? 1 : 0;
     const p1 = pt(r1, a0); const p2 = pt(r1, a1); const p3 = pt(r0, a1); const p4 = pt(r0, a0);
-    return 'M' + f2(p1[0]) + ' ' + f2(p1[1]) + ' A' + r1 + ' ' + r1 + ' 0 ' + large + ' 1 ' + f2(p2[0]) + ' ' + f2(p2[1]) +
-      ' L' + f2(p3[0]) + ' ' + f2(p3[1]) + ' A' + r0 + ' ' + r0 + ' 0 ' + large + ' 0 ' + f2(p4[0]) + ' ' + f2(p4[1]) + ' Z';
+    return 'M' + f2(p1[0]) + ' ' + f2(p1[1]) + ' A' + f2(r1) + ' ' + f2(r1) + ' 0 ' + large + ' 1 ' + f2(p2[0]) + ' ' + f2(p2[1]) +
+      ' L' + f2(p3[0]) + ' ' + f2(p3[1]) + ' A' + f2(r0) + ' ' + f2(r0) + ' 0 ' + large + ' 0 ' + f2(p4[0]) + ' ' + f2(p4[1]) + ' Z';
   };
-  const slices = [];
-  let acc = -Math.PI / 2;
-  series.forEach((s) => {
-    const ang = (s.w / wSum) * Math.PI * 2;
-    slices.push({ s: s, a0: acc, a1: acc + ang, mid: acc + ang / 2, ang: ang });
-    acc += ang;
-  });
-  /* 引线只留给角度太小的扇区；大扇区直接把名称与占比写在里面（参照用户给的信息图），圆心留空 */
-  const INNER_MIN = 0.42;   /* ≈24°，再小就写不下两行字 */
-  const inner = slices.filter((o) => o.ang >= INNER_MIN);
-  const outer = slices.filter((o) => o.ang < INNER_MIN);
 
+  const step = (Math.PI * 2) / n;
+  const slices = series.map((sd, i) => {
+    const a0 = -Math.PI / 2 + i * step;
+    const mid = a0 + step / 2;
+    const rOut = R * (0.56 + 0.44 * (sd.w / (maxW || 1)));
+    return { sd: sd, i: i, a0: a0, a1: a0 + step, mid: mid, rOut: rOut };
+  });
+
+  /* 标签左右均分（cos≥0 归右），每侧纵向均布 + 防重叠推挤（gap≥128，越界回推） */
+  const leftO = slices.filter((o) => Math.cos(o.mid) < 0);
+  const rightO = slices.filter((o) => Math.cos(o.mid) >= 0);
   function place(list) {
-    const gap = 42; const top = 26; const bottom = H - 26;
-    const arr = list.map((o) => ({ o: o, y: CY + Math.sin(o.mid) * R * 1.02 })).sort((a, b) => a.y - b.y);
-    arr.forEach((it, i) => { it.y = Math.max(it.y, i ? arr[i - 1].y + gap : top); });
-    if (arr.length) {
-      arr[arr.length - 1].y = Math.min(arr[arr.length - 1].y, bottom);
-      for (let i = arr.length - 2; i >= 0; i--) arr[i].y = Math.min(arr[i].y, arr[i + 1].y - gap);
-      for (let i = 1; i < arr.length; i++) arr[i].y = Math.max(arr[i].y, arr[i - 1].y + gap);
+    const m = list.length;
+    if (!m) return [];
+    const yTop = 225, yBot = 885, gap = 128;
+    const arr = list.map((o, k) => ({ o: o, y: m === 1 ? (yTop + yBot) / 2 : yTop + (yBot - yTop) * k / (m - 1) }));
+    arr.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < m; i++) if (arr[i].y - arr[i - 1].y < gap) arr[i].y = arr[i - 1].y + gap;
+    if (arr[m - 1].y > yBot) {
+      arr[m - 1].y = yBot;
+      for (let i = m - 2; i >= 0; i--) arr[i].y = Math.min(arr[i].y, arr[i + 1].y - gap);
     }
     return arr;
   }
-  const leftSide = place(outer.filter((o) => Math.cos(o.mid) < 0));
-  const rightSide = place(outer.filter((o) => Math.cos(o.mid) >= 0));
+  const leftPos = place(leftO);
+  const rightPos = place(rightO);
 
-  let shapes = '';
+  let segs = '', leads = '', labs = '';
   slices.forEach((o) => {
-    const sd = o.s;
-    shapes += '<path d="' + sector(R0, R, o.a0, o.a1) + '" fill="#eef3f8" stroke="#fff" stroke-width="1"/>';
-    shapes += '<path d="' + sector(R * BAND, R, o.a0, o.a1) + '" fill="' + sd.color + '" stroke="#fff" stroke-width="1.2">' +
-      '<title>' + esc(sd.label) + ' ' + nf(sd.w, 2) + '%</title></path>';
-    const dot = pt(R * 0.70, o.mid);
-    shapes += '<circle cx="' + f2(dot[0]) + '" cy="' + f2(dot[1]) + '" r="2.4" fill="' + sd.color + '"/>';
+    segs += '<path class="alr3-seg" data-i="' + o.i + '" d="' + sector(RIN, o.rOut, o.a0, o.a1) +
+      '" fill="' + o.sd.color + '" stroke="#fff" stroke-width="2.5">' +
+      '<title>' + esc(o.sd.label) + ' ' + nf(o.sd.w, 2) + '%</title></path>';
+  });
+  slices.forEach((o) => {
+    const dot = pt((RIN + o.rOut) / 2, o.mid);
+    segs += '<circle cx="' + f2(dot[0]) + '" cy="' + f2(dot[1]) + '" r="' + f2(W * 0.00214) + '" fill="#78838F"/>';
   });
 
-  /* 大扇区：名称与占比直接写在扇区里 */
-  inner.forEach((o) => {
-    const sd = o.s;
-    const p = pt(R0 * 0.55, o.mid);
-    /* 文字统一深蓝，放在灰色扇区中部——白字跨灰底和蓝带会被吃掉一半 */
-    const dark = false;
-    const name = sd.label.length > 7 ? sd.label.slice(0, 7) + '…' : sd.label;
-    shapes += '<text x="' + f2(p[0]) + '" y="' + f2(p[1] - 2) + '" text-anchor="middle" class="alr2-in' + (dark ? ' light' : '') + '">' + esc(name) + '</text>' +
-      '<text x="' + f2(p[0]) + '" y="' + f2(p[1] + 15) + '" text-anchor="middle" class="alr2-inv' + (dark ? ' light' : '') + '">' + nf(sd.w, 2) + '%</text>';
-  });
-
-  function labels(list, side) {
-    return list.map((it) => {
-      const o = it.o; const sd = o.s;
-      const edge = pt(R + 2, o.mid);
-      const elbowX = side === 'left' ? CX - R - 40 : CX + R + 40;
-      const textX = side === 'left' ? CX - R - 118 : CX + R + 118;
-      const anchor = side === 'left' ? 'start' : 'end';
+  function leadLabel(list, side) {
+    return place(list).map((it) => {
+      const o = it.o; const sd = o.sd;
+      const exy = pt(LEAD_R, o.mid);
+      const lx = side === 'left' ? 470 : 1130;
+      const ly2 = it.y + 6;
+      const dx = lx - exy[0];
+      const anchor = side === 'left' ? 'end' : 'start';
       const name = sd.label.length > 10 ? sd.label.slice(0, 10) + '…' : sd.label;
-      return '<polyline points="' + f2(edge[0]) + ',' + f2(edge[1]) + ' ' + f2(elbowX) + ',' + f2(it.y) + ' ' + f2(elbowX + (side === 'left' ? -8 : 8)) + ',' + f2(it.y) +
-        '" fill="none" stroke="#c3d6e8" stroke-width="1"/>' +
-        '<circle cx="' + f2(elbowX) + '" cy="' + f2(it.y) + '" r="2" fill="#9fb8cd"/>' +
-        '<text x="' + textX + '" y="' + f2(it.y - 3) + '" text-anchor="' + anchor + '" class="alr2-k">' + esc(name) + '</text>' +
-        '<text x="' + textX + '" y="' + f2(it.y + 13) + '" text-anchor="' + anchor + '" class="alr2-v">' + nf(sd.w, 2) + '%</text>';
+      const neg = sd.w < 0 ? '（負值）' : '';
+      return '<path class="alr3-lead" data-i="' + o.i + '" d="M' + f2(exy[0]) + ' ' + f2(exy[1]) +
+        ' C' + f2(exy[0] + dx * 0.5) + ' ' + f2(exy[1]) + ', ' + f2(lx - dx * 0.32) + ' ' + f2(ly2) + ', ' + lx + ' ' + f2(ly2) +
+        '" fill="none" stroke="' + sd.color + '" stroke-opacity="0.6" stroke-width="1.8"/>' +
+        '<g class="alr3-lab" data-i="' + o.i + '">' +
+        '<text x="' + lx + '" y="' + f2(it.y) + '" text-anchor="' + anchor + '" class="alr3-pct" fill="' + sd.color + '">' + nf(sd.w, 2) + '%</text>' +
+        '<text x="' + lx + '" y="' + f2(it.y + 28) + '" text-anchor="' + anchor + '" class="alr3-name">' + esc(name) + esc(neg) + '</text></g>';
     }).join('');
   }
+  labs += leadLabel(leftO, 'left') + leadLabel(rightO, 'right');
 
-  const svg = '<svg class="alr2-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(titleText) + '">' +
-    shapes + labels(leftSide, 'left') + labels(rightSide, 'right') + '</svg>';
+  /* 中心：真实合计（不归一化、不写死 100%） */
+  const center =
+    '<text x="' + CX + '" y="' + (CY - 4) + '" text-anchor="middle" class="alr3-total">' + nf(allocSum, 1) + '%</text>' +
+    '<text x="' + CX + '" y="' + (CY + 20) + '" text-anchor="middle" class="alr3-sub">' + esc(TT('投資組合')) + ' · ' + n + ' ' + esc(TT('類資產')) + '</text>';
 
+  /* 数据来源：卡片左下角（规格七），保持繁体 */
+  const SRC_NAME = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
+  const srcKey = String(d.src || '').toLowerCase();
+  const srcName = SRC_NAME[srcKey] || (srcKey ? srcKey.charAt(0).toUpperCase() + srcKey.slice(1) : '—');
+  const srcLine = '數據來源：' + srcName + ' · 截至 ' + (d.asOf || '—') + ' · 佔基金資產淨值百分比';
+
+  const ariaText = esc(titleText) + '：' + series.map((sd) => sd.label + ' ' + nf(sd.w, 2) + '%').join('、') + '；合計 ' + nf(allocSum, 1) + '%';
+  const svg = '<svg class="alr3-svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="auto" role="img" aria-label="' + ariaText + '">' +
+    segs + labs + leads + center +
+    '<text x="40" y="968" class="alr3-src">' + esc(srcLine) + '</text></svg>';
+
+  /* 移动端（<520px）：图省略，改竖排列表 */
   const mob = series.map((sd) =>
     '<li><i style="background:' + sd.color + '"></i><span class="alr-l" title="' + esc(sd.label) + '">' + esc(sd.label) + '</span><b>' + nf(sd.w, 2) + '%</b></li>').join('');
 
-  const allocGap = Math.abs(allocSum - 100) > 0.5
+  /* 该基金条目自带的口径提示（注意：不能引用全局 srcNote——id="srcNote" 的 DOM 会被暴露为 window.srcNote） */
+  const dSrcNote = (d && d.srcNote) ? '<div class="hl-note hl-note-warn">' + esc(TT(d.srcNote)) + '</div>' : '';
+  /* 合计口径说明：>100% 为真实敞口，非 bug；<100% 照实显示不补齐（沿用缺口说明） */
+  const overNote = allocSum > 100.05
+    ? '<div class="hl-note hl-warn">合計超過 100%：部分資產同時計入多個類別／含衍生工具或槓桿敞口</div>'
+    : '';
+  const gapNote = allocSum < 99.5
     ? '<div class="hl-note hl-warn">' + TQ('上图仅列出该基金便览披露的主要类别，合计 {s}%；未列出的类别（约 {g}%）未在源文件中单列，本站不做推算补齐。', { s: nf(allocSum, 2), g: nf(100 - allocSum, 2) }) + '</div>'
     : '';
   return '<div class="an-hold">' + title +
-    '<div class="alr2">' + svg + '</div>' +
+    '<div class="alr3">' + svg + '</div>' +
+    overNote +
     '<ul class="alr2-list">' + mob + '</ul>' +
-    '<div class="hl-note">' + TQ('数据来源：{s}；截至 {d}。', { s: src, d: d.asOf || '—' }) + '</div>' + allocGap + '</div>';
+    '<div class="alr2-note hl-note">' + TQ('數據來源：{s} · 佔基金資產淨值百分比', { s: srcName }) + (d.asOf ? ' · ' + TQ('截至 {d}', { d: d.asOf }) : '') + '</div>' +
+    dSrcNote + gapNote + '</div>';
 };
+
+/* 玫瑰图 hover/focus：扇形加深描边，同步高亮对应引线与标签（事件委托，只绑定一次） */
+if (!window.__alr3Bound) {
+  window.__alr3Bound = true;
+  document.addEventListener('mouseover', function (e) {
+    const seg = e.target && e.target.closest ? e.target.closest('.alr3-seg') : null;
+    if (!seg) return;
+    const svg = seg.closest('svg');
+    const i = seg.getAttribute('data-i');
+    svg.querySelectorAll('.hi').forEach((x) => x.classList.remove('hi'));
+    seg.classList.add('hi');
+    const lead = svg.querySelector('.alr3-lead[data-i="' + i + '"]');
+    if (lead) lead.classList.add('hi');
+    const lab = svg.querySelector('.alr3-lab[data-i="' + i + '"]');
+    if (lab) lab.classList.add('hi');
+  });
+  document.addEventListener('mouseout', function (e) {
+    const box = e.target && e.target.closest ? e.target.closest('.alr3') : null;
+    if (!box) return;
+    box.querySelectorAll('.hi').forEach((x) => x.classList.remove('hi'));
+  });
+}
 
 window.openDetail = function (id) {
   const x = DATA.funds.find((f) => f.id === id);
