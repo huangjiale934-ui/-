@@ -414,14 +414,12 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 .pager .info { font-size: 12px; color: var(--text-3); margin-left: 6px; }
 
 /* ---------- Ranking ---------- */
-.tabs { display: block; margin-bottom: 14px; }
-.tab-group { display: flex; align-items: flex-start; gap: 10px; }
-.tab-group + .tab-group { margin-top: 6px; }
-.tg-label {
+/* 2026-10-30（用户要求）：榜单标签整行平铺（同资料库排名维度），不再分组建列 */
+.tabs { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.tab {
   flex: 0 0 68px; font-size: 12px; color: var(--text-3); font-weight: 600;
   padding-top: 9px; letter-spacing: 0.3px; white-space: nowrap;
 }
-.tg-items { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
 .tab {
   font-family: inherit; font-size: 13px; padding: 8px 15px;
   border: 1px solid var(--border-strong); background: var(--surface);
@@ -430,6 +428,8 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 }
 .tab:hover { border-color: var(--brand-2); color: var(--brand); }
 .tab.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 500; }
+.tab.on::after { content: ' ↓'; font-weight: 700; }
+.tab.on.asc::after { content: ' ↑'; }
 
 
 /* ---------- 榜单维度提示行 + 展开/收起 ---------- */
@@ -443,8 +443,6 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 }
 .th-toggle:hover { border-color: var(--brand-2); background: var(--brand-soft, #f2f7fc); }
 /* 收起状态：只保留当前榜单所在的一组，其余隐藏 */
-.tabs.mini .tab-group { display: none; }
-.tabs.mini .tab-group.on-group { display: flex; }
 
 /* 历年回报榜 · 年份切换 */
 .year-tabs { align-items: center; margin-top: -6px; }
@@ -742,9 +740,6 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
   .tabs { gap: 5px; }
   .tab { padding: 7px 12px; font-size: 12.5px; }
   .year-tabs .ytab { min-width: 62px; }
-  .tab-group { flex-direction: column; gap: 3px; }
-  .tab-group + .tab-group { margin-top: 10px; }
-  .tg-label { flex: none; padding-top: 0; }
 }
 
 /* 移动端：宽表转卡片，每行「标签 + 数值」左右对齐 */
@@ -1277,7 +1272,6 @@ body.an-detail .foot { display: none; }
 .scope-note.scope-mpfa { background: #eef8f4; color: #245a48; }
 .scope-note b { color: inherit; }
 .tabs .tab { padding: 4px 11px; font-size: 12px; }
-.tabs .tg-label { font-size: 11.5px; }
 @media (max-width: 720px) {
   .tabs .tab { padding: 4px 9px; font-size: 11.5px; }
 }

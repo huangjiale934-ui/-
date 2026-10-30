@@ -174,55 +174,55 @@
     '<th data-i18n-parts class="c" style="width:86px">' + TT('详情') + '</th>';
 
   function buildTabs() {
-    // 榜单较多，按主题分组展示，避免一排长标签难以定位
-    const groups = [];
-    BOARDS.forEach((b) => {
-      let g = null;
-      for (const x of groups) if (x.name === b.g) { g = x; break; }
-      if (!g) { g = { name: b.g, list: [] }; groups.push(g); }
-      g.list.push(b);
-    });
-    const onGroup = (g) => (g.list.some((b) => b.id === S.board) ? ' on-group' : '');
-    $('#rkTabs').innerHTML = groups.map((g) =>
-      '<div class="tab-group' + onGroup(g) + '">' +
-        '<span class="tg-label">' + esc(TT(g.name)) + '</span>' +
-        '<div class="tg-items">' + g.list.map((b) =>
-          '<button class="tab' + (b.id === S.board ? ' on' : '') + '" data-b="' + b.id + '">' + esc(TT(b.name)) + '</button>'
-        ).join('') + '</div>' +
-      '</div>'
+    /* 2026-10-30（用户要求）：不要左侧组名列、不要分 5 行——
+       像「基金最新数据」的排名维度一样，全部标签一整行流式平铺（放不下自动换行）。 */
+    $('#rkTabs').innerHTML = BOARDS.map((b) =>
+      '<button class="tab' + (b.id === S.board ? ' on' : '') +
+      (b.id === S.board && S.sortDir === 'asc' ? ' asc' : '') +
+      '" data-b="' + b.id + '" data-dir="' + (b.dir || 'desc') + '" aria-pressed="' + (b.id === S.board) + '">' +
+      esc(TT(b.name)) + '</button>'
     ).join('');
 
-    // 维度提示：让客户一眼知道共有多少个排名维度，而不是以为只有一份榜
     const note = $('#rkTabsNote');
-    if (note) note.innerHTML = TQ('共 <b>{n}</b> 个排名维度 · {g} 组（全部展开）· 点击任意标签切换', { n: BOARDS.length, g: groups.length });
-    /* 2026-10-30（用户要求）：标签全部平铺，不再折叠、不再有「收起全部」按钮 */
+    if (note) note.innerHTML = TQ('共 <b>{n}</b> 个排名维度 · 点一次按默认方向排名，再点反向，第三次取消', { n: BOARDS.length });
 
-    /* 2026-10-26 修（既有 bug）：tab 的 click 原本逐元素绑定，但 navperf 到达后 buildTabs()
-       会重建标签元素 → 重建后的标签全部失去监听（点击无效）。改为容器事件委托，一劳永逸。 */
+    /* 2026-10-26 修（既有 bug）：容器事件委托——navperf 到达后 buildTabs() 重建标签不丢监听 */
     const rkTabsEl = $('#rkTabs');
     if (rkTabsEl && !rkTabsEl.__tabBound) {
       rkTabsEl.__tabBound = 1;
       rkTabsEl.addEventListener('click', (e) => {
         const t = e.target.closest ? e.target.closest('.tab') : null;
         if (!t || !t.dataset.b) return;
-        /* 2026-10-26（用户要求）三态：点击当前已选榜 = 取消选中，回默认榜 ann1；
-           任何切换都先归还维度联动放出的列（非默认列回到隐藏，默认列回原位） */
-        const isSame = S.board === t.dataset.b;
+        /* 2026-10-30：三态——与资料库 bindSelfTabs 完全一致：
+           ① 点一次 = 该榜默认方向（BOARDS.dir，多为降序）
+           ② 再点同标签 = 反向
+           ③ 第三次 = 取消，回「全部基金」（按积金局编号原序，不排序不高亮） */
+        const k = t.dataset.b;
+        const bd = BOARDS.find((x) => x.id === k) || {};
+        const first = t.dataset.dir || 'desc';
+        const second = first === 'asc' ? 'desc' : 'asc';
         if (window.__rkCancelDim) window.__rkCancelDim();
-        S.board = isSame ? '' : t.dataset.b;   /* 2026-10-30：取消选中，回「全部基金」默认表 */
-        S.sortKey = null; S.sortDir = null;
-        if (history.replaceState) history.replaceState(null, '', '#' + S.board);
-        /* 选中态一律按 S.board 重算（取消时不能把刚点的标签又点亮） */
-        $$('#rkTabs .tab').forEach((o) => o.classList.toggle('on', o.dataset.b === S.board));
-        $$('#rkTabs .tab-group').forEach((el) => el.classList.remove('on-group'));
-        const onTab = document.querySelector('#rkTabs .tab[data-b="' + S.board + '"]');
-        if (onTab && onTab.closest('.tab-group')) onTab.closest('.tab-group').classList.add('on-group');
+        if (S.board !== k) { S.board = k; S.sortKey = null; S.sortDir = null; }
+        else if (S.sortDir == null || S.sortDir === first) { S.sortKey = bd.metric || null; S.sortDir = second; }
+        else { S.board = ''; S.sortKey = null; S.sortDir = null; }
+        if (history.replaceState) history.replaceState(null, '', S.board ? '#' + S.board : '#');
+        paintTabs();
         renderYearSwitch();
         render();
-        /* 2026-10-26：列联动已并入 render（数组单源），不再二次移动 DOM（会造成表头/表体错位） */
+        /* 2026-10-26：列联动已并入 render（数组单源），不再二次移动 DOM */
       });
     }
+    paintTabs();
     renderYearSwitch();
+  }
+
+  /* 标签三态视觉（与资料库 .st.on / .st.on.asc 一致）：选中=实心蓝+↓，升序=+↑ */
+  function paintTabs() {
+    $$('#rkTabs .tab').forEach((o) => {
+      const on = o.dataset.b === S.board;
+      o.classList.toggle('on', on);
+      o.classList.toggle('asc', on && S.sortDir === 'asc');
+    });
   }
 
   function renderYearSwitch() {
@@ -737,6 +737,7 @@
     if (el && key && el.value !== key && Array.from(el.options).some((o) => o.value === key)) el.value = key;
     const d = $('#rkMSortDir');
     if (d) d.textContent = !key ? '—' : (dir === 'asc' ? '升序 ↑' : '降序 ↓');
+    if (typeof paintTabs === 'function') paintTabs();   /* 标签 ↓/↑ 与表头保持一致 */
   }
 
   /** 发行人实力榜的领跑卡片：改以「平均回报 + 旗下规模」呈现，不再按基金种类分组 */

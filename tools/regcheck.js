@@ -120,7 +120,16 @@ chk('排名·维度榜单 17 个（仅积金局口径）', (function () {
   const s = new Set((rk.match(/data-b="([^"]*)"/g) || []));
   return s.size === 17;
 })(), '实际 ' + new Set((rk.match(/data-b="([^"]*)"/g) || [])).size);
-chk('排名·榜单分组标题存在', /收益表現|收益表现/.test(rk) && /風險與成本|风险与成本/.test(rk));
+chk('排名·标签整行平铺（无组名列、无折叠按钮，2026-10-30 用户要求）', (function () {
+  try {
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+    const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
+    return h.indexOf('rkTabsToggle') < 0 && /<div class="tabs" id="rkTabs">/.test(h) &&
+      r.indexOf('tab-group') < 0 && r.indexOf('paintTabs') >= 0 &&
+      st.indexOf('.tab.on::after') >= 0 && st.indexOf('.tab.on.asc::after') >= 0;
+  } catch (e) { return false; }
+})());
 chk('排名·榜单表体默认渲染 10 行', (function () {
   const tb = (/<tbody id="rkTbody"[\s\S]*?<\/tbody>/.exec(rk) || [''])[0];
   return (tb.match(/<tr/g) || []).length === 10;

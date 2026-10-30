@@ -168,7 +168,7 @@ window.MPFXLSX = (function () {
       x += '<mergeCells count="' + sheet.merges.length + '">' +
         sheet.merges.map(function (m) { return '<mergeCell ref="' + m + '"/>'; }).join('') + '</mergeCells>';
     }
-    if (sheet.drawing) x += '<drawing r:id="rId1"/>';
+    if (sheet.drawing || (sheet.images && sheet.images.length)) x += '<drawing r:id="rId1"/>';
     x += '</worksheet>';
     return x;
   }
@@ -180,17 +180,31 @@ window.MPFXLSX = (function () {
     var enc = new TextEncoder();
     function add(name, str) { files.push({ name: name, data: enc.encode(str) }); }
 
+    /* 2026-10-30：多图支持——每个 sheet 可带 images:[{data,col,row,col2,row2,name}]；
+       顶层 opt.image 仍是单图（挂到标记了 drawing 的第一个 sheet），保持旧调用兼容。 */
+    var drawingPlans = [];   /* [{sheetIdx, images:[]}] */
+    sheets.forEach(function (s, si) {
+      var imgs = [];
+      if (Array.isArray(s.images)) imgs = s.images.slice();
+      else if (Array.isArray(s.drawing)) imgs = s.drawing.slice();
+      else if (s.drawing && opt.image) imgs = [opt.image];
+      if (imgs.length) drawingPlans.push({ sheetIdx: si, images: imgs });
+    });
+    var hasAnyImg = drawingPlans.length > 0;
+
     var ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
       '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
       '<Default Extension="xml" ContentType="application/xml"/>' +
-      (opt.image ? '<Default Extension="png" ContentType="image/png"/>' : '') +
+      (hasAnyImg ? '<Default Extension="png" ContentType="image/png"/>' : '') +
       '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
       sheets.map(function (s, i) {
         return '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
       }).join('') +
       '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
-      (opt.image ? '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>' : '') +
+      drawingPlans.map(function (d, k) {
+        return '<Override PartName="/xl/drawings/drawing' + (k + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>';
+      }).join('') +
       '</Types>';
     add('[Content_Types].xml', ct);
 
@@ -216,37 +230,51 @@ window.MPFXLSX = (function () {
 
     add('xl/styles.xml', STYLES);
 
-    sheets.forEach(function (s, i) {
-      add('xl/worksheets/sheet' + (i + 1) + '.xml', sheetXml(s));
-      if (s.drawing) {
-        add('xl/worksheets/_rels/sheet' + (i + 1) + '.xml.rels',
-          '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-          '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-          '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>' +
-          '</Relationships>');
-      }
-    });
-
-    if (opt.image) {
-      add('xl/drawings/drawing1.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-        '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" ' +
-        'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ' +
-        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' +
-        '<xdr:twoCellAnchor editAs="oneCell">' +
-        '<xdr:from><xdr:col>' + opt.image.col + '</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>' + opt.image.row + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>' +
-        '<xdr:to><xdr:col>' + opt.image.col2 + '</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>' + opt.image.row2 + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>' +
-        '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="1" name="走势图"/><xdr:cNvPicPr/></xdr:nvPicPr>' +
-        '<xdr:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>' +
-        '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></a:xfrm>' +
-        '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>' +
-        '<xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>');
-      add('xl/drawings/_rels/drawing1.xml.rels',
+    var mediaSeq = 0;
+    drawingPlans.forEach(function (plan, k) {
+      var sheetNo = plan.sheetIdx + 1;
+      var drawingNo = k + 1;
+      add('xl/worksheets/sheet' + sheetNo + '.xml', sheetXml(sheets[plan.sheetIdx]));
+      /* sheet → drawing 关系（sheet 内无其他关系，固定 rId1） */
+      add('xl/worksheets/_rels/sheet' + sheetNo + '.xml.rels',
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
         '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.png"/>' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing' + drawingNo + '.xml"/>' +
         '</Relationships>');
-      files.push({ name: 'xl/media/image1.png', data: b64ToU8(opt.image.data) });
-    }
+      /* drawing XML：每图一个 anchor */
+      var anchors = plan.images.map(function (im, mi) {
+        var rid = 'rId' + (mi + 1);
+        var nm = xesc(im.name || ('图' + (mi + 1)));
+        return '<xdr:twoCellAnchor editAs="oneCell">' +
+          '<xdr:from><xdr:col>' + im.col + '</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>' + im.row + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>' +
+          '<xdr:to><xdr:col>' + im.col2 + '</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>' + im.row2 + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>' +
+          '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="' + (mediaSeq + mi + 1) + '" name="' + nm + '"/><xdr:cNvPicPr/></xdr:nvPicPr>' +
+          '<xdr:blipFill><a:blip r:embed="' + rid + '"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>' +
+          '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></a:xfrm>' +
+          '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>' +
+          '<xdr:clientData/></xdr:twoCellAnchor>';
+      }).join('');
+      add('xl/drawings/drawing' + drawingNo + '.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" ' +
+        'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ' +
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' + anchors + '</xdr:wsDr>');
+      add('xl/drawings/_rels/drawing' + drawingNo + '.xml.rels',
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        plan.images.map(function (im, mi) {
+          return '<Relationship Id="rId' + (mi + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image' + (mediaSeq + mi + 1) + '.png"/>';
+        }).join('') +
+        '</Relationships>');
+      plan.images.forEach(function (im) {
+        mediaSeq += 1;
+        files.push({ name: 'xl/media/image' + mediaSeq + '.png', data: b64ToU8(im.data) });
+      });
+    });
+    /* 无图 sheet 也要写出 xml */
+    sheets.forEach(function (s, i) {
+      var planned = drawingPlans.some(function (d) { return d.sheetIdx === i; });
+      if (!planned) add('xl/worksheets/sheet' + (i + 1) + '.xml', sheetXml(s));
+    });
 
     return zip(files);
   }

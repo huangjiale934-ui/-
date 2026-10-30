@@ -1400,6 +1400,149 @@ window.holdBlockHTML = function (id) {
     '<div class="hl-note">' + TQ('数据来源：{s}；截至 {d}。', { s: src, d: d.asOf || '—' }) + '</div>' + srcNote + '</div></div>';
 };
 
+/* 2026-10-30：玫瑰图公共渲染函数——详情页与 Excel 导出共用（trend.js 也调用）。 */
+window.buildRoseSVG = function (d, titleText, opts) {
+  if (!d || !d.alloc || !d.alloc.length) return null;
+  const items0 = (d.alloc || []).map((a) => ({ label: String(a.label || ''), w: +a.weight || 0 }))
+    .filter((x) => isFinite(x.w) && x.w > 0);
+  items0.sort((a, b) => b.w - a.w);
+  let series = items0.slice();
+  if (series.length > 12) {
+    const head = series.slice(0, 11);
+    head.push({ label: '其他', w: series.slice(11).reduce((a, x) => a + x.w, 0) });
+    series = head.sort((a, b) => b.w - a.w);
+  }
+  const n = series.length;
+  const allocSum = series.reduce((a, x) => a + x.w, 0);
+  const maxW = series.length ? series[0].w : 0;
+
+  /* 色阶：深→浅，按数值升序取色（最小最浅、最大最深），n≠8 等分插值 */
+  const RAMP = ['#0A3D91', '#0F4FA8', '#1763C0', '#2E7BD1', '#4C8FDA', '#77A8E4', '#A0C1EE', '#C3D7F5'];
+  function hexLerp(h1, h2, t) {
+    const a = [1, 3, 5].map((k) => parseInt(h1.slice(k, k + 2), 16));
+    const b = [1, 3, 5].map((k) => parseInt(h2.slice(k, k + 2), 16));
+    return '#' + a.map((v, k) => Math.round(v + (b[k] - v) * t).toString(16).padStart(2, '0')).join('');
+  }
+  /* 升序取色：iAsc=0（最小）→ #C3D7F5 最浅；iAsc=max → #0A3D91 最深（规格二/参考参数） */
+  function rampColor(iAsc, count) {
+    if (count <= 1) return RAMP[0];
+    const pos = (iAsc / (count - 1)) * (RAMP.length - 1);
+    const k = Math.min(RAMP.length - 2, Math.floor(pos));
+    return hexLerp(RAMP[RAMP.length - 1 - k], RAMP[RAMP.length - 2 - k], pos - k);
+  }
+  series.forEach((sd, j) => { sd.color = rampColor(n - 1 - j, n); });   /* j 为降序序号：j=0 最大 → 最深 */
+
+  const W = 1280, H = 1100, CX = 640, CY = 580, R = 345, RIN = 97, LEAD_R = 385;
+  const f2 = (v) => Number(v).toFixed(2);
+  const pt = (r, a) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+  const sector = (r0, r1, a0, a1) => {
+    const large = (a1 - a0) > Math.PI ? 1 : 0;
+    const p1 = pt(r1, a0); const p2 = pt(r1, a1); const p3 = pt(r0, a1); const p4 = pt(r0, a0);
+    return 'M' + f2(p1[0]) + ' ' + f2(p1[1]) + ' A' + f2(r1) + ' ' + f2(r1) + ' 0 ' + large + ' 1 ' + f2(p2[0]) + ' ' + f2(p2[1]) +
+      ' L' + f2(p3[0]) + ' ' + f2(p3[1]) + ' A' + f2(r0) + ' ' + f2(r0) + ' 0 ' + large + ' 0 ' + f2(p4[0]) + ' ' + f2(p4[1]) + ' Z';
+  };
+
+  const step = (Math.PI * 2) / n;
+  const slices = series.map((sd, i) => {
+    const a0 = -Math.PI / 2 + i * step;
+    const mid = a0 + step / 2;
+    const rOut = R * (0.56 + 0.44 * (sd.w / (maxW || 1)));
+    return { sd: sd, i: i, a0: a0, a1: a0 + step, mid: mid, rOut: rOut };
+  });
+
+  /* 标签左右均分（cos≥0 归右），每侧纵向均布 + 防重叠推挤（gap≥128，越界回推） */
+  const leftO = slices.filter((o) => Math.cos(o.mid) < 0);
+  const rightO = slices.filter((o) => Math.cos(o.mid) >= 0);
+  function place(list) {
+    /* 2026-10-30（用户要求）：标签高度贴合扇形灰点（不再左右均布摊满）——
+       扇形 12 点起顺时针降序，因此右侧标签自上而下递减、左侧自下而上递减，
+       引线与扇形同序，天然不交叉；仅当相邻标签过近时做最小推挤。 */
+    const m = list.length;
+    if (!m) return [];
+    const yTop = 240, yBot = 985, gap = 104;
+    const arr = list.map((o) => ({
+      o: o,
+      y: CY + Math.sin(o.mid) * ((RIN + o.rOut) / 2),   /* 灰点自然高度 */
+    }));
+    arr.forEach((it) => { it.y = Math.max(yTop, Math.min(yBot, it.y)); });
+    arr.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < m; i++) if (arr[i].y - arr[i - 1].y < gap) arr[i].y = arr[i - 1].y + gap;
+    if (arr[m - 1].y > yBot) {
+      arr[m - 1].y = yBot;
+      for (let i = m - 2; i >= 0; i--) arr[i].y = Math.min(arr[i].y, arr[i + 1].y - gap);
+      for (let i = 1; i < m; i++) arr[i].y = Math.max(arr[i].y, arr[i - 1].y + gap);   /* 双向回推 */
+    }
+    return arr;
+  }
+  const leftPos = place(leftO);
+  const rightPos = place(rightO);
+
+  let segs = '', leads = '', labs = '';
+  slices.forEach((o) => {
+    segs += '<path class="alr3-seg" data-i="' + o.i + '" d="' + sector(RIN, o.rOut, o.a0, o.a1) +
+      '" fill="' + o.sd.color + '" stroke="#fff" stroke-width="2.5">' +
+      '<title>' + esc(o.sd.label) + ' ' + nf(o.sd.w, 2) + '%</title></path>';
+  });
+  slices.forEach((o) => {
+    const dot = pt((RIN + o.rOut) / 2, o.mid);
+    segs += '<circle cx="' + f2(dot[0]) + '" cy="' + f2(dot[1]) + '" r="3.6" fill="#78838F"/>';
+  });
+
+  function leadLabel(list, side) {
+    return place(list).map((it) => {
+      const o = it.o; const sd = o.sd;
+      const dot = pt((RIN + o.rOut) / 2, o.mid);   /* 引线起点=扇形内灰点 */
+      const exy = pt(LEAD_R, o.mid);
+      const lx = side === 'left' ? 232 : 1048;
+      const ly2 = it.y + 6;
+      const dx = lx - exy[0];
+      const anchor = side === 'left' ? 'end' : 'start';
+      const name = sd.label.length > 10 ? sd.label.slice(0, 10) + '…' : sd.label;
+      const neg = sd.w < 0 ? '（負值）' : '';
+      /* 规格四：起点=扇形内灰点 → 沿平分线穿出 → 三次贝塞尔到标签列 */
+      return '<path class="alr3-lead" data-i="' + o.i + '" d="M' + f2(dot[0]) + ' ' + f2(dot[1]) +
+        ' L' + f2(exy[0]) + ' ' + f2(exy[1]) +
+        ' C' + f2(exy[0] + dx * 0.5) + ' ' + f2(exy[1]) + ', ' + f2(lx - dx * 0.32) + ' ' + f2(ly2) + ', ' + lx + ' ' + f2(ly2) +
+        '" fill="none" stroke="' + sd.color + '" stroke-opacity="0.6" stroke-width="1.8"/>' +
+        '<g class="alr3-lab" data-i="' + o.i + '">' +
+        '<text x="' + lx + '" y="' + f2(it.y) + '" text-anchor="' + anchor + '" class="alr3-pct" fill="' + sd.color + '">' + nf(sd.w, 2) + '%</text>' +
+        '<text x="' + lx + '" y="' + f2(it.y + 30) + '" text-anchor="' + anchor + '" class="alr3-name">' + esc(name) + esc(neg) + '</text></g>';
+    }).join('');
+  }
+  labs += leadLabel(leftO, 'left') + leadLabel(rightO, 'right');
+
+  /* 中心：真实合计（不归一化、不写死 100%） */
+  const center =
+    '<text x="' + CX + '" y="' + (CY - 4) + '" text-anchor="middle" class="alr3-total">' + nf(allocSum, 1) + '%</text>' +
+    '<text x="' + CX + '" y="' + (CY + 20) + '" text-anchor="middle" class="alr3-sub">' + esc(TT('投資組合')) + ' · ' + n + ' ' + esc(TT('類資產')) + '</text>';
+
+  /* 数据来源：卡片左下角（规格七），保持繁体 */
+  const SRC_NAME = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
+  const srcKey = String(d.src || '').toLowerCase();
+  const srcName = SRC_NAME[srcKey] || (srcKey ? srcKey.charAt(0).toUpperCase() + srcKey.slice(1) : '—');
+  const srcLine = '數據來源：' + srcName + ' · 截至 ' + (d.asOf || '—') + ' · 佔基金資產淨值百分比';
+
+  const ariaText = esc(titleText) + '：' + series.map((sd) => sd.label + ' ' + nf(sd.w, 2) + '%').join('、') + '；合計 ' + nf(allocSum, 1) + '%';
+  const ROSE_STYLE = '<style>' +
+    'text{font-family:"Microsoft YaHei","Noto Sans TC",sans-serif}' +
+    '.alr3-pct{font-size:38px;font-weight:700}' +
+    '.alr3-name{font-size:19px;font-weight:700;fill:#1f2933}' +
+    '.alr3-total{font-size:28px;font-weight:700;fill:#0A3D91}' +
+    '.alr3-sub{font-size:15px;fill:#6b7785}' +
+    '.alr3-src{font-size:20px;fill:#6b7785}</style>';
+  /* fixedSize：导出 PNG 用（<img> 加载无尺寸 SVG 会按 300x150 默认渲染导致失真） */
+  const sizeAttr = (opts && opts.fixedSize) ? ('width="' + W + '" height="' + H + '"') : 'width="100%" height="auto"';
+  const svg = '<svg class="alr3-svg" viewBox="0 0 ' + W + ' ' + H + '" ' + sizeAttr + ' role="img" aria-label="' + ariaText + '">' +
+    ((opts && opts.embedStyle) ? ROSE_STYLE : '') +
+    segs + labs + leads + center +
+    '<text x="40" y="' + (H - 32) + '" class="alr3-src">' + esc(srcLine) + '</text></svg>';
+  /* 移动端（<520px）：图省略，改竖排列表 */
+  const mob = series.map((sd) =>
+    '<li><i style="background:' + sd.color + '"></i><span class="alr-l" title="' + esc(sd.label) + '">' + esc(sd.label) + '</span><b>' + nf(sd.w, 2) + '%</b></li>').join('');
+
+  return { svg: svg, allocSum: allocSum, n: n, srcName: srcName, series: series, mob: mob };
+};
+
 window.allocBlockHTML = function (id) {
   const HLDG = window.__HLDG;
   const d = HLDG && HLDG.funds ? HLDG.funds[id] : null;
@@ -1430,125 +1573,14 @@ window.allocBlockHTML = function (id) {
      · 中心显示真实合计（可能 >100%，禁止归一化）；>100% 时图下追加口径说明
      · viewBox 0 0 1600 1000，无图表库，直接 SVG 字符串
      ============================================================ */
-  const items0 = (d.alloc || []).map((a) => ({ label: String(a.label || ''), w: +a.weight || 0 }))
-    .filter((x) => isFinite(x.w) && x.w > 0);
-  items0.sort((a, b) => b.w - a.w);
-  let series = items0.slice();
-  if (series.length > 12) {
-    const head = series.slice(0, 11);
-    head.push({ label: '其他', w: series.slice(11).reduce((a, x) => a + x.w, 0) });
-    series = head.sort((a, b) => b.w - a.w);
-  }
-  const n = series.length;
-  const allocSum = series.reduce((a, x) => a + x.w, 0);
-  const maxW = series.length ? series[0].w : 0;
+  /* 玫瑰图（公共函数，trend.js 导出也用） */
+  const ROSE = window.buildRoseSVG(d, titleText);
+  const svg = ROSE.svg;
+  const allocSum = ROSE.allocSum;
+  const n = ROSE.n;
+  const srcName = ROSE.srcName;
+  const mob = ROSE.mob;
 
-  /* 色阶：深→浅，按数值升序取色（最小最浅、最大最深），n≠8 等分插值 */
-  const RAMP = ['#0A3D91', '#0F4FA8', '#1763C0', '#2E7BD1', '#4C8FDA', '#77A8E4', '#A0C1EE', '#C3D7F5'];
-  function hexLerp(h1, h2, t) {
-    const a = [1, 3, 5].map((k) => parseInt(h1.slice(k, k + 2), 16));
-    const b = [1, 3, 5].map((k) => parseInt(h2.slice(k, k + 2), 16));
-    return '#' + a.map((v, k) => Math.round(v + (b[k] - v) * t).toString(16).padStart(2, '0')).join('');
-  }
-  /* 升序取色：iAsc=0（最小）→ #C3D7F5 最浅；iAsc=max → #0A3D91 最深（规格二/参考参数） */
-  function rampColor(iAsc, count) {
-    if (count <= 1) return RAMP[0];
-    const pos = (iAsc / (count - 1)) * (RAMP.length - 1);
-    const k = Math.min(RAMP.length - 2, Math.floor(pos));
-    return hexLerp(RAMP[RAMP.length - 1 - k], RAMP[RAMP.length - 2 - k], pos - k);
-  }
-  series.forEach((sd, j) => { sd.color = rampColor(n - 1 - j, n); });   /* j 为降序序号：j=0 最大 → 最深 */
-
-  const W = 1240, H = 1100, CX = 620, CY = 580, R = 300, RIN = 84, LEAD_R = 334;
-  const f2 = (v) => Number(v).toFixed(2);
-  const pt = (r, a) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
-  const sector = (r0, r1, a0, a1) => {
-    const large = (a1 - a0) > Math.PI ? 1 : 0;
-    const p1 = pt(r1, a0); const p2 = pt(r1, a1); const p3 = pt(r0, a1); const p4 = pt(r0, a0);
-    return 'M' + f2(p1[0]) + ' ' + f2(p1[1]) + ' A' + f2(r1) + ' ' + f2(r1) + ' 0 ' + large + ' 1 ' + f2(p2[0]) + ' ' + f2(p2[1]) +
-      ' L' + f2(p3[0]) + ' ' + f2(p3[1]) + ' A' + f2(r0) + ' ' + f2(r0) + ' 0 ' + large + ' 0 ' + f2(p4[0]) + ' ' + f2(p4[1]) + ' Z';
-  };
-
-  const step = (Math.PI * 2) / n;
-  const slices = series.map((sd, i) => {
-    const a0 = -Math.PI / 2 + i * step;
-    const mid = a0 + step / 2;
-    const rOut = R * (0.56 + 0.44 * (sd.w / (maxW || 1)));
-    return { sd: sd, i: i, a0: a0, a1: a0 + step, mid: mid, rOut: rOut };
-  });
-
-  /* 标签左右均分（cos≥0 归右），每侧纵向均布 + 防重叠推挤（gap≥128，越界回推） */
-  const leftO = slices.filter((o) => Math.cos(o.mid) < 0);
-  const rightO = slices.filter((o) => Math.cos(o.mid) >= 0);
-  function place(list) {
-    const m = list.length;
-    if (!m) return [];
-    const yTop = 250, yBot = 960, gap = 150;
-    const arr = list.map((o, k) => ({ o: o, y: m === 1 ? (yTop + yBot) / 2 : yTop + (yBot - yTop) * k / (m - 1) }));
-    arr.sort((a, b) => a.y - b.y);
-    for (let i = 1; i < m; i++) if (arr[i].y - arr[i - 1].y < gap) arr[i].y = arr[i - 1].y + gap;
-    if (arr[m - 1].y > yBot) {
-      arr[m - 1].y = yBot;
-      for (let i = m - 2; i >= 0; i--) arr[i].y = Math.min(arr[i].y, arr[i + 1].y - gap);
-    }
-    return arr;
-  }
-  const leftPos = place(leftO);
-  const rightPos = place(rightO);
-
-  let segs = '', leads = '', labs = '';
-  slices.forEach((o) => {
-    segs += '<path class="alr3-seg" data-i="' + o.i + '" d="' + sector(RIN, o.rOut, o.a0, o.a1) +
-      '" fill="' + o.sd.color + '" stroke="#fff" stroke-width="2.5">' +
-      '<title>' + esc(o.sd.label) + ' ' + nf(o.sd.w, 2) + '%</title></path>';
-  });
-  slices.forEach((o) => {
-    const dot = pt((RIN + o.rOut) / 2, o.mid);
-    segs += '<circle cx="' + f2(dot[0]) + '" cy="' + f2(dot[1]) + '" r="3.6" fill="#78838F"/>';
-  });
-
-  function leadLabel(list, side) {
-    return place(list).map((it) => {
-      const o = it.o; const sd = o.sd;
-      const dot = pt((RIN + o.rOut) / 2, o.mid);   /* 引线起点=扇形内灰点 */
-      const exy = pt(LEAD_R, o.mid);
-      const lx = side === 'left' ? 240 : 1000;
-      const ly2 = it.y + 6;
-      const dx = lx - exy[0];
-      const anchor = side === 'left' ? 'end' : 'start';
-      const name = sd.label.length > 10 ? sd.label.slice(0, 10) + '…' : sd.label;
-      const neg = sd.w < 0 ? '（負值）' : '';
-      /* 规格四：起点=扇形内灰点 → 沿平分线穿出 → 三次贝塞尔到标签列 */
-      return '<path class="alr3-lead" data-i="' + o.i + '" d="M' + f2(dot[0]) + ' ' + f2(dot[1]) +
-        ' L' + f2(exy[0]) + ' ' + f2(exy[1]) +
-        ' C' + f2(exy[0] + dx * 0.5) + ' ' + f2(exy[1]) + ', ' + f2(lx - dx * 0.32) + ' ' + f2(ly2) + ', ' + lx + ' ' + f2(ly2) +
-        '" fill="none" stroke="' + sd.color + '" stroke-opacity="0.6" stroke-width="1.8"/>' +
-        '<g class="alr3-lab" data-i="' + o.i + '">' +
-        '<text x="' + lx + '" y="' + f2(it.y) + '" text-anchor="' + anchor + '" class="alr3-pct" fill="' + sd.color + '">' + nf(sd.w, 2) + '%</text>' +
-        '<text x="' + lx + '" y="' + f2(it.y + 28) + '" text-anchor="' + anchor + '" class="alr3-name">' + esc(name) + esc(neg) + '</text></g>';
-    }).join('');
-  }
-  labs += leadLabel(leftO, 'left') + leadLabel(rightO, 'right');
-
-  /* 中心：真实合计（不归一化、不写死 100%） */
-  const center =
-    '<text x="' + CX + '" y="' + (CY - 4) + '" text-anchor="middle" class="alr3-total">' + nf(allocSum, 1) + '%</text>' +
-    '<text x="' + CX + '" y="' + (CY + 20) + '" text-anchor="middle" class="alr3-sub">' + esc(TT('投資組合')) + ' · ' + n + ' ' + esc(TT('類資產')) + '</text>';
-
-  /* 数据来源：卡片左下角（规格七），保持繁体 */
-  const SRC_NAME = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
-  const srcKey = String(d.src || '').toLowerCase();
-  const srcName = SRC_NAME[srcKey] || (srcKey ? srcKey.charAt(0).toUpperCase() + srcKey.slice(1) : '—');
-  const srcLine = '數據來源：' + srcName + ' · 截至 ' + (d.asOf || '—') + ' · 佔基金資產淨值百分比';
-
-  const ariaText = esc(titleText) + '：' + series.map((sd) => sd.label + ' ' + nf(sd.w, 2) + '%').join('、') + '；合計 ' + nf(allocSum, 1) + '%';
-  const svg = '<svg class="alr3-svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="auto" role="img" aria-label="' + ariaText + '">' +
-    segs + labs + leads + center +
-    '<text x="40" y="' + (H - 32) + '" class="alr3-src">' + esc(srcLine) + '</text></svg>';
-
-  /* 移动端（<520px）：图省略，改竖排列表 */
-  const mob = series.map((sd) =>
-    '<li><i style="background:' + sd.color + '"></i><span class="alr-l" title="' + esc(sd.label) + '">' + esc(sd.label) + '</span><b>' + nf(sd.w, 2) + '%</b></li>').join('');
 
   /* 该基金条目自带的口径提示（注意：不能引用全局 srcNote——id="srcNote" 的 DOM 会被暴露为 window.srcNote） */
   const dSrcNote = (d && d.srcNote) ? '<div class="hl-note hl-note-warn">' + esc(TT(d.srcNote)) + '</div>' : '';

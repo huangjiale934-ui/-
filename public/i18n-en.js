@@ -1065,6 +1065,8 @@
 
   '共 <b>{n}</b> 个排名维度 · {g} 组（全部展开）· 点击任意标签切换': '<b>{n}</b> ranking dimensions in {g} groups (all expanded) · click a tag to switch',
 
+  '共 <b>{n}</b> 个排名维度 · 点一次按默认方向排名，再点反向，第三次取消': '<b>{n}</b> ranking dimensions · click once for the default order, again to reverse, a third time to cancel',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

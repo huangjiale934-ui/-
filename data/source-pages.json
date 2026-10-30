@@ -2,21 +2,102 @@
   "updatedAt": "2026-10-29",
   "note": "净值来源的官方页面（人工核定）。merge-nav 每晚用它覆盖 navStat.sources.page；前端在 page 缺失/非法时用它自愈。cadence 用于巡检判断是否超期：daily 超过 10 天、monthly 超过 50 天即告警。",
   "sources": [
-    { "match": "BCT", "url": "https://www.bcthk.com/tc/mpf/fund-price", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "宏利", "url": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "東亞", "url": "https://www.hkbea.com/hk-form/?formId=RATE&rateType=mpfcfp&language=tc", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "中銀保誠", "url": "https://www.bocpt.com/homepage/easy-choice-mpf/fund-price-enquiry/", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "永明", "url": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "富達", "url": "https://www.fidelity.com.hk/zh/our-funds/mpf", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "友邦", "url": "https://www.aia.com.hk/zh-hk/products/mpf/list", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "恒生", "url": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "滙豐", "url": "https://www.hsbc.com.hk/zh-hk/mpf/tool/unit-prices/", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "etnet", "url": "https://www.etnet.com.hk/www/tc/mpf/index.php", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "交通", "url": "https://www.bocomtrust.com.hk/BankCommSite/shtml/trust/tw/2600764/list.shtml?channelId=2600764", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "海通", "url": "https://www.htisec.com/asm/tc/mpf.jsp?type=1", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "萬通", "url": "https://www.yflife.com/tc/Hong-Kong/Corporate/MPF/Fund-Price-History/", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "中國人壽", "url": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW", "cadence": "daily", "cadenceNote": "每日" },
-    { "match": "新地", "url": "https://www.shkp.com/Html/MPF/Fund%20Price%20and%20FFS%20for%20SHKPESS.pdf", "cadence": "monthly", "cadenceNote": "月更" },
-    { "match": "AMTD", "url": "https://www.ooogroup.xyz/locales/hk/mpf-3", "cadence": "quarterly", "cadenceNote": "季更（Google Drive）" }
+    {
+      "match": "BCT",
+      "url": "https://www.bcthk.com/tc/mpf/fund-price",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "宏利",
+      "url": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "東亞",
+      "url": "https://www.hkbea.com/hk-form/?formId=RATE&rateType=mpfcfp&language=tc",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "中銀保誠",
+      "url": "https://www.bocpt.com/homepage/easy-choice-mpf/fund-price-enquiry/",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "永明",
+      "url": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "富達",
+      "url": "https://www.fidelity.com.hk/zh/our-funds/mpf",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "友邦",
+      "url": "https://www.aia.com.hk/zh-hk/products/mpf/list",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "恒生",
+      "url": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "滙豐",
+      "url": "https://www.hsbc.com.hk/zh-hk/mpf/tool/unit-prices/",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "etnet",
+      "url": "https://www.etnet.com.hk/www/tc/mpf/index.php",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "交通",
+      "url": "https://www.bocomtrust.com.hk/BankCommSite/shtml/trust/tw/2600764/list.shtml?channelId=2600764",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "海通",
+      "url": "https://www.htisec.com/asm/tc/mpf.jsp?type=1",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "萬通",
+      "url": "https://www.yflife.com/tc/Hong-Kong/Corporate/MPF/Fund-Price-History/",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "中國人壽",
+      "url": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW",
+      "cadence": "daily",
+      "cadenceNote": "每日"
+    },
+    {
+      "match": "新地",
+      "url": "https://www.shkp.com/Html/MPF/Fund%20Price%20and%20FFS%20for%20SHKPESS.pdf",
+      "cadence": "monthly",
+      "cadenceNote": "月更"
+    },
+    {
+      "match": "AMTD",
+      "url": "https://www.ooogroup.xyz/locales/hk/mpf-3",
+      "cadence": "quarterly",
+      "cadenceNote": "季更（Google Drive）· 友链条目（净值走 etnet）",
+      "friendOnly": true
+    }
   ]
 }
