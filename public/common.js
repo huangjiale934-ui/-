@@ -1363,6 +1363,52 @@ window.svgStrToPng = function (svgStr, w, h) {
   });
 };
 
+/* 2026-10-30：前十大持仓横向柱状图（导出用；详情页 hl-bars 的 SVG 版）。
+   画布 1140×1000（比例≈1.14，与导出嵌入区 6 列×16 行一致，避免拉伸变形）。 */
+window.buildTopBarsSVG = function (d, opts) {
+  if (!d || !d.top10 || !d.top10.length) return null;
+  const items = d.top10.map((h) => ({ label: String(h.name || ''), w: +h.weight || 0 }))
+    .filter((x) => x.label && isFinite(x.w));
+  if (!items.length) return null;
+  const n = items.length;
+  const maxW = Math.max.apply(null, items.map((x) => x.w)) || 1;
+  const W = 1140, H = 1000;
+  const f1 = (v) => Number(v).toFixed(1);
+  /* 同一色相明度等差：最大最深、最小最浅 */
+  const barColor = (i) => 'hsl(208 64% ' + (28 + (n > 1 ? i / (n - 1) : 0) * 50).toFixed(1) + '%)';
+  const rowH = 62, top = 96, x0 = 300, x1 = 1080;
+  let bars = '';
+  items.forEach((it, i) => {
+    const y = top + i * rowH;
+    const bw = Math.max(6, (x1 - x0 - 110) * (it.w / maxW));
+    bars += '<text x="' + (x0 - 16) + '" y="' + (y + 24) + '" text-anchor="end" class="tb-name">' + esc(it.label.length > 14 ? it.label.slice(0, 14) + '…' : it.label) + '</text>' +
+      '<rect x="' + x0 + '" y="' + (y + 4) + '" width="' + f1(bw) + '" height="34" rx="4" fill="' + barColor(i) + '"/>' +
+      '<text x="' + f1(x0 + bw + 12) + '" y="' + (y + 29) + '" class="tb-val">' + nf(it.w, 2) + '%</text>';
+  });
+  const sum = items.reduce((a, x) => a + x.w, 0);
+  const SRC = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
+  const sk = String(d.src || '').toLowerCase();
+  const srcLine = '數據來源：' + (SRC[sk] || sk || '—') + ' · 截至 ' + (d.asOf || '—');
+  const style = '<style>' +
+    'text{font-family:"Microsoft YaHei","Noto Sans TC",sans-serif}' +
+    '.tb-title{font-size:30px;font-weight:700;fill:#142846}' +
+    '.tb-name{font-size:21px;font-weight:600;fill:#1f2933}' +
+    '.tb-val{font-size:22px;font-weight:700;fill:#0A3D91}' +
+    '.tb-sum{font-size:22px;font-weight:700;fill:#142846}' +
+    '.tb-src{font-size:18px;fill:#6b7785}</style>';
+  const svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" ' +
+    ((opts && opts.fixedSize) ? ('width="' + W + '" height="' + H + '"') : 'width="100%" height="auto"') +
+    ' role="img" aria-label="' + esc('前十大持仓柱状图') + '">' +
+    ((opts && opts.embedStyle) ? style : '') +
+    '<text x="40" y="52" class="tb-title">前十大持倉（佔基金資產淨值 %）</text>' +
+    '<line x1="40" y1="70" x2="' + (W - 40) + '" y2="70" stroke="#d1e3f2" stroke-width="2"/>' +
+    bars +
+    '<text x="' + (x0 - 16) + '" y="' + (top + n * rowH + 34) + '" text-anchor="end" class="tb-sum">前十大合計</text>' +
+    '<text x="' + f1(x0) + '" y="' + (top + n * rowH + 34) + '" class="tb-sum">' + nf(sum, 2) + '%</text>' +
+    '<text x="40" y="' + (H - 36) + '" class="tb-src">' + esc(srcLine) + '</text></svg>';
+  return svg;
+};
+
 /* 「持仓与分布」工作表（前十大持仓 + 投资组合分布 + 各自合计 + 玫瑰图 PNG）。
    entries: [{ id, name }] —— 只传有便览概念的成分基金（指数/均值行由调用方过滤）。
    返回 { rows, merges, cols, images }，images 可直接挂到 MPFXLSX 的 sheet.images。 */
@@ -1374,45 +1420,57 @@ window.buildHoldAllocSheet = async function (entries) {
   const src3 = (k) => SRC3[String(k || '').toLowerCase()] || (k || '—');
   const n2 = (v) => (v == null || !isFinite(+v) ? '' : +v);
   const rows = [];
-  const jobs = [];   /* {name, row, svg, span} */
+  const jobs = [];   /* {name, row, svg, span, kind}——kind: rose | bars */
   rows.push({ h: 26, cells: [{ v: '前十大持仓与投资组合分布（来源：各发行人官网「基金便览」；占基金资产净值 %）', s: 1 }] });
-  rows.push({ h: 30, cells: ['成分基金', '数据类型', '名称 / 类别', '占基金资产净值(%)', '报告期', '数据来源'].map((v) => ({ v, s: 2 })) });
+  rows.push({ h: 30, cells: ['序号', '成分基金', '数据类型', '名称 / 类别', '占基金资产净值(%)', '报告期', '数据来源'].map((v) => ({ v, s: 2 })) });
   list.forEach((ent) => {
     const id = String(ent.id);
     const nm = ent.name || ('#' + id);
     const d = HLD[id];
     if (!d || ((!d.top10 || !d.top10.length) && (!d.alloc || !d.alloc.length))) {
-      rows.push({ cells: [{ v: nm, s: 4 }, { v: '—', s: 4 }, { v: '该基金暂无便览数据', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }] });
+      rows.push({ cells: [{ v: '', s: 4 }, { v: nm, s: 4 }, { v: '—', s: 4 }, { v: '该基金暂无便览数据', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }] });
       return;
     }
-    const roseStart = rows.length;
+    const blockStart = rows.length;
+    /* 双图并排锚点：玫瑰图 H..N（col 7..13）、柱状图 O..U（col 14..20），同一块首行 */
     if (d.alloc && d.alloc.length && window.buildRoseSVG) {
       const R0 = window.buildRoseSVG(d, '', { embedStyle: true, fixedSize: true });
-      if (R0 && R0.svg) jobs.push({ name: nm, row: roseStart, svg: R0.svg, span: 16 });
+      if (R0 && R0.svg) jobs.push({ name: nm, row: blockStart, svg: R0.svg, kind: 'rose' });
     }
-    (d.top10 || []).forEach((h) => {
-      rows.push({ cells: [{ v: nm, s: 4 }, { v: '前十大持仓', s: 4 }, { v: h.name || '', s: 4 }, n2(h.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
+    if (d.top10 && d.top10.length && window.buildTopBarsSVG) {
+      const T0 = window.buildTopBarsSVG(d, { embedStyle: true, fixedSize: true });
+      if (T0) jobs.push({ name: nm, row: blockStart, svg: T0, kind: 'bars' });
+    }
+    (d.top10 || []).forEach((h, i) => {
+      rows.push({ cells: [{ v: i + 1, s: 4 }, { v: nm, s: 4 }, { v: '前十大持仓', s: 4 }, { v: h.name || '', s: 4 }, n2(h.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
     });
     if (d.top10 && d.top10.length) {
-      rows.push({ cells: [{ v: nm, s: 4 }, { v: '前十大持仓', s: 4 }, { v: '前十大合计', s: 4 }, n2(d.top10.reduce((a, h) => a + (h.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+      rows.push({ cells: [{ v: '', s: 4 }, { v: nm, s: 4 }, { v: '前十大持仓', s: 4 }, { v: '前十大合计', s: 4 }, n2(d.top10.reduce((a, h) => a + (h.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
     }
-    (d.alloc || []).forEach((a) => {
-      rows.push({ cells: [{ v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: a.label || '', s: 4 }, n2(a.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
+    (d.alloc || []).forEach((a, i) => {
+      rows.push({ cells: [{ v: i + 1, s: 4 }, { v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: a.label || '', s: 4 }, n2(a.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
     });
     if (d.alloc && d.alloc.length) {
-      rows.push({ cells: [{ v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '已披露合计', s: 4 }, n2(d.alloc.reduce((a, x2) => a + (+x2.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+      rows.push({ cells: [{ v: '', s: 4 }, { v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '已披露合计', s: 4 }, n2(d.alloc.reduce((a, x2) => a + (+x2.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
     }
-    if (jobs.length && jobs[jobs.length - 1].row === roseStart) {
-      jobs[jobs.length - 1].span = rows.length - roseStart;   /* 块行数，限定图高 */
-    }
+    /* 2026-10-30（用户反馈）：多基金时图与下一块挤压难看——块尾 pad 空行，
+       保证每块 ≥19 行（图 16 行高 + 3 行缓冲），块与块之间留 1 行空行 */
+    const MIN_BLOCK = 19;
+    while (rows.length - blockStart < MIN_BLOCK) rows.push({ cells: [] });
+    rows.push({ cells: [] });
   });
+  /* 2026-10-30（用户要求）：嵌入两张图——投资组合分布玫瑰图 + 前十大持仓柱状图（各 6 列并排） */
   const images = [];
   for (const job of jobs) {
-    const b64 = await window.svgStrToPng(job.svg, 1280, 1100);
+    const isRose = job.kind === 'rose';
+    const b64 = await window.svgStrToPng(job.svg, isRose ? 1280 : 1140, isRose ? 1100 : 1000);
     if (!b64) continue;
-    images.push({ data: b64, col: 6, row: job.row, col2: 12, row2: job.row + Math.min(16, Math.max(12, job.span)), name: job.name + ' 投资组合分布' });
+    images.push({
+      data: b64, col: isRose ? 7 : 14, row: job.row, col2: isRose ? 13 : 20, row2: job.row + 16,
+      name: job.name + (isRose ? ' 投资组合分布' : ' 前十大持仓柱状图'),
+    });
   }
-  return { rows: rows, merges: ['A1:F1'], cols: [28, 15, 36, 19, 12, 18], images: images };
+  return { rows: rows, merges: ['A1:G1'], cols: [7, 26, 14, 34, 18, 12, 16], images: images };
 };
 
 window.holdBlockHTML = function (id) {
