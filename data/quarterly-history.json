@@ -1,12 +1,12 @@
 [
   {
-    "generatedAt": "2026-10-30T13:40:00",
+    "generatedAt": "2026-10-30T23:02:49",
     "groups": [
       {
         "name": "AMTD",
         "currentAsOf": "2026-06-30",
-        "latestPeriod": "2026-06-30",
-        "action": "官方尚未发布新季",
+        "latestPeriod": null,
+        "action": "样张下载失败（网络或代理）",
         "updated": false
       },
       {

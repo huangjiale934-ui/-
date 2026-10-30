@@ -22,12 +22,15 @@ return 'zh-Hans';
 }
 
 var cur = detect();
+w.__t2sActive = (cur === 'zh-Hans');
 
 function t(key, fallback) {
 var d = DICT[cur] || {};
 var v = d[key];
-if (v != null) return v;
-return fallback != null ? fallback : key;
+if (v == null) v = fallback != null ? fallback : key;
+/* 2026-10-31（领导要求）：简体模式彻底繁转简——数据原文（基金名/新闻/积金局文案）也转换 */
+if (cur === 'zh-Hans' && w.t2s) v = w.t2s(v);
+return v;
 }
 
 function applyI18n(root) {
@@ -77,6 +80,7 @@ function setLang(code) {
 if (!DICT[code]) return;
 cur = code;
 w.LANG = code;   /* 2026-10-22 修：切换器走的是 setLang，原实现只改内部 cur，window.LANG 会一直停在初始值 */
+w.__t2sActive = (code === 'zh-Hans');   /* 2026-10-31：简体模式繁转简开关 */
 try { localStorage.setItem(STORE, code); } catch (e) {}
 ensureDict(code, function () {
 document.documentElement.setAttribute('lang', code === 'en' ? 'en' : code === 'zh-Hant' ? 'zh-Hant' : 'zh-CN');

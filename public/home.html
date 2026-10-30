@@ -48,6 +48,8 @@
     </div>
   </div>
 </header>
+  <!-- 2026-10-31（用户要求）：雅虎财经式行情栏（随页面滚动，不固定）——规模加权 MPF 指数 + 恒指 -->
+  <div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><div class="tk-track"><span class="tk-loading">…</span></div></div>
 
 <!-- Hero：先讲市场 -->
 <section class="hero">
@@ -55,18 +57,14 @@
     <div class="hero-copy">
       <div class="hero-tag" data-i18n="香港强积金市场数据平台">香港强积金市场数据平台</div>
       <h1><span data-i18n="全市场 451 条成分基金">全市场 451 条成分基金</span><br><span data-i18n="一站看透">一站看透</span></h1>
-      <p class="hero-sub" data-i18n="收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照">收录全港 451 条强积金成分基金，规模、回报、风险与持仓多维对照</p>
-      <p class="hero-slogan" data-i18n="净值每日取自发行人官网，其余资料来自积金局 · 每日自动同步 · 未经增删">净值每日取自发行人官网，其余资料来自积金局 · 每日自动同步 · 未经增删</p>
       <div class="hero-btns">
         <a class="cta primary" href="index.html">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
           <span data-i18n="强积金资料库">强积金资料库</span>
-          <span class="cta-sub" data-i18n="451 条成分基金全量数据">451 条成分基金全量数据</span>
         </a>
         <a class="cta ghost" href="analysis.html">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V9"/><path d="M16 21V13"/><path d="M4 21h16"/><path d="M12 9V3"/><path d="m9 6 3-3 3 3"/></svg>
           <span data-i18n="基金可视化对比">基金可视化对比</span>
-          <span class="cta-sub" data-i18n="走势对比 · 自算指数 · 定投试算">走势对比 · 自算指数 · 定投试算</span>
         </a>
       </div>
     </div>
@@ -91,17 +89,17 @@
     <div class="mk-rank">
       <!-- 2026-10-22（领导）：标题与说明去掉，模块整体上移；榜单内容不动 -->
       <div class="mk-tops">
-        <div class="mk-top"><h3 data-i18n="近 1 年回报领先">近 1 年回报领先</h3><a class="mk-more" href="index.html?rk=ann1#ann1"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="年率化回报 · 由高至低">年率化回报 · 由高至低</p>
+        <div class="mk-top"><h3 data-i18n="近 1 年回报领先">近 1 年回报领先</h3><a class="mk-more" href="index.html?rk=ann1#ann1"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop1"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="近 5 年回报领先">近 5 年回报领先</h3><a class="mk-more" href="index.html?rk=ann5#ann5"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="年率化回报 · 由高至低">年率化回报 · 由高至低</p>
+        <div class="mk-top"><h3 data-i18n="近 5 年回报领先">近 5 年回报领先</h3><a class="mk-more" href="index.html?rk=ann5#ann5"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop4"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="推出至今累积回报">推出至今累积回报</h3><a class="mk-more" href="index.html?rk=cumLaunch#cumLaunch"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="自基金推出日起累积 · 由高至低">自基金推出日起累积 · 由高至低</p>
+        <div class="mk-top"><h3 data-i18n="推出至今累积回报">推出至今累积回报</h3><a class="mk-more" href="index.html?rk=cumLaunch#cumLaunch"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop5"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="规模领先">规模领先</h3><a class="mk-more" href="index.html?rk=size#size"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="基金资产规模 · 由大至小">基金资产规模 · 由大至小</p>
+        <div class="mk-top"><h3 data-i18n="规模领先">规模领先</h3><a class="mk-more" href="index.html?rk=size#size"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop2"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="总开支最低">总开支最低</h3><a class="mk-more" href="index.html?rk=fer#fer"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="基金开支比率 FER · 由低至高">基金开支比率 FER · 由低至高</p>
+        <div class="mk-top"><h3 data-i18n="总开支最低">总开支最低</h3><a class="mk-more" href="index.html?rk=fer#fer"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop3"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="低风险优选">低风险优选</h3><a class="mk-more" href="index.html?rk=risk#risk"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a><p class="ph" data-i18n="积金局风险级别最低 · 规模较大者优先">积金局风险级别最低 · 规模较大者优先</p>
+        <div class="mk-top"><h3 data-i18n="低风险优选">低风险优选</h3><a class="mk-more" href="index.html?rk=risk#risk"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop6"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
       </div>
     </div>
@@ -112,7 +110,6 @@
         <div class="news-head">
           <div>
             <h3 data-i18n="MPF 最新资讯">MPF 最新资讯</h3>
-            <p class="ph" data-i18n="积金局最新新闻稿，点击标题直达官网原文">积金局最新新闻稿，点击标题直达官网原文</p>
           </div>
           <a class="news-more" href="https://www.mpfa.org.hk/tc/info-centre/press-releases" target="_blank" rel="noopener" data-i18n="查看全部 →">查看全部 →</a>
         </div>
@@ -121,11 +118,9 @@
           <li class="news-item"><div class="sk sk-li"></div></li>
           <li class="news-item"><div class="sk sk-li"></div></li>
         </ul>
-        <p class="news-note" data-i18n="来源：积金局「新闻稿」。本平台仅展示标题与日期并链接至官网原文，不转载内容。">来源：积金局「新闻稿」。本平台仅展示标题与日期并链接至官网原文，不转载内容。</p>
       </div>
       <div class="mk-panel">
-        <h3 data-i18n="市场整体回报走势">市场整体回报走势</h3>
-        <p class="ph" data-i18n="历年全市场算术平均与中位数回报（%）">历年全市场算术平均与中位数回报（%）</p>
+        <h3 data-i18n="市场整体回报走势">市场整体回报走势<span class="h3-tip" id="yrTip" data-tip="数据取自积金局「曆年回報」列">ⓘ</span></h3>
         <div class="mk-slot" id="mkYearLine"><div class="sk sk-chart"></div></div>
         <!-- 市场解读：2026-10-20 移入右栏，填满资讯块带来的高度差 -->
         <div class="mk-read mk-slot" id="mkRead"><div class="sk sk-text"></div></div>
@@ -135,8 +130,7 @@
     <!-- 市场涨跌温度计 -->
     <div class="mk-panel mk-thermo-panel">
       <div class="mk-thermo-head">
-        <h3 data-i18n="市场涨跌温度计">市场涨跌温度计</h3>
-        <p class="ph" data-i18n="以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，蓝为涨、绿为跌">以全市场成分基金「近 1 年 · 年率化回报」为冷热口径，蓝为涨、绿为跌</p>
+        <h3 data-i18n="市场涨跌温度计">市场涨跌温度计<span class="h3-tip" data-tip="以全市场成分基金「近 1 年 · 年率化回报」为冷热口径（规模加权）；蓝为涨、绿为跌">ⓘ</span></h3>
       </div>
       <div class="mk-slot mk-thermo-slot" id="mkThermo"><div class="sk sk-thermo"></div></div>
     </div>
@@ -145,24 +139,20 @@
     <div class="mk-charts">
       <div class="mk-panel pie-panel">
         <h3 data-i18n="基金种类分布">基金种类分布</h3>
-        <p class="ph" data-i18n="按基金数目占比 · 右侧为规模">按基金数目占比 · 右侧为规模</p>
         <div class="mk-slot pie-flex" id="mkTypeRing"><div class="sk sk-pie"></div></div>
       </div>
       <div class="mk-panel pie-panel">
         <h3 data-i18n="受托人市场份额">受托人市场份额</h3>
-        <p class="ph" data-i18n="按旗下基金资产规模占比">按旗下基金资产规模占比</p>
         <div class="mk-slot pie-flex" id="mkTrusteePie"><div class="sk sk-pie"></div></div>
       </div>
       <div class="mk-panel">
         <h3 data-i18n="风险级别分布">风险级别分布</h3>
-        <p class="ph" data-i18n="按积金局风险级别统计基金数">按积金局风险级别统计基金数</p>
         <div class="mk-slot cols" id="mkRisk"><div class="sk sk-cols"></div></div>
         <div class="mk-note" id="mkRiskNote"></div>
         <!-- 风险等级图例 -->
         <div class="risk-legend" id="riskLegend">
           <div class="rl-title" data-i18n="风险级别图例（1 级最低 → 7 级最高）">风险级别图例（1 级最低 → 7 级最高）</div>
           <ul class="rl-list"></ul>
-          <p class="rl-note" data-i18n="风险级别由积金局按基金价格波动幅度评定，1 级最低、7 级最高。色块自浅蓝（低风险）逐级过渡至深蓝（高风险），仅为风险示意，与涨跌无关。">风险级别由积金局按基金价格波动幅度评定，1 级最低、7 级最高。色块自浅蓝（低风险）逐级过渡至深蓝（高风险），仅为风险示意，与涨跌无关。</p>
         </div>
       </div>
     </div>
@@ -171,18 +161,14 @@
     <div class="mk-official">
       <div class="mk-panel">
         <div class="mo-head">
-          <h3 data-i18n="积金局最新公布 · 按月更新">积金局最新公布 · 按月更新</h3>
+          <h3 data-i18n="积金局最新公布 · 各基金种类的过去 12 个月年率化净回报">积金局最新公布 · 各基金种类的过去 12 个月年率化净回报<span class="h3-tip" data-tip="数据取自积金局「基金便览」按月发布；条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）">ⓘ</span></h3>
           <a class="mo-src" id="moSrc" href="https://www.mpfa.org.hk/tc/info-centre/press-releases/20261006" target="_blank" rel="noopener"></a>
         </div>
-        <p class="ph" data-i18n="各基金种类的过去 12 个月年率化净回报（已扣除收费及费用）；「最高／最低」为该类别内个别基金的区间">各基金种类的过去 12 个月年率化净回报（已扣除收费及费用）；「最高／最低」为该类别内个别基金的区间</p>
         <div class="mk-slot" id="mkOfficial"><div class="sk sk-chart"></div></div>
       </div>
     </div>
   </div>
-  <div class="mk-src" data-i18n="数据来源：香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表；单位资产净值、业绩与持仓另取自各计划受托人／保荐人官网。">
-    数据来源：香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表；单位资产净值、业绩与持仓另取自各计划受托人／保荐人官网。
-  </div>
-</section>
+  </section>
 
 <!-- 市场排行榜已并入上方市场概览（2026-10-22 领导要求前移） -->
 
@@ -194,7 +180,6 @@
   <div class="wrap plat-grid">
     <div class="plat-copy">
       <h2 data-i18n="自建强积金数据平台">自建强积金数据平台</h2>
-      <p data-i18n="全市场 451 条成分基金逐只收录（按单位类别逐行统计；积金局官网页面标注的 382 只，系将同一基金的各个单位类别合并后的计数），数据取自香港积金局「強積金基金平台」，每日自动同步、未经增删，免费开放给每一位客户。">全市场 <b>451 条</b>成分基金逐只收录（按单位类别逐行统计；积金局官网页面标注的 382 只，系将同一基金的各个单位类别合并后的计数），数据取自香港积金局「強積金基金平台」，每日自动同步、未经增删，免费开放给每一位客户。</p>
       <ul class="plat-list">
         <li data-i18n="关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选">关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选</li>
         <li data-i18n="21 个维度榜单 · 类别冠军 · 勾选对比">21 个维度榜单 · 类别冠军 · 勾选对比</li>

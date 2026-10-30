@@ -142,7 +142,9 @@
     arr.forEach((v) => {
       const o = document.createElement('option');
       o.value = v;
-      o.textContent = fmt ? fmt(v) : v;
+      /* 2026-10-31：简体模式下筛选下拉的数据值（发行人/种类等）繁转简 */
+      const label = window.__t2sActive && window.t2s ? window.t2s(fmt ? fmt(v) : v) : (fmt ? fmt(v) : v);
+      o.textContent = label;
       el.appendChild(o);
     });
     if (arr.indexOf(cur) >= 0 || arr.map(String).indexOf(String(cur)) >= 0) el.value = cur;
@@ -490,7 +492,8 @@
   }
 
   function card(k, v, unit, s) {
-    return '<div class="stat"><div class="k">' + k + '</div><div class="v num">' + v + '<small>' + unit + '</small></div><div class="s">' + esc(s) + '</div></div>';
+    /* 2026-10-31：v（基金名等数据值）也走 esc——简体模式下繁转简 */
+    return '<div class="stat"><div class="k">' + k + '</div><div class="v num">' + esc(v) + '<small>' + unit + '</small></div><div class="s">' + esc(s) + '</div></div>';
   }
 
   function renderChips() {

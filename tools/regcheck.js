@@ -552,7 +552,8 @@ chk('月度板块·「<0.5%」标记已接入（数据 shareLt + 行内/图例/�
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.js'), 'utf8');
     const j = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'mpfa-monthly.json'), 'utf8'));
     const mmf = j.rows.find((r) => r.key === 'mmf');
-    return !!(mmf && mmf.shareLt === true) && /r\.shareLt \? '<' : ''/.test(h) && /it\.lt \? '<' : ''/g.test(h);
+    /* 2026-10-31：行内「资产占比」小字已删（用户要求），<0.5% 标记保留在图例与扇区 */
+    return !!(mmf && mmf.shareLt === true) && /it\.lt \? '<' : ''/.test(h);
   } catch (e) { return false; }
 })());
 chk('月度板块·页面抽检：资产占比 <0.5%', /资产占比 (?:<|&lt;)0\.5%/.test(home));
@@ -899,8 +900,10 @@ chk('深夜·④页脚折叠 + 来源免责合并 + 核对时间入 summary', (f
     const i = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    /* 2026-10-31（用户要求）：foot-legal 并入折叠栏（src-brief），来源告警/两套口径段删除 */
     return i.indexOf('foldSpec') >= 0 && a.indexOf('foldSpec') >= 0 && i.indexOf('navCheckAt') >= 0 &&
-      i.indexOf('数据来源与免责声明') >= 0 && c.indexOf('navCheckAt') >= 0;
+      i.indexOf('src-brief') >= 0 && i.indexOf('foot-legal') < 0 && c.indexOf('navCheckAt') >= 0 &&
+      c.indexOf('来源告警') < 0;
   } catch (e) { return false; }
 })());
 chk('深夜·⑤页头只显示本站更新时间（三处统一）+ 同计划对比入口', (function () {
@@ -1449,8 +1452,10 @@ chk('页脚重排：估值日分布 + 风险级别说明移至「数据来源」
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const i = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
+    /* 2026-10-31（用户要求）：估值卡删除；图例移至 summary 行 #ffRisk */
     return /id="srcNoteTop"/.test(i) && /id="srcNoteTop"/.test(a) && /querySelector\('#srcNoteTop'\)/.test(c) &&
-      /elTop\.innerHTML = navDateDistHTML\(\) \+ MPF_RISK\.legendHTML\(\)/.test(c);
+      /elTop\.innerHTML = navDateDistHTML\(\);/.test(c) &&
+      i.indexOf('navDistCard') < 0 && a.indexOf('navDistCard') < 0 && /id="ffRisk"/.test(i) && /id="ffRisk"/.test(a);
   } catch (e) { return false; }
 })());
 

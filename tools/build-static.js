@@ -95,7 +95,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   /* 4.5) b.js / b.css 合并包静态化（server.js 的动态端点 → 拼装落盘）+
           HTML 引用改写（b.css?p=home 需含 home.css，Pages 忽略 query 无法区分） */
   const P = (f) => fs.readFileSync(path.join(ROOT, 'public', f), 'utf8');
-  fs.writeFileSync(path.join(SITE, 'b.js'), ['i18n.js', 'zhmap.js', 'common.js', 'trend.js', 'xlsx.js'].map(P).join('\n;\n'));
+  fs.writeFileSync(path.join(SITE, 'b.js'), ['t2s.js', 'i18n.js', 'zhmap.js', 'common.js', 'trend.js', 'xlsx.js'].map(P).join('\n;\n'));
   fs.writeFileSync(path.join(SITE, 'b.css'), ['style.css', 'analysis.css'].map(P).join('\n'));
   fs.writeFileSync(path.join(SITE, 'b-home.css'), ['style.css', 'analysis.css', 'home.css'].map(P).join('\n'));
   const htmls = ['index.html', 'home.html', 'analysis.html', 'ranking.html'];

@@ -1071,6 +1071,20 @@
 
   '导出组件未加载，请刷新页面': 'Export module not loaded — please refresh the page',
 
+  'MPF 市场指数': 'MPF Market Index',
+  '注：官网标注的 {d} 只为「合并单位类别后」的计数，本站按单位类别逐行收录为 {c} 条，两者并无矛盾。': 'Note: the {d} funds on the MPFA site count merged unit classes; this site lists {c} rows by unit class. No contradiction.',
+  '全市场规模加权': 'Market AUM-weighted',
+  '规模加权平均': 'AUM-weighted average',
+  '年率化回报（规模加权）': 'Annualised return (AUM-weighted)',
+  '该类别内个别基金的最高回报为 {a}%、最低为回报为 {b}%': 'Highest individual fund return in this class: {a}%; lowest: {b}%',
+  '数据取自积金局「曆年回報」列，截止至 {d}': 'From the MPFA calendar-year returns column, as of {d}',
+  '积金局最新公布 · 各基金种类的过去 12 个月年率化净回报': 'MPFA latest · Past 12 months annualised net return by fund class',
+  '数据来源：积金局「强积金基金平台」公布的基金资讯表；单位资产净值取自各受托人／保荐人官网，每日自动同步。本页资料仅供参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。': 'Sources: MPFA Fund Bulletin Platform; NAVs from trustees/sponsors, synced daily. For reference only, not investment advice; past performance is not a guide, investment involves risk.',
+  '数据取自积金局「曆年回報」列': 'From the MPFA calendar-year returns column',
+  '以全市场成分基金「近 1 年 · 年率化回报」为冷热口径（规模加权）；蓝为涨、绿为跌': 'Basis: all constituent funds by recent 1-year annualised return (AUM-weighted); blue = gain, green = loss',
+  '数据取自积金局「基金便览」按月发布；条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）': 'Monthly MPFA factsheets; bars show each class 12-month annualised net return (net of fees)',
+  '风险级别图例（1 级最低 → 7 级最高）': 'Risk class legend (1 lowest - 7 highest)',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -1,0 +1,16 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>T2S_TEST</title></head><body>
+<pre id="out">running</pre>
+<script src="/b.js"></script>
+<script>
+var out=[];
+try{
+  out.push('typeof t2s=' + typeof window.t2s);
+  out.push('__t2sActive=' + window.__t2sActive);
+  out.push('LANG=' + window.LANG);
+  out.push('t2s("強積金測試")=' + window.t2s ? window.t2s('強積金測試') : '(n/a)');
+  out.push('t("強積金基金平台直接调t")=' + (typeof window.t === 'function' ? window.t('強積金基金平台直接调t') : '(no t)'));
+  out.push('esc测试=' + esc('宏利MPF康健護理基金'));
+}catch(e){ out.push('ERROR: ' + e.message); }
+document.getElementById('out').textContent = out.join('\n');
+document.title='T2S_DONE';
+</script></body></html>

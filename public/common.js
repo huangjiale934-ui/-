@@ -393,7 +393,8 @@ function renderSrcNote() {
      其余口径说明文字保留在页脚卡片内。
      2026-10-14 深夜：页脚改为折叠式——核对时间进 summary（#navCheckAt），口径说明折叠展开。 */
   const elTop = document.querySelector('#srcNoteTop');
-  if (elTop && DATA.count) elTop.innerHTML = navDateDistHTML() + MPF_RISK.legendHTML();
+  /* 2026-10-31（用户要求）：风险图例移至折叠栏 summary 行（#ffRisk），折叠区内只留估值日分布 */
+  if (elTop && DATA.count) elTop.innerHTML = navDateDistHTML();
   const nc = document.querySelector('#navCheckAt');
   if (nc && DATA.navStat && DATA.navStat.navUpdatedAt) {
     const locale = (typeof window.getLang === 'function' && window.getLang() === 'en') ? 'en-GB' : 'zh-CN';
@@ -405,8 +406,9 @@ function renderSrcNote() {
   el.innerHTML =
     TQ('本页收录 <b>{c}</b> 条成分基金 · {u} 家受托人 · {s} 个强积金计划，积金局资料截至 <b>{d}</b>。',
       { c: DATA.count, u: DATA.trusteeCount || '—', s: DATA.schemeCount || '—', d: DATA.dataAsOf || '—' }) +
+    /* 2026-10-31（用户要求）：口径差异精简为一句话 */
     '<div class="note-diff">' +
-    TQ('关于「{c} 条」与官网「{d} 只」的口径差异：积金局基金资讯表<b>每一行对应一个「单位类别」</b>（同一只成分基金可同时设有 A 类、B 类、D 类等单位，收费与净值各自不同），本站逐行完整收录，故为 {c} 条；官网页面顶部标注的「已選擇的成分基金總數: {d}」是把同一只基金的各个单位类别<b>合并成一只基金</b>后的计数。两者并无矛盾，本站提供「详情」可查看该基金各个单位类别的分别数据。',
+    TQ('注：官网标注的 {d} 只为「合并单位类别后」的计数，本站按单位类别逐行收录为 {c} 条，两者并无矛盾。',
       { c: DATA.count, d: declared }) +
     '</div>' +
     navStatNote();
@@ -419,11 +421,6 @@ function navStatNote() {
   const na = n.na || 0;
   const pct1 = ((n.verified / (n.total || 1)) * 100).toFixed(1);
   const src = n.sources || [];
-  const dates = src.map((s) => s.asOf).filter(Boolean).sort();
-  const span = dates.length ? (dates[0] === dates[dates.length - 1]
-    ? dates[0]
-    : dates[0] + ' ~ ' + dates[dates.length - 1]) : '';
-  const noDate = src.filter((s) => !s.asOf);
   const locale = (typeof window.getLang === 'function' && window.getLang() === 'en') ? 'en-GB' : 'zh-CN';  /* 英文模式用英式 24 小时格式 */
   return '<div class="note-nav">' +
     '<b>' + TT('单位资产净值（NAV）的数据来源与日期：') + '</b>' +
@@ -434,21 +431,6 @@ function navStatNote() {
     (n.unmatched ? TQ('，其余 <b>{n}</b> 条暂未能从其官网公开页面取得，一律显示「{x}」，不以任何推测数值代替',
       { n: n.unmatched, x: '<span class="nav-pending">' + TT('待核实') + '</span>' }) : '') +
     '。' +
-    (span ? '<br>' + TQ('<b>请注意两套数据的日期口径不同：</b>本表的<b>基金规模、风险级别、各项回报、基金开支比率、管理费</b>等指标取自积金局基金资讯表，其资料截至日为 <b>{d}</b>（由积金局统一更新，通常滞后若干周）；而<b>单位资产净值</b>由各受托人在官网逐日公布，本次取到的估值日集中在 <b>{span}</b>，每一行净值右下方均标注了该基金自己的估值日。两者更新频率不同属正常现象，本站不因日期差异而对任何数值做推算或对齐。',
-      { d: esc(DATA.dataAsOf || TT('官网最新公布日')), span: span }) : '') +
-    (noDate.length
-      ? '<br><span class="muted">' + TQ('其中 {list} 的官网把估值日放在异步脚本中生成，静态页面读不到日期，故这几只只显示净值、不显示估值日（净值本身仍取自其官网）。',
-        { list: noDate.map((s) => esc(String(s.label).replace(/（.*$/, ''))).join('、') }) + '</span>'
-      : '') +
-    ((n.alerts && n.alerts.length)
-      ? '<br><span class="nav-alert"><b>' + TT('⚠ 来源告警（自动检测）：') + '</b>' +
-        n.alerts.map((a) => esc(a.label) + '：' + esc(a.msg || '') +
-          TQ('（上次 {a} 条 → 本次 {b} 条）', { a: a.prev || 0, b: a.now || 0 })).join('；') +
-        '。' + (n.unmatched > 0
-          ? TQ('受影响的基金本次已暂时显示「{x}」，本站绝不以推测值代替。', { x: '<span class="nav-pending">' + TT('待核实') + '</span>' })
-          : TT('相关净值已自动沿用上一次核对结果，数值本身不受影响。')) +
-        TT('每日同步任务会重新尝试该来源，恢复正常后告警自动解除。') + '</span>'
-      : '') +
     '</div>';
 }
 
@@ -470,46 +452,12 @@ function navDateDistHTML() {
     '</div>';
 }
 
-/** 2026-10-24（领导）：把「净值估值日分布」从折叠区提到列表下方，做成可点击的卡片。
-    数据就绪（loadData）后渲染；点某日期只看该日估值的基金，再点取消。 */
+/** 2026-10-31（用户要求）：估值日分布卡删除；风险级别图例改放「数据统计口径说明」行中间空位 */
 function renderNavDistCard() {
-  const el = document.getElementById('navDistCard');
+  const el = document.getElementById('ffRisk');
   if (!el) return;
-  const funds = (DATA.funds || []).filter((x) => x.navStatus === 'verified' && x.nav != null);
-  if (!funds.length) { el.hidden = true; el.innerHTML = ''; return; }
-  const map = {};
-  funds.forEach((x) => { const k = x.navAsOf || 'none'; map[k] = (map[k] || 0) + 1; });
-  const keys = Object.keys(map).filter((k) => k !== 'none').sort().reverse();
-  if (map.none) keys.push('none');
-  let max = 0;
-  keys.forEach((k) => { if (map[k] > max) max = map[k]; });
-  const cur = window.__MPF_NAVDATE || '';
-  el.hidden = false;
-  el.innerHTML =
-    '<div class="ndc-head"><b>' + TT('净值估值日分布') + '</b>' +
-    '<span>' + TQ('共 {n} 只已核对官方净值；点日期只看该日，再点取消', { n: funds.length }) + '</span></div>' +
-    '<div class="ndc-body">' +
-    '<div class="ndc-list">' +
-    keys.map((k) => '<button type="button" class="ndc' + (cur === k ? ' on' : '') + (map[k] === max ? ' peak' : '') +
-      '" data-navdate="' + k + '"><b>' + (k === 'none' ? TT('无估值日') : k) + '</b>' +
-      '<span>' + TQ('{n} 只', { n: map[k] }) + '</span></button>').join('') +
-    '</div>' +
-    /* 2026-10-29（5.0）：右侧空白补风险级别图例（用户要求），与列表徽章同色 */
-    '<div class="ndc-legend"><b>' + TT('风险级别') + '</b><ul>' +
-    [1, 2, 3, 4, 5, 6, 7].map((lv) => '<li><i style="background:' + MPF_RISK.color(lv) + '"></i>' +
-      lv + ' ' + MPF_RISK.label(lv) + '</li>').join('') +
-    '</ul></div>' +
-    '</div>';
-  Array.prototype.forEach.call(el.querySelectorAll('.ndc'), (btn) => {
-    btn.addEventListener('click', () => {
-      const v = btn.getAttribute('data-navdate');
-      const next = (window.__MPF_NAVDATE === v) ? '' : v;
-      window.__MPF_NAVDATE = next;
-      if (window.mpfSetNavDate) window.mpfSetNavDate(next);
-      else if (window.anSetNavDate) window.anSetNavDate(next);
-      renderNavDistCard();
-    });
-  });
+  el.innerHTML = [1, 2, 3, 4, 5, 6, 7].map((lv) =>
+    '<i style="background:' + MPF_RISK.color(lv) + '" title="' + esc(lv + ' ' + MPF_RISK.label(lv)) + '"></i>').join('');
 }
 window.renderNavDistCard = renderNavDistCard;
 
@@ -766,7 +714,10 @@ function cls(v) {
   return v > 0 ? 'up' : v < 0 ? 'down' : 'flat';
 }
 function esc(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let out = String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  /* 2026-10-31（领导要求）：简体模式下数据原文（基金名/持仓名/积金局文案）彻底繁转简 */
+  if (window.__t2sActive && window.t2s) out = window.t2s(out);
+  return out;
 }
 function riskTag(r) {
   /* 2026-10-29：积金局对成立不足三年（未评级）的基金写 n.a.，本站随之显示 n.a. 并给悬浮说明；
@@ -2485,6 +2436,24 @@ function initDCABuild() {
   fab.setAttribute('aria-label', TT('供款计算器'));
   fab.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/></svg><span>' + TT('供款计算器') + '</span>';
   document.body.appendChild(fab);
+
+  /* 2026-10-31（用户要求）：1 分钟无交互自动缩成圆形图标（沿用配色与计算器图案），
+     悬停展开为胶囊，点击才打开面板；面板打开期间不收缩。 */
+  let dcaIdleTimer = null;
+  function dcaResetIdle() {
+    clearTimeout(dcaIdleTimer);
+    fab.classList.remove('idle');
+    dcaIdleTimer = setTimeout(() => { if (wrap.hidden) fab.classList.add('idle'); }, 60000);
+  }
+  dcaResetIdle();
+  fab.addEventListener('click', dcaResetIdle);
+  fab.addEventListener('mouseenter', () => fab.classList.remove('idle'));
+  fab.addEventListener('mouseleave', () => {
+    if (wrap.hidden) { clearTimeout(dcaIdleTimer); dcaIdleTimer = setTimeout(() => fab.classList.add('idle'), 60000); }
+  });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest && (e.target.closest('.dca-wrap'))) dcaResetIdle();
+  }, true);
 
   const wrap = document.createElement('div');
   wrap.className = 'dca-wrap';

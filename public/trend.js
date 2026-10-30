@@ -79,8 +79,12 @@ window.TREND = (function () {
   function perfOf(id) { return ensurePerf().then((p) => (p && p.funds && p.funds[String(id)]) || null); }
 
   /* ---------------- 工具 ---------------- */
-  const esc0 = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc0 = (s0) => {
+    let s = String(s0 == null ? '' : s0);
+    if (window.__t2sActive && window.t2s) s = window.t2s(s);   /* 2026-10-31：简体模式数据原文繁转简 */
+    return s.replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  };
   /* 说明：common.js 的 TT/TQ 是顶层 const（脚本作用域共享），**不挂在 window 上**——
      这里必须按名字直接引用；本文件内的包装函数命名为 _t/_tq，避免同名遮蔽递归。 */
   function _t(s) { return (typeof TT === 'function') ? TT(s) : s; }

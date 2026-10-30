@@ -166,7 +166,8 @@
     /* 2026-10-22（用户要求）：温度计改用「自算净值口径」的日度数据（最新净值日），
        积金局季频口径（含费含息）作为对照单列一行，两套口径分开标注、不混用。 */
     const sf = (m.self && m.self.base) ? m.self : null;
-    const v = sf ? sf.avg : m.avgAnn1;
+    /* 2026-10-31（用户要求）：平均回报改规模加权 */
+    const v = sf ? (sf.wavg != null ? sf.wavg : sf.avg) : m.avgAnn1;
     if (v == null) return '<div class="chart-empty">' + TT('暂无回报数据') + '</div>';
     const lo = Math.min(-10, Math.floor((v - 12) / 5) * 5);
     const hi = Math.max(10, Math.ceil((v + 12) / 5) * 5);
@@ -217,7 +218,7 @@
     const stats = '<div class="thermo-stats">'
       + '<div class="ts-row">'
       + '<div class="ts-box"><span class="ts-k">' + TT('近 1 年平均回报') + '</span>'
-      + '<b class="ts-v ' + sgn(v) + '">' + pctv(v) + '</b><span class="ts-s">' + TT('全市场算术平均') + '</span></div>'
+      + '<b class="ts-v ' + sgn(v) + '">' + pctv(v) + '</b><span class="ts-s">' + TT('全市场规模加权') + '</span></div>'
       + '<div class="ts-box"><span class="ts-k">' + TT('近 1 年中位数回报') + '</span>'
       + '<b class="ts-v ' + sgn(med) + '">' + pctv(med) + '</b><span class="ts-s">' + TT('一半基金高于此值') + '</span></div>'
       + '<div class="ts-box"><span class="ts-k">' + TT('正回报基金占比') + '</span>'
@@ -233,14 +234,6 @@
       + '<li><i class="mk-dot flat"></i>' + TT('平盘') + ' <b>' + num(flat) + ' ' + TT('条') + '</b><span>（' + pc(flat) + '%）</span></li>'
       + '<li><i class="mk-dot down"></i>' + TT('下跌') + ' <b class="down">' + num(down) + ' ' + TT('条') + '</b><span>（' + pc(down) + '%）</span></li>'
       + '</ul>'
-      + '<p class="ts-note">' + TT('刻度区间') + ' ' + (lo > 0 ? '+' : '') + lo + '% ~ +' + hi + '%；' +
-      (sf ? TT('自算净值口径') + '（' + TT('净值日') + ' ' + esc(asOfTxt) + '）' : TT('积金局口径')) +
-      '，' + TT('有近 1 年回报数据的成分基金') + ' <b>' + num(base) + '</b> / ' + num(m.unitRows) + ' ' + TT('条') + '。</p>'
-      + (sf && m.avgAnn1 != null
-        ? '<p class="ts-note ts-note-2">' + TT('积金局口径（含费含息，季度公布，截至') + ' ' + esc(m.dataAsOf || '') + '）：'
-          + TT('近 1 年平均') + ' <b>' + pctv(m.avgAnn1) + '</b> · ' + TT('中位数') + ' ' + pctv(m.medianAnn1)
-          + ' · ' + num(m.upCount) + '/' + num(m.upBase) + ' ' + TT('条录得正回报') + '。' + TT('两套口径不可直接相减。') + '</p>'
-        : '')
       + '</div>';
 
     return '<div class="thermo-wrap">' + svg + stats + '</div>';
@@ -310,12 +303,12 @@
   let yearSel = 'all';
 
   function yearLine(rows) {
-    const rows2 = (rows || []).filter((r) => r.avg != null);
+    const rows2 = (rows || []).filter((r) => (r.wavg != null ? r.wavg : r.avg) != null);
     if (rows2.length < 2) return '<div class="chart-empty">' + TT('暂无历年回报数据') + '</div>';
-    const W = 372, H = 214, padL = 32, padR = 14, padT = 22, padB = 34;
+    const W = 372, H = 330, padL = 32, padR = 14, padT = 22, padB = 34;   /* 2026-10-31（用户要求）：图上下延伸 */
     const pw = W - padL - padR, ph = H - padT - padB;
     let minV = 0, maxV = 0;
-    rows2.forEach((r) => { minV = Math.min(minV, r.avg, r.median == null ? r.avg : r.median); maxV = Math.max(maxV, r.avg, r.median == null ? r.avg : r.median); });
+    rows2.forEach((r) => { const A = (r.wavg != null ? r.wavg : r.avg); minV = Math.min(minV, A, r.median == null ? A : r.median); maxV = Math.max(maxV, A, r.median == null ? A : r.median); });
     const sc = niceScale(minV, maxV, 4);
     const X = (i) => padL + (pw / (rows2.length - 1)) * i;
     const Y = (v) => padT + ph * (1 - (v - sc.lo) / (sc.hi - sc.lo));
@@ -334,7 +327,7 @@
         + (dash ? ' stroke-dasharray="5 4" opacity="0.85"' : '') + ' stroke-linejoin="round" stroke-linecap="round"/>';
     };
 
-    const areaPts = rows2.map((r, i) => [X(i), Y(r.avg == null ? 0 : r.avg)]);
+    const areaPts = rows2.map((r, i) => [X(i), Y(r.wavg != null ? r.wavg : r.avg)]);
     const area = 'M' + fx(areaPts[0][0]) + ' ' + fx(y0) + areaPts.map((p) => 'L' + fx(p[0]) + ' ' + fx(p[1])).join('')
       + 'L' + fx(areaPts[areaPts.length - 1][0]) + ' ' + fx(y0) + 'Z';
 
@@ -347,17 +340,18 @@
         dots += '<circle cx="' + fx(cx) + '" cy="' + fx(Y(r.median)) + '" r="3" fill="#fff" stroke="' + C_FLAT + '" stroke-width="1.6">'
           + '<title>' + r.year + ' ' + TT('中位数') + '：' + pctv(r.median) + '</title></circle>';
       }
-      if (r.avg != null) {
-        const c = r.avg > 0 ? C_UP : r.avg < 0 ? C_DOWN : C_FLAT;
-        const vy = Y(r.avg) - (r.avg >= 0 ? 9 : -16);
-        dots += '<circle cx="' + fx(cx) + '" cy="' + fx(Y(r.avg)) + '" r="4.2" fill="' + c + '" stroke="#fff" stroke-width="1.6">'
-          + '<title>' + r.year + ' ' + TT('平均回报') + '：' + pctv(r.avg) + '（' + r.up + ' / ' + r.down + '，' + r.n + '）</title></circle>'
-          + '<text class="line-val ' + sgn(r.avg) + '" x="' + fx(lx) + '" y="' + fx(vy) + '" text-anchor="middle">' + pctv(r.avg) + '</text>';
+      const A = (r.wavg != null ? r.wavg : r.avg);
+      if (A != null) {
+        const c = A > 0 ? C_UP : A < 0 ? C_DOWN : C_FLAT;
+        const vy = Y(A) - (A >= 0 ? 9 : -16);
+        dots += '<circle cx="' + fx(cx) + '" cy="' + fx(Y(A)) + '" r="4.2" fill="' + c + '" stroke="#fff" stroke-width="1.6">'
+          + '<title>' + r.year + ' ' + TT('规模加权平均') + '：' + pctv(A) + '（' + r.up + ' / ' + r.down + '，' + r.n + '）</title></circle>'
+          + '<text class="line-val ' + sgn(A) + '" x="' + fx(lx) + '" y="' + fx(vy) + '" text-anchor="middle">' + pctv(A) + '</text>';
       }
     });
 
     return '<div class="chart-head"><ul class="chart-legend">'
-      + '<li><i style="background:' + C_UP + '"></i>' + TT('平均回报') + '</li>'
+      + '<li><i style="background:' + C_UP + '"></i>' + TT('规模加权平均') + '</li>'
       + '<li><i class="ln-dash"></i>' + TT('中位数') + '</li></ul></div>'
       + '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(TT('市场整体回报走势')) + '">'
       + grid
@@ -365,8 +359,7 @@
       + line('median', C_FLAT, true)
       + line('avg', '#1a6fb5', false)
       + '<line class="chart-zero" x1="' + padL + '" y1="' + fx(y0) + '" x2="' + (W - padR) + '" y2="' + fx(y0) + '"/>'
-      + dots + '</svg>'
-      + '<p class="chart-foot">' + TT('历年回报取自积金局「曆年回報」列；各年参与统计的基金数见悬停提示。官方最新月度数据（过去 12 个月）见下方「积金局最新公布」。') + '</p>';
+      + dots + '</svg>';
   }
 
   function yearPanel(m) {
@@ -387,8 +380,8 @@
     const d = p && p.avg != null ? (r.avg - p.avg) : null;
     return tabs + '<div class="yr-detail">' +
       '<div class="ts-row">' +
-      '<div class="ts-box"><span class="ts-k">' + r.year + ' ' + TT('年率化回报') + '</span>' +
-      '<b class="ts-v ' + sgn(r.avg) + '">' + pctv(r.avg) + '</b>' +
+      '<div class="ts-box"><span class="ts-k">' + r.year + ' ' + TT('年率化回报（规模加权）') + '</span>' +
+      '<b class="ts-v ' + sgn(r.wavg != null ? r.wavg : r.avg) + '">' + pctv(r.wavg != null ? r.wavg : r.avg) + '</b>' +
       '<span class="ts-s">' + (d == null ? TT('无上一年数据可比') :
         TT('较') + ' ' + p.year + ' ' + TT('年') + (d >= 0 ? TT('提升') : TT('回落')) + ' ' + Math.abs(d).toFixed(2) + ' ' + TT('个百分点')) + '</span></div>' +
       '<div class="ts-box"><span class="ts-k">' + r.year + ' ' + TT('中位数') + '</span>' +
@@ -464,17 +457,14 @@
       const left = v >= 0 ? zeroPct : zeroPct - w;
       /* 2026-10-23（领导）：改回标准涨红跌绿，不再用自定义浅色 */
       const col = v >= 0 ? 'var(--up)' : 'var(--down)';
-      const tip = (r.note ? TQ('{n}（{t}）', { n: typeLabel(r.name), t: TT(r.note) }) : typeLabel(r.name)) + '：' +
-        TQ('「過去 12 個月」{m}%；该类别内个别基金的最高为 {a}%、最低为 {b}%', { m: sgnv(v), a: sgnv(r.m12Hi), b: sgnv(r.m12Lo) }) +
-        (r.since != null ? TQ('；自制度实施以来 {v}% p.a.', { v: r.since }) : '') +
-        (r.dis != null ? TQ('；自 DIS 推出以来 {v}% p.a.', { v: r.dis }) : '');
+      /* 2026-10-31（用户要求）：悬浮精简——只保留类别内最高/最低 */
+      const tip = typeLabel(r.name) + '：' +
+        TQ('该类别内个别基金的最高回报为 {a}%、最低为回报为 {b}%', { a: sgnv(r.m12Hi), b: sgnv(r.m12Lo) });
       return '<div class="mo-row' + (r.sub ? ' sub' : '') + '" data-tip="' + esc(tip) + '">' +
-        '<div class="mo-name">' + esc(typeLabel(r.name)) + '<small>' + TQ('资产占比 {p}%', { p: (r.shareLt ? '<' : '') + r.share }) + '</small></div>' +
+        '<div class="mo-name">' + esc(typeLabel(r.name)) + '</div>' +
         '<div class="mo-track"><i class="mo-zero" style="left:' + zeroPct.toFixed(1) + '%"></i>' +
           '<i class="mo-bar" style="left:' + left.toFixed(1) + '%;width:' + w.toFixed(1) + '%;background:' + col + '"></i></div>' +
         '<div class="mo-val ' + (v > 0 ? 'up' : v < 0 ? 'down' : '') + '">' + (v >= 0 ? '+' : '') + Number(v).toFixed(1) + '%' +
-          '<small>' + TQ('类别内最高 {a}% ／ 最低 {b}%', { a: sgnv(r.m12Hi), b: sgnv(r.m12Lo) }) + '</small>' +
-
           '</div>' +
         '</div>';
     }).join('') + '</div>';
@@ -495,8 +485,7 @@
     box.innerHTML = '<div class="mo-flex">' +
       '<div class="mo-left">' + list + '</div>' +
       (pie ? '<div class="mo-right">' + pie + '</div>' : '') +
-      '</div>' +
-      '<p class="chart-foot">' + TQ('积金局按月公布：本期 {p} 发布、数据截至 {d}；官方口径为「過去 12 個月」年率化净回报（已扣除收费及费用）；条形自 0% 基准线向两侧延伸（红条向右、绿条向左，竖向虚线为 0% 基准）。', { p: mo.publishedAt, d: mo.asOf }) + '</p>';
+      '</div>';
   }
 
   /* ---------------- 载入与渲染 ---------------- */
@@ -519,6 +508,9 @@
   function render(m) {
     lastM = m;
     // 显著显示数据更新时间：让客户一眼判断数据新旧（m.updatedAt 为本站同步时间）
+    /* 2026-10-31：走势标题悬浮补数据截止日 */
+    const yrTip = document.getElementById('yrTip');
+    if (yrTip && m.dataAsOf) yrTip.dataset.tip = TQ('数据取自积金局「曆年回報」列，截止至 {d}', { d: m.dataAsOf });
     $$('.mk-asof').forEach((el) => {
       el.innerHTML = m.dataAsOf
         ? '<span class="upd-live"><i></i>' + TQ('数据更新时间 <b>{t}</b>', { t: fmtDT(m.updatedAt || Date.now()) }) + '</span>' +
@@ -530,18 +522,17 @@
        积金局口径在温度计下方单列对照，避免同屏两个口径混用。 */
     const sf0 = (m.self && m.self.base) ? m.self : null;
     const kpi = [
-      [TT('成分基金'), num(m.unitRows) + ' <small>' + TT('条') + '</small>', TT('按单位类别逐行统计')],
-      [TT('受托人／发行人'), num(m.trusteeCount) + ' <small>' + TT('家') + '</small>',
-        TT('涵盖') + ' ' + num(m.schemeCount) + ' ' + TT('个强积金计划')],
-      [TT('市场总规模'), fmtSize(m.totalSize) + '<small>' + TT('港元') + '</small>', TT('各成分基金资产规模合计')],
+      [TT('成分基金'), num(m.unitRows) + ' <small>' + TT('条') + '</small>', ''],
+      [TT('受托人／发行人'), num(m.trusteeCount) + ' <small>' + TT('家') + '</small>', ''],
+      [TT('市场总规模'), fmtSize(m.totalSize) + '<small>' + TT('港元') + '</small>', ''],
       sf0
-        ? [TT('近 1 年平均回报'), pctv(sf0.avg), TT('自算净值口径') + ' · ' + TT('净值日') + ' ' + sf0.asOf + ' · ' +
-          num(sf0.up) + '/' + num(sf0.base) + ' ' + TT('条录得正回报')]
-        : [TT('近 1 年平均回报'), pctv(m.avgAnn1), TT('全市场算术平均') + ' · ' + num(m.upCount) + '/' + num(m.upBase) + ' ' + TT('条录得正回报')],
+        ? [TT('近 1 年平均回报'), pctv(sf0.wavg != null ? sf0.wavg : sf0.avg), '']
+        : [TT('近 1 年平均回报'), pctv(m.avgAnn1), ''],
     ];
+    /* 2026-10-31（用户要求）：KPI 卡不再带小字说明 */
     $('#mkKpi').innerHTML = kpi
       .map((k) => '<div class="mk-card"><div class="mk-k">' + k[0] + '</div>' +
-        '<div class="mk-v">' + k[1] + '</div><div class="mk-s">' + k[2] + '</div></div>')
+        '<div class="mk-v">' + k[1] + '</div></div>')
       .join('');
 
     $('#mkThermo').innerHTML = thermometer(m);
@@ -569,8 +560,6 @@
         '%;background:' + riskColor(x.risk) + '"></i></div>' +
         '<span class="cv">' + x.count + '</span><span class="cx">' + x.risk + ' ' + TT('级') + '</span></div>')
       .join('');
-    $('#mkRiskNote').textContent = naRisk.length
-      ? TQ('另有 {n} 条基金积金局未提供风险级别，未计入上图。', { n: naRisk[0].count }) : '';
     renderRiskLegend(m.byRisk);
 
     /* 2026-10-20：各类基金平均回报对比图表已下线，该位置改为「MPF 最新资讯」 */
@@ -585,24 +574,8 @@
     // 按基金数目计的类别第一（与按规模计可能不同，两句都写出来避免误读）
     const topCount = types.slice().sort((a, b) => (b.count || 0) - (a.count || 0))[0];
     const dy = m.byYear && m.byYear.length ? m.byYear[m.byYear.length - 1] : null;
-    $('#mkRead').innerHTML =
-      '<p>' + TQ('截至 {d}，香港强积金市场共 {s} 个计划、{u} 家受托人，合计 {z} 港元资产。',
-        { d: esc(m.dataAsOf || ''), s: num(m.schemeCount), u: num(m.trusteeCount), z: fmtSize(m.totalSize) }) +
-      (top1 ? TQ('按资产规模计，{f} 占比最高：{n} 条、{v} 港元，占全市场 {p}%。',
-        { f: esc(typeLabel(top1.name)), n: top1.count, v: fmtSize(top1.size), p: ((top1.size / m.totalSize) * 100).toFixed(1) }) +
-        (topCount && topCount.name !== top1.name
-          ? TQ('按基金数目计最多的是 {t}（{m} 条）。', { t: esc(typeLabel(topCount.name)), m: topCount.count })
-          : '') : '') +
-      '</p><p>' + (sf0
-        ? TQ('全市场近 1 年平均回报 {a}，中位数 {b}；{n} 条有数据的基金中 {k} 条录得正回报，占比 {p}%（自算净值口径，净值日 {d}）。',
-          { a: pctv(sf0.avg), b: pctv(sf0.median), n: num(sf0.base), k: num(sf0.up),
-            p: (sf0.base ? ((sf0.up / sf0.base) * 100).toFixed(0) : '—'), d: esc(sf0.asOf) })
-        : TQ('全市场近 1 年平均回报 {a}，中位数 {b}；{n} 条有回报数据的基金中 {k} 条录得正回报，占比 {p}%。',
-          { a: pctv(m.avgAnn1), b: pctv(m.medianAnn1), n: num(m.upBase), k: num(m.upCount),
-            p: (m.upBase ? ((m.upCount / m.upBase) * 100).toFixed(0) : '—') })) +
-      (dy ? TQ('最近一个完整曆年（{y}）全市场平均回报 {a}，{n} 条中有 {k} 条录得正回报。',
-        { y: dy.year, a: pctv(dy.avg), n: dy.n, k: dy.up }) : '') +
-      TT('市场结构、规模与年度回报取自积金局官方数值；近 1 年行情为自算净值口径，与积金局含费含息口径不可直接比较。') + '</p>';
+    /* 2026-10-31（用户要求）：图下方「市场解读」两段文字说明删除（口径并入标题悬浮） */
+    $('#mkRead').innerHTML = '';
 
     renderTop('#mkTop1', m.topReturn, (x) => pctv(x.ann1), (x) => x.ann1);
     renderTop('#mkTop4', m.topReturn5, (x) => pctv(x.ann5), (x) => x.ann5);
@@ -692,7 +665,8 @@
       : fetch('/api/news').then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))));
     fetcher.then((j) => {
       /* 2026-10-20：展示 15 条（原 10 条），配合字号放大填满右栏空白 */
-      const items = ((j && j.items) || []).slice(0, 13);
+      /* 2026-10-31（用户要求）：资讯保留 10 条，与右侧走势栏底端对齐 */
+      const items = ((j && j.items) || []).slice(0, 10);
       if (!items.length) { box.innerHTML = '<li class="news-item news-empty">' + TT('暂无资讯') + '</li>'; return; }
       box.innerHTML = items.map((x) =>
         '<li class="news-item">' +
@@ -726,4 +700,66 @@
     var md = document.querySelector('meta[name="description"]');
     if (md && md.content.indexOf('451') >= 0) md.content = md.content.replace(/451/g, s);
   }).catch(function () {});
+})();
+
+/* ================= 市场行情栏（2026-10-31，用户要求） =================
+   雅虎财经式：导航下方一行小卡（随页面滚动、不固定），展示
+   MPF 市场指数（规模加权）+ 五大类规模加权指数 + 恒生指数。 */
+(function () {
+  var NAMES = {
+    MPFAVG: 'MPF 市场指数', MPF_STOCK: '股票基金', MPF_MIX: '混合资产',
+    MPF_BOND: '债券基金', MPF_MONEY: '货币市场', MPF_GUAR: '保证基金', HSI: '恒生指数',
+  };
+  var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'MPF_MONEY', 'MPF_GUAR', 'HSI'];
+
+  function spark(series, up) {
+    var w = 76, h = 26, n = series.length;
+    if (n < 2) return '';
+    var mn = Math.min.apply(null, series), mx = Math.max.apply(null, series);
+    var rg = mx - mn || 1;
+    var pts = series.map(function (v, i) {
+      return (i / (n - 1) * w).toFixed(1) + ',' + (h - 3 - (v - mn) / rg * (h - 6)).toFixed(1);
+    });
+    var c = up ? '#d93025' : '#12996b';
+    return '<svg class="tk-spark" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" aria-hidden="true">' +
+      '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + c + '" stroke-width="1.6"/>' +
+      '</svg>';
+  }
+
+  function fmt(v) {
+    return v >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : (Math.round(v * 100) / 100).toFixed(2);
+  }
+
+  function render(j) {
+    var box = document.getElementById('mktTicker');
+    if (!box || !j || !j.items) return;
+    var cards = '';
+    ORDER.forEach(function (k) {
+      var it = j.items[k];
+      if (!it) return;
+      var up = it.chg > 0, flat = !it.chg;
+      var cls = flat ? 'flat' : (up ? 'up' : 'down');
+      var pct = (up ? '+' : '') + it.chg.toFixed(2) + '%';
+      cards += '<div class="tk-card" data-tip="' + esc(it.name + ' · 截至 ' + it.asOf) + '">' +
+        '<span class="tk-name">' + TT(NAMES[k] || it.name) + '</span>' +
+        '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +
+        '<b class="tk-chg ' + cls + '">' + pct + '</b></span>' +
+        spark(it.spark, up) +
+        '</div>';
+    });
+    box.querySelector('.tk-track').innerHTML = cards;
+  }
+
+  function esc(s) {
+    if (window.__t2sActive && window.t2s) s = window.t2s(s);
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function TT(s) { return (typeof window.t === 'function' && window.t(s, s)) || s; }
+
+  fetch('/api/ticker').then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { if (j) render(j); })
+    .catch(function () {
+      var box = document.getElementById('mktTicker');
+      if (box) box.style.display = 'none';
+    });
 })();

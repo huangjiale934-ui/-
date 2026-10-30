@@ -75,14 +75,27 @@ function loadSelfStat() {
     const f = (j && j.funds) || {};
     const vals = [];
     let asOf = '';
+    /* 2026-10-31（用户要求）：补充规模加权平均——权重=基金资产规模（积金局季度值） */
+    let sizeById = null;
+    try {
+      const fd = JSON.parse(fs.readFileSync(path.join(DATA, 'funds.json'), 'utf8'));
+      sizeById = {};
+      (fd.funds || []).forEach((x) => { sizeById[String(x.id)] = Number(x.size) || 0; });
+    } catch (e2) { sizeById = null; }
+    let wsum = 0, wv = 0;
     Object.keys(f).forEach((k) => {
       const x = f[k] || {};
-      if (x.y1 != null && isFinite(x.y1)) vals.push(x.y1);
+      if (x.y1 != null && isFinite(x.y1)) {
+        vals.push(x.y1);
+        const sv = sizeById ? (sizeById[k] || 0) : 0;
+        if (sv > 0) { wsum += sv; wv += sv * x.y1; }
+      }
       if (x.asOf && x.asOf > asOf) asOf = x.asOf;
     });
     const out = {
       base: vals.length,
       avg: rnd(mean(vals)),
+      wavg: wsum ? rnd(wv / wsum) : null,
       median: rnd(median(vals)),
       up: vals.filter((x) => x > 0).length,
       flat: vals.filter((x) => x === 0).length,
@@ -154,10 +167,14 @@ function buildMarketStat(c) {
     .sort()
     .map((y) => {
       const vals = funds.map((f) => (f.cal ? f.cal[y] : null)).filter((v) => v != null);
+      /* 2026-10-31（用户要求）：历年回报补规模加权平均（权=基金资产规模） */
+      const wvals = funds.map((f) => ((f.cal && f.cal[y] != null && f.size) ? { v: f.cal[y], s: f.size } : null)).filter(Boolean);
+      const wsum = wvals.reduce((a, x) => a + x.s, 0);
       return {
         year: y,
         n: vals.length,
         avg: rnd(mean(vals)),
+        wavg: wsum ? rnd(wvals.reduce((a, x) => a + x.v * x.s, 0) / wsum) : null,
         median: rnd(median(vals)),
         up: vals.filter((v) => v > 0).length,
         down: vals.filter((v) => v < 0).length,
@@ -593,6 +610,31 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  /* 2026-10-31（用户要求）：首页顶部行情栏——规模加权 MPF 指数 + 恒指，轻量（每指数近 40 点 sparkline） */
+  if (p === '/api/ticker') {
+    return fs.readFile(path.join(__dirname, 'data', 'index.json'), (err, buf) => {
+      if (err) return send(res, 404, JSON.stringify({ error: '指数数据未生成' }));
+      try {
+        const j = JSON.parse(buf.toString('utf8'));
+        const KEYS = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'MPF_MONEY', 'MPF_GUAR', 'HSI'];
+        const items = {};
+        KEYS.forEach((k) => {
+          const it = j.items && j.items[k];
+          if (!it || !it.series || !it.series.length) return;
+          const s2 = it.series;
+          const last = s2[s2.length - 1], prev = s2[s2.length - 2] || last;
+          items[k] = {
+            name: it.name, asOf: it.asOf || last[0],
+            last: last[1], prev: prev[1],
+            chg: prev[1] ? Math.round((last[1] / prev[1] - 1) * 10000) / 100 : 0,
+            spark: s2.slice(-40).map((x) => x[1]),
+          };
+        });
+        return sendRaw(req, res, 200, JSON.stringify({ updatedAt: j.updatedAt, items }), MIME['.json'], { cache: 'no-store' });
+      } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }
+    });
+  }
+
   if (p === '/api/indices') {
     /* 2026-10-21 性能：?lite=1 只回恒生指数（首屏画默认线用，543KB → ~2KB）；
        用户点「选择指数」时再拉全量。 */
@@ -952,7 +994,7 @@ const server = http.createServer(async (req, res) => {
     const isJs = p === '/b.js';
     const page = u.searchParams.get('p') || 'analysis';
     const list = isJs
-      ? ['i18n.js', 'zhmap.js', 'common.js', 'trend.js', 'xlsx.js']
+      ? ['t2s.js', 'i18n.js', 'zhmap.js', 'common.js', 'trend.js', 'xlsx.js']
       : (page === 'home' ? ['style.css', 'analysis.css', 'home.css'] : ['style.css', 'analysis.css']);
     try {
       const dir = path.join(__dirname, 'public');

@@ -11,7 +11,8 @@
     if (t.unit === 'KRW' || t.unit === 'TWD') return '韓台股';
     return '其他';
   }
-  function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function esc(s) {
+    if (window.__t2sActive && window.t2s) s = window.t2s(s); return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
   function render(box, hld) {
     const rows = [];

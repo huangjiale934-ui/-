@@ -1386,7 +1386,7 @@ table.data th:hover { background: var(--brand-soft); }
    2026-10-20 供款（定投）计算器：悬浮按钮 + 弹层
    ========================================================== */
 /* 2026-10-20：上移，避免与「回到顶部」按钮（right:20 bottom:24 44×44）重合 */
-.dca-fab { position: fixed; right: 20px; bottom: 80px; z-index: 60; display: inline-flex; align-items: center; gap: 8px;
+.dca-fab { position: fixed; right: 20px; bottom: 80px; z-index: 60; display: inline-flex; align-items: center; gap: 8px; transition: padding .25s, border-radius .25s;
   background: var(--brand); color: #fff; border: 0; border-radius: 999px; padding: 12px 18px; font-size: 13.5px;
   font-weight: 600; font-family: inherit; box-shadow: 0 8px 24px rgba(8,102,187,0.28); cursor: pointer; }
 .dca-fab:hover { background: var(--brand-2); }
@@ -1730,3 +1730,14 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 2026-10-26（用户要求）：排名维度联动列高亮（浅蓝底，两个表共用） */
 #rkTable .dim-hl, #fundTable .dim-hl { background: #eaf3fd !important; }
 #rkTable thead .dim-hl, #fundTable thead .dim-hl { background: #d7e8fa !important; font-weight: 700; }
+
+/* 2026-10-31（用户要求）：闲置 1 分钟缩成圆形图标；悬停展开胶囊 */
+.dca-fab.idle { padding: 13px; border-radius: 50%; }
+.dca-fab.idle span { display: none; }
+.dca-fab.idle:hover { padding: 10px 18px; border-radius: 999px; }
+.dca-fab.idle:hover span { display: inline; }
+
+/* 2026-10-31：折叠栏 summary 行的风险图例（紧凑胶囊） */
+.ff-risk { display: inline-flex; gap: 4px; align-items: center; margin: 0 14px; }
+.ff-risk i { width: 15px; height: 15px; border-radius: 4px; cursor: help; }
+.src-brief { margin: 0 0 10px; padding: 9px 12px; background: var(--surface-2, #f4f8fc); border-radius: 8px; font-size: 12.5px; line-height: 1.7; color: var(--text-2, #3d5470); }

@@ -256,7 +256,10 @@
     el.innerHTML = '<option value="">' + el.options[0].text + '</option>';
     arr.sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'));
     arr.forEach((v) => {
-      const o = document.createElement('option'); o.value = v; o.textContent = v; el.appendChild(o);
+      const o = document.createElement('option'); o.value = v;
+      /* 2026-10-31：简体模式下下拉数据值繁转简 */
+      o.textContent = window.__t2sActive && window.t2s ? window.t2s(v) : v;
+      el.appendChild(o);
     });
     if (arr.indexOf(cur) >= 0) el.value = cur;
   }
@@ -303,7 +306,7 @@
       const sub = document.querySelector('#rkRSub');
       if (sub && sub.options.length <= 1) {
         [...new Set(DATA.funds.map((x) => x.subtype).filter(Boolean))].sort().forEach((v) => {
-          const o = document.createElement('option'); o.value = v; o.textContent = typeLabel(v); sub.appendChild(o);
+          const o = document.createElement('option'); o.value = v; o.textContent = window.__t2sActive && window.t2s ? window.t2s(typeLabel(v)) : typeLabel(v); sub.appendChild(o);
         });
       }
       const rk = document.querySelector('#rkRRisk');
