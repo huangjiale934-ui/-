@@ -1,11 +1,11 @@
 {
- "updatedAt": 1793326741890,
+ "updatedAt": 1793327172125,
  "sources": [
   {
    "key": "AMTD",
    "label": "AMTD強積金計劃（銀聯信託）",
    "url": "https://www.ooogroup.xyz/mpf_price.html",
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "count": 16,
    "na": 0,
    "page": "https://www.ooogroup.xyz/mpf_price.html"
@@ -23,7 +23,7 @@
    "key": "HangSeng",
    "label": "恒生強積金智選計劃（恒生銀行）",
    "url": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/",
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "count": 20,
    "na": 0,
    "page": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
@@ -128,6 +128,15 @@
    "page": "https://www.bcthk.com/zh/mpf-orso/fund-information/fund-prices#cat-6"
   },
   {
+   "key": "SunLife",
+   "label": "永明彩虹強積金計劃（永明）",
+   "url": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/",
+   "asOf": "2026-10-28",
+   "count": 31,
+   "na": 0,
+   "page": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
    "key": "AIA",
    "label": "友邦強積金優選計劃（友邦信托）",
    "url": "https://www.aia.com.hk/zh-hk/products/mpf/list",
@@ -206,9 +215,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順強積金保守基金",
    "unit": "",
-   "nav": 11.111,
+   "nav": 11.1571,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -217,9 +226,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順環球債券基金",
    "unit": "",
-   "nav": 10.7771,
+   "nav": 10.6543,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -228,9 +237,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順亞洲基金",
    "unit": "",
-   "nav": 24.6005,
+   "nav": 23.6328,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -239,9 +248,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順歐洲基金",
    "unit": "",
-   "nav": 28.5484,
+   "nav": 27.4639,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -250,9 +259,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順香港中國基金",
    "unit": "",
-   "nav": 14.5593,
+   "nav": 12.8717,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -261,9 +270,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD景順目標現在退休基金",
    "unit": "",
-   "nav": 15.3952,
+   "nav": 15.0825,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -272,9 +281,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順目標2028退休基金",
    "unit": "",
-   "nav": 17.6513,
+   "nav": 17.2638,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -283,9 +292,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順目標2038退休基金",
    "unit": "",
-   "nav": 21.2223,
+   "nav": 20.6569,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -294,9 +303,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順目標2048退休基金",
    "unit": "",
-   "nav": 23.9995,
+   "nav": 23.2431,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -305,9 +314,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順核心累積基金",
    "unit": "",
-   "nav": 19.4392,
+   "nav": 19.5986,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -316,9 +325,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 景順65歲後基金",
    "unit": "",
-   "nav": 12.5439,
+   "nav": 12.5436,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -327,9 +336,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 安聯精選靈活資產基金",
    "unit": "",
-   "nav": 16.6189,
+   "nav": 16.4882,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -338,9 +347,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 安聯精選穩定資本基金",
    "unit": "",
-   "nav": 14.7991,
+   "nav": 14.4941,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -349,9 +358,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 安聯精選穩定增長基金",
    "unit": "",
-   "nav": 18.8165,
+   "nav": 18.3129,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -360,9 +369,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 安聯精選均衡基金",
    "unit": "",
-   "nav": 23.6038,
+   "nav": 22.8557,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -371,9 +380,9 @@
    "scheme": "AMTD強積金計劃",
    "fund": "AMTD 安聯精選增長基金",
    "unit": "",
-   "nav": 29.5345,
+   "nav": 28.4468,
    "na": false,
-   "asOf": "2026-07-31",
+   "asOf": "2026-10-28",
    "src": "AMTD強積金計劃（銀聯信託）",
    "srcUrl": "https://www.ooogroup.xyz/mpf_price.html"
   },
@@ -604,7 +613,7 @@
    "unit": "",
    "nav": 14.2381,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -615,7 +624,7 @@
    "unit": "",
    "nav": 41.4881,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -626,7 +635,7 @@
    "unit": "",
    "nav": 28.4963,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -637,7 +646,7 @@
    "unit": "",
    "nav": 13.8301,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -648,7 +657,7 @@
    "unit": "",
    "nav": 31.7511,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -659,7 +668,7 @@
    "unit": "",
    "nav": 22.8088,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -670,7 +679,7 @@
    "unit": "",
    "nav": 11.5186,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -681,7 +690,7 @@
    "unit": "",
    "nav": 34.185,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -692,7 +701,7 @@
    "unit": "",
    "nav": 32.0346,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -703,7 +712,7 @@
    "unit": "",
    "nav": 10.4901,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -714,7 +723,7 @@
    "unit": "",
    "nav": 8.2776,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -725,7 +734,7 @@
    "unit": "",
    "nav": 27.4913,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -736,7 +745,7 @@
    "unit": "",
    "nav": 24.1522,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -747,7 +756,7 @@
    "unit": "",
    "nav": 14.4549,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -758,7 +767,7 @@
    "unit": "",
    "nav": 43.9631,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -769,7 +778,7 @@
    "unit": "",
    "nav": 13.7705,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -780,7 +789,7 @@
    "unit": "",
    "nav": 20.9197,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -791,7 +800,7 @@
    "unit": "",
    "nav": 20.3192,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -802,7 +811,7 @@
    "unit": "",
    "nav": 26.3032,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -813,7 +822,7 @@
    "unit": "",
    "nav": 59.4313,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "恒生強積金智選計劃（恒生銀行）",
    "srcUrl": "https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/"
   },
@@ -2908,6 +2917,347 @@
    "srcUrl": "https://www.bcthk.com/bin/servlet/fundInformation?lang=zh&schemaInfoId=industry-choice&date=2026-10-28"
   },
   {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金保守基金",
+   "unit": "A",
+   "nav": 1.2608,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金保守基金",
+   "unit": "B",
+   "nav": 1.2659,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金港元債券基金",
+   "unit": "A",
+   "nav": 1.461,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金港元債券基金",
+   "unit": "B",
+   "nav": 1.5288,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金人民幣及港元基金",
+   "unit": "A",
+   "nav": 1.1491,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金人民幣及港元基金",
+   "unit": "B",
+   "nav": 1.1564,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金環球債券基金",
+   "unit": "A",
+   "nav": 0.9059,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金環球債券基金",
+   "unit": "B",
+   "nav": 0.9361,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金收益基金",
+   "unit": "--",
+   "nav": 1.0232,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金平穩基金",
+   "unit": "A",
+   "nav": 2.3384,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金平穩基金",
+   "unit": "B",
+   "nav": 2.4555,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金均衡基金",
+   "unit": "A",
+   "nav": 3.0767,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金均衡基金",
+   "unit": "B",
+   "nav": 3.2306,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金增長基金",
+   "unit": "A",
+   "nav": 3.9603,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金增長基金",
+   "unit": "B",
+   "nav": 4.1584,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金環球低碳指數基金",
+   "unit": "--",
+   "nav": 1.6999,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金行業股票基金",
+   "unit": "A",
+   "nav": 2.8884,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金行業股票基金",
+   "unit": "B",
+   "nav": 2.9959,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金歐洲股票基金",
+   "unit": "--",
+   "nav": 1.427,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金亞洲股票基金",
+   "unit": "A",
+   "nav": 2.4621,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金亞洲股票基金",
+   "unit": "B",
+   "nav": 2.5536,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金美國股票基金",
+   "unit": "--",
+   "nav": 1.7651,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金美國及香港股票基金",
+   "unit": "--",
+   "nav": 1.5347,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金大中華股票基金",
+   "unit": "A",
+   "nav": 1.8561,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金大中華股票基金",
+   "unit": "B",
+   "nav": 1.9236,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明富時強積金香港指數基金",
+   "unit": "A",
+   "nav": 1.291,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明富時強積金香港指數基金",
+   "unit": "B",
+   "nav": 1.2911,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金香港股票基金",
+   "unit": "A",
+   "nav": 5.9158,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金香港股票基金",
+   "unit": "B",
+   "nav": 6.2118,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金核心累積基金",
+   "unit": "--",
+   "nav": 1.8579,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
+   "trustee": "永明",
+   "scheme": "永明彩虹強積金計劃",
+   "fund": "永明強積金65歲後基金",
+   "unit": "--",
+   "nav": 1.2294,
+   "na": false,
+   "asOf": "2026-10-28",
+   "src": "永明彩虹強積金計劃（永明）",
+   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
+  },
+  {
    "trustee": "友邦信託",
    "scheme": "友邦強積金優選計劃",
    "fund": "美洲基金",
@@ -3453,7 +3803,7 @@
    "unit": "",
    "nav": 12.2213,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3464,7 +3814,7 @@
    "unit": "",
    "nav": 32.5625,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3475,7 +3825,7 @@
    "unit": "",
    "nav": 38.4095,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3497,7 +3847,7 @@
    "unit": "",
    "nav": 21.7538,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3508,7 +3858,7 @@
    "unit": "",
    "nav": 16.4003,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3519,7 +3869,7 @@
    "unit": "",
    "nav": 19.7618,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3530,7 +3880,7 @@
    "unit": "",
    "nav": 12.5944,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3541,7 +3891,7 @@
    "unit": "",
    "nav": 10.5848,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3552,7 +3902,7 @@
    "unit": "",
    "nav": 14.1194,
    "na": false,
-   "asOf": "2026-10-28",
+   "asOf": "2026-10-27",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -4712,347 +5062,6 @@
    "srcUrl": "https://www.htisec.com/asm/tc/mpf.jsp?type=1"
   },
   {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金保守基金",
-   "unit": "A",
-   "nav": 1.2608,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金保守基金",
-   "unit": "B",
-   "nav": 1.2659,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金港元債券基金",
-   "unit": "A",
-   "nav": 1.461,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金港元債券基金",
-   "unit": "B",
-   "nav": 1.5288,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金人民幣及港元基金",
-   "unit": "A",
-   "nav": 1.1491,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金人民幣及港元基金",
-   "unit": "B",
-   "nav": 1.1564,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金環球債券基金",
-   "unit": "A",
-   "nav": 0.9059,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金環球債券基金",
-   "unit": "B",
-   "nav": 0.9361,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金收益基金",
-   "unit": "--",
-   "nav": 1.0232,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金平穩基金",
-   "unit": "A",
-   "nav": 2.3384,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金平穩基金",
-   "unit": "B",
-   "nav": 2.4555,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金均衡基金",
-   "unit": "A",
-   "nav": 3.0767,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金均衡基金",
-   "unit": "B",
-   "nav": 3.2306,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金增長基金",
-   "unit": "A",
-   "nav": 3.9603,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金增長基金",
-   "unit": "B",
-   "nav": 4.1584,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金環球低碳指數基金",
-   "unit": "--",
-   "nav": 1.6999,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金行業股票基金",
-   "unit": "A",
-   "nav": 2.8884,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金行業股票基金",
-   "unit": "B",
-   "nav": 2.9959,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金歐洲股票基金",
-   "unit": "--",
-   "nav": 1.427,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金亞洲股票基金",
-   "unit": "A",
-   "nav": 2.4621,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金亞洲股票基金",
-   "unit": "B",
-   "nav": 2.5536,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金美國股票基金",
-   "unit": "--",
-   "nav": 1.7651,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金美國及香港股票基金",
-   "unit": "--",
-   "nav": 1.5347,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金大中華股票基金",
-   "unit": "A",
-   "nav": 1.8561,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金大中華股票基金",
-   "unit": "B",
-   "nav": 1.9236,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明富時強積金香港指數基金",
-   "unit": "A",
-   "nav": 1.291,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明富時強積金香港指數基金",
-   "unit": "B",
-   "nav": 1.2911,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金香港股票基金",
-   "unit": "A",
-   "nav": 5.9158,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金香港股票基金",
-   "unit": "B",
-   "nav": 6.2118,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金核心累積基金",
-   "unit": "--",
-   "nav": 1.8579,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
-   "trustee": "永明",
-   "scheme": "永明彩虹強積金計劃",
-   "fund": "永明強積金65歲後基金",
-   "unit": "--",
-   "nav": 1.2294,
-   "na": false,
-   "asOf": "2026-10-28",
-   "src": "永明彩虹強積金計劃（永明）",
-   "srcUrl": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/"
-  },
-  {
    "trustee": "HSBC",
    "scheme": "富達退休集成信託",
    "fund": "65歲後基金",
@@ -5242,14 +5251,6 @@
  ],
  "alerts": [
   {
-   "key": "SunLife",
-   "label": "永明彩虹強積金計劃（永明）",
-   "prev": 0,
-   "now": 0,
-   "level": "fail",
-   "msg": "本次抓取失败，已保留上次数据（非官方未发布；月度来源请留意下轮）"
-  },
-  {
    "key": "SHKP",
    "label": "新地強積金僱主營辦計劃（新鴻基地產）",
    "prev": 0,
@@ -5258,5 +5259,5 @@
    "msg": "本次抓取失败，已保留上次数据（非官方未发布；月度来源请留意下轮）"
   }
  ],
- "alertsAt": 1793326741890
+ "alertsAt": 1793327172125
 }
