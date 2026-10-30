@@ -674,7 +674,7 @@
   }
 
   /** 导出当前榜单（当前筛选与排序下的全部结果，CSV；Excel 直接打开） */
-  function exportCurrent() {
+  async function exportCurrent() {
     const b = cur();
     const list = sortRows(pool(), S.sortKey || b.metric || null, S.sortDir || b.dir || 'desc');
     if (b.self) {
@@ -716,7 +716,27 @@
       x.launch || '',
     ]);
     if (b.self) return;   /* 自算榜已在函数开头单独导出 */
-    csvDownload(csvSourceNote().concat([head], body), 'MPF排名_' + TT(b.name) + '_' + TT('数据截至') + '_' + (DATA.dataAsOf || '') + '.csv');
+    /* 2026-10-30（用户要求）：榜单导出升级 xlsx——Sheet1 榜单数据、Sheet2「持仓与分布」嵌玫瑰图；
+       与走势页共用 buildHoldAllocSheet 公共函数（全站同一份代码）。 */
+    if (!window.MPFXLSX) { if (window.mpfToast) mpfToast(_t('导出组件未加载，请刷新页面')); return; }
+    const r1 = [
+      { h: 26, cells: [{ v: TT(b.name) + '（积金局口径，含费含息）· 数据截至 ' + (DATA.dataAsOf || '') + ' · 共 ' + list.length + ' 条', s: 1 }] },
+      { h: 30, cells: head.map((v) => ({ v, s: 2 })) },
+    ].concat(body.map((row) => ({ cells: row.map((v) => ({ v: v, s: 4 })) })));
+    const sheet2 = await window.buildHoldAllocSheet(list.map((x) => ({ id: String(x.id), name: x.fundBase || x.fund })));
+    const sheetName = TT(b.name).replace(/[\\/:*?[\]]/g, '').slice(0, 28) || '榜单';
+    const blob = window.MPFXLSX.build({
+      sheets: [
+        { name: sheetName, rows: r1, merges: ['A1:Q1'], cols: head.map(() => 16) },
+        { name: '持仓与分布', rows: sheet2.rows, merges: sheet2.merges, cols: sheet2.cols, images: sheet2.images },
+      ],
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'MPF排名_' + TT(b.name) + '_' + (DATA.dataAsOf || '') + '.xlsx';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+    if (window.mpfToast) mpfToast(_t('已导出（两个工作表，含持仓分布玫瑰图）'));
   }
 
   function maxBar(rows, k, x) {

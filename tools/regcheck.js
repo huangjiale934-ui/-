@@ -706,13 +706,13 @@ chk('词条·刷新反馈三语（已刷新为最新数据）', (function () {
   try { const t = i18nText();
     return t.indexOf("'已刷新为最新数据': '已刷新為最新數據'") >= 0 && t.indexOf("'已刷新为最新数据': 'Refreshed to the latest data'") >= 0; } catch (e) { return false; }
 })());
-chk('导出·溯源头（csvSourceNote：来源/资料截至/净值区间/同步时间）', (function () {
+chk('导出·溯源头（csvSourceNote）与榜单 xlsx 化（2026-10-30：主榜升级 xlsx 加持仓分布表）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
     return /function csvSourceNote/.test(c) && /积金局资料截至/.test(c) && /净值估值日区间/.test(c) &&
-      /csvSourceNote\(\)\.concat/.test(r) && /csvSourceNote\(\)\.concat/.test(a);
+      /buildHoldAllocSheet/.test(r) && /MPFXLSX\.build/.test(r) && /csvSourceNote\(\)\.concat/.test(a);
   } catch (e) { return false; }
 })());
 chk('导出·文件名改为数据截至日（含 TT(\'数据截至\')）', (function () {

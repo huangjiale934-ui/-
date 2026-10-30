@@ -648,11 +648,16 @@
 .alr3-seg:hover, .alr3-seg.hi { stroke: #1f2933; stroke-width: 3.5; }
 .alr3-lead { transition: stroke-opacity .12s; }
 .alr3-lead.hi { stroke-opacity: 1; }
-.alr3-pct { font-size: 38px; font-weight: 700; }
-.alr3-name { font-size: 19px; font-weight: 700; fill: #1f2933; }
-.alr3-lab.hi .alr3-pct { text-decoration: underline; }
-.alr3-total { font-size: 28px; font-weight: 700; fill: #0A3D91; }
-.alr3-sub { font-size: 15px; fill: #6b7785; }
+.alr3-pct { font-size: 35px; font-weight: 700; }
+.alr3-name { font-size: 21px; font-weight: 700; fill: #1f2933; }
+.alr3-lab.hi .alr3-pct { text-decoration: underline; text-decoration-thickness: 3.5px; text-underline-offset: 5px; }
+.alr3-lead { stroke-dasharray: 1; stroke-dashoffset: 1; animation: alr3draw .8s ease-out forwards; transition: stroke-width .15s, stroke-opacity .15s; }
+@keyframes alr3draw { to { stroke-dashoffset: 0; } }
+.alr3-lead.hi { stroke-width: 3.2 !important; stroke-opacity: 1 !important; }
+.alr3-seg { transition: filter .15s; }
+.alr3-seg.hi { filter: brightness(0.82); }
+.alr3-total { font-size: 30px; font-weight: 700; fill: #0A3D91; }
+.alr3-sub { font-size: 17px; fill: #6b7785; }
 .alr3-src { font-size: 20px; fill: #6b7785; }
 /* 数据来源行：桌面已在 SVG 左下角画出，HTML 备用行仅移动端显示 */
 .alr2-note { display: none; }

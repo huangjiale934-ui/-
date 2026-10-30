@@ -1067,6 +1067,10 @@
 
   '共 <b>{n}</b> 个排名维度 · 点一次按默认方向排名，再点反向，第三次取消': '<b>{n}</b> ranking dimensions · click once for the default order, again to reverse, a third time to cancel',
 
+  '已导出（两个工作表，含持仓分布玫瑰图）': 'Exported (2 sheets incl. holdings, allocation & rose charts)',
+
+  '导出组件未加载，请刷新页面': 'Export module not loaded — please refresh the page',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

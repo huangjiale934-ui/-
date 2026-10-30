@@ -382,28 +382,6 @@ window.TREND = (function () {
         } catch (e) { resolve(''); }
       });
     }
-    /* 2026-10-30：字符串 SVG → PNG（玫瑰图导出用；SVG 需带显式 width/height） */
-    function svgStrToPng(svgStr, w, h) {
-      return new Promise((resolve) => {
-        try {
-          const img = new Image();
-          const url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' }));
-          img.onload = () => {
-            try {
-              const cv = document.createElement('canvas');
-              cv.width = w * 2; cv.height = h * 2;
-              const ctx = cv.getContext('2d');
-              ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
-              ctx.drawImage(img, 0, 0, cv.width, cv.height);
-              URL.revokeObjectURL(url);
-              resolve(cv.toDataURL('image/png'));
-            } catch (e) { resolve(null); }
-          };
-          img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
-          img.src = url;
-        } catch (e) { resolve(null); }
-      });
-    }
 
     window.__trendExportBook = exportBook;
     window.__trendDbg = () => ({ items: S.items.length, data: Object.keys(S.data), win: !!currentWindow() });
@@ -427,8 +405,6 @@ window.TREND = (function () {
       if (!cols.length) { if (window.mpfToast) mpfToast(_t('暂无可导出的数据')); return; }
 
       const allT = Array.from(new Set(cols.flatMap((c) => c.raw.map((r) => r[0])))).sort((a, b) => ts(b) - ts(a));
-      /* 2026-10-30（用户要求）：导出工作簿新增「持仓与分布」工作表——预取全量便览数据（有缓存） */
-      const hldgP = (window.ensureHoldings ? window.ensureHoldings(null) : Promise.resolve(null));
       const maps = cols.map((c) => new Map(c.raw));
       const stat = cols.map((c) => {
         const base = c.raw[0][1];
@@ -446,7 +422,7 @@ window.TREND = (function () {
       const f2 = (v, d) => (v == null ? '' : (v > 0 ? '+' : '') + v.toFixed(d == null ? 2 : d) + '%');
       const span = cols.length * 2 + 1;
 
-      svgToPng(q('.tr-svg'), cols.map((c) => ({ name: c.name, color: c.color }))).then((png) => hldgP.then(async () => {
+      svgToPng(q('.tr-svg'), cols.map((c) => ({ name: c.name, color: c.color }))).then(async (png) => {
         /* 2026-10-21：改用真 xlsx（MPFXLSX），两个工作表 + 第二个表内嵌走势图。
            Sheet1 = 声明 + 基金详细对比表（全部居中、声明行合并单元格）
            Sheet2 = 逐日净值 + 当日涨跌幅（倒序）+ 右侧内嵌走势图 */
@@ -570,54 +546,10 @@ window.TREND = (function () {
         const HLD = window.__HLDG && window.__HLDG.funds ? window.__HLDG.funds : {};
         const SRC3 = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
         const src3 = (k) => SRC3[String(k || '').toLowerCase()] || (k || '—');
-        const r3 = [];
-        const roseJobs = [];   /* 2026-10-30：{name, row(0-based), span, svg}——每只有便览的成分基金一张玫瑰图 */
-        r3.push({ h: 26, cells: [{ v: '前十大持仓与投资组合分布（来源：各发行人官网「基金便览」；占基金资产净值 %）', s: 1 }] });
-        r3.push({ h: 30, cells: ['成分基金', '数据类型', '名称 / 类别', '占基金资产净值(%)', '报告期', '数据来源'].map((v) => ({ v, s: 2 })) });
-        cols.forEach((c) => {
-          const x = pickF(c.it);
-          if (!x) return;   /* 指数/均值行没有便览 */
-          const d = HLD[String(x.id)];
-          if (!d || ((!d.top10 || !d.top10.length) && (!d.alloc || !d.alloc.length))) {
-            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '—', s: 4 }, { v: '该基金暂无便览数据', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }] });
-            return;
-          }
-          /* 玫瑰图锚点：块首行（0-based）；块行数用于限定图高 */
-          const roseStart = r3.length;
-          let roseSpan = 0;
-          if (d.alloc && d.alloc.length && window.buildRoseSVG) {
-            const R0 = window.buildRoseSVG(d, '', { embedStyle: true, fixedSize: true });
-            if (R0 && R0.svg) roseJobs.push({ name: c.name, row: roseStart, svg: R0.svg });
-          }
-          (d.top10 || []).forEach((h) => {
-            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '前十大持仓', s: 4 }, { v: h.name || '', s: 4 }, n2(h.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
-          });
-          if (d.top10 && d.top10.length) {
-            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '前十大持仓', s: 4 }, { v: '前十大合计', s: 4 }, n2(d.top10.reduce((a, h) => a + (h.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
-          }
-          (d.alloc || []).forEach((a) => {
-            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '投资组合分布', s: 4 }, { v: a.label || '', s: 4 }, n2(a.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
-          });
-          if (d.alloc && d.alloc.length) {
-            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '已披露合计', s: 4 }, n2(d.alloc.reduce((a, x2) => a + (+x2.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
-          }
-          /* 回填块行数，限定玫瑰图高度 */
-          const lastJob = roseJobs[roseJobs.length - 1];
-          if (lastJob && lastJob.row === roseStart) lastJob._span = r3.length - roseStart;
-        });
-        const merges3 = ['A1:F1'];
-
-        /* 玫瑰图 PNG：宽 6 列（G..L），高按块行数与图比例取小，避免压到下一块 */
-        const roseImgs = [];
-        for (const job of roseJobs) {
-          const b64 = await svgStrToPng(job.svg, 1280, 1100);
-          if (!b64) continue;
-          roseImgs.push({ data: b64, col: 6, row: job.row, col2: 12, row2: job.row + Math.min(16, Math.max(12, roseSpanOf(job.row))), name: job.name + ' 投资组合分布' });
-        }
-        function roseSpanOf(startRow) {
-          const job = roseJobs.find((x) => x.row === startRow);
-          return job ? job._span || 16 : 16;
-        }
+        /* 「持仓与分布」：公共函数（榜单页导出共用同一份） */
+        const sheet3 = window.buildHoldAllocSheet
+          ? await window.buildHoldAllocSheet(cols.map((c) => { const x = pickF(c.it); return x ? { id: String(x.id), name: c.name } : null; }).filter(Boolean))
+          : { rows: [], merges: [], cols: [28, 15, 36, 19, 12, 18], images: [] };
 
         const blob = window.MPFXLSX.build({
           sheets: [
@@ -627,7 +559,7 @@ window.TREND = (function () {
               cols: [13].concat(cols.reduce((a) => a.concat([12, 12]), [])).concat([2, 2, 2]),
               /* 2026-10-22（用户要求）：走势图横向拉长（8 → 15 列），纵向高度不变 */
               drawing: png ? { col: imgCol, row: 2, col2: imgCol + 15, row2: 2 + 16 } : null },
-            { name: '持仓与分布', rows: r3, merges: merges3, cols: [28, 15, 36, 19, 12, 18], images: roseImgs },
+            { name: '持仓与分布', rows: sheet3.rows, merges: sheet3.merges, cols: sheet3.cols, images: sheet3.images },
           ],
           image: png ? { data: png, col: imgCol, row: 2, col2: imgCol + 15, row2: 2 + 16 } : null,
         });
@@ -640,7 +572,7 @@ window.TREND = (function () {
         document.body.appendChild(a); a.click();
         setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
         if (window.mpfToast) mpfToast(_t('已导出（三个工作表，含走势图与持仓分布玫瑰图）'));
-      }));
+      });
     }
     const shrBtn = q('.tr-share');
     if (shrBtn) shrBtn.addEventListener('click', () => {

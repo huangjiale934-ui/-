@@ -1334,6 +1334,87 @@ window.ensureHoldings = function (id) {
   return __hldgPending[key];
 };
 
+/* ---------- 导出公共件（2026-10-30）：走势页与榜单页共用同一份「持仓与分布」逻辑 ---------- */
+
+/* 字符串 SVG → PNG dataURL（2 倍分辨率；SVG 需带显式 width/height） */
+window.svgStrToPng = function (svgStr, w, h) {
+  return new Promise((resolve) => {
+    try {
+      /* <img> 加载 SVG 必须有 xmlns，否则 XML 解析失败走 onerror（innerHTML 插入会自动补，Blob 不会） */
+      if (svgStr.indexOf('<svg ') === 0 && svgStr.indexOf('xmlns=') < 0) {
+        svgStr = svgStr.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
+      }
+      const img = new Image();
+      const url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' }));
+      img.onload = () => {
+        try {
+          const cv = document.createElement('canvas');
+          cv.width = w * 2; cv.height = h * 2;
+          const ctx = cv.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+          ctx.drawImage(img, 0, 0, cv.width, cv.height);
+          URL.revokeObjectURL(url);
+          resolve(cv.toDataURL('image/png'));
+        } catch (e) { resolve(null); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+      img.src = url;
+    } catch (e) { resolve(null); }
+  });
+};
+
+/* 「持仓与分布」工作表（前十大持仓 + 投资组合分布 + 各自合计 + 玫瑰图 PNG）。
+   entries: [{ id, name }] —— 只传有便览概念的成分基金（指数/均值行由调用方过滤）。
+   返回 { rows, merges, cols, images }，images 可直接挂到 MPFXLSX 的 sheet.images。 */
+window.buildHoldAllocSheet = async function (entries) {
+  const list = Array.isArray(entries) ? entries : [];
+  if (window.ensureHoldings) { try { await window.ensureHoldings(null); } catch (e) {} }
+  const HLD = window.__HLDG && window.__HLDG.funds ? window.__HLDG.funds : {};
+  const SRC3 = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
+  const src3 = (k) => SRC3[String(k || '').toLowerCase()] || (k || '—');
+  const n2 = (v) => (v == null || !isFinite(+v) ? '' : +v);
+  const rows = [];
+  const jobs = [];   /* {name, row, svg, span} */
+  rows.push({ h: 26, cells: [{ v: '前十大持仓与投资组合分布（来源：各发行人官网「基金便览」；占基金资产净值 %）', s: 1 }] });
+  rows.push({ h: 30, cells: ['成分基金', '数据类型', '名称 / 类别', '占基金资产净值(%)', '报告期', '数据来源'].map((v) => ({ v, s: 2 })) });
+  list.forEach((ent) => {
+    const id = String(ent.id);
+    const nm = ent.name || ('#' + id);
+    const d = HLD[id];
+    if (!d || ((!d.top10 || !d.top10.length) && (!d.alloc || !d.alloc.length))) {
+      rows.push({ cells: [{ v: nm, s: 4 }, { v: '—', s: 4 }, { v: '该基金暂无便览数据', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }] });
+      return;
+    }
+    const roseStart = rows.length;
+    if (d.alloc && d.alloc.length && window.buildRoseSVG) {
+      const R0 = window.buildRoseSVG(d, '', { embedStyle: true, fixedSize: true });
+      if (R0 && R0.svg) jobs.push({ name: nm, row: roseStart, svg: R0.svg, span: 16 });
+    }
+    (d.top10 || []).forEach((h) => {
+      rows.push({ cells: [{ v: nm, s: 4 }, { v: '前十大持仓', s: 4 }, { v: h.name || '', s: 4 }, n2(h.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
+    });
+    if (d.top10 && d.top10.length) {
+      rows.push({ cells: [{ v: nm, s: 4 }, { v: '前十大持仓', s: 4 }, { v: '前十大合计', s: 4 }, n2(d.top10.reduce((a, h) => a + (h.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+    }
+    (d.alloc || []).forEach((a) => {
+      rows.push({ cells: [{ v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: a.label || '', s: 4 }, n2(a.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
+    });
+    if (d.alloc && d.alloc.length) {
+      rows.push({ cells: [{ v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '已披露合计', s: 4 }, n2(d.alloc.reduce((a, x2) => a + (+x2.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+    }
+    if (jobs.length && jobs[jobs.length - 1].row === roseStart) {
+      jobs[jobs.length - 1].span = rows.length - roseStart;   /* 块行数，限定图高 */
+    }
+  });
+  const images = [];
+  for (const job of jobs) {
+    const b64 = await window.svgStrToPng(job.svg, 1280, 1100);
+    if (!b64) continue;
+    images.push({ data: b64, col: 6, row: job.row, col2: 12, row2: job.row + Math.min(16, Math.max(12, job.span)), name: job.name + ' 投资组合分布' });
+  }
+  return { rows: rows, merges: ['A1:F1'], cols: [28, 15, 36, 19, 12, 18], images: images };
+};
+
 window.holdBlockHTML = function (id) {
   const HLDG = window.__HLDG;
   const d = HLDG && HLDG.funds ? HLDG.funds[id] : null;
@@ -1454,23 +1535,32 @@ window.buildRoseSVG = function (d, titleText, opts) {
   const leftO = slices.filter((o) => Math.cos(o.mid) < 0);
   const rightO = slices.filter((o) => Math.cos(o.mid) >= 0);
   function place(list) {
-    /* 2026-10-30（用户要求）：标签高度贴合扇形灰点（不再左右均布摊满）——
-       扇形 12 点起顺时针降序，因此右侧标签自上而下递减、左侧自下而上递减，
-       引线与扇形同序，天然不交叉；仅当相邻标签过近时做最小推挤。 */
+    /* 2026-10-30 二版（用户要求）：标签贴饼散布——
+       y 取扇形灰点自然高度（顺时针降序 ⇒ 右侧自上而下递减、左侧自下而上递减），
+       x 由 leadLabel 跟随各自穿出点，不再两列硬对齐；
+       相邻过近时做「双向最小推挤」（重叠量对半分给上下两个标签），数量多时位移也小，引线不易交叉。 */
     const m = list.length;
     if (!m) return [];
-    const yTop = 240, yBot = 985, gap = 104;
-    const arr = list.map((o) => ({
-      o: o,
-      y: CY + Math.sin(o.mid) * ((RIN + o.rOut) / 2),   /* 灰点自然高度 */
-    }));
+    const yTop = 180, yBot = 1000, gap = 80;
+    const arr = list.map((o) => ({ o: o, y: CY + Math.sin(o.mid) * (LEAD_R + 26) }));   /* 径向锚点高度 */
+    for (let i = 0; i < arr.length; i++) arr[i].mid = list[i].mid;
     arr.forEach((it) => { it.y = Math.max(yTop, Math.min(yBot, it.y)); });
     arr.sort((a, b) => a.y - b.y);
-    for (let i = 1; i < m; i++) if (arr[i].y - arr[i - 1].y < gap) arr[i].y = arr[i - 1].y + gap;
-    if (arr[m - 1].y > yBot) {
-      arr[m - 1].y = yBot;
-      for (let i = m - 2; i >= 0; i--) arr[i].y = Math.min(arr[i].y, arr[i + 1].y - gap);
-      for (let i = 1; i < m; i++) arr[i].y = Math.max(arr[i].y, arr[i - 1].y + gap);   /* 双向回推 */
+    for (let pass = 0; pass < 3; pass++) {
+      for (let i = 1; i < m; i++) {
+        if (arr[i].y - arr[i - 1].y < gap) {
+          const need = gap - (arr[i].y - arr[i - 1].y);
+          const up = Math.min(need / 2, arr[i - 1].y - yTop);
+          arr[i - 1].y -= up; arr[i].y += need - up;
+        }
+      }
+      for (let i = m - 2; i >= 0; i--) {
+        if (arr[i + 1].y - arr[i].y < gap) {
+          const need = gap - (arr[i + 1].y - arr[i].y);
+          const down = Math.min(need / 2, yBot - arr[i + 1].y);
+          arr[i + 1].y += down; arr[i].y -= need - down;
+        }
+      }
     }
     return arr;
   }
@@ -1489,24 +1579,27 @@ window.buildRoseSVG = function (d, titleText, opts) {
   });
 
   function leadLabel(list, side) {
+    /* 2026-10-30 二版：图例贴饼（参照用户样图）——
+       x 跟随各自穿出点再外移 18px，不再左右两列硬对齐；引线＝灰点→穿出→短贝塞尔到标签，
+       pathLength=1 供 CSS 生长动画。 */
     return place(list).map((it) => {
       const o = it.o; const sd = o.sd;
-      const dot = pt((RIN + o.rOut) / 2, o.mid);   /* 引线起点=扇形内灰点 */
+      const dot = pt((RIN + o.rOut) / 2, o.mid);
       const exy = pt(LEAD_R, o.mid);
-      const lx = side === 'left' ? 232 : 1048;
-      const ly2 = it.y + 6;
-      const dx = lx - exy[0];
+      /* 锚点沿角平分线径向外移 26px（R+61），保证文字起点恒在所有扇形之外；x 随角度变化=贴饼散布 */
+      const axy = pt(LEAD_R + 26, o.mid);
+      const lx = axy[0];
+      const ly2 = it.y + 8;
       const anchor = side === 'left' ? 'end' : 'start';
       const name = sd.label.length > 10 ? sd.label.slice(0, 10) + '…' : sd.label;
       const neg = sd.w < 0 ? '（負值）' : '';
-      /* 规格四：起点=扇形内灰点 → 沿平分线穿出 → 三次贝塞尔到标签列 */
-      return '<path class="alr3-lead" data-i="' + o.i + '" d="M' + f2(dot[0]) + ' ' + f2(dot[1]) +
+      return '<path class="alr3-lead" pathLength="1" data-i="' + o.i + '" d="M' + f2(dot[0]) + ' ' + f2(dot[1]) +
         ' L' + f2(exy[0]) + ' ' + f2(exy[1]) +
-        ' C' + f2(exy[0] + dx * 0.5) + ' ' + f2(exy[1]) + ', ' + f2(lx - dx * 0.32) + ' ' + f2(ly2) + ', ' + lx + ' ' + f2(ly2) +
+        ' C' + f2(exy[0]) + ' ' + f2(exy[1] + (ly2 - exy[1]) * 0.3) + ', ' + f2(lx) + ' ' + f2(ly2 - (ly2 - exy[1]) * 0.3) + ', ' + f2(lx) + ' ' + f2(ly2) +
         '" fill="none" stroke="' + sd.color + '" stroke-opacity="0.6" stroke-width="1.8"/>' +
         '<g class="alr3-lab" data-i="' + o.i + '">' +
-        '<text x="' + lx + '" y="' + f2(it.y) + '" text-anchor="' + anchor + '" class="alr3-pct" fill="' + sd.color + '">' + nf(sd.w, 2) + '%</text>' +
-        '<text x="' + lx + '" y="' + f2(it.y + 30) + '" text-anchor="' + anchor + '" class="alr3-name">' + esc(name) + esc(neg) + '</text></g>';
+        '<text x="' + f2(lx) + '" y="' + f2(it.y) + '" text-anchor="' + anchor + '" class="alr3-pct" fill="' + sd.color + '">' + nf(sd.w, 2) + '%</text>' +
+        '<text x="' + f2(lx) + '" y="' + f2(it.y + 26) + '" text-anchor="' + anchor + '" class="alr3-name">' + esc(name) + esc(neg) + '</text></g>';
     }).join('');
   }
   labs += leadLabel(leftO, 'left') + leadLabel(rightO, 'right');
@@ -1527,8 +1620,8 @@ window.buildRoseSVG = function (d, titleText, opts) {
     'text{font-family:"Microsoft YaHei","Noto Sans TC",sans-serif}' +
     '.alr3-pct{font-size:38px;font-weight:700}' +
     '.alr3-name{font-size:19px;font-weight:700;fill:#1f2933}' +
-    '.alr3-total{font-size:28px;font-weight:700;fill:#0A3D91}' +
-    '.alr3-sub{font-size:15px;fill:#6b7785}' +
+    '.alr3-total{font-size:30px;font-weight:700;fill:#0A3D91}' +
+    '.alr3-sub{font-size:17px;fill:#6b7785}' +
     '.alr3-src{font-size:20px;fill:#6b7785}</style>';
   /* fixedSize：导出 PNG 用（<img> 加载无尺寸 SVG 会按 300x150 默认渲染导致失真） */
   const sizeAttr = (opts && opts.fixedSize) ? ('width="' + W + '" height="' + H + '"') : 'width="100%" height="auto"';
