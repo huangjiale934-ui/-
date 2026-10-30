@@ -1063,6 +1063,8 @@
   '數據來源：{s} · 佔基金資產淨值百分比': 'Data source: {s} · % of fund net assets',
   '规模 n.a.': 'Size n.a.',
 
+  '共 <b>{n}</b> 个排名维度 · {g} 组（全部展开）· 点击任意标签切换': '<b>{n}</b> ranking dimensions in {g} groups (all expanded) · click a tag to switch',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

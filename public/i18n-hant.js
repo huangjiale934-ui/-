@@ -1075,6 +1075,8 @@
   '數據來源：{s} · 佔基金資產淨值百分比': '數據來源：{s} · 佔基金資產淨值百分比',
   '规模 n.a.': '規模 n.a.',
 
+  '共 <b>{n}</b> 个排名维度 · {g} 组（全部展开）· 点击任意标签切换': '共 <b>{n}</b> 個排名維度 · {g} 組（全部展開）· 點擊任意標籤切換',
+
 };
   for (var k in H) { if (Object.prototype.hasOwnProperty.call(H, k)) w.HANT[k] = H[k]; }
 })(window);

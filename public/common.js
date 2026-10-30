@@ -1459,7 +1459,7 @@ window.allocBlockHTML = function (id) {
   }
   series.forEach((sd, j) => { sd.color = rampColor(n - 1 - j, n); });   /* j 为降序序号：j=0 最大 → 最深 */
 
-  const W = 1600, H = 1000, CX = 800, CY = 560, R = 250, RIN = 70, LEAD_R = 284;
+  const W = 1240, H = 1100, CX = 620, CY = 580, R = 300, RIN = 84, LEAD_R = 334;
   const f2 = (v) => Number(v).toFixed(2);
   const pt = (r, a) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
   const sector = (r0, r1, a0, a1) => {
@@ -1483,7 +1483,7 @@ window.allocBlockHTML = function (id) {
   function place(list) {
     const m = list.length;
     if (!m) return [];
-    const yTop = 225, yBot = 885, gap = 128;
+    const yTop = 250, yBot = 960, gap = 150;
     const arr = list.map((o, k) => ({ o: o, y: m === 1 ? (yTop + yBot) / 2 : yTop + (yBot - yTop) * k / (m - 1) }));
     arr.sort((a, b) => a.y - b.y);
     for (let i = 1; i < m; i++) if (arr[i].y - arr[i - 1].y < gap) arr[i].y = arr[i - 1].y + gap;
@@ -1504,20 +1504,23 @@ window.allocBlockHTML = function (id) {
   });
   slices.forEach((o) => {
     const dot = pt((RIN + o.rOut) / 2, o.mid);
-    segs += '<circle cx="' + f2(dot[0]) + '" cy="' + f2(dot[1]) + '" r="' + f2(W * 0.00214) + '" fill="#78838F"/>';
+    segs += '<circle cx="' + f2(dot[0]) + '" cy="' + f2(dot[1]) + '" r="3.6" fill="#78838F"/>';
   });
 
   function leadLabel(list, side) {
     return place(list).map((it) => {
       const o = it.o; const sd = o.sd;
+      const dot = pt((RIN + o.rOut) / 2, o.mid);   /* 引线起点=扇形内灰点 */
       const exy = pt(LEAD_R, o.mid);
-      const lx = side === 'left' ? 470 : 1130;
+      const lx = side === 'left' ? 240 : 1000;
       const ly2 = it.y + 6;
       const dx = lx - exy[0];
       const anchor = side === 'left' ? 'end' : 'start';
       const name = sd.label.length > 10 ? sd.label.slice(0, 10) + '…' : sd.label;
       const neg = sd.w < 0 ? '（負值）' : '';
-      return '<path class="alr3-lead" data-i="' + o.i + '" d="M' + f2(exy[0]) + ' ' + f2(exy[1]) +
+      /* 规格四：起点=扇形内灰点 → 沿平分线穿出 → 三次贝塞尔到标签列 */
+      return '<path class="alr3-lead" data-i="' + o.i + '" d="M' + f2(dot[0]) + ' ' + f2(dot[1]) +
+        ' L' + f2(exy[0]) + ' ' + f2(exy[1]) +
         ' C' + f2(exy[0] + dx * 0.5) + ' ' + f2(exy[1]) + ', ' + f2(lx - dx * 0.32) + ' ' + f2(ly2) + ', ' + lx + ' ' + f2(ly2) +
         '" fill="none" stroke="' + sd.color + '" stroke-opacity="0.6" stroke-width="1.8"/>' +
         '<g class="alr3-lab" data-i="' + o.i + '">' +
@@ -1541,7 +1544,7 @@ window.allocBlockHTML = function (id) {
   const ariaText = esc(titleText) + '：' + series.map((sd) => sd.label + ' ' + nf(sd.w, 2) + '%').join('、') + '；合計 ' + nf(allocSum, 1) + '%';
   const svg = '<svg class="alr3-svg" viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="auto" role="img" aria-label="' + ariaText + '">' +
     segs + labs + leads + center +
-    '<text x="40" y="968" class="alr3-src">' + esc(srcLine) + '</text></svg>';
+    '<text x="40" y="' + (H - 32) + '" class="alr3-src">' + esc(srcLine) + '</text></svg>';
 
   /* 移动端（<520px）：图省略，改竖排列表 */
   const mob = series.map((sd) =>

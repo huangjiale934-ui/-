@@ -63,7 +63,7 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-  const FALLBACK_BOARD = { id: '', name: '全部基金', desc: '尚未选择榜单：以下按基金资产规模由高至低排列', metric: 'size', dir: 'desc' };
+  const FALLBACK_BOARD = { id: '', name: '全部基金', desc: '尚未选择榜单：按积金局基金编号顺序显示；点击上方任一标签开始排名', metric: null, dir: null };
   function cur() { return BOARDS.find((b) => b.id === S.board) || FALLBACK_BOARD; }
 
   function init() {
@@ -94,30 +94,19 @@
 
   /** 绑定表头点击排序（表头可能整体替换，故需可重复绑定）
       2026-10-22（用户要求）：三态 —— 最大 → 最小 → 取消（回该榜单默认名次） */
-  /* 2026-10-29（5.0）：三态排序一直存在，但箭头永远 ↕、看不出当前处于哪一态，
-     容易被误认为「三态没了」。这里补上可视反馈：升/降/取消分别显示 ↑/↓/↕ 并高亮该列。 */
-  function paintSortState() {
-    $$('#rkThead th[data-k]').forEach((th) => {
-      const on = S.sortKey === th.dataset.k;
-      th.classList.toggle('sort-on', on);
-      const ar = th.querySelector('.arrow');
-      if (ar) ar.textContent = on ? (S.sortDir === 'asc' ? '↑' : '↓') : '↕';
-    });
-  }
-
+  /* 2026-10-30：三态（首次=defdir → 再点=反向 → 三点=取消回默认顺序）。
+     箭头与高亮统一由 render() 末尾的 syncHeader() 刷新，与「基金最新数据」页观感一致。 */
   function bindHeadSort() {
     $$('#rkThead th[data-k]').forEach((th) => {
       th.addEventListener('click', () => {
         const k = th.dataset.k;
-        const d0 = th.dataset.defdir || 'desc';
+        const d0 = th.dataset.defdir === 'asc' ? 'asc' : 'desc';
         if (S.sortKey !== k) { S.sortKey = k; S.sortDir = d0; }
-        else if (S.sortDir === d0) { S.sortDir = flip(d0); }
-        else { S.sortKey = null; S.sortDir = null; }   // ③ 取消
+        else if (S.sortDir === d0) { S.sortDir = d0 === 'asc' ? 'desc' : 'asc'; }
+        else { S.sortKey = null; S.sortDir = null; }   /* ③ 取消 */
         render();
-        paintSortState();
       });
     });
-    paintSortState();
   }
 
   /** 发行人实力榜列结构不同，切换榜单时整体替换表头。
@@ -205,28 +194,8 @@
 
     // 维度提示：让客户一眼知道共有多少个排名维度，而不是以为只有一份榜
     const note = $('#rkTabsNote');
-    if (note) note.innerHTML = TQ('共 <b>{n}</b> 个排名维度 · {g} 组 · 点击任意标签切换', { n: BOARDS.length, g: groups.length });
-    const tg = $('#rkTabsToggle');
-    if (tg) {
-      const syncTg = () => {
-        tg.textContent = $('#rkTabs').classList.contains('mini') ? TT('点此展开全部') : TT('收起全部');
-      };
-      if (!tg.__bound) {
-        tg.__bound = 1;
-        tg.addEventListener('click', () => {
-          $('#rkTabs').classList.toggle('mini');
-          $$('#rkTabs .tab-group').forEach((el) => el.classList.remove('on-group'));
-          const curG = groups.filter((g) => g.list.some((b) => b.id === S.board))[0];
-          if (curG && $('#rkTabs').classList.contains('mini')) {
-            const idx = groups.indexOf(curG);
-            const el = $$('#rkTabs .tab-group')[idx];
-            if (el) el.classList.add('on-group');
-          }
-          syncTg();
-        });
-      }
-      syncTg();
-    }
+    if (note) note.innerHTML = TQ('共 <b>{n}</b> 个排名维度 · {g} 组（全部展开）· 点击任意标签切换', { n: BOARDS.length, g: groups.length });
+    /* 2026-10-30（用户要求）：标签全部平铺，不再折叠、不再有「收起全部」按钮 */
 
     /* 2026-10-26 修（既有 bug）：tab 的 click 原本逐元素绑定，但 navperf 到达后 buildTabs()
        会重建标签元素 → 重建后的标签全部失去监听（点击无效）。改为容器事件委托，一劳永逸。 */
@@ -407,6 +376,8 @@
           });
         });
     }
+    /* 2026-10-30：未选榜（metric=null）＝不过滤，按积金局编号原序显示全部 */
+    if (b.metric == null) return arr;
     return arr.filter((x) => x[b.metric] != null);
   }
 
@@ -579,7 +550,7 @@
     $('#rkYearSwitch').style.display = isCal ? '' : 'none';
 
     // 排名主榜
-    const ranked = sortRows(pool(), b.metric, b.dir);
+    const ranked = sortRows(pool(), b.metric || null, b.metric ? b.dir : null);
     window.__rkRanked = ranked;   /* 2026-10-26：行内对比条需要全榜最大值（CELL_FUND 在模块作用域） */
     // 分类冠军（当前筛选下，按当前榜单指标）；区块标题随榜单类型切换（发行人榜 ≠ 各类别冠军）
     const chT = $('#rkChampTitle'), chD = $('#rkChampDesc');
@@ -594,9 +565,9 @@
     else renderChampions(ranked, b);
 
     // 表格：若用户手动点了其他列排序，则按用户排序；否则按榜单指标
-    const key = S.sortKey || b.metric;
-    const dir = S.sortDir || b.dir;
-    let rows = sortRows(pool(), key, dir);
+    const key = S.sortKey || b.metric || null;
+    const dir = key ? (S.sortDir || b.dir || 'desc') : null;
+    let rows = key ? sortRows(pool(), key, dir) : pool();
     const total = rows.length;
     const shown = rows.slice(0, S.top);
     $('#rkRcnt').textContent = total;
@@ -705,7 +676,7 @@
   /** 导出当前榜单（当前筛选与排序下的全部结果，CSV；Excel 直接打开） */
   function exportCurrent() {
     const b = cur();
-    const list = sortRows(pool(), S.sortKey || b.metric, S.sortDir || b.dir);
+    const list = sortRows(pool(), S.sortKey || b.metric || null, S.sortDir || b.dir || 'desc');
     if (b.self) {
       /* 自算榜导出：只输出官网净值口径的指标，不含积金局字段 */
       const sHead = [TT('名次'), TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('计划'), TT('发行人'), TT('净值估值日')]
@@ -755,14 +726,17 @@
   }
 
   function syncHeader(key, dir) {
+    /* 2026-10-30：key 为空（未选榜/已取消）＝默认顺序，所有列 ↕、无高亮、方向显示 — */
     $$('#rkThead th[data-k]').forEach((th) => {
-      const on = th.dataset.k === key;
+      const on = !!key && th.dataset.k === key;
       th.classList.toggle('sorted', on);
-      th.querySelector('.arrow').textContent = on ? (dir === 'asc' ? '↑' : '↓') : '↕';
+      const a = th.querySelector('.arrow');
+      if (a) a.textContent = on ? (dir === 'asc' ? '↑' : '↓') : '↕';
     });
     const el = $('#rkMSortKey');
-    if (el && el.value !== key && Array.from(el.options).some((o) => o.value === key)) el.value = key;
-    const d = $('#rkMSortDir'); if (d) d.textContent = dir === 'asc' ? '升序 ↑' : '降序 ↓';
+    if (el && key && el.value !== key && Array.from(el.options).some((o) => o.value === key)) el.value = key;
+    const d = $('#rkMSortDir');
+    if (d) d.textContent = !key ? '—' : (dir === 'asc' ? '升序 ↑' : '降序 ↓');
   }
 
   /** 发行人实力榜的领跑卡片：改以「平均回报 + 旗下规模」呈现，不再按基金种类分组 */

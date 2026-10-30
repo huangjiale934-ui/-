@@ -202,7 +202,12 @@ chk('首页·风险柱用蓝色 7 级色板', (function () {
   } catch (e) { return false; }
 }));
 chk('排名·榜单维度提示行', /id="rkTabsNote"/.test(rk) && /共 <b>17<\/b> 个排名维度/.test(rk));
-chk('排名·展开收起按钮', /id="rkTabsToggle"/.test(rk) && /展开全部|收起全部/.test(rk));
+chk('排名·标签全展开（无折叠按钮、容器无 mini 类）', (function () {
+  try {
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+    return h.indexOf('rkTabsToggle') < 0 && /<div class="tabs" id="rkTabs">/.test(h);
+  } catch (e) { return false; }
+})());
 chk('排名·对比栏带数量徽标', /class="cmp-lab"/.test(rk) && /id="cmpN"/.test(rk));
 chk('资料库·对比栏与对比弹窗已加入', /id="cmpModal"/.test(idx) && /id="cmpList"/.test(idx) && /id="cmpBody"/.test(idx));
 chk('资料库·口径说明含7级风险小图例', /class="risk-mini"/.test(idx) && /class="rlm-list"/.test(idx) && (idx.match(/class="rlm-list"[\s\S]{0,600}?<\/ul>/)[0].match(/<li>/g) || []).length === 7);

@@ -405,6 +405,8 @@ window.TREND = (function () {
       if (!cols.length) { if (window.mpfToast) mpfToast(_t('暂无可导出的数据')); return; }
 
       const allT = Array.from(new Set(cols.flatMap((c) => c.raw.map((r) => r[0])))).sort((a, b) => ts(b) - ts(a));
+      /* 2026-10-30（用户要求）：导出工作簿新增「持仓与分布」工作表——预取全量便览数据（有缓存） */
+      const hldgP = (window.ensureHoldings ? window.ensureHoldings(null) : Promise.resolve(null));
       const maps = cols.map((c) => new Map(c.raw));
       const stat = cols.map((c) => {
         const base = c.raw[0][1];
@@ -422,7 +424,7 @@ window.TREND = (function () {
       const f2 = (v, d) => (v == null ? '' : (v > 0 ? '+' : '') + v.toFixed(d == null ? 2 : d) + '%');
       const span = cols.length * 2 + 1;
 
-      svgToPng(q('.tr-svg'), cols.map((c) => ({ name: c.name, color: c.color }))).then((png) => {
+      svgToPng(q('.tr-svg'), cols.map((c) => ({ name: c.name, color: c.color }))).then((png) => hldgP.then(() => {
         /* 2026-10-21：改用真 xlsx（MPFXLSX），两个工作表 + 第二个表内嵌走势图。
            Sheet1 = 声明 + 基金详细对比表（全部居中、声明行合并单元格）
            Sheet2 = 逐日净值 + 当日涨跌幅（倒序）+ 右侧内嵌走势图 */
@@ -542,6 +544,36 @@ window.TREND = (function () {
         });
 
         const imgCol = Math.max(nCols2, 3) + 1;
+        /* ---------- Sheet3：前十大持仓 + 投资组合分布（2026-10-30 用户要求，单独一张表） ---------- */
+        const HLD = window.__HLDG && window.__HLDG.funds ? window.__HLDG.funds : {};
+        const SRC3 = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
+        const src3 = (k) => SRC3[String(k || '').toLowerCase()] || (k || '—');
+        const r3 = [];
+        r3.push({ h: 26, cells: [{ v: '前十大持仓与投资组合分布（来源：各发行人官网「基金便览」；占基金资产净值 %）', s: 1 }] });
+        r3.push({ h: 30, cells: ['成分基金', '数据类型', '名称 / 类别', '占基金资产净值(%)', '报告期', '数据来源'].map((v) => ({ v, s: 2 })) });
+        cols.forEach((c) => {
+          const x = pickF(c.it);
+          if (!x) return;   /* 指数/均值行没有便览 */
+          const d = HLD[String(x.id)];
+          if (!d || ((!d.top10 || !d.top10.length) && (!d.alloc || !d.alloc.length))) {
+            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '—', s: 4 }, { v: '该基金暂无便览数据', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }, { v: '', s: 4 }] });
+            return;
+          }
+          (d.top10 || []).forEach((h) => {
+            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '前十大持仓', s: 4 }, { v: h.name || '', s: 4 }, n2(h.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
+          });
+          if (d.top10 && d.top10.length) {
+            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '前十大持仓', s: 4 }, { v: '前十大合计', s: 4 }, n2(d.top10.reduce((a, h) => a + (h.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+          }
+          (d.alloc || []).forEach((a) => {
+            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '投资组合分布', s: 4 }, { v: a.label || '', s: 4 }, n2(a.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
+          });
+          if (d.alloc && d.alloc.length) {
+            r3.push({ cells: [{ v: c.name, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '已披露合计', s: 4 }, n2(d.alloc.reduce((a, x2) => a + (+x2.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+          }
+        });
+        const merges3 = ['A1:F1'];
+
         const blob = window.MPFXLSX.build({
           sheets: [
             { name: '基金对比_' + dstr(startTs) + '_' + dstr(endTs), rows: r1, merges: merges1,
@@ -550,6 +582,7 @@ window.TREND = (function () {
               cols: [13].concat(cols.reduce((a) => a.concat([12, 12]), [])).concat([2, 2, 2]),
               /* 2026-10-22（用户要求）：走势图横向拉长（8 → 15 列），纵向高度不变 */
               drawing: png ? { col: imgCol, row: 2, col2: imgCol + 15, row2: 2 + 16 } : null },
+            { name: '持仓与分布', rows: r3, merges: merges3, cols: [28, 15, 36, 19, 12, 18] },
           ],
           image: png ? { data: png, col: imgCol, row: 2, col2: imgCol + 15, row2: 2 + 16 } : null,
         });
@@ -561,8 +594,8 @@ window.TREND = (function () {
         a.download = '基金对比_' + dstr(startTs) + '_' + dstr(endTs) + ' ' + nm + '.xlsx';
         document.body.appendChild(a); a.click();
         setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
-        if (window.mpfToast) mpfToast(_t('已导出（两个工作表，含走势图）'));
-      });
+        if (window.mpfToast) mpfToast(_t('已导出（三个工作表，含走势图与持仓分布）'));
+      }));
     }
     const shrBtn = q('.tr-share');
     if (shrBtn) shrBtn.addEventListener('click', () => {

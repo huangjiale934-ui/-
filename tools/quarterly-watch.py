@@ -160,6 +160,25 @@ def main():
     report['review'] = review
     with open(os.path.join(ROOT, 'data', 'quarterly-report.json'), 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
+
+    # 2026-10-30（用户要求）：换季时间线台账——每次运行追加一条（同日覆盖），保留 400 条
+    hist_path = os.path.join(ROOT, 'data', 'quarterly-history.json')
+    try:
+        hist = json.load(open(hist_path, encoding='utf-8'))
+    except Exception:
+        hist = []
+    entry = {
+        'generatedAt': report['generatedAt'],
+        'groups': [{'name': g.get('name'), 'currentAsOf': g.get('currentAsOf'),
+                    'latestPeriod': g.get('latestPeriod'), 'action': g.get('action'),
+                    'updated': bool(g.get('updated'))} for g in report['groups']],
+        'review': review,
+    }
+    today = entry['generatedAt'][:10]
+    hist = [h for h in hist if str(h.get('generatedAt', ''))[:10] != today]
+    hist.append(entry)
+    with open(hist_path, 'w', encoding='utf-8') as f:
+        json.dump(hist[-400:], f, ensure_ascii=False, indent=2)
     for g in report['groups']:
         print('%s | 当前 %s | 官方 %s | %s' % (g['name'], g.get('currentAsOf'), g.get('latestPeriod', '未知'), g.get('action')))
     if review:
