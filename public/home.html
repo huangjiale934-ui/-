@@ -10,8 +10,8 @@
 <!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
 <link rel="preload" as="image" href="img/hero-hk.webp?v=2" media="(min-width: 701px)">
 <link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
-<link rel="stylesheet" href="b.css?p=home&v=20261021b">
-<link rel="stylesheet" href="home.css?v=20261011a">
+<link rel="stylesheet" href="b.css?p=home&v=20261031c">
+<link rel="stylesheet" href="home.css?v=20261031c">
 </head>
 <body class="home">
 
@@ -24,8 +24,8 @@
     <nav class="nav">
       <a href="home.html" class="on" data-i18n="首页">首页</a>
       <a href="index.html" data-i18n="强积金资料库">强积金资料库</a>
-      
-      <a href="analysis.html" data-i18n="MPF基金可视化对比">MPF基金可视化对比</a>
+
+      <a href="index.html#cmp" data-i18n="MPF基金可视化对比">MPF基金可视化对比</a>
     </nav>
     <div class="lang-sw" id="langSw" role="group" aria-label="语言">
       <button type="button" data-lang="zh-Hans">简</button>
@@ -45,13 +45,13 @@
   <div class="hero-inner">
     <div class="hero-copy">
       <div class="hero-brand"><img src="img/logo.png" alt="JING YAN"><span data-i18n="广州精研数据有限公司">广州精研数据有限公司</span></div>
-      <h1 data-i18n="香港强积金数据平台">香港强积金数据平台</h1>
+      <h1 data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</h1>
       <div class="hero-btns">
         <a class="cta primary" href="index.html">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/></svg>
           <span data-i18n="强积金资料库">强积金资料库</span>
         </a>
-        <a class="cta ghost" href="analysis.html">
+        <a class="cta ghost" href="index.html#cmp">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21V9"/><path d="M16 21V13"/><path d="M4 21h16"/><path d="M12 9V3"/><path d="m9 6 3-3 3 3"/></svg>
           <span data-i18n="基金可视化对比">基金可视化对比</span>
         </a>
@@ -77,19 +77,19 @@
     <div class="mk-rank">
       <!-- 2026-10-22（领导）：标题与说明去掉，模块整体上移；榜单内容不动 -->
       <div class="mk-tops">
-        <div class="mk-top"><h3 data-i18n="近 1 年回报领先">近 1 年回报领先</h3><a class="mk-more" href="index.html?rk=ann1#ann1"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="近 1 年回报领先">近 1 年回报领先</span><span class="h3-tip" data-tip="按发行人官网最新净值自算的近 1 年涨幅前 5 名（每日更新，未含分红与费用调整）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=ann1#ann1"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop1"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="近 5 年回报领先">近 5 年回报领先</h3><a class="mk-more" href="index.html?rk=ann5#ann5"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="近 5 年回报领先">近 5 年回报领先</span><span class="h3-tip" data-tip="按发行人官网净值自算的近 5 年年化回报前 5 名（每日更新）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=ann5#ann5"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop4"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="推出至今累积回报">推出至今累积回报</h3><a class="mk-more" href="index.html?rk=cumLaunch#cumLaunch"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="推出至今累积回报">推出至今累积回报</span><span class="h3-tip" data-tip="自基金推出以来的累积总回报前 5 名（积金局口径，含费含息）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=cumLaunch#cumLaunch"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop5"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3 data-i18n="规模领先">规模领先</h3><a class="mk-more" href="index.html?rk=size#size"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="规模领先">规模领先</span><span class="h3-tip" data-tip="按积金局公布的基金资产规模（百万港元）前 5 名。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=size#size"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop2"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
       </div>
     </div>
 
     <!-- 2026-10-31（用户要求）：积金表现指数（参考 GUM 版式、自有设计语言）——四大类规模加权自算指数 -->
-    <div class="mk-panel perf-idx">
+    <div class="mk-panel perf-idx" id="perfIdx">
       <div class="pi-head">
         <h3><span data-i18n="积金表现指数">积金表现指数</span><span class="h3-tip" data-tip="自算指数：以 2015 年首个净值为基期 100，按各基金资产规模加权合成（与市场温度计同口径）；随每日净值自动更新，仅供参考。">ⓘ</span></h3>
         <div class="pi-ranges" id="piRanges"></div>
@@ -130,15 +130,15 @@
     <!-- 环形图 / 扇形图 / 风险柱状图 -->
     <div class="mk-charts">
       <div class="mk-panel pie-panel">
-        <h3 data-i18n="基金种类分布">基金种类分布</h3>
+        <h3><span data-i18n="基金种类分布">基金种类分布</span><span class="h3-tip" data-tip="按积金局最新公布的基金种类统计：内环数字为成分基金总数，图例同时列出条数与资产规模。">ⓘ</span></h3>
         <div class="mk-slot pie-flex" id="mkTypeRing"><div class="sk sk-pie"></div></div>
       </div>
       <div class="mk-panel pie-panel">
-        <h3 data-i18n="受托人市场份额">受托人市场份额</h3>
+        <h3><span data-i18n="受托人市场份额">受托人市场份额</span><span class="h3-tip" data-tip="按 11 家受托人（发行人）旗下成分基金的资产规模合计占比。">ⓘ</span></h3>
         <div class="mk-slot pie-flex" id="mkTrusteePie"><div class="sk sk-pie"></div></div>
       </div>
       <div class="mk-panel">
-        <h3 data-i18n="风险级别分布">风险级别分布</h3>
+        <h3><span data-i18n="风险级别分布">风险级别分布</span><span class="h3-tip" data-tip="积金局基金风险级别（1 级最低 → 7 级最高）的分布条数；未评级的基金显示 n.a.。">ⓘ</span></h3>
         <div class="mk-slot cols" id="mkRisk"><div class="sk sk-cols"></div></div>
         <div class="mk-note" id="mkRiskNote"></div>
         <!-- 风险等级图例 -->
@@ -179,7 +179,7 @@
       </ul>
       <div class="plat-btns">
         <a class="btn solid" href="index.html#db" data-i18n="进入基金最新数据 →">进入基金最新数据 →</a>
-        <a class="btn line" href="analysis.html" data-i18n="进入基金对比 →">进入基金对比 →</a>
+        <a class="btn line" href="index.html#cmp" data-i18n="进入基金对比 →">进入基金对比 →</a>
       </div>
     </div>
     <div class="plat-img">
@@ -210,10 +210,11 @@
 
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+  <span class="tt-txt" data-i18n="回到顶部">回到顶部</span>
 </button>
 
-<script src="b.js?p=home&v=20261021b"></script>
-<script src="home.js?v=20261011a"></script>
+<script src="b.js?p=home&v=20261031c"></script>
+<script src="home.js?v=20261031c"></script>
 <script src="heat.js"></script>
 <script>renderFriends();</script>
 

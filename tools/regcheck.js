@@ -31,6 +31,8 @@ function i18nText() {
 const idx = read('index');
 const rk = read('ranking');
 const css = (function () { try { return fs.readFileSync(path.join(__dirname, '..', 'public', 'home.css'), 'utf8'); } catch (e) { return ''; } })();
+const rawIdxHtml = (function () { try { return fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8'); } catch (e) { return ''; } })();
+const readSrc = (f) => { try { return f.indexOf('root:') === 0 ? fs.readFileSync(path.join(__dirname, '..', f.slice(5)), 'utf8') : fs.readFileSync(path.join(__dirname, '..', 'public', f), 'utf8'); } catch (e) { return ''; } };
 
 /* ---------------- 首页 ---------------- */
 chk('首页·KPI 成分基金 451', /成分基金[\s\S]{0,60}?451/.test(home));
@@ -179,7 +181,7 @@ chk('首页·背景图不透明度 >= 0.5', /opacity:\s*0\.5/.test(css));
 chk('资料库·口径说明在表格下方', idx.indexOf('srcNote') > idx.indexOf('<tbody'));
 chk('排名·口径说明在表格下方', rk.indexOf('srcNote') > rk.indexOf('<tbody'));
 /* 2026-10-28 首屏改版：公司名 h2 随公司介绍块一起移除，主标题改为 hero 内的 h1 双行文案 */
-chk('首页·首屏=公司logo+「香港强积金数据平台」（2026-10-31 用户要求）', /hero-brand/.test(home) && /<h1 data-i18n="香港强积金数据平台">/.test(home) && home.indexOf('香港强积金市场概览') < 0 && home.indexOf('hero-tag') < 0);
+chk('首页·首屏=公司logo+「香港强积金数据分析平台」（2026-10-31 三版改名）', /hero-brand/.test(home) && /<h1 data-i18n="香港强积金数据分析平台">/.test(home) && home.indexOf('香港强积金市场概览') < 0 && home.indexOf('hero-tag') < 0);
 /* 2026-10-29：公司介绍块（含大量 data-i18n）已删除，属性总数由 80+ 降至 72，阈值相应下调 */
 chk('首页·多语言属性已覆盖', (home.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 38);
 chk('资料库·多语言属性已覆盖', (idx.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 20);
@@ -191,13 +193,16 @@ const rawHtml = {};
 ['home', 'index', 'analysis'].forEach((n) => {
   try { rawHtml[n] = fs.readFileSync(path.join(__dirname, '..', 'public', n === 'home' ? 'home.html' : n + '.html'), 'utf8'); } catch (e) { rawHtml[n] = ''; }
 });
-['home', 'index', 'analysis'].forEach((n) => {
+['home', 'index'].forEach((n) => {
   const h = rawHtml[n];
   const od = (h.match(/<div/g) || []).length;
   const cd = (h.match(/<[\/]div>/g) || []).length;
-  chk((n === 'home' ? '首页' : n === 'index' ? '资料库' : '第四页') + '·HTML div 配平',
+  chk((n === 'home' ? '首页' : '资料库') + '·HTML div 配平',
     od > 0 && od === cd, '开' + od + ' / 闭' + cd);
 });
+/* 2026-10-31（用户要求）：第三页并入资料库第三板块，analysis.html 仅作旧链接跳转页 */
+chk('可视化对比已并入资料库（analysis.html 跳转 + index 含 anSec）',
+  /location\.replace\('index\.html#cmp'\)/.test(rawHtml.analysis || '') && /id="anSec"/.test(rawHtml.index || ''));
 
 /* ---- 第七轮：语言补全 / 榜单提示 / 对比入口 / 风险小图例 / 更新时间 / 估值日提示 ---- */
 chk('首页·概览双卡：数据更新+积金局资料截至（2026-10-31 恢复）', /class="upd-live"/.test(home) && /数据更新 <b>/.test(home) && /class="upd-of"/.test(home));
@@ -603,9 +608,9 @@ chk('404·页面存在 + server 返回 404 状态', (function () {
     return fs.existsSync(path.join(__dirname, '..', 'public', '404.html')) && s.indexOf("'404.html'") >= 0 && /sendRaw\(req, res, 404, b2/.test(s);
   } catch (e) { return false; }
 })());
-chk('版权·三页已加入（copyright 类 + 三语词条）', (function () {
+chk('版权·两页已加入（copyright 类 + 三语词条；分析页 2026-10-31 起为跳转页）', (function () {
   try {
-    const ok = ['home.html', 'index.html', 'analysis.html'].every((f) =>
+    const ok = ['home.html', 'index.html'].every((f) =>
       /class="copyright"/.test(fs.readFileSync(path.join(__dirname, '..', 'public', f), 'utf8')));
     const t = i18nText();
     return ok && t.indexOf("'© 2026 广州精研数据有限公司 · 保留所有权利': '© 2026 廣州精研數據有限公司 · 保留所有權利'") >= 0 &&
@@ -636,12 +641,10 @@ chk('详情·含「最近期基金开支比率」（FER）行（带悬浮说明�
       t.indexOf("'最近期基金开支比率': '最近期基金開支比率'") >= 0 && t.indexOf("'最近期基金开支比率': 'Latest fund expense ratio'") >= 0;
   } catch (e) { return false; }
 })());
-chk('详情·右上角「导出/分享」按钮（两页 HTML + 绑定 + 函数）', (function () {
+chk('详情·右上角「导出/分享」按钮（合并页 HTML + 绑定 + 函数）', (function () {
   try {
-    const ok = ['index.html', 'analysis.html'].every((f) => {
-      const h = fs.readFileSync(path.join(__dirname, '..', 'public', f), 'utf8');
-      return h.indexOf('id="mExport"') >= 0 && h.indexOf('id="mShare"') >= 0;
-    });
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+    const ok = h.indexOf('id="mExport"') >= 0 && h.indexOf('id="mShare"') >= 0;
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     return ok && /function exportOneFund/.test(c) && /function shareFundLink/.test(c) && /exportOneFund\(x\)/.test(c) && /shareFundLink\(x\.id\)/.test(c);
   } catch (e) { return false; }
@@ -734,10 +737,14 @@ chk('访问统计·推送与自动化已接入（可在任务总结附数字）'
     return /ANALYTICS_FILE/.test(s) && /analytics\.json/.test(s); } catch (e) { return false; }
 })());
 
-/* ---------------- 第四页·MPF基金分析 ---------------- */
-const an = read('analysis');
-chk('第四页·页面标题与页头（MPF基金分析）', /MPF基金分析/.test(an) && /<header class="hdr/.test(an));
-chk('第四页·四页导航含「MPF基金分析」且当前页高亮', /class="nav"[\s\S]{0,300}?analysis\.html[\s\S]{0,80}?class="on"/.test(an));
+/* ---------------- 第四板块·MPF基金可视化对比（2026-10-31 并入资料库 index.html#cmp） ----------------
+   原 analysis.html 已改为跳转页；板块 DOM 随 index dump 渲染，故 an = index 快照。 */
+const an = read('index');
+chk('第四板块·三板块切换按钮（基金最新数据 / MPFA 基金榜单 / 可视化对比）',
+  /id="dbtDb"/.test(rawIdxHtml) && /id="dbtRank"/.test(rawIdxHtml) && /id="dbtCmp"/.test(rawIdxHtml) &&
+  /data-dbtab="cmp"/.test(rawIdxHtml) && /id="anSec"/.test(rawIdxHtml));
+chk('第四板块·导航含「MPF基金可视化对比」且指向 #cmp（common.js）',
+  /index\.html#cmp', 'MPF基金可视化对比'/.test(readSrc('common.js')));
 /* ---- 第四页 v3 改版：纯对比页 + 左侧发行人栏（版式参照合作方站） ---- */
 chk('第四页·侧栏 + 基金列表联动（已选置顶+分隔线+其余，2026-10-17 v2）', /id="anProv"/.test(an) && /id="anTbody2"/.test(an) && (function () {
   try {
@@ -771,7 +778,7 @@ chk('第四页·数据来源行（官方截至日期 · 净值最新日期 · �
 chk('第四页·图上方双选择器（选择指数 / 选择基金）+ 面板容器', /data-panel="idx"/.test(an) && /data-panel="fund"/.test(an) && /tr-p-list-idx/.test(an) && /tr-p-list-fund/.test(an));
 chk('第四页·区间按钮 5 档 + 选择日期 + 全部区间', ['1w', '1m', '1y', '3y', '5y', 'custom', 'all'].every((r) => new RegExp('data-r="' + r + '"').test(an)) && /tr-daterow/.test(an));
 chk('第四页·区间统计表五列（名称/区间收益/区间最大回撤/起止日期；2026-10-20 删除「最新点位」列）', !/最新点位/.test(an) && /区间收益/.test(an) && /区间最大回撤/.test(an) && /最大回撤起始日期/.test(an) && /最大回撤结束日期/.test(an) && /恒生指数/.test(an));
-chk('第四页·「查看具体基金分析」按钮 + 返回对比文案', /查看具体基金分析/.test(an) && (function () {
+chk('第四页·「查看具体基金分析」按钮 + 返回对比文案', /查看具体基金分析/.test(readSrc('analysis.js')) && (function () {
   try { const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
     return /window\.anOpen/.test(j) && /← 返回对比/.test(j); } catch (e) { return false; }
 })());
@@ -878,10 +885,10 @@ chk('深夜·③列设置（COL_DEFS + 记忆 + 一键清除）', (function () {
 chk('深夜·④页脚折叠 + 来源免责合并 + 核对时间入 summary', (function () {
   try {
     const i = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    /* 2026-10-31（用户要求）：foot-legal 并入折叠栏（src-brief），来源告警/两套口径段删除 */
-    return i.indexOf('foldSpec') >= 0 && a.indexOf('foldSpec') >= 0 && i.indexOf('navCheckAt') >= 0 &&
+    /* 2026-10-31（用户要求）：foot-legal 并入折叠栏（src-brief），来源告警/两套口径段删除；
+       2026-10-31 三版：analysis.html 改跳转页，仅校验 index */
+    return i.indexOf('foldSpec') >= 0 && i.indexOf('navCheckAt') >= 0 &&
       i.indexOf('src-brief') >= 0 && i.indexOf('foot-legal') < 0 && c.indexOf('navCheckAt') >= 0 &&
       c.indexOf('来源告警') < 0;
   } catch (e) { return false; }
@@ -1294,9 +1301,9 @@ chk('第四页·发行人平均指数（trustee-idx ≥3 家 + 接口 + 面板�
 })());
 
 
-chk('第四页·基金列表（8列含近1年年率化 + 表头排序 + 无计划子行）', (function () {
+chk('第四板块·基金列表（8列含近1年年率化 + 表头排序 + 无计划子行）', (function () {
   try {
-    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
     return /data-lsk="ann1"/.test(h) && /data-lsk="size"/.test(h) && (h.match(/data-lsk=/g) || []).length === 8 &&
       /function sortList/.test(j) && /function syncListArrows/.test(j) && /<small>年率化<\/small>/.test(h) &&
@@ -1313,8 +1320,7 @@ chk('对比弹窗·走势模块置顶（cmpTrend + openCmp 挂载 TREND）', (fu
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const i = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
-    return /id="cmpTrend"/.test(i) && /id="cmpTrend"/.test(a) &&
+    return /id="cmpTrend"/.test(i) &&
       /getElementById\('cmpTrend'\)/.test(c) && /bareHead: true/.test(c) && /cmp-tools/.test(c);
   } catch (e) { return false; }
 })());
@@ -1354,8 +1360,7 @@ chk('详情小窗·放大按钮（只换视图不回退历史）+ 960px 两页�
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
     const i = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
-    return /id="mExpand"/.test(i) && /id="mExpand"/.test(a) && /#mExpand/.test(c) &&
+    return /id="mExpand"/.test(i) && /#mExpand/.test(c) &&
       /anOpen\(x\.id, \{ replace: true \}\)/.test(c) && /\.modal-box \{ max-width: 960px; \}/.test(css);
   } catch (e) { return false; }
 })());
@@ -1689,3 +1694,32 @@ setTimeout(() => {
   console.log("\n结果：" + pass + " / " + results.length + " 通过" + (pass === results.length ? "  🎉 全部通过" : "  ⚠ 存在失败项"));
   process.exit(pass === results.length ? 0 : 1);
 }, 28000);   /* 线上冷启动时 /api/funds 可能要 20s+，等待异步断言完成 */
+
+/* ================= 2026-10-31 三版（用户十六项反馈） ================= */
+chk('三版·①hero 改名+按钮卡与标题对齐（hero-copy fit-content）',
+  /<h1 data-i18n="香港强积金数据分析平台">/.test(home) && /\.hero-copy \{ width: fit-content/.test(css) && /\.hero-btns \.cta \{ flex: 1 1 0/.test(css));
+chk('三版·②行情栏 sticky 固定 + 点击跳转表现指数（data-tk → __piSelect）',
+  /\.mkt-ticker \{ position: sticky/.test(css) && /data-tk="' \+ k \+ '"/.test(readSrc('home.js')) && /window\.__piSelect/.test(readSrc('home.js')));
+chk('三版·③表现指数含恒指/上证（perf-idx 6 键 + 卡片 6 张）',
+  /'MPF_BOND', 'HSI', 'SSE'/.test(readSrc('root:server.js')) && /\['HSI', '恒生指数'\], \['SSE', '上证指数'\]/.test(readSrc('home.js')));
+chk('三版·④表现指数纵轴整10刻度（step 10/20 等间隔）', /let step = 10;/.test(readSrc('home.js')) && /pi-yk-year/.test(readSrc('home.js')));
+chk('三版·⑤横轴年份倾斜标注（1 月位置 rotate -40）', /rotate\(-40 /.test(readSrc('home.js')) && /pi-yk-year \{ font-size: 11\.5px; font-weight: 700/.test(css));
+chk('三版·⑥年度走势线/点/阴影同源（VAL 统一取值）', /const VAL = \(r\) => \(r\.wavg != null \? r\.wavg : r\.avg\);/.test(readSrc('home.js')) && /const areaPts = linePts;/.test(readSrc('home.js')));
+chk('三版·⑦排名徽标蓝色系（表格 medal + 首页榜单 r1-r3）',
+  /linear-gradient\(135deg, #1466ac, #084e8c\)/.test(readSrc('style.css')) && /\.mk-top \.r\.r1 \{ background: #084e8c/.test(css));
+chk('三版·⑧页2筛选两行化（chips/重置按钮删除 + 搜索框并入工具栏行）',
+  rawIdxHtml.indexOf('id="chips"') < 0 && rawIdxHtml.indexOf('id="btnReset"') < 0 &&
+  rawIdxHtml.indexOf('id="rkRChips"') < 0 && rawIdxHtml.indexOf('id="rkRReset"') < 0 &&
+  (rawIdxHtml.match(/class="tb-search"/g) || []).length === 2 && ! /function renderChips/.test(readSrc('app.js')));
+chk('三版·⑨列名与筛选统一「受托人」口径',
+  />受托人 <span class="arrow">↕<\/span><\/th>/.test(rawIdxHtml) &&
+  /trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕<\/span><\/th>'/.test(readSrc('app.js')) &&
+  /trustee: '<th data-c="trustee" data-i18n-parts>受托人<\/th>'/.test(readSrc('rank.js')));
+chk('三版·⑩估值日分布行细身（#foldSpec 去边框）', /#foldSpec \{ margin-top: 2px; border: 0;/.test(readSrc('style.css')));
+chk('三版·⑪页脚折叠箭头加大左移蓝色（避让悬浮按钮）',
+  /\.foot-fold \.ff-arrow \{ font-size: 15px; color: var\(--brand/.test(readSrc('style.css')) && /margin-right: 78px/.test(readSrc('style.css')));
+chk('三版·⑫回到顶部悬停展开「回到顶部」（tt-txt，同计算器蓝）',
+  /\.to-top:hover \{ background: var\(--brand-2/.test(readSrc('style.css')) && /\.tt-txt/.test(readSrc('style.css')) &&
+  rawIdxHtml.indexOf('tt-txt') >= 0 && home.indexOf('tt-txt') >= 0);
+chk('三版·⑬首页模块标题统一格式（17px + 榜单卡标题间距加大）',
+  /\.mk-top h3 \{ font-size: 17px; margin: 0 0 14px/.test(css) && /\.mk-panel h3 \{ font-size: 17px; \}/.test(css));

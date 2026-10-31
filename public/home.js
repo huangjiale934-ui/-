@@ -307,8 +307,12 @@
     if (rows2.length < 2) return '<div class="chart-empty">' + TT('暂无历年回报数据') + '</div>';
     const W = 372, H = 264, padL = 32, padR = 14, padT = 22, padB = 34;   /* 2026-10-31 三版（用户要求）：图加高 10% */
     const pw = W - padL - padR, ph = H - padT - padB;
+    /* 2026-10-31 三版（用户反馈：红点不在线上、阴影不贴合）：折线/圆点/阴影全部改用
+       同一个取值函数（wavg 优先、avg 兜底）。此前折线固定用 avg、点与阴影用 wavg，
+       两个口径并存时点浮在线外——本 bug 根因。 */
+    const VAL = (r) => (r.wavg != null ? r.wavg : r.avg);
     let minV = 0, maxV = 0;
-    rows2.forEach((r) => { const A = (r.wavg != null ? r.wavg : r.avg); minV = Math.min(minV, A); maxV = Math.max(maxV, A); });
+    rows2.forEach((r) => { const A = VAL(r); minV = Math.min(minV, A); maxV = Math.max(maxV, A); });
     const sc = niceScale(minV, maxV, 4);
     const X = (i) => padL + (pw / (rows2.length - 1)) * i;
     const Y = (v) => padT + ph * (1 - (v - sc.lo) / (sc.hi - sc.lo));
@@ -320,14 +324,13 @@
         + '<text class="chart-axis" x="' + (padL - 5) + '" y="' + fx(Y(tk) + 3.5) + '" text-anchor="end">' + (tk > 0 ? '+' : '') + tk + '</text>';
     });
 
-    const line = (key, color, dash) => {
-      const pts = rows2.map((r, i) => (r[key] == null ? null : [X(i), Y(r[key])])).filter(Boolean);
-      const d = pts.map((p, i) => (i ? 'L' : 'M') + fx(p[0]) + ' ' + fx(p[1])).join('');
-      return '<path class="line-path" d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2"'
-        + (dash ? ' stroke-dasharray="5 4" opacity="0.85"' : '') + ' stroke-linejoin="round" stroke-linecap="round"/>';
-    };
+    /* 折线：rows2 已经过滤掉空值，直接全部连线（与圆点/阴影同源） */
+    const linePts = rows2.map((r, i) => [X(i), Y(VAL(r))]);
+    const lineD = linePts.map((p, i) => (i ? 'L' : 'M') + fx(p[0]) + ' ' + fx(p[1])).join('');
+    const lineSvg = '<path class="line-path" d="' + lineD + '" fill="none" stroke="#1a6fb5" stroke-width="2"'
+      + ' stroke-linejoin="round" stroke-linecap="round"/>';
 
-    const areaPts = rows2.map((r, i) => [X(i), Y(r.wavg != null ? r.wavg : r.avg)]);
+    const areaPts = linePts;
     const area = 'M' + fx(areaPts[0][0]) + ' ' + fx(y0) + areaPts.map((p) => 'L' + fx(p[0]) + ' ' + fx(p[1])).join('')
       + 'L' + fx(areaPts[areaPts.length - 1][0]) + ' ' + fx(y0) + 'Z';
 
@@ -337,7 +340,7 @@
       const lx = Math.max(padL + 16, Math.min(W - padR - 16, cx));
       dots += '<text class="chart-xlab" x="' + fx(cx) + '" y="' + (padT + ph + 16) + '" text-anchor="middle">' + esc(r.year) + '</text>';
       /* 2026-10-31 三版（用户要求）：中位数线/点删除（对普通用户意义不大） */
-      const A = (r.wavg != null ? r.wavg : r.avg);
+      const A = VAL(r);
       if (A != null) {
         const c = A > 0 ? C_UP : A < 0 ? C_DOWN : C_FLAT;
         const vy = Y(A) - (A >= 0 ? 9 : -16);
@@ -352,7 +355,7 @@
       + '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(TT('市场整体回报走势')) + '">'
       + grid
       + '<path d="' + area + '" fill="#e8f0f9" opacity="0.85"/>'
-      + line('avg', '#1a6fb5', false)
+      + lineSvg
       + '<line class="chart-zero" x1="' + padL + '" y1="' + fx(y0) + '" x2="' + (W - padR) + '" y2="' + fx(y0) + '"/>'
       + dots + '</svg>';
   }
@@ -732,14 +735,22 @@
       var up = it.chg > 0, flat = !it.chg;
       var cls = flat ? 'flat' : (up ? 'up' : 'down');
       var pct = (up ? '+' : '') + it.chg.toFixed(2) + '%';
-      cards += '<div class="tk-card" data-tip="' + esc(it.name + ' · 截至 ' + it.asOf) + '">' +
+      cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(it.name + ' · 截至 ' + it.asOf + '；点击查看下方走势图') + '">' +
         '<span class="tk-name">' + TT(NAMES[k] || it.name) + '</span>' +
         '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +
         '<b class="tk-chg ' + cls + '">' + pct + '</b></span>' +
         spark(it.spark, up) +
-        '</div>';
+        '</button>';
     });
     box.querySelector('.tk-track').innerHTML = cards;
+    /* 2026-10-31 三版（用户要求）：点击行情项 → 滚动到「积金表现指数」并切换到对应指数 */
+    box.querySelectorAll('.tk-card').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var panel = document.getElementById('perfIdx');
+        if (panel && panel.scrollIntoView) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (typeof window.__piSelect === 'function') window.__piSelect(b.dataset.tk);
+      });
+    });
   }
 
   function esc(s) {
@@ -757,9 +768,15 @@
 })();
 
 /* ================= 积金表现指数（2026-10-31，用户要求；参考 GUM 版式、自有设计语言） =================
-   四张卡=四大类规模加权自算指数的区间累计回报（点卡切换）；下方为该指数的面积走势图（基期=100）。 */
+   六张卡=四大类规模加权自算指数 + 恒生指数/上证指数的区间累计回报（点卡切换）；
+   下方为该指数的面积走势图（基期=区间起点=100）。
+   2026-10-31 三版（用户反馈）：主图拉高 20%；纵轴整 10/整 20 等间隔；
+   横轴月份不带年份、年份在 1 月位置倾斜标注（参考 GUM）；与顶部行情栏联动跳转。 */
 (function () {
-  const KEYS = [['MPFAVG', '积金市场指数'], ['MPF_STOCK', '股票基金指数'], ['MPF_MIX', '混合资产基金指数'], ['MPF_BOND', '债券基金指数']];
+  const KEYS = [
+    ['MPFAVG', '积金市场指数'], ['MPF_STOCK', '股票基金指数'], ['MPF_MIX', '混合资产基金指数'],
+    ['MPF_BOND', '债券基金指数'], ['HSI', '恒生指数'], ['SSE', '上证指数'],
+  ];
   const RANGES = [['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['10y', '近 10 年'], ['all', '全部']];
   let DB = null, cur = 'MPFAVG', range = '5y';   /* 2026-10-31 二版（用户要求）：默认近 5 年 */
 
@@ -821,37 +838,50 @@
       return;
     }
     const s = sliceSeries(it.series, range);
-    const W = 1000, H = 390, padL = 46, padR = 16, padT = 16, padB = 30;   /* 2026-10-31 二版：模块上下拉长 30% */
+    const W = 1000, H = 468, padL = 46, padR = 16, padT = 16, padB = 40;   /* 2026-10-31 三版：主图上下拉长 20%（390→468） */
     const base = s[0][1] || 1;
     const pts = s.map((r) => [r[0], (r[1] / base) * 100]);
     let mn = Math.min.apply(null, pts.map((p) => p[1]));
     let mx = Math.max.apply(null, pts.map((p) => p[1]));
     const padv = (mx - mn) * 0.08 || 1; mn -= padv; mx += padv;
+    /* 2026-10-31 三版（用户反馈：纵轴间隔不规律）：改为整 10（跨度过大时整 20）等间隔刻度 */
+    let step = 10;
+    if ((mx - mn) / step > 11) step = 20;
+    if ((mx - mn) / step > 11) step = 25;
+    const lo = Math.floor(mn / step) * step;
+    const hi = Math.ceil(mx / step) * step;
     const X = (i) => padL + (W - padL - padR) * (i / (pts.length - 1));
-    const Y = (v) => padT + (H - padT - padB) * (1 - (v - mn) / (mx - mn));
+    const Y = (v) => padT + (H - padT - padB) * (1 - (v - lo) / (hi - lo));
     let grid = '', yl = '';
-    for (let g = 0; g <= 4; g++) {
-      const v = mn + (mx - mn) * g / 4;
+    for (let v = lo; v <= hi + step / 1000; v += step) {
       grid += '<line x1="' + padL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#eef2f7" stroke-width="1"/>';
-      yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + v.toFixed(0) + '</text>';
+      yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + Math.round(v) + '</text>';
     }
-    /* 2026-10-31 二版（用户要求）：横坐标按跨度自适应——
-       ≤13 个月标每月；≤6 年标每年 3/6/9/12 月；更长时间跨度只标年份 */
+    /* 2026-10-31 三版（用户反馈）：横坐标按跨度自适应——
+       ≤13 个月标每月「3月」；≤74 个月标每年 3/6/9 月；更长时间跨度只标年份。
+       年份一律在 1 月的位置、倾斜 -40° 标注（参考 GUM），与月份标签明显区分；
+       月份标签不再带年份。 */
     const mspan = (new Date(pts[pts.length - 1][0]) - new Date(pts[0][0])) / 2592000000;
-    const seenm = {}; let xt = '';
+    const seenm = {}; const seenY = {}; let xt = '';
+    const yearLab = (x, y, txt) =>
+      '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="end" class="pi-yk pi-yk-year" transform="rotate(-40 ' + x.toFixed(1) + ' ' + y + ')">' + txt + '</text>';
     pts.forEach((p, i) => {
-      const y = p[0].slice(0, 4); const mo = Number(p[0].slice(5, 7));
+      const yy = p[0].slice(0, 4); const mo = Number(p[0].slice(5, 7));
       let lab = null;
-      if (mspan <= 13) { if (!seenm[p[0].slice(0, 7)]) { lab = mo + '月'; seenm[p[0].slice(0, 7)] = 1; } }
-      else if (mspan <= 74) { if ((mo === 3 || mo === 6 || mo === 9 || mo === 12) && !seenm[p[0].slice(0, 7)]) { lab = y.slice(2) + '/' + mo; seenm[p[0].slice(0, 7)] = 1; } }
-      else if (mo === 1 && !seenm[y]) { lab = y; seenm[y] = 1; }
+      if (mo === 1 && !seenY[yy]) {
+        seenY[yy] = 1;
+        xt += yearLab(X(i), H - 8, yy + TT('年'));
+        return;
+      }
+      if (mspan <= 13) { if (!seenm[p[0].slice(0, 7)]) { lab = mo + TT('月'); seenm[p[0].slice(0, 7)] = 1; } }
+      else if (mspan <= 74) { if ((mo === 3 || mo === 6 || mo === 9) && !seenm[p[0].slice(0, 7)]) { lab = mo + TT('月'); seenm[p[0].slice(0, 7)] = 1; } }
       if (lab) xt += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="pi-yk">' + lab + '</text>';
     });
     const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
     const areaD = lineD + ' L' + X(pts.length - 1).toFixed(1) + ' ' + (H - padB) + ' L' + padL + ' ' + (H - padB) + ' Z';
     const last = pts[pts.length - 1];
     host.innerHTML =
-      '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="auto" role="img" aria-label="' + esc2(TT('积金表现指数')) + '">' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc2(TT('积金表现指数')) + '">' +
       '<defs><linearGradient id="piGrad" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#0866bb" stop-opacity="0.26"/><stop offset="1" stop-color="#0866bb" stop-opacity="0.02"/></linearGradient></defs>' +
       grid + yl + xt +
@@ -886,6 +916,13 @@
   }
 
   function render() { renderRanges(); renderCards(); renderChart(); }
+
+  /* 2026-10-31 三版（用户要求）：顶部行情栏点击 → 跳转到本栏目并切换到对应指数 */
+  window.__piSelect = function (key) {
+    if (!DB || !DB.items[key]) return;
+    cur = key; range = '5y';
+    render();
+  };
 
   fetch('/api/perf-idx').then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.items) return;

@@ -1049,12 +1049,20 @@ body { overflow-x: clip; }
 .mo-track { height: 12px; }
 .mo-right { flex: 0 0 272px; }
 
+/* ===== 2026-10-31 三版：行情栏 sticky 固定（滚到哪都能看到）+ 可点击跳转 ===== */
+.mkt-ticker { position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 14px rgba(16, 50, 90, 0.06); }
+.tk-card { appearance: none; border: 0; background: none; font-family: inherit; text-align: left; cursor: pointer; transition: background .15s; }
+.tk-card { border-right: 1px solid var(--border, #e9f0f6); }
+.tk-card:last-child { border-right: 0; }
+.tk-card:hover { background: var(--brand-soft, #edf7ff); }
+
 /* ===== 积金表现指数（2026-10-31，用户要求） ===== */
-.perf-idx { margin-top: 16px; }
-.pi-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+/* 三版（用户反馈）：整栏下移一点、标题行与卡片留白加大 */
+.perf-idx { margin-top: 30px; }
+.pi-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 4px; }
 .pi-head h3 { margin: 0; }
 .pi-ranges { display: flex; gap: 6px; flex-wrap: wrap; }
-.pi-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 14px 0 6px; }
+.pi-cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin: 16px 0 8px; }
 .pi-card { appearance: none; text-align: left; font-family: inherit; background: #fff;
   border: 1px solid var(--border, #e3ecf4); border-radius: 10px; padding: 12px 14px; cursor: pointer;
   display: flex; flex-direction: column; gap: 3px; transition: border-color .15s, background .15s; }
@@ -1069,35 +1077,55 @@ body { overflow-x: clip; }
 .pi-chart { position: relative; margin-top: 8px; }
 .pi-chart svg { width: 100%; height: auto; display: block; }
 .pi-yk { font-size: 11px; fill: var(--text-3, #8595a8); }
+/* 倾斜年份标签：比月份更醒目 */
+.pi-yk-year { font-size: 11.5px; font-weight: 700; fill: var(--text, #16283e); }
 .pi-bubble { position: absolute; transform: translate(-50%, -130%); background: var(--text, #16283e); color: #fff;
   font-size: 12px; padding: 5px 9px; border-radius: 7px; pointer-events: none; white-space: nowrap; z-index: 3; }
+@media (max-width: 1160px) { .pi-cards { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 720px) { .pi-cards { grid-template-columns: 1fr 1fr; } }
 
 
 /* ===== 2026-10-31 三版（用户十六项反馈） ===== */
-/* hero：公司 logo 行 + 单行主标题 + 按钮横排 */
-.hero-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-.hero-brand img { height: 36px; width: auto; display: block; }
-.hero-brand span { font-size: 15px; font-weight: 600; color: var(--text, #16283e); letter-spacing: 0.5px; }
-.hero h1 { font-size: 38px; margin-bottom: 18px; }
-.cta { flex-direction: row; align-items: center; gap: 10px; min-width: 0; padding: 14px 22px; font-size: 16.5px; }
-.cta svg { margin-bottom: 0; flex: none; }
+/* hero：公司 logo 行加大一号并上移；主标题改名+缩小一号；按钮卡缩小、文字加大、总宽与标题对齐 */
+.hero-inner { padding: 42px 20px 48px; }
+.hero-brand { display: flex; align-items: center; gap: 11px; margin-bottom: 18px; }
+.hero-brand img { height: 44px; width: auto; display: block; }
+.hero-brand span { font-size: 17px; font-weight: 600; color: var(--text, #16283e); letter-spacing: 0.5px; }
+.hero h1 { font-size: 34px; margin-bottom: 18px; }
+/* 让两个按钮卡的总宽度 = 主标题一行的宽度：hero-copy 以最宽子元素（标题）定宽 */
+.hero-copy { width: fit-content; max-width: 100%; }
+.cta { flex-direction: row; align-items: center; gap: 9px; min-width: 0; padding: 11px 18px; font-size: 17px; border-radius: 11px; }
+.cta svg { margin-bottom: 0; flex: none; width: 17px; height: 17px; }
+.hero-btns { margin-top: 0; gap: 12px; }
+.hero-btns .cta { flex: 1 1 0; justify-content: center; white-space: nowrap; min-width: 0; padding: 11px 18px; font-size: 17px; }
+@media (max-width: 620px) {
+  .hero-copy { width: auto; }
+  .hero-btns { flex-direction: column; }
+  .hero-btns .cta { flex: none; }
+}
+@media (max-width: 1080px) { .hero h1 { font-size: 30px; } }
+@media (max-width: 620px) { .hero h1 { font-size: 26px; } }
 /* 概览区：删标题后 chips 右对齐 */
 .mk-head { justify-content: flex-end; }
-/* 六榜 → 四榜 2×2：行距加大、徽标金银铜、入场动画 */
+/* 六榜 → 四榜 2×2：行距加大、徽标蓝色调（2026-10-31 三版用户要求，弃金银铜）、入场动画 */
 .mk-tops { grid-template-columns: repeat(2, 1fr); gap: 22px; margin-bottom: 40px; }
 .mk-top { padding: 18px 20px 14px; animation: mkFadeUp .5s ease both; }
 .mk-top:nth-child(2) { animation-delay: .06s; }
 .mk-top:nth-child(3) { animation-delay: .12s; }
 .mk-top:nth-child(4) { animation-delay: .18s; }
 @keyframes mkFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* 2026-10-31 三版（用户反馈）：小标题与列表拉开距离；字号统一为 17px（与「MPF 最新资讯」一致） */
+.mk-top h3 { font-size: 17px; margin: 0 0 14px; }
 .mk-top li { padding: 11px 10px; }
 .mk-top .n { font-size: 14px; }
-.mk-top .r.r1 { background: #f0b429; color: #5b3c00; }
-.mk-top .r.r2 { background: #c3ccd6; color: #2c3947; }
-.mk-top .r.r3 { background: #e2b08a; color: #6b3f1d; }
+/* 排名徽标：蓝色系 1 深 → 3 浅（与全站风险级别蓝阶一致） */
+.mk-top .r.r1 { background: #084e8c; color: #fff; }
+.mk-top .r.r2 { background: #2e7fc0; color: #fff; }
+.mk-top .r.r3 { background: #cfe4f5; color: #0b3a66; }
 .mk-top li:hover { background: var(--brand-soft, #edf7ff); transform: translateX(3px); }
 .mk-top li { transition: background .15s, transform .15s; }
+/* 首页模块标题统一为「MPF 最新资讯ⓘ」格式：17px */
+.mk-panel h3 { font-size: 17px; }
 /* 表现指数：模块加高后与下模块间距 +20% */
 .perf-idx { margin-bottom: 34px; }
 .pi-bubble { background: #fff; border: 1px solid var(--brand, #0866bb); color: var(--text, #16283e); box-shadow: 0 4px 14px rgba(8, 60, 110, .14); }

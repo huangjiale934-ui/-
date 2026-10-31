@@ -6,8 +6,8 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230f4c81%27/%3E%3Cpath d=%27M6 22 L12 14 L17 18 L26 8%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="强积金资料库 · 广州精研数据有限公司">强积金资料库 · 广州精研数据有限公司</title>
-<meta name="description" content="香港强积金（MPF）全市场基金资料库，数据覆盖全市场成分基金，支持关键词搜索、基金种类、发行人、涨跌幅、最大回撤筛选。">
-<link rel="stylesheet" href="b.css?p=index&v=20261021b">
+<meta name="description" content="香港强积金（MPF）全市场基金资料库，数据覆盖全市场成分基金，支持关键词搜索、基金种类、受托人、涨跌幅、最大回撤筛选，并可一键切换基金可视化对比。">
+<link rel="stylesheet" href="b.css?p=index&v=20261031c">
 </head>
 <body>
 
@@ -31,26 +31,23 @@
 </header>
 
 <div class="wrap">
-  <div class="page-head pg-head">
-    <h1 data-i18n="强积金资料库">强积金资料库</h1>
-    <div class="db-tabs" role="tablist" aria-label="模块切换" style="margin-left:16px">
+  <!-- 2026-10-31（用户要求）：页首大标题「强积金资料库」删除，只留三个板块切换；
+       视觉表头方案待用户从 20 版设计稿中挑选后再替换 -->
+  <div class="page-head pg-head db-head-row">
+    <div class="db-tabs" role="tablist" aria-label="模块切换">
       <button type="button" class="dbt on" id="dbtDb" data-dbtab="db" data-i18n="基金最新数据">基金最新数据</button>
       <button type="button" class="dbt" id="dbtRank" data-dbtab="rank" data-i18n="MPFA 基金榜单">MPFA 基金榜单</button>
+      <button type="button" class="dbt" id="dbtCmp" data-dbtab="cmp" data-i18n="可视化对比">可视化对比</button>
     </div>
   </div>
 
   <div id="dbSec">
   <div class="stats" id="stats"></div>
 
+  <!-- 2026-10-31（用户要求）：筛选区只留两行——第 1 行四个下拉；搜索框并入表格工具栏行；
+       「筛选条件：无」行与「重置条件」按钮删除 -->
   <div class="card filters">
     <div class="f-row f-row-main">
-      <div class="f-item search-box">
-        <label data-i18n-parts>关键词搜索</label>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-          <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
-        </svg>
-        <input type="text" id="kw" data-i18n-ph="基金名称／计划名称／受托人" placeholder="基金名称／计划名称／受托人">
-      </div>
       <div class="f-item">
         <label data-i18n-parts>基金种类</label>
         <select id="fType"><option data-i18n-parts  value="">全部种类</option></select>
@@ -60,26 +57,27 @@
         <select id="fSub"><option data-i18n-parts  value="">全部细类</option></select>
       </div>
       <div class="f-item">
-        <label data-i18n-parts>基金发行人 <span class="hint">（受托人／保荐人）</span></label>
-        <select id="fTrustee"><option data-i18n-parts  value="">全部发行人</option></select>
+        <label data-i18n-parts>受托人</label>
+        <select id="fTrustee"><option data-i18n-parts  value="">全部受托人</option></select>
       </div>
       <div class="f-item">
         <label data-i18n-parts>风险级别</label>
         <select id="fRisk"><option data-i18n-parts  value="">全部级别</option></select>
       </div>
     </div>
-
-    </div>
-
-    <div class="chips" id="chips"></div>
-    <div style="display:flex;justify-content:flex-end;margin-top:-6px"><button class="btn ghost sm" id="btnReset" data-i18n="重置条件">重置条件</button></div>
   </div>
 
   <div class="card">
-    <div class="f-summary">
+    <div class="f-summary f-summary-new">
+      <div class="tb-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+        </svg>
+        <input type="text" id="kw" data-i18n-ph="基金名称／计划名称／受托人" placeholder="基金名称／计划名称／受托人" aria-label="关键词搜索">
+      </div>
       <div class="dim-pick"><label for="dimSel" data-i18n="排名维度">排名维度</label><select id="dimSel"></select></div>
-      <div><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">0</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip"></span></div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="tb-count"><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">0</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip"></span></div>
+      <div class="tb-right">
         <label data-i18n-parts  class="muted" for="perPage" style="font-size:12px">每页显示</label>
         <select id="perPage" style="padding:4px 8px;font-size:12.5px">
           <option data-i18n-parts  value="10" selected>10 条</option>
@@ -104,9 +102,9 @@
           <th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>
           <th data-c="cmp" data-i18n-parts class="c" style="width:52px">对比</th>
           <th data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>
-          <th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">发行人（受托人） <span class="arrow">↕</span></th>
+          <th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>
           <th data-c="typeFull" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>
-          
+
           <th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>
           <th data-c="nav" data-i18n-parts data-k="nav" data-defdir="desc" class="sortable r">单位资产净值<br><small>取自各受托人官网</small> <span class="arrow">↕</span></th>
           <th data-c="selfD1" data-i18n-parts data-k="selfD1" data-defdir="desc" class="sortable r">日涨跌 <span class="arrow">↕</span></th>
@@ -131,7 +129,7 @@
     <div class="pager" id="pager"></div>
   </div>
 
-    </div>
+  </div>
 
   <div id="rkSec" hidden>
   <p class="scope-note scope-mpfa" id="rkScopeNote">本页数据全部来自积金局「强积金基金平台」，目前更新至 <b id="rkScopeDate">—</b>。</p>
@@ -140,13 +138,6 @@
   <div class="card filters rk-filters" style="margin-bottom:14px">
     <div style="display:none"><h2 id="rkBoardTitle">排行榜</h2><div class="desc" id="rkBoardDesc"></div></div>
     <div class="f-row f-row-main">
-      <div class="f-item search-box">
-        <label data-i18n-parts>关键词搜索</label>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-          <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
-        </svg>
-        <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称／受托人" placeholder="基金名称／计划名称／受托人">
-      </div>
       <div class="f-item">
         <label data-i18n-parts>基金种类</label>
         <select id="rkRType"><option data-i18n-parts  value="">全部种类</option></select>
@@ -156,8 +147,8 @@
         <select id="rkRSub"><option data-i18n-parts  value="">全部细类</option></select>
       </div>
       <div class="f-item">
-        <label data-i18n-parts>基金发行人 <span class="hint">（受托人／保荐人）</span></label>
-        <select id="rkRTrustee"><option data-i18n-parts  value="">全部发行人</option></select>
+        <label data-i18n-parts>受托人</label>
+        <select id="rkRTrustee"><option data-i18n-parts  value="">全部受托人</option></select>
       </div>
       <div class="f-item">
         <label data-i18n-parts>风险级别</label>
@@ -195,19 +186,20 @@
           <input type="number" id="rkRFeeMax" data-i18n-ph="如 0.8" placeholder="如 0.8">
         </div>
       </div>
-      <div class="f-item f-reset">
-        <button class="btn ghost" id="rkRReset" data-i18n="重置条件">重置条件</button>
-      </div>
     </div>
-
-    <div class="chips" id="rkRChips"></div>
   </div>
 
   <div class="card">
-    <div class="f-summary">
+    <div class="f-summary f-summary-new">
+      <div class="tb-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+        </svg>
+        <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称／受托人" placeholder="基金名称／计划名称／受托人" aria-label="关键词搜索">
+      </div>
       <div class="dim-pick"><label for="rkDimSel" data-i18n="排名维度">排名维度</label><select id="rkDimSel"></select></div>
-      <div><span data-i18n="当前榜单共">当前榜单共</span> <b id="rkRcnt">0</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip"></span></div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="tb-count"><span data-i18n="当前榜单共">当前榜单共</span> <b id="rkRcnt">0</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip"></span></div>
+      <div class="tb-right">
         <label class="muted" for="rkRTop" style="font-size:12px" data-i18n-parts>每页显示</label>
         <select id="rkRTop" style="padding:4px 8px;font-size:12.5px">
           <option data-i18n-parts  value="10" selected>10 条</option>
@@ -237,7 +229,7 @@
         <thead><tr id="rkThead">
           <th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>
           <th data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>
-          <th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">发行人 <span class="arrow">↕</span></th>
+          <th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>
           <th data-c="typeFull" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>
           <th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险 <span class="arrow">↕</span></th>
                     <th data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>
@@ -272,9 +264,48 @@
     <div style="padding:0 16px 16px"><div class="podium" id="rkChampions"></div></div>
   </div>
 
-  
   </div>
 
+  <!-- 2026-10-31（用户要求）：第三页「MPF基金可视化对比」并入本页第三板块（内容由 analysis.js 挂载） -->
+  <div id="anSec" hidden>
+    <div class="an-view" id="anCompare">
+      <div class="an-layout">
+        <aside class="an-side">
+          <div class="an-side-title" data-i18n="MPF基金可视化对比">MPF基金可视化对比</div>
+          <nav class="an-prov" id="anProv" aria-label="发行人"></nav>
+          <div class="an-side-note" data-i18n="点选发行人筛选基金列表">点选发行人筛选基金列表</div>
+        </aside>
+        <main class="an-main">
+          <div class="loading"></div>
+          <div class="an-badge an-badge-line" id="anBadge">—</div>
+          <section class="card tr-card" id="anTrendBox"></section>
+          <div class="card an-tablecard an-listcard">
+            <div class="an-lh">
+              <div class="an-lh-t" id="anListTitle">—</div>
+              <div class="an-lh-r" data-i18n="勾选方框加入对比 · 点表头可排序 · 点基金名查看详情">按基金规模降序 · 点表头可排序 · 点基金名查看详情</div>
+            </div>
+            <div class="table-scroll">
+              <table class="data an-table">
+                <thead><tr id="anThead">
+                  <th class="fselcol" style="width:1%;min-width:1%;padding:0 2px 0 12px"></th>
+                  <th data-i18n-parts class="sortable fz" data-lsk="fund" data-defdir="1">基金名称 <span class="arrow">↕</span></th>
+                  <th data-i18n-parts class="sortable r" data-lsk="nav" data-defdir="-1">单位净值 <span class="arrow">↕</span></th>
+                  <th data-i18n-parts class="sortable r" data-lsk="d1" data-defdir="-1">日涨跌幅 <span class="arrow">↕</span></th>
+                  <th data-i18n-parts class="sortable r" data-lsk="ytd" data-defdir="-1">年初至今 <span class="arrow">↕</span></th>
+                  <th data-i18n-parts class="sortable r" data-lsk="ann1" data-defdir="-1">近1年<br><small>年率化</small> <span class="arrow">↕</span></th>
+                  <th data-i18n-parts class="sortable c" data-lsk="risk" data-defdir="1">风险级别 <span class="arrow">↕</span></th>
+                  <th data-i18n-parts class="sortable r" data-lsk="size" data-defdir="-1">基金规模<br><small>亿港元</small> <span class="arrow">↕</span></th>
+                  <th data-i18n-parts class="sortable c" data-lsk="navAsOf" data-defdir="-1">更新日期 <span class="arrow">↕</span></th>
+                </tr></thead>
+                <tbody id="anTbody2"></tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <div class="an-view" id="anDetail" hidden></div>
+  </div>
 
   <div class="foot">
   <p class="scope-note" id="dbScopeNote" style="margin:10px 2px">本表数据取自 11 家受托人官网（每交易日更新），排名与涨跌指标由本平台自行计算；因各发行人公布时间不一致，少数基金可能滞后 1–2 天。如需完全对齐的日度数据，请切换到「MPFA 基金榜单」查看积金局每月底发布的列表。</p>
@@ -296,6 +327,8 @@
     </details>
     <div class="copyright" data-i18n="© 2026 广州精研数据有限公司 · 保留所有权利">© 2026 广州精研数据有限公司 · 保留所有权利</div>
   </div>
+
+</div>
 
 <!-- 对比栏（与排名页共用，跨页保持；来源：common.js CMPX） -->
 <div class="cmp" id="cmp">
@@ -335,29 +368,41 @@
   </div>
 </div>
 
-<script src="b.js?p=index&v=20261021b"></script>
-<script src="app.js?v=20261011a"></script>
-<script src="rank.js?v=20261013"></script>
-<button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></button>
+<script src="b.js?p=index&v=20261031c"></script>
+<script src="app.js?v=20261031c"></script>
+<script src="rank.js?v=20261031c"></script>
+<script src="analysis.js?v=20261031c"></script>
+<button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg><span class="tt-txt" data-i18n="回到顶部">回到顶部</span></button>
 
-<!-- 板块切换（db-tabs-script）：支持 ?rk=<榜单id> 深链、#db/#rank 锚点与刷新记忆 -->
+<!-- 板块切换（三板块）：支持 ?rk=<榜单id>、#db/#rank/#cmp 锚点与刷新记忆 -->
 <script>
 (function () {
   var qs = new URLSearchParams(location.search);
   var hash0 = (location.hash || '').replace(/^#/, '');
   var BOARDS = /^(ann1|ann5|ann10|annLaunch|calYear|cum1|cum5|cum10|cumLaunch|mdd|risk|fer|size|launchTs|trusteeAgg|champion|selfW1|selfYtd|selfY1|selfMdd)$/;
-  var want = qs.get('rk') ? 'rank' : (hash0 === 'rank' || BOARDS.test(hash0) ? 'rank' : (hash0 === 'db' ? 'db' : 'db'));
+  function wantTab() {
+    if (qs.get('rk')) return 'rank';
+    if (hash0 === 'cmp') return 'cmp';
+    if (hash0 === 'rank' || BOARDS.test(hash0)) return 'rank';
+    return 'db';
+  }
+  var anMounted = false;
   function show(tab, keepHash) {
-    var isRank = tab === 'rank';
-    var db = document.getElementById('dbSec'), rkSec = document.getElementById('rkSec');
-    if (!db || !rkSec) return;
-    db.hidden = isRank;
+    var isRank = tab === 'rank', isCmp = tab === 'cmp';
+    var db = document.getElementById('dbSec'), rkSec = document.getElementById('rkSec'), anSec = document.getElementById('anSec');
+    if (!db || !rkSec || !anSec) return;
+    db.hidden = isRank || isCmp;
     rkSec.hidden = !isRank;
-    var b1 = document.getElementById('dbtDb'), b2 = document.getElementById('dbtRank');
-    if (b1) b1.classList.toggle('on', !isRank);
-    if (b2) b2.classList.toggle('on', isRank);
+    anSec.hidden = !isCmp;
+    [['dbtDb', !isRank && !isCmp], ['dbtRank', isRank], ['dbtCmp', isCmp]].forEach(function (p) {
+      var b = document.getElementById(p[0]);
+      if (b) b.classList.toggle('on', p[1]);
+    });
     /* 刷新记忆：切换时写 hash（榜单深链则保留原 hash 不动） */
-    if (!keepHash) { try { history.replaceState(null, '', isRank ? '#rank' : '#db'); } catch (e) {} }
+    if (!keepHash) {
+      hash0 = isRank ? 'rank' : (isCmp ? 'cmp' : 'db');
+      try { history.replaceState(null, '', '#' + hash0); } catch (e) {}
+    }
     try { window.dispatchEvent(new Event('resize')); } catch (e) {}
     if (window.__syncTableScroll) window.__syncTableScroll();
     /* 2026-10-31（用户要求）：估值日分布 chips 与说明行仅「基金最新数据」段显示 */
@@ -365,11 +410,28 @@
     if (fnN) fnN.style.display = isRank ? 'none' : '';
     var snN = document.getElementById('dbScopeNote');
     if (snN) snN.style.display = isRank ? 'none' : '';
+    /* 首次进入对比板块时重挂走势图（隐藏容器内首挂宽度为 0） */
+    if (isCmp && !anMounted && typeof window.__anRemount === 'function') {
+      anMounted = true;
+      setTimeout(function () { try { window.__anRemount(); } catch (e) {} }, 60);
+    }
+    /* 顶部导航高亮跟随板块 */
+    document.querySelectorAll('.nav a').forEach(function (a) {
+      var href = a.getAttribute('href') || '';
+      var isCmpLink = href.indexOf('#cmp') >= 0;
+      var isDbLink = /index\.html$/.test(href);
+      a.classList.toggle('on', isCmp ? isCmpLink : isDbLink);
+    });
   }
-  var b1 = document.getElementById('dbtDb'), b2 = document.getElementById('dbtRank');
-  if (b1) b1.addEventListener('click', function () { show('db'); });
-  if (b2) b2.addEventListener('click', function () { show('rank'); });
-  show(want, !!qs.get('rk') || BOARDS.test(hash0));
+  ['dbtDb', 'dbtRank', 'dbtCmp'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) b.addEventListener('click', function () { show(b.dataset.dbtab); });
+  });
+  window.addEventListener('hashchange', function () {
+    hash0 = (location.hash || '').replace(/^#/, '');
+    show(wantTab(), true);
+  });
+  show(wantTab(), !!qs.get('rk') || BOARDS.test(hash0));
 })();
 </script>
 </body>

@@ -360,9 +360,10 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
   width: 22px; height: 22px; border-radius: 50%;
   font-size: 11px; font-weight: 700; color: #fff;
 }
-.medal.g1 { background: linear-gradient(135deg, #e8b94a, #c9962c); }
-.medal.g2 { background: linear-gradient(135deg, #c3ccd6, #9aa7b6); }
-.medal.g3 { background: linear-gradient(135deg, #d09a6a, #b07c4d); }
+/* 2026-10-31（用户要求）：排名徽标弃金银铜，改蓝色系（1 最深 → 3 最浅，与风险级别蓝阶一致） */
+.medal.g1 { background: linear-gradient(135deg, #1466ac, #084e8c); }
+.medal.g2 { background: linear-gradient(135deg, #559ad1, #2e7fc0); }
+.medal.g3 { background: linear-gradient(135deg, #cfe4f5, #a9cdec); color: #0b3a66; }
 
 .fund-name { font-weight: 550; color: var(--text); }
 .sub-line { font-size: 11px; color: var(--text-3); margin-top: 1px; white-space: nowrap; }
@@ -876,19 +877,24 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 @media (max-width: 620px) { .sk-pie { width: 110px; height: 110px; } }
 
 /* ---------- 回到顶部 ---------- */
+/* 2026-10-31（用户要求）：悬停向左展开「回到顶部」文字、移开收起；配色与计算器同款品牌蓝；无首次计时 */
 .to-top {
   position: fixed; right: 20px; bottom: 24px; z-index: 70;
-  width: 44px; height: 44px; border-radius: 50%;
-  border: 1px solid var(--border); background: #fff; color: var(--brand);
-  box-shadow: 0 6px 20px rgba(16, 32, 56, 0.18);
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  height: 44px; width: 44px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--brand, #0866bb); color: #fff;
+  box-shadow: 0 6px 20px rgba(8, 102, 187, 0.30);
+  display: flex; align-items: center; justify-content: center; gap: 0;
+  cursor: pointer; overflow: hidden; white-space: nowrap; font-family: inherit; font-size: 13.5px; font-weight: 600;
   opacity: 0; visibility: hidden; transform: translateY(10px);
-  transition: opacity 0.2s, transform 0.2s, visibility 0.2s, background 0.2s, color 0.2s;
+  transition: opacity 0.2s, transform 0.2s, visibility 0.2s, width 0.22s ease, background 0.2s, color 0.2s;
 }
+.to-top .tt-txt { display: inline-block; max-width: 0; opacity: 0; transform: translateX(4px); overflow: hidden;
+  transition: max-width 0.22s ease, opacity 0.18s ease, margin 0.22s ease; }
 .to-top.show { opacity: 1; visibility: visible; transform: none; }
-.to-top:hover { background: var(--brand); color: #fff; }
+.to-top:hover { background: var(--brand-2, #2f7fc1); color: #fff; width: 132px; }
+.to-top:hover .tt-txt { max-width: 72px; opacity: 1; transform: none; margin-left: 6px; }
 .to-top:active { transform: scale(0.94); }
-@media (max-width: 560px) { .to-top { right: 14px; bottom: 16px; width: 40px; height: 40px; } }
+@media (max-width: 560px) { .to-top { right: 14px; bottom: 16px; height: 40px; width: 40px; } .to-top:hover { width: 118px; } }
 
 /* ---------- 页面切换过渡：轻微淡入 / 淡出 ---------- */
 html.fx-ready body { transition: opacity 0.13s ease; }
@@ -1756,11 +1762,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 页头：数据版本徽标加大；更新数据按钮已删 */
 .ver-chip { font-size: 12.5px; padding: 4.5px 13px; gap: 6px; }
 .ver-chip b { font-size: 12.5px; }
-/* 回到顶部：悬停展开文字（配色同计算器） */
-.to-top { width: 42px; overflow: hidden; justify-content: center; }
-.to-top .tt-x { display: none; white-space: nowrap; font-size: 12.5px; font-weight: 600; margin-left: 7px; }
-.to-top:hover { width: auto; padding-left: 15px; padding-right: 15px; }
-.to-top:hover .tt-x { display: inline; }
+/* 回到顶部悬停展开文字：见上方「回到顶部」主规则（.tt-txt） */
 /* 口径行估值分布 chips */
 .ff-nav { flex: 1 1 auto; display: flex; justify-content: center; margin: 0 18px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .ff-nav .navdist { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-3); white-space: nowrap; }
@@ -1771,3 +1773,29 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 页2 标题与切换按钮同行 */
 .pg-head { display: flex; align-items: center; flex-wrap: wrap; }
 .pg-head h1 { margin: 0; }
+
+/* ==========================================================
+   2026-10-31 三版追加（用户十六项反馈）
+   ========================================================== */
+/* ① 排名徽标已在 .medal 处改蓝色系 */
+/* ② 页脚折叠行的展开箭头：加大、左移（避开右下角计算器/回到顶部悬浮按钮）、改蓝色 */
+.foot-fold .ff-arrow { font-size: 15px; color: var(--brand, #0866bb); font-weight: 700; margin-right: 78px; transition: transform 0.2s, margin 0.2s; }
+.foot-fold[open] .ff-arrow { transform: rotate(180deg); }
+@media (max-width: 560px) { .foot-fold .ff-arrow { margin-right: 8px; } }
+/* ③ 估值日分布行（#foldSpec）：去掉上边框整线、细身、上移，与上下文字左对齐 */
+#foldSpec { margin-top: 2px; border: 0; border-radius: 0; background: none; }
+#foldSpec summary { padding: 7px 2px; }
+#foldSpec[open] summary { border-bottom: 0; }
+#foldSpec summary:hover { background: none; }
+#foldSpec .ff-body { padding: 2px 2px 10px; }
+/* ④ 表格工具栏：搜索框并入排名维度一行后的紧凑样式 */
+.f-summary-new { row-gap: 8px; }
+.tb-search { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-strong);
+  border-radius: 8px; height: 34px; padding: 0 10px; flex: 0 1 250px; min-width: 170px; color: var(--text-3); }
+.tb-search:focus-within { border-color: var(--brand-2, #378add); }
+.tb-search svg { flex: none; }
+.tb-search input { border: 0; outline: none; height: 100%; width: 100%; min-width: 0; font-size: 13px;
+  font-family: inherit; color: var(--text); background: transparent; }
+.tb-count { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.tb-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+@media (max-width: 900px) { .tb-right { margin-left: 0; } }

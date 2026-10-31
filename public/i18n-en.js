@@ -1118,6 +1118,13 @@
 
   '基金名称／计划名称／受托人': 'Fund / scheme / trustee',
 
+  '受托人：{v}': 'Trustee: {v}',
+  '家受托人': 'trustees',
+  '月': 'M',
+  '受托人数量': 'Trustees',
+  '可视化对比': 'Visual comparison',
+  '勾选方框加入对比 · 点表头可排序 · 点基金名查看详情': 'Tick to compare · click headers to sort · click a fund for details',
+
   '各类基金过去 12 个月年率化净回报': 'Past 12 months annualised net return by fund class',
   '积金局最新公布（按月更新）：数据取自积金局「基金便览」，条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）。悬浮任意一行可看该类别内最高／最低的单只基金回报。': 'Latest MPFA release (monthly): bars show each class 12-month annualised net return (net of fees), from MPFA factsheets. Hover a row for the best/worst fund in that class.',
 

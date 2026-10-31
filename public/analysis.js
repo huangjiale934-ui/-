@@ -21,7 +21,21 @@
   const $ = (s) => document.querySelector(s);
 
   function init() {
-    mountHeader('an');
+    /* 2026-10-31（用户要求）：本页并入「强积金资料库」第三板块（index.html#cmp）。
+       合并模式下导航高亮由页内板块切换脚本控制，这里只在独立页才自挂导航。 */
+    const MERGED = !!document.getElementById('dbSec') && !!document.getElementById('anSec');
+    if (!MERGED) mountHeader('an');
+    else mountHeader((location.hash || '') === '#cmp' ? 'an' : 'db');
+    document.addEventListener('mpf:dbtab', (e) => {
+      if (!MERGED) return;
+      const tab = e && e.detail;
+      if (tab === 'cmp') { mountHeader('an'); if (typeof window.__anRemount === 'function') window.__anRemount(); }
+      else mountHeader('db');
+    });
+    /* 板块切换脚本在首次进入对比板块时调用：重挂走势图（隐藏容器内首挂宽度为 0） */
+    window.__anRemount = function () {
+      try { if (DATA.count) { mountMain(); renderFundList(); } } catch (e) {}
+    };
     /* 发行人平均指数：尽早拉取，供点选发行人时的默认对比使用 */
     fetchJSON('/api/trustee-idx', 'tidx').then((j) => { TIDX = j; }).catch(() => {});
     loadData(() => {
@@ -59,7 +73,9 @@
         const want = new URLSearchParams(location.search).get('open');
         if (want && findFund(want)) openAnalysis(want, { replace: true });
       } catch (e) {}
-      window.__onRefresh = () => { mountMain(); };
+      /* 2026-10-31：合并页上 app.js/rank.js 也注册了 __onRefresh——链式调用，别覆盖 */
+      const __prevRefresh = window.__onRefresh;
+      window.__onRefresh = () => { try { if (__prevRefresh) __prevRefresh(); } catch (e) {} mountMain(); };
     });
     /* 语言切换：侧栏、主对比模块、基金列表与详情视图全部重绘（含动态文案） */
     document.addEventListener('mpf:lang', () => {

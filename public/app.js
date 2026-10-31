@@ -9,7 +9,7 @@
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
   const SORT_LABEL = {
-    fund: '成分基金名称', trustee: '发行人', typeFull: '基金种类',
+    fund: '成分基金名称', trustee: '受托人', typeFull: '基金种类',
     size: '基金规模', risk: '风险级别', nav: '单位资产净值',
     ann1: '近1年年率化回报', ann5: '近5年年率化回报', ann10: '近10年年率化回报',
     annLaunch: '推出至今年率化回报', mgmtFee: '基金管理费', launchTs: '推出日期',  /* 渲染时 TT() */
@@ -179,7 +179,7 @@
 
   /** 导出当前筛选结果（全部行，非仅当前页，CSV；Excel 直接打开） */
   function exportIdx() {
-    const head = [TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('发行人'), TT('风险级别'),
+    const head = [TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('受托人'), TT('风险级别'),
       TT('单位资产净值'), TT('净值估值日'), TT('近1年年率化回报'), TT('近5年年率化回报'), TT('近10年年率化回报'),
       TT('推出至今年率化回报'), TQ('基金规模（{u}）', { u: TT('百万港元') }), TT('基金管理费 %'), TT('最近期基金开支比率'), TT('推出日期')];
     const body = ROWS.map((x) => [
@@ -211,14 +211,14 @@
     document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
     fillSub(); S.page = 1; render();
   }
-  window.clearAllFilters = resetAll;   // 空态「一键清除」入口（2026-10-14）
+  window.clearAllFilters = resetAll;   // 空态「一键清除」入口（2026-10-14；筛选行/重置按钮 2026-10-31 应用户要求删除）
 
   /* ---------- 列设置（2026-10-14）：勾选显示列 + 精简模式 ---------- */
   /* 2026-10-19：列序对齐「基金最新数据」表格（名次 + 自算指标） */
   const COL_DEFS = [
     { i: 1, k: 'rank', n: '名次', lock: true },
     { i: 3, k: 'fund', n: '成分基金' },
-    { i: 4, k: 'trustee', n: '发行人（受托人）' },
+    { i: 4, k: 'trustee', n: '受托人' },   /* 2026-10-31（用户要求）：列名由「发行人（受托人）」简写 */
     { i: 5, k: 'type', n: '基金种类' },
     { i: 6, k: 'risk', n: '风险级别' },
     { i: 7, k: 'nav', n: '单位资产净值' },
@@ -312,8 +312,9 @@
     $('#fSub').addEventListener('change', () => { F.sub = $('#fSub').value; S.page = 1; render(); });
     $('#fTrustee').addEventListener('change', () => { F.trustee = $('#fTrustee').value; S.page = 1; render(); });
     $('#fRisk').addEventListener('change', () => { F.risk = $('#fRisk').value; S.page = 1; render(); });
-    /* 2026-10-31（用户要求）：第二行筛选（涨跌幅/回撤/管理费）删除，相关绑定移除 */
-    $('#btnReset').addEventListener('click', resetAll);   /* 2026-10-14：复用 resetAll（含估值日标签） */
+    /* 2026-10-31（用户要求）：第二行筛选（涨跌幅/回撤/管理费）与「重置条件」按钮已删除；重置走空态「一键清除」 */
+    const bReset = $('#btnReset');
+    if (bReset) bReset.addEventListener('click', resetAll);
     $('#perPage').addEventListener('change', () => {
       S.size = parseInt($('#perPage').value, 10) || 10;
       S.page = 1;
@@ -359,7 +360,6 @@
     $('#cnt').textContent = total;
     $('#loading').style.display = 'none';
     renderStats(ROWS);
-    renderChips();
 
     /* 2026-10-26 重做：可见列顺序单源——表头与表体由同一数组生成，物理上不可能错位 */
     const order = visibleOrder();
@@ -403,7 +403,7 @@
     cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
     fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) + (x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '') + '</div>' +
       (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
-    trustee: (x) => '<td data-c="trustee" data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
+    trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
     type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span>' +
       '<div class="cell-sub">' + esc(typeLabel(x.subtype || x.type)) + '</div></td>',
     risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
@@ -443,7 +443,7 @@
     rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
     cmp: '<th data-c="cmp" data-i18n-parts class="c" style="width:52px">对比</th>',
     fund: '<th data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>',
-    trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">发行人（受托人） <span class="arrow">↕</span></th>',
+    trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>',
     type: '<th data-c="type" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>',
     risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
     nav: '<th data-c="nav" data-i18n-parts data-k="nav" data-defdir="desc" class="sortable r">单位资产净值<br><small>取自各受托人官网</small> <span class="arrow">↕</span></th>',
@@ -500,7 +500,7 @@
     const big = rows.reduce((m, x) => (x.size != null && x.size > (m ? m.size : 0) ? x : m), null);
     $('#stats').innerHTML = [
       card(TT('基金数量'), rows.length, TT('条'), TQ('全市场共 {n} 条', { n: f.length })),
-      card(TT('发行人数量'), uniq(rows.map((x) => x.trustee)).length, TT('家'), TT('受托人／保荐人')),
+      card(TT('受托人数量'), uniq(rows.map((x) => x.trustee)).length, TT('家'), TT('受托人／保荐人')),
       card(TT('基金种类'), uniq(rows.map((x) => x.type)).length, TT('类'), TQ('{n} 个细类', { n: uniq(rows.map((x) => x.subtype)).length })),
       card(TT('近1年平均回报'), pct(avg('ann1')), '', TT('已剔除无数据基金')),
       card(TT('近1年上涨占比'), tot ? Math.round((pos / tot) * 100) : 0, '%', TQ('{n} / {m} 条录得正回报', { n: pos, m: tot })),
@@ -513,35 +513,8 @@
     return '<div class="stat"><div class="k">' + k + '</div><div class="v num">' + esc(v) + '<small>' + unit + '</small></div><div class="s">' + esc(s) + '</div></div>';
   }
 
-  function renderChips() {
-    const c = [];
-    if (F.kw) c.push([TQ('关键词：{v}', { v: F.kw }), 'kw']);
-    if (F.type) c.push([TQ('种类：{v}', { v: typeLabel(F.type) }), 'type']);
-    if (F.sub) c.push([TQ('细类：{v}', { v: typeLabel(F.sub) }), 'sub']);
-    if (F.trustee) c.push([TQ('发行人：{v}', { v: F.trustee }), 'trustee']);
-    if (F.risk !== '') c.push([TQ('风险：{v}', { v: F.risk }), 'risk']);
-    if (F.retMin !== '' || F.retMax !== '') c.push([dimName(F.retDim) + '：' + (F.retMin || TT('不限')) + ' ~ ' + (F.retMax || TT('不限')), 'ret']);
-    if (F.ddMin !== '' || F.ddMax !== '') c.push([TQ('最大回撤(近5年)：{a} ~ {b}', { a: F.ddMin || TT('不限'), b: F.ddMax || TT('不限') }), 'dd']);
-    if (F.feeMax !== '') c.push([TQ('管理费 ≤ {v}%', { v: F.feeMax }), 'fee']);
-    if (F.navDate) c.push([TQ('估值日：{v}', { v: F.navDate === 'none' ? TT('无估值日') : F.navDate.slice(5).replace('-', '/') }), 'navDate']);
-    $('#chips').innerHTML = c.length
-      ? '<span class="muted" style="font-size:12px">' + TT('筛选条件：') + '</span>' +
-        c.map((x) => '<span class="chip">' + esc(x[0]) + '<span class="x" data-c="' + x[1] + '">×</span></span>').join('')
-      : '<span class="muted" style="font-size:12px">' + TT('筛选条件：无') + '</span>';
-    $$('#chips .x').forEach((b) => b.addEventListener('click', () => {
-      const k = b.dataset.c;
-      if (k === 'kw') { F.kw = ''; $('#kw').value = ''; }
-      if (k === 'type') { F.type = ''; $('#fType').value = ''; fillSub(); }
-      if (k === 'sub') { F.sub = ''; fillSub(); }
-      if (k === 'trustee') { F.trustee = ''; $('#fTrustee').value = ''; }
-      if (k === 'risk') { F.risk = ''; $('#fRisk').value = ''; }
-      if (k === 'navDate') {
-        F.navDate = '';
-        document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
-      }
-      S.page = 1; render();
-    }));
-  }
+  /* 2026-10-31（用户要求）：「筛选条件：无」chips 行与「重置条件」按钮删除——
+     renderChips 连同容器一并下线；激活中的筛选仍由各下拉与搜索框本身呈现。 */
 
   function dimName(k) {
     return TT({ ann1: '近1年回报', ann5: '近5年年化', ann10: '近10年年化', annLaunch: '推出至今年化', cum1: '近1年累积' }[k] || k);

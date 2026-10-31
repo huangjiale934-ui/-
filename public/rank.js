@@ -113,7 +113,7 @@
       文案全部经过 TT()，切换语言后由 mpf:lang 监听重建即可跟随。 */
   const aggHead = () =>
     '<th class="c" style="width:56px">' + TT('名次') + '</th>' +
-    '<th data-k="fund" data-defdir="asc" class="sortable fz">' + TT('发行人（受托人）') + ' <span class="arrow">↕</span></th>' +
+    '<th data-k="fund" data-defdir="asc" class="sortable fz">' + TT('受托人') + ' <span class="arrow">↕</span></th>' +
     '<th data-k="count" data-defdir="desc" class="sortable r">' + TT('成分') + '<br>' + TT('基金数') + ' <span class="arrow">↕</span></th>' +
     '<th data-k="sizeSum" data-defdir="desc" class="sortable r">' + TT('总规模') + '<br><small>' + TT('百万港元') + '</small> <span class="arrow">↕</span></th>' +
     '<th data-k="ann1Avg" data-defdir="desc" class="sortable r">' + TT('平均近1年') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
@@ -164,7 +164,7 @@
   const selfHead = () =>
     '<th data-i18n-parts class="c" style="width:56px">' + TT('名次') + '</th>' +
     '<th data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">' + TT('成分基金') + ' <span class="arrow">↕</span></th>' +
-    '<th data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">' + TT('发行人') + ' <span class="arrow">↕</span></th>' +
+    '<th data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">' + TT('受托人') + ' <span class="arrow">↕</span></th>' +
     '<th data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">' + TT('基金种类') + ' <span class="arrow">↕</span></th>' +
     '<th data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">' + TT('风险') + ' <span class="arrow">↕</span></th>' +
     '<th data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">' + TT('基金规模') + '<br><small>' + TT('百万港元') + '</small> <span class="arrow">↕</span></th>' +
@@ -419,7 +419,7 @@
     if (S.kw) c.push([TQ('关键词：{v}', { v: S.kw }), 'kw']);
     if (S.type) c.push([TQ('种类：{v}', { v: typeLabel(S.type) }), 'type']);
     if (S.sub) c.push([TQ('细类：{v}', { v: typeLabel(S.sub) }), 'sub']);
-    if (S.trustee) c.push([TQ('发行人：{v}', { v: S.trustee }), 'trustee']);
+    if (S.trustee) c.push([TQ('受托人：{v}', { v: S.trustee }), 'trustee']);
     if (S.risk !== '' && S.risk != null) c.push([TQ('风险：{v}', { v: S.risk }), 'risk']);
     if (S.retMin !== '' || S.retMax !== '') {
       const dim = document.querySelector('#rkRRetDim');
@@ -454,7 +454,7 @@
       barHTML(cur(), x, window.__rkRanked || null) + '</td>',   /* 2026-10-31：名称下小字删除，计划名称移独立列 */
     scheme: (x) => '<td data-c="scheme" data-l="' + TT('计划名称') + '" class="fz"><div>' + esc(x.scheme || '—') + '</div>' +
       (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
-    trustee: (x) => '<td data-c="trustee" data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
+    trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
     type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>',
     risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
     ann1: (x) => '<td data-c="ann1" data-l="' + TT('近1年年率化') + '" class="r num ' + cls(x.ann1) + '">' + pct(x.ann1) + '</td>',
@@ -486,7 +486,7 @@
     rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
     fund: '<th data-c="fund" data-i18n-parts class="f-main fz">成分基金</th>',
     scheme: '<th data-c="scheme" data-i18n-parts>计划名称</th>',
-    trustee: '<th data-c="trustee" data-i18n-parts>发行人</th>',
+    trustee: '<th data-c="trustee" data-i18n-parts>受托人</th>',
     type: '<th data-c="type" data-i18n-parts>基金种类</th>',
     risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险级别 <span class="arrow">↕</span></th>',
     ann1: '<th data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>',
@@ -559,7 +559,7 @@
     const total = rows.length;
     const shown = rows.slice(0, S.top);
     $('#rkRcnt').textContent = total;
-    $('#rkRcntUnit').textContent = b.agg === 'trustee' ? TT('家发行人（受托人）') : TT('条');
+    $('#rkRcntUnit').textContent = b.agg === 'trustee' ? TT('家受托人') : TT('条');
     $('#rkRtip').textContent = shown.length < total ? TQ('（显示前 {n} 名）', { n: shown.length }) : TT('（全部显示）');
 
     // 名次列始终按榜单指标计算
@@ -579,7 +579,7 @@
             '<td class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div>' +
               (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') +
               barHTML(b, x, ranked) + '</td>' +
-            '<td data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
+            '<td data-l="' + TT('受托人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
             '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>' +
             '<td data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>' +
             '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
@@ -623,7 +623,7 @@
     const rate = x.navTotal ? Math.round((x.navOk / x.navTotal) * 100) : 0;
     return '<tr data-agg="1">' +
       '<td class="c" data-l="' + TT('名次') + '">' + medal + '</td>' +
-      '<td class="f-main fz" data-l="' + TT('发行人') + '"><div class="fund-name">' + esc(x.trustee) + '</div>' +
+      '<td class="f-main fz" data-l="' + TT('受托人') + '"><div class="fund-name">' + esc(x.trustee) + '</div>' +
         '<div class="sub-line">' + TT('受托人／保荐人') + ' · ' + TQ('旗下 {n} 条成分基金', { n: x.count }) + '</div>' +
         '<div class="bar"><i style="left:0;width:' + share + '%;background:#1a6fb5"></i></div></td>' +
       '<td data-l="' + TT('成分基金数') + '" class="r num">' + nf(x.count, 0) + '</td>' +
@@ -667,7 +667,7 @@
     const list = sortRows(pool(), S.sortKey || b.metric || null, S.sortDir || b.dir || 'desc');
     if (b.self) {
       /* 自算榜导出：只输出官网净值口径的指标，不含积金局字段 */
-      const sHead = [TT('名次'), TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('计划'), TT('发行人'), TT('净值估值日')]
+      const sHead = [TT('名次'), TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('计划'), TT('受托人'), TT('净值估值日')]
         .concat(SELF_COLS.map(([, n]) => TT(n)))
         .concat([TQ('基金规模（{u}）', { u: TT('百万港元') })]);
       const sBody = list.map((x, i) => [
@@ -681,7 +681,7 @@
         'MPF排名_' + TT(b.name) + '_' + TT('数据截至') + '_' + d + '.csv');
       return;
     }
-    const head = [TT('名次'), TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('发行人'), TT('风险级别'),
+    const head = [TT('名次'), TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('受托人'), TT('风险级别'),
       TT('单位资产净值'), TT('净值估值日'), TT('近1年年率化回报'), TT('近5年年率化回报'), TT('近10年年率化回报'),
       TT('推出至今年率化回报'), TQ('基金规模（{u}）', { u: TT('百万港元') }), TT('基金管理费 % p.a.'), TT('最近期基金开支比率'), TT('推出日期')];
     const body = list.map((x, i) => [
@@ -829,7 +829,7 @@
     /* 列定义：k=列键、n=显示名、lock=必显 */
     const FUND = [
       /* 2026-10-26（用户要求）：基金规模列移到回报组之后（原管理费位置），管理费移出默认显示 */
-      ['rank', '名次', 1], ['fund', '成分基金', 1], ['scheme', '计划名称', 0], ['trustee', '发行人', 0],
+      ['rank', '名次', 1], ['fund', '成分基金', 1], ['scheme', '计划名称', 0], ['trustee', '受托人', 0],
       ['type', '基金种类', 0], ['risk', '风险级别', 0],
       ['ann1', '近1年年率化', 0], ['ann5', '近5年年率化', 0], ['ann10', '近10年年率化', 0],
       ['annLaunch', '推出至今年率化', 0], ['size', '基金规模', 0], ['mgmtFee', '管理费', 0],
@@ -844,13 +844,13 @@
       ['cmp', '对比', 1], ['ops', '详情', 1],
     ];
     const AGG = [
-      ['rank', '名次', 1], ['trustee', '发行人（受托人）', 1], ['count', '成分基金数', 0],
+      ['rank', '名次', 1], ['trustee', '受托人', 1], ['count', '成分基金数', 0],
       ['sizeSum', '总规模', 0], ['ann1Avg', '平均近1年年率化', 0], ['ann5Avg', '平均近5年年率化', 0],
       ['ann10Avg', '平均近10年年率化', 0], ['annLaunchAvg', '平均推出至今年率化', 0],
       ['mgmtFee', '平均管理费', 0], ['navRate', '净值核实率', 0], ['ops', '详情', 1],
     ];
     const SELF = [
-      ['rank', '名次', 1], ['fund', '成分基金', 1], ['trustee', '发行人', 0], ['type', '基金种类', 0],
+      ['rank', '名次', 1], ['fund', '成分基金', 1], ['trustee', '受托人', 0], ['type', '基金种类', 0],
       ['risk', '风险级别', 0], ['size', '基金规模', 0],
       ['selfD1', '日涨跌', 0], ['selfW1', '近1周', 0], ['selfM1', '近1月', 0], ['selfYtd', '年初至今', 0],
       ['selfY1', '近1年', 0], ['selfY3a', '近3年年化', 0], ['selfY5a', '近5年年化', 0],

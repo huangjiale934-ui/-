@@ -890,11 +890,16 @@ function initDualScroll(scrollSel, topSel, ghostSel) {
 
 /* ---------- 头部 ---------- */
 function mountHeader(active) {
+  /* 2026-10-31：合并页（资料库内含可视化对比板块）导航高亮按当前 hash 自判，
+     避免语言切换重挂导航时回退到脚本加载时捕获的旧板块 */
+  if (typeof document !== 'undefined' && document.getElementById('dbSec') && document.getElementById('anSec')) {
+    active = (location.hash || '') === '#cmp' ? 'an' : 'db';
+  }
   /* 2026-10-26 修 Pages 子路径 404：全部改相对路径（WorkBuddy 根路径与 Pages /-/ 子路径两站通用） */
   const navs = [
     ['home.html', '首页', 'home'],
     ['index.html', '强积金资料库', 'db'],
-    ['analysis.html', 'MPF基金可视化对比', 'an'],
+    ['index.html#cmp', 'MPF基金可视化对比', 'an'],   /* 2026-10-31：对比页并入资料库第三板块 */
   ];
   const tb = (k) => (typeof window.t === 'function' ? window.t(k) : k);
   document.querySelector('.nav').innerHTML = navs
