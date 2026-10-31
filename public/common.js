@@ -101,12 +101,35 @@ function setLoadMsg(html) {
   });
 }
 
+/* 2026-11-01（6.0）：把 /api/navperf 的自算指标挂到基金对象上。
+   踩坑：页 2 三个板块（db/rank/cmp）各自调用 loadData，最后一次赋值 DATA=j 会
+   把已装饰的数组整体换掉 → 之后任何筛选/排序重绘，selfY1 等全部 undefined，
+   表现是「一筛选所有自算列变 —，按自算列排序等于没排」。
+   因此：① 任何一次 loadData 赋值后立即补挂；② 缓存 perf，供后加载的模块复用。 */
+function decorateSelfPerf(funds, perf) {
+  if (!funds || !perf || !perf.funds) return;
+  const hy = perf.meta && perf.meta.hsi ? perf.meta.hsi.y1 : null;
+  funds.forEach((x) => {
+    const p = perf.funds[String(x.id)];
+    if (!p) return;
+    x.selfD1 = p.d1; x.selfYtd = p.ytd; x.selfY1 = p.y1;
+    x.selfW1 = p.w1; x.selfM1 = p.m1;
+    x.selfY3a = p.y3a; x.selfY5a = p.y5a;
+    x.selfMdd5 = p.mdd5 != null ? p.mdd5 : null;
+    x.selfMdd = p.mdd1 != null ? p.mdd1 : p.mdd;
+    x.vol1 = p.vol1; x.vol3 = p.vol3; x.sharpe1 = p.sharpe1; x.posM12 = p.posM12;
+    x.excess1 = (p.y1 != null && hy != null) ? Math.round((p.y1 - hy) * 100) / 100 : null;
+  });
+}
+window.decorateSelfPerf = decorateSelfPerf;
+
 async function loadData(onDone, attempt, force) {
   attempt = attempt || 0;
   try {
     const j = await fetchJSON(API, 'funds', force);
     if (!j.funds || !j.funds.length) throw new Error(TT('空数据'));
     DATA = j;
+    if (window.__PERF_JSON) decorateSelfPerf(DATA.funds, window.__PERF_JSON);
     renderUpdateTime();
     renderFriends();
     renderNavDistCard();
@@ -800,23 +823,28 @@ window.fundMatch = fundMatch;
    绑定时的 state 即为「默认顺序」，取消时还原。 */
 function makeSorter(thList, state, onSort) {
   const D0 = { key: state.key, dir: state.dir };
-  const paint = () => {
+  /* 2026-11-01（6.0）：只负责把「当前排序状态」画到表头。
+     renderThead 每次重绘都会重建 th，旧标记随之丢失 → 绑定后必须立即再画一次，
+     否则点完列后所有箭头都回到 ↕，用户看不出当前按哪列排。 */
+  const markActive = () => {
     thList.forEach((o) => {
       o.classList.remove('sorted');
       const a = o.querySelector('.arrow');
       if (a) a.textContent = '↕';
       if (o.hasAttribute('data-k')) o.setAttribute('aria-sort', 'none');
     });
-    /* 2026-10-26 修 2-04：取消态=回到默认序列，也是三态之一——恢复默认列的箭头标记，
-       否则默认列（如 size desc）的「降序」肉眼不可见（aria-sort 在 none/asc 间跳） */
+    const act = state.key || D0.key;
     thList.forEach((o) => {
-      if (o.dataset.k === D0.key) {
+      if (o.dataset.k === act) {
         o.classList.add('sorted');
         const a = o.querySelector('.arrow');
-        if (a) a.textContent = D0.dir === 'desc' ? '↓' : '↑';
-        if (o.hasAttribute('data-k')) o.setAttribute('aria-sort', D0.dir);
+        if (a) a.textContent = state.dir === 'asc' ? '↑' : '↓';
+        if (o.hasAttribute('data-k')) o.setAttribute('aria-sort', state.dir === 'asc' ? 'ascending' : 'descending');
       }
     });
+  };
+  const paint = () => {
+    markActive();
     /* 表头排序与「排名维度」卡片互斥：表头动过之后，卡片不再显示选中态 */
     const tabs = document.querySelector('#selfTabs');
     if (tabs) tabs.querySelectorAll('.st').forEach((n) => { n.classList.remove('on'); n.classList.remove('asc'); });
@@ -825,6 +853,7 @@ function makeSorter(thList, state, onSort) {
     if (dsel) dsel.value = '';
     window.__dimActive = false;
   };
+  markActive();   /* 新建/重建表头后立刻标记当前列 */
   thList.forEach((th) => {
     th.addEventListener('click', () => {
       const key = th.dataset.k;
@@ -2969,12 +2998,18 @@ document.addEventListener('mpf:lang', () => {
     MPF_BOND: '债券积金', HSI: '恒生指数', SSE: '上证指数',
   };
   var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];
+  var LAST = null;   /* 缓存最近一次 /api/ticker 响应，供语言切换重渲染 */
 
   function esc(s) {
     if (window.__t2sActive && window.t2s) s = window.t2s(s);
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
-  function TT(s) { return (typeof window.t === 'function' && window.t(s, s)) || s; }
+  function TT(s) {
+    /* 2026-11-01（6.0）：这里原本只走 window.t()，且行情栏只在 boot 渲染一次 →
+       切繁/英后 6 张卡片仍是简体。TT 补 t2s 兜底，并在 mpf:lang 时用缓存重渲染。 */
+    var v = (typeof window.t === 'function' && window.t(s, s)) || s;
+    return (window.__t2sActive && window.t2s) ? window.t2s(v) : v;
+  }
   function spark(series, up) {
     var w = 58, h = 24, n = series.length;
     if (n < 2) return '';
@@ -2994,6 +3029,7 @@ document.addEventListener('mpf:lang', () => {
   function render(j) {
     var box = document.getElementById('mktTicker');
     if (!box || !j || !j.items) return;
+    LAST = j;
     var cards = '';
     ORDER.forEach(function (k) {
       var it = j.items[k];
@@ -3045,6 +3081,12 @@ document.addEventListener('mpf:lang', () => {
       .then(function (j) { if (j) render(j); })
       .catch(function () { var box = document.getElementById('mktTicker'); if (box) box.style.display = 'none'; });
   }
+  /* 语言切换：用缓存重渲染 6 张卡片（不重复请求接口） */
+  document.addEventListener('mpf:lang', function () {
+    if (LAST) render(LAST);
+    /* 旧内核 fixed 兜底的高度随语言变化，重新量一次 */
+    pinFallback();
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();

@@ -1790,9 +1790,12 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .wrap .foot { border-top: 0; margin-top: 8px; }
 /* ④ 表格工具栏：搜索框并入排名维度一行后的紧凑样式 */
 .f-summary-new { row-gap: 8px; }
-.tb-search { display: flex; align-items: center; gap: 7px; background: #fff; border: 1px solid #d5e3f0;
-  border-radius: 8px; height: 34px; padding: 0 9px; flex: 0 1 190px; min-width: 145px; color: var(--text-3);
-  transition: border-color .15s, box-shadow .15s; }
+.tb-search { display: flex; align-items: center; gap: 7px; background: #f7fbff; border: 1.5px solid #b9d4ec;
+  border-radius: 9px; height: 34px; padding: 0 10px; flex: 0 1 190px; min-width: 145px; color: var(--text-3);
+  box-shadow: inset 0 1px 2px rgba(8, 102, 187, 0.05);
+  transition: border-color .15s, box-shadow .15s, background-color .15s; }
+/* 2026-11-01（6.0）：与第十五轮「控件蓝色设计语言」对齐——此前搜索框还是旧的 1px #d5e3f0 */
+.tb-search:hover { border-color: #7fb2de; background-color: #f2f8fe; }
 /* 2026-10-31 四版（用户要求）：搜索框缩小，不留大片空白 */
 .tb-search:focus-within { border-color: var(--brand-2, #378add); }
 .tb-search svg { flex: none; }
@@ -1830,7 +1833,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 数字输入保留右侧微调空间 */
 .range input[type="number"] { padding-right: 8px; }
 .f-item > label { font-size: 12px; color: var(--text-3); }
-.tb-search:focus-within { border-color: var(--brand, #0866bb); box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.10); }
+.tb-search:focus-within { border-color: var(--brand, #0866bb); background: #fff; box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.13); }
 /* ⑮ 页2表头：H11 居中 tabs（白卡居中、选中=蓝色加粗无底） */
 .pg-head { justify-content: center; margin-bottom: 14px; }
 .db-tabs { background: #fff; border: 1px solid var(--line, #e3ecf4); border-radius: 12px; padding: 5px; gap: 4px; box-shadow: 0 1px 6px rgba(20, 50, 80, .05); }

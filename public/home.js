@@ -666,7 +666,7 @@
         '<li class="news-item">' +
           '<span class="news-date">' + esc(x.date) + '</span>' +
           '<a class="news-title" href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer">' +
-            esc(x.title) + '<i class="news-out">↗</i></a>' +
+            '<span class="nt-text">' + esc(x.title) + '</span><i class="news-out">↗</i></a>' +
         '</li>').join('');
     }).catch(() => {
       box.innerHTML = '<li class="news-item news-empty">' + TT('资讯加载失败，可前往积金局官网查看') + '</li>';
@@ -802,6 +802,12 @@
        月份标签不再带年份。 */
     const mspan = (new Date(pts[pts.length - 1][0]) - new Date(pts[0][0])) / 2592000000;
     const seenm = {}; const seenY = {}; let xt = '';
+    /* 2026-11-01（6.0）：英文模式下 TT('年')='yrs'、TT('月')='M'，直接拼会成「2022yrs/3M」。
+       改为按语言显式输出：EN = 2022 / Mar，简繁 = 2022年 / 3月。 */
+    const EN = (document.documentElement.lang || '').indexOf('en') === 0;
+    const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const yearTxt = (yy) => EN ? yy : yy + TT('年');
+    const monthTxt = (mo) => EN ? (MON[mo - 1] || mo) : mo + TT('月');
     const yearLab = (x, y, txt) =>
       '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="end" class="pi-yk pi-yk-year" transform="rotate(-40 ' + x.toFixed(1) + ' ' + y + ')">' + txt + '</text>';
     pts.forEach((p, i) => {
@@ -809,11 +815,11 @@
       let lab = null;
       if (mo === 1 && !seenY[yy]) {
         seenY[yy] = 1;
-        xt += yearLab(X(i) + 6, (H - padB) + 18, yy + TT('年'));
+        xt += yearLab(X(i) + 6, (H - padB) + 18, yearTxt(yy));
         return;
       }
-      if (mspan <= 13) { if (!seenm[p[0].slice(0, 7)]) { lab = mo + TT('月'); seenm[p[0].slice(0, 7)] = 1; } }
-      else if (mspan <= 74) { if ((mo === 3 || mo === 6 || mo === 9) && !seenm[p[0].slice(0, 7)]) { lab = mo + TT('月'); seenm[p[0].slice(0, 7)] = 1; } }
+      if (mspan <= 13) { if (!seenm[p[0].slice(0, 7)]) { lab = monthTxt(mo); seenm[p[0].slice(0, 7)] = 1; } }
+      else if (mspan <= 74) { if ((mo === 3 || mo === 6 || mo === 9) && !seenm[p[0].slice(0, 7)]) { lab = monthTxt(mo); seenm[p[0].slice(0, 7)] = 1; } }
       if (lab) xt += '<text x="' + X(i).toFixed(1) + '" y="' + ((H - padB) + 16) + '" text-anchor="middle" class="pi-yk">' + lab + '</text>';
     });
     const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
@@ -862,6 +868,10 @@
     cur = key; range = '5y';
     render();
   };
+
+  /* 2026-11-01（6.0）：区间按钮 / 6 张指数卡 / 年月轴标签都是 JS 生成的，
+     切繁/英后必须重绘，否则整块仍是简体。 */
+  document.addEventListener('mpf:lang', function () { if (DB) render(); });
 
   fetch('/api/perf-idx').then((r) => (r.ok ? r.json() : null)).then((j) => {
     if (!j || !j.items) return;

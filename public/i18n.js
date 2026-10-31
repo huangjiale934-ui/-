@@ -75,7 +75,7 @@ if (code === 'zh-Hans') { cb(); return; }
 var flag = code === 'zh-Hant' ? '__hantLoaded' : '__enLoaded';
 if (window[flag]) { cb(); return; }
 var sc = document.createElement('script');
-sc.src = (code === 'zh-Hant' ? 'i18n-hant.js' : 'i18n-en.js') + '?v=20261021c';
+sc.src = (code === 'zh-Hant' ? 'i18n-hant.js' : 'i18n-en.js') + '?v=20261101c';
 sc.onload = function () { window[flag] = 1; cb(); };
 sc.onerror = function () { cb(); };
 document.head.appendChild(sc);

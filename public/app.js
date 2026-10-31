@@ -89,26 +89,19 @@
       /* 2026-10-19：本页改为「最新净值口径」列表——补入自算指标（日涨跌/年初至今/近1年/近3年/回撤） */
       if (window.ensurePerf) {
         window.ensurePerf().then((j) => {
-          const pf = (j && j.funds) || {};
-          DATA.funds.forEach((x) => {
-            const p = pf[String(x.id)];
-            if (!p) return;
-            x.selfD1 = p.d1; x.selfYtd = p.ytd; x.selfY1 = p.y1;
-            x.selfW1 = p.w1; x.selfM1 = p.m1;
-            x.selfY3a = p.y3a; x.selfY5a = p.y5a;
-            x.selfMdd5 = p.mdd5 != null ? p.mdd5 : null;
-            x.selfMdd = p.mdd1 != null ? p.mdd1 : p.mdd;
-            x.vol1 = p.vol1; x.vol3 = p.vol3; x.sharpe1 = p.sharpe1; x.posM12 = p.posM12;
-            const hy = j && j.meta && j.meta.hsi ? j.meta.hsi.y1 : null;
-            x.excess1 = (p.y1 != null && hy != null) ? Math.round((p.y1 - hy) * 100) / 100 : null;
-          });
+          /* 2026-11-01（6.0）：缓存 perf 并走公共装饰（loadData 里也会补挂，
+             避免 rank/analysis 随后的一次 loadData 把装饰覆盖掉） */
+          window.__PERF_JSON = j;
+          window.decorateSelfPerf(DATA.funds, j);
           render();
         }).catch(() => {});
       }
       bindNavDateDist();
     });
     // 语言切换后重绘整表（表头 data-l 标签、详情按钮、净值悬浮说明等）
-    document.addEventListener('mpf:lang', () => { if (DATA.count) render(); });
+    /* 2026-11-01（6.0）：下拉 option 是 JS 生成的，必须在语言切换时一并重建，
+       否则繁/英模式下仍停留上一语言的文案（曾出现繁体页下拉全是简体）。 */
+    document.addEventListener('mpf:lang', () => { if (DATA.count) { buildFilters(); render(); } });
   }
 
   /* 2026-10-24（领导要求）：列表下方的「净值估值日」卡片 → 点击筛选（供 common.js 的卡片调用） */
@@ -149,17 +142,27 @@
     $('#fSub').value = F.sub;
   }
 
+  /* 2026-11-01（6.0）：option 文案统一出口——类别走 typeLabel（繁/简/英三态），
+     其余数据值仅在简体模式繁转简；繁/英保留原值。 */
+  function optText(v, fmt) {
+    const raw = fmt ? fmt(v) : v;
+    return (document.documentElement.lang === 'zh-Hans' && window.t2s) ? window.t2s(raw) : raw;
+  }
+
   function fill(sel, arr, fmt) {
     const el = $(sel);
     const cur = el.value;
-    el.innerHTML = '<option value="">' + el.options[0].text + '</option>';
+    const first = el.options[0];
+    /* 首项「全部…」原来直接取 options[0].text，重建一次后 data-i18n 就丢了 →
+       记在 data-all-key 上，每次用 TT() 现翻，切语言不会停留在旧文案。 */
+    const key = el.dataset.allKey || (first && first.getAttribute('data-i18n')) || (first ? first.textContent : '');
+    el.dataset.allKey = key;
+    el.innerHTML = '<option value="">' + TT(key) + '</option>';
     arr.sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'));
     arr.forEach((v) => {
       const o = document.createElement('option');
       o.value = v;
-      /* 2026-10-31：简体模式下筛选下拉的数据值（发行人/种类等）繁转简 */
-      const label = window.__t2sActive && window.t2s ? window.t2s(fmt ? fmt(v) : v) : (fmt ? fmt(v) : v);
-      o.textContent = label;
+      o.textContent = optText(v, fmt);
       el.appendChild(o);
     });
     if (arr.indexOf(cur) >= 0 || arr.map(String).indexOf(String(cur)) >= 0) el.value = cur;
@@ -355,6 +358,9 @@
 
   function render() {
     if (!DATA || !DATA.funds) return;   /* applyCols 可能在数据加载前触发 */
+    /* 2026-11-01（6.0）：兜底补挂自算指标——rank/analysis 板块后加载会整体替换 DATA，
+       不补挂就会出现「筛选后所有自算列变 —」。幂等、451 条开销可忽略。 */
+    if (window.__PERF_JSON) window.decorateSelfPerf(DATA.funds, window.__PERF_JSON);
     ROWS = sortRows(filtered(), S.key, S.dir);
     const total = ROWS.length;
     $('#cnt').textContent = total;

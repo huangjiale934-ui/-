@@ -232,17 +232,54 @@
     const f = DATA.funds;
     fill('#rkRType', uniq(f.map((x) => x.type)), (v) => typeLabel(v));
     fill('#rkRTrustee', uniq(f.map((x) => x.trustee)));
+    buildSubRisk();
   }
 
-  function fill(sel, arr) {
+  /* 细类 / 风险级别：选项也由数据生成，语言切换时必须重建（原来只建一次，会停留在旧语言） */
+  function buildSubRisk() {
+    const sub = document.querySelector('#rkRSub');
+    if (sub) {
+      const cur = sub.value;
+      sub.innerHTML = '<option value="">' + TT('全部细类') + '</option>';
+      [...new Set(DATA.funds.map((x) => x.subtype).filter(Boolean))].sort().forEach((v) => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = optText(v, true);
+        sub.appendChild(o);
+      });
+      if (cur) sub.value = cur;
+    }
+    const rk = document.querySelector('#rkRRisk');
+    if (rk) {
+      const cur = rk.value;
+      rk.innerHTML = '<option value="">' + TT('全部级别') + '</option>';
+      [...new Set(DATA.funds.map((x) => x.risk).filter((v) => v != null))].sort((a, b) => a - b).forEach((v) => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = v + ' ' + TT('级');
+        rk.appendChild(o);
+      });
+      if (cur) rk.value = cur;
+    }
+  }
+
+  /* 选项文案：类别走 typeLabel（繁/简/英三态），其余数据值简体模式下繁转简 */
+  function optText(v, isType) {
+    const raw = isType ? typeLabel(v) : v;
+    return (document.documentElement.lang === 'zh-Hans' && window.t2s) ? window.t2s(raw) : raw;
+  }
+
+  function fill(sel, arr, fmt) {
     const el = $(sel);
     const cur = el.value;
-    el.innerHTML = '<option value="">' + el.options[0].text + '</option>';
+    const first = el.options[0];
+    const key = el.dataset.allKey || (first && first.getAttribute('data-i18n')) || (first ? first.textContent : '');
+    el.dataset.allKey = key;
+    el.innerHTML = '<option value="">' + TT(key) + '</option>';
     arr.sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'));
     arr.forEach((v) => {
       const o = document.createElement('option'); o.value = v;
-      /* 2026-10-31：简体模式下下拉数据值繁转简 */
-      o.textContent = window.__t2sActive && window.t2s ? window.t2s(v) : v;
+      o.textContent = optText(v, !!fmt);
       el.appendChild(o);
     });
     if (arr.indexOf(cur) >= 0) el.value = cur;
@@ -810,6 +847,7 @@
   document.addEventListener('mpf:lang', () => {
     if (!DATA.count) return;
     HEAD_MODE = '';        // 强制重建表头；FUND 快照为中文，重建后再统一翻译
+    buildFilters();        // 2026-11-01（6.0）：下拉选项按新语言重建
     buildTabs();
     buildMobileSort();
     render();
