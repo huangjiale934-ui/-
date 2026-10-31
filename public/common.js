@@ -2938,3 +2938,92 @@ document.addEventListener('mpf:lang', () => {
 
 
 /* 2026-10-28：旧的 #updBar 实现已并入 initUpdateBanner（统一一条，避免重复/冲突） */
+
+/* ======================= 市场行情栏（2026-10-31 四版：全站共用，自 home.js 上移） =======================
+ * 任何页面顶部固定可见（sticky + 旧内核 fixed 兜底）；首页点卡片跳「积金表现指数」，
+ * 其他页点卡片回首页对应指数走势。 */
+(function () {
+  var NAMES = {
+    MPFAVG: '积金市场指数', MPF_STOCK: '股票积金', MPF_MIX: '混合积金',
+    MPF_BOND: '债券积金', HSI: '恒生指数', SSE: '上证指数',
+  };
+  var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];
+
+  function esc(s) {
+    if (window.__t2sActive && window.t2s) s = window.t2s(s);
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function TT(s) { return (typeof window.t === 'function' && window.t(s, s)) || s; }
+  function spark(series, up) {
+    var w = 58, h = 24, n = series.length;
+    if (n < 2) return '';
+    var mn = Math.min.apply(null, series), mx = Math.max.apply(null, series);
+    var rg = mx - mn || 1;
+    var pts = series.map(function (v, i) {
+      return (i / (n - 1) * w).toFixed(1) + ',' + (h - 3 - (v - mn) / rg * (h - 6)).toFixed(1);
+    });
+    var c = up ? '#d93025' : '#12996b';
+    return '<svg class="tk-spark" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" aria-hidden="true">' +
+      '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + c + '" stroke-width="1.6"/></svg>';
+  }
+  function fmt(v) {
+    return v >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : (Math.round(v * 100) / 100).toFixed(2);
+  }
+
+  function render(j) {
+    var box = document.getElementById('mktTicker');
+    if (!box || !j || !j.items) return;
+    var cards = '';
+    ORDER.forEach(function (k) {
+      var it = j.items[k];
+      if (!it) return;
+      var up = it.chg > 0, flat = !it.chg;
+      var cls = flat ? 'flat' : (up ? 'up' : 'down');
+      var pct = (up ? '+' : '') + it.chg.toFixed(2) + '%';
+      cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(it.name + ' · 截至 ' + it.asOf + '；点击查看指数走势') + '">' +
+        '<span class="tk-name">' + TT(NAMES[k] || it.name) + '</span>' +
+        '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +
+        '<b class="tk-chg ' + cls + '">' + pct + '</b></span>' +
+        spark(it.spark, up) +
+        '</button>';
+    });
+    box.querySelector('.tk-track').innerHTML = cards;
+    box.querySelectorAll('.tk-card').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var panel = document.getElementById('perfIdx');
+        if (panel && panel.scrollIntoView) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (typeof window.__piSelect === 'function') window.__piSelect(b.dataset.tk);
+        } else {
+          /* 非首页：回首页的「积金表现指数」并选中对应指数 */
+          try { sessionStorage.setItem('piJump', b.dataset.tk); } catch (e) {}
+          location.href = 'home.html#perfIdx';
+        }
+      });
+    });
+  }
+
+  /* 旧内核 sticky 兜底：不支持 sticky 时用 fixed（引擎不支持时才启用，避免固定化导致的回流跳动） */
+  function pinFallback() {
+    var box = document.getElementById('mktTicker');
+    if (!box) return;
+    var ok = false;
+    try { ok = (window.CSS && CSS.supports && (CSS.supports('position', 'sticky') || CSS.supports('position', '-webkit-sticky'))); } catch (e) { ok = true; }
+    if (ok) return;
+    var h = box.offsetHeight;
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > box.offsetTop + h) { box.classList.add('pinned'); document.body.style.paddingTop = h + 'px'; }
+      else { box.classList.remove('pinned'); document.body.style.paddingTop = ''; }
+    }, { passive: true });
+  }
+
+  function boot() {
+    if (!document.getElementById('mktTicker')) return;
+    pinFallback();
+    fetch('/api/ticker').then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j) render(j); })
+      .catch(function () { var box = document.getElementById('mktTicker'); if (box) box.style.display = 'none'; });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();

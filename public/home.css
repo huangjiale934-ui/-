@@ -1016,23 +1016,7 @@ body { overflow-x: visible; }
   .plat-img img { max-height: 220px; }
 }
 
-/* ===== 2026-10-31（用户要求）：雅虎财经式行情栏（导航下、随页面滚动） ===== */
-.mkt-ticker { background: var(--surface, #fff); border-bottom: 1px solid var(--border, #e3ecf4); }
-.mkt-ticker .tk-track { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; max-width: 1400px; margin: 0 auto; padding: 0 14px; }
-.mkt-ticker .tk-track::-webkit-scrollbar { display: none; }
-.mkt-ticker .tk-loading { padding: 10px 0; font-size: 12px; color: var(--text-3, #8595a8); }
-.tk-card { display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-right: 1px solid var(--border, #e9f0f6); flex: none; cursor: default; }
-.tk-card:first-child { padding-left: 0; }
-.tk-card:last-child { border-right: 0; }
-.tk-name { font-size: 12.5px; font-weight: 600; color: var(--text-2, #3d5470); white-space: nowrap; }
-.tk-nums { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; white-space: nowrap; }
-.tk-last { font-size: 13.5px; font-variant-numeric: tabular-nums; color: var(--text, #16283e); font-weight: 600; }
-.tk-chg { font-size: 11.5px; font-variant-numeric: tabular-nums; font-weight: 600; }
-.tk-chg.up { color: #d93025; }
-.tk-chg.down { color: #12996b; }
-.tk-chg.flat { color: var(--text-3, #8595a8); }
-.tk-spark { flex: none; opacity: .9; }
-@media (max-width: 720px) { .tk-card { padding: 8px 10px; gap: 7px; } .tk-spark { display: none; } }
+/* ===== 2026-10-31 四版：行情栏样式已上移到 style.css（页 2 等所有页面共用），此处不再重复 ===== */
 
 
 /* ===== 2026-10-31 二版（用户反馈） ===== */
@@ -1042,12 +1026,6 @@ body { overflow-x: visible; }
   line-height: 13px; text-align: center; vertical-align: 2px; font-style: normal; }
 /* 标题与年份标签拉开间距 */
 .yr-tabs { margin-top: 14px; }
-/* 行情栏：6 张全部可见 */
-.tk-card { flex: 1 1 0; min-width: 0; justify-content: center; padding: 9px 10px; gap: 8px; }
-.tk-name { max-width: 118px; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
-.tk-nums { margin-left: auto; }
-.tk-last { font-size: 13px; }
-@media (max-width: 1160px) { .tk-spark { display: none; } }
 /* 榜单行删受托人后名称占满 */
 .mk-top .n { flex: 1 1 auto; min-width: 0; }
 .mk-top .t { display: none; }
@@ -1058,12 +1036,7 @@ body { overflow-x: visible; }
 .mo-track { height: 12px; }
 .mo-right { flex: 0 0 272px; }
 
-/* ===== 2026-10-31 三版：行情栏 sticky 固定（滚到哪都能看到）+ 可点击跳转 ===== */
-.mkt-ticker { position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 14px rgba(16, 50, 90, 0.06); }
-.tk-card { appearance: none; border: 0; background: none; font-family: inherit; text-align: left; cursor: pointer; transition: background .15s; }
-.tk-card { border-right: 1px solid var(--border, #e9f0f6); }
-.tk-card:last-child { border-right: 0; }
-.tk-card:hover { background: var(--brand-soft, #edf7ff); }
+/* ===== 2026-10-31 四版：行情栏样式统一放 style.css（全站 sticky 固定） ===== */
 
 /* ===== 积金表现指数（2026-10-31，用户要求） ===== */
 /* 三版（用户反馈）：整栏下移一点、标题行与卡片留白加大 */

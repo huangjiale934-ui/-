@@ -200,9 +200,15 @@ const rawHtml = {};
   chk((n === 'home' ? '首页' : '资料库') + '·HTML div 配平',
     od > 0 && od === cd, '开' + od + ' / 闭' + cd);
 });
-/* 2026-10-31 四版（用户要求）：原第三页文件直接删除（并入资料库第三板块） */
-chk('四版·原第三页已删除且对比板块并入资料库（无 analysis.html + index 含 anSec）',
-  !fs.existsSync(path.join(__dirname, '..', 'public', 'analysis.html')) && /id="anSec"/.test(rawHtml.index || ''));
+/* 2026-10-31 四版（用户要求）：原第三页下线；本地仅留最小跳转占位（沙箱不删除文件，占位可覆盖线上旧版） */
+chk('四版·原第三页已下线（analysis.html 为最小跳转占位 + index 含 anSec）',
+  (function () {
+    try {
+      const st = fs.statSync(path.join(__dirname, '..', 'public', 'analysis.html'));
+      const t = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
+      return st.size < 800 && t.indexOf('index.html#cmp') >= 0 && /id="anSec"/.test(rawHtml.index || '');
+    } catch (e) { return false; }
+  })());
 
 /* ---- 第七轮：语言补全 / 榜单提示 / 对比入口 / 风险小图例 / 更新时间 / 估值日提示 ---- */
 chk('首页·概览双卡：数据更新+积金局资料截至（2026-10-31 恢复）', /class="upd-live"/.test(home) && /数据更新 <b>/.test(home) && /class="upd-of"/.test(home));
@@ -1699,8 +1705,8 @@ setTimeout(() => {
 /* ================= 2026-10-31 三版（用户十六项反馈） ================= */
 chk('三版·①hero 改名+按钮卡与标题对齐（hero-copy fit-content）',
   /<h1 data-i18n="香港强积金数据分析平台">/.test(home) && /\.hero-copy \{ width: fit-content/.test(css) && /\.hero-btns \.cta \{ flex: 1 1 0/.test(css));
-chk('三版·②行情栏 sticky 固定 + 点击跳转表现指数（data-tk → __piSelect）',
-  /\.mkt-ticker \{ position: sticky/.test(css) && /data-tk="' \+ k \+ '"/.test(readSrc('home.js')) && /window\.__piSelect/.test(readSrc('home.js')));
+chk('四版·②行情栏全站固定（样式入 style.css、逻辑入 common.js）+ 首页跳转表现指数',
+  /\.mkt-ticker \{ background[^}]*position: sticky/.test(readSrc('style.css')) && /data-tk="' \+ k \+ '"/.test(readSrc('common.js')) && /pinFallback/.test(readSrc('common.js')) && /window\.__piSelect/.test(readSrc('home.js')) && /id="mktTicker"/.test(rawIdxHtml));
 chk('三版·③表现指数含恒指/上证（perf-idx 6 键 + 卡片 6 张）',
   /'MPF_BOND', 'HSI', 'SSE'/.test(readSrc('root:server.js')) && /\['HSI', '恒生指数'\], \['SSE', '上证指数'\]/.test(readSrc('home.js')));
 chk('三版·④表现指数纵轴整10刻度（step 10/20 等间隔）', /let step = 10;/.test(readSrc('home.js')) && /pi-yk-year/.test(readSrc('home.js')));
