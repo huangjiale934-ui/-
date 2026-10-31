@@ -809,12 +809,12 @@
       let lab = null;
       if (mo === 1 && !seenY[yy]) {
         seenY[yy] = 1;
-        xt += yearLab(X(i), H - 8, yy + TT('年'));
+        xt += yearLab(X(i) + 6, (H - padB) + 18, yy + TT('年'));
         return;
       }
       if (mspan <= 13) { if (!seenm[p[0].slice(0, 7)]) { lab = mo + TT('月'); seenm[p[0].slice(0, 7)] = 1; } }
       else if (mspan <= 74) { if ((mo === 3 || mo === 6 || mo === 9) && !seenm[p[0].slice(0, 7)]) { lab = mo + TT('月'); seenm[p[0].slice(0, 7)] = 1; } }
-      if (lab) xt += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="pi-yk">' + lab + '</text>';
+      if (lab) xt += '<text x="' + X(i).toFixed(1) + '" y="' + ((H - padB) + 16) + '" text-anchor="middle" class="pi-yk">' + lab + '</text>';
     });
     const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
     const areaD = lineD + ' L' + X(pts.length - 1).toFixed(1) + ' ' + (H - padB) + ' L' + padL + ' ' + (H - padB) + ' Z';

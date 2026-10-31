@@ -1780,11 +1780,11 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* ① 排名徽标已在 .medal 处改蓝色系 */
 /* ② 2026-10-31 四版（用户要求）：折叠箭头加大加粗蓝色；两行箭头用同一右内边距对齐，并避开悬浮按钮 */
 .foot-fold summary { padding-right: 134px; }
-.foot-fold .ff-arrow { font-size: 16px; color: #0866bb; font-weight: 700; width: 22px; text-align: center; line-height: 1; align-self: center; }
+.foot-fold .ff-arrow { font-size: 21px; color: #0866bb; font-weight: 800; width: 26px; text-align: center; line-height: 1; align-self: center; }
 .foot-fold[open] .ff-arrow { transform: rotate(180deg); }
 @media (max-width: 560px) { .foot-fold summary { padding-right: 56px; } }
 /* ③ 2026-10-31 四版（用户澄清）：恢复 #foldSpec 卡片框，只删它上方 .foot 的通栏分隔线 */
-#foldSpec { margin-top: 8px; }
+#foldSpec { margin-top: 8px; border-top: 0; border-radius: 0 0 10px 10px; }
 #foldSpec summary { padding: 8px 134px 8px 13px; }   /* 右侧同全局 134px：两行箭头对齐且避让悬浮钮 */
 /* 2026-10-31 四版（用户要求）：估值日分布行上方的通栏横线删除（仅页 2；首页页脚不动） */
 .wrap .foot { border-top: 0; margin-top: 8px; }
@@ -1806,19 +1806,29 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
    2026-10-31 四版（用户要求）：筛选控件统一设计语言 + 版式调整
    ========================================================== */
 /* 单行筛选行：维度最左（margin-right:auto 把四个下拉+搜索框推到右侧） */
-.f-row-split .dim-pick { margin-right: auto; }
-.f-row-split .tb-search { margin-left: 4px; }
+/* 2026-11-01 五版：搜索框在筛选行最左、排名维度在工具栏最左（结构见 index.html） */
+.f-summary .dim-pick select { min-width: 150px; }
+.tb-search { margin-right: 4px; }
 /* 统一控件外观：34px 高、浅蓝描边、8px 圆角、聚焦蓝光圈 */
 .f-item select, .f-item input[type="text"], .f-item input[type="number"],
 .dim-pick select, .range select, .range input[type="number"] {
-  height: 34px; font-size: 12.5px; background: #fff; color: var(--text);
-  border: 1px solid #d5e3f0; border-radius: 8px; padding: 0 10px;
-  transition: border-color .15s, box-shadow .15s;
+  height: 34px; font-size: 12.5px; color: #1b3a5c; font-weight: 600;
+  background: #f7fbff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%230866bb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center;
+  border: 1.5px solid #b9d4ec; border-radius: 9px; padding: 0 26px 0 10px;
+  box-shadow: inset 0 1px 2px rgba(8, 102, 187, 0.05);
+  transition: border-color .15s, box-shadow .15s, background-color .15s;
+  appearance: none; -webkit-appearance: none;
 }
-.f-item select:hover, .f-item input:hover, .dim-pick select:hover, .range select:hover, .range input:hover { border-color: #7fb2de; }
+.f-item input[type="text"], .f-item input[type="number"], .range input[type="number"] {
+  background-image: none; font-weight: 500; padding: 0 10px;
+}
+.f-item select:hover, .f-item input:hover, .dim-pick select:hover, .range select:hover, .range input:hover { border-color: #7fb2de; background-color: #f2f8fe; }
 .f-item select:focus, .f-item input:focus, .dim-pick select:focus, .range select:focus, .range input:focus {
-  border-color: var(--brand, #0866bb); box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.10); outline: none;
+  border-color: var(--brand, #0866bb); background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.13); outline: none;
 }
+/* 数字输入保留右侧微调空间 */
+.range input[type="number"] { padding-right: 8px; }
 .f-item > label { font-size: 12px; color: var(--text-3); }
 .tb-search:focus-within { border-color: var(--brand, #0866bb); box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.10); }
 /* ⑮ 页2表头：H11 居中 tabs（白卡居中、选中=蓝色加粗无底） */
@@ -1841,8 +1851,8 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
    sticky 固定——任何页面滚动到任何位置都可见；.pinned 为旧内核兜底
    ========================================================== */
 .mkt-ticker { background: var(--surface, #fff); border-bottom: 1px solid var(--border, #e3ecf4);
-  position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 14px rgba(16, 50, 90, 0.06); }
-.mkt-ticker.pinned { position: fixed; left: 0; right: 0; top: 0; }
+  position: sticky; top: var(--hdr-h, 64px); z-index: 55; box-shadow: 0 4px 14px rgba(16, 50, 90, 0.06); }
+.mkt-ticker.pinned { position: fixed; left: 0; right: 0; top: var(--hdr-h, 64px); }
 .mkt-ticker .tk-track { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; max-width: 1400px; margin: 0 auto; padding: 0 14px; }
 .mkt-ticker .tk-track::-webkit-scrollbar { display: none; }
 .mkt-ticker .tk-loading { padding: 10px 0; font-size: 12px; color: var(--text-3, #8595a8); }

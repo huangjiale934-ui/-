@@ -1722,9 +1722,9 @@ chk('三版·⑨列名与筛选统一「受托人」口径',
   />受托人 <span class="arrow">↕<\/span><\/th>/.test(rawIdxHtml) &&
   /trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕<\/span><\/th>'/.test(readSrc('app.js')) &&
   /trustee: '<th data-c="trustee" data-i18n-parts>受托人<\/th>'/.test(readSrc('rank.js')));
-chk('四版·⑩估值日分布行恢复卡框 + 上方通栏线删除', /#foldSpec \{ margin-top: 8px; \}/.test(readSrc('style.css')) && /\.wrap \.foot \{ border-top: 0;/.test(readSrc('style.css')));
-chk('四版·⑪页脚折叠箭头 16px 蓝色 + 两行统一右内边距对齐（134px 避让悬浮钮）',
-  /\.foot-fold \.ff-arrow \{ font-size: 16px; color: #0866bb/.test(readSrc('style.css')) && /\.foot-fold summary \{ padding-right: 134px; \}/.test(readSrc('style.css')));
+chk('五版·⑩估值日分布行：卡框保留、顶部边线删除 + 上方通栏线删除', /#foldSpec \{ margin-top: 8px; border-top: 0; border-radius: 0 0 10px 10px; \}/.test(readSrc('style.css')) && /\.wrap \.foot \{ border-top: 0;/.test(readSrc('style.css')));
+chk('五版·⑪页脚折叠箭头 21px 蓝色加粗 + 两行统一右内边距对齐（134px 避让悬浮钮）',
+  /\.foot-fold \.ff-arrow \{ font-size: 21px; color: #0866bb/.test(readSrc('style.css')) && /\.foot-fold summary \{ padding-right: 134px; \}/.test(readSrc('style.css')));
 chk('三版·⑫回到顶部悬停展开「回到顶部」（tt-txt，同计算器蓝）',
   /\.to-top:hover \{ background: var\(--brand-2/.test(readSrc('style.css')) && /\.tt-txt/.test(readSrc('style.css')) &&
   rawIdxHtml.indexOf('tt-txt') >= 0 && home.indexOf('tt-txt') >= 0);

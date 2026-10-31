@@ -2311,13 +2311,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ======================= 回到顶部按钮 ======================= */
+/* 2026-11-01 五版：页 2 表格是内部滚动容器（每页 100 条/全部时页面本身不动），
+   之前只监听 window.scrollY → 表内滚到底按钮也不出现。现在同时监听表格内滚；
+   点击时窗口与表格一起回顶。 */
 function initToTop() {
   const btn = document.getElementById('toTop');
   if (!btn) return;
-  const onScroll = () => btn.classList.toggle('show', window.scrollY > 420);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  const tables = ['#tscroll', '#rkTscroll'].map((s) => document.querySelector(s)).filter(Boolean);
+  const visible = () => btn.classList.toggle('show',
+    window.scrollY > 420 || tables.some((t) => t.scrollTop > 420));
+  window.addEventListener('scroll', visible, { passive: true });
+  tables.forEach((t) => t.addEventListener('scroll', visible, { passive: true }));
+  visible();
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    tables.forEach((t) => t.scrollTo({ top: 0, behavior: 'smooth' }));
+  });
+}
+
+/* 2026-11-01 五版：页头是 sticky（63px），行情栏 sticky top 必须让位——
+   把页头高度写入 CSS 变量 --hdr-h（行情栏与兜底 fixed 均引用） */
+function initHdrH() {
+  const set = () => {
+    const h = document.querySelector('.hdr');
+    if (h) document.documentElement.style.setProperty('--hdr-h', h.offsetHeight + 'px');
+  };
+  set();
+  window.addEventListener('resize', set);
 }
 
 /* ======================= 页面切换过渡（轻微淡入 / 淡出） ======================= */
@@ -2347,6 +2367,7 @@ function initPageTransition() {
 document.addEventListener('DOMContentLoaded', () => {
   initToTop();
   initPageTransition();
+  initHdrH();
 });
 
 /* ======================= 自绘悬浮说明（.mpf-tip） =======================
