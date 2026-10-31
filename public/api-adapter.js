@@ -204,7 +204,7 @@
 
     /* 直读端点 → 同名 JSON 文件 */
     const KNOWN = ['funds', 'market', 'holdings', 'navperf', 'hist-index', 'names-en', 'trustee-perf',
-                   'trustee-idx', 'allstats', 'news', 'hist-gaps'];
+                   'trustee-idx', 'allstats', 'news', 'hist-gaps', 'ticker', 'perf-idx', 'source-pages'];
     if (KNOWN.indexOf(p) >= 0) return origFetch('api/' + p + '.json');
 
     /* 未知端点：原样放行（让调用方拿到 404 便于发现问题） */

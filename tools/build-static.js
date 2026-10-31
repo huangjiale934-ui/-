@@ -75,6 +75,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   put('indices-lite.json', await getJson('/api/indices?lite=1'));
   put('top-y1.json', await getJson('/api/top?k=y1&n=20'));
   put('top-y5a.json', await getJson('/api/top?k=y5a&n=20'));
+  /* 2026-11-01（6.0）：补两个 10-31 新增端点——此前静态站缺行情栏与积金表现指数 */
+  put('ticker.json', await getJson('/api/ticker'));
+  put('perf-idx.json', await getJson('/api/perf-idx'));
+  /* 来源核定表（页脚官方数据来源）·静态站此前一直 404 */
+  put('source-pages.json', await getJson('/api/source-pages'));
 
   /* 3) 逐只 hist（server 响应含 mergeLatestNav 补点，与 Node 版逐字节一致） */
   const perfs = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'nav-perf.json'), 'utf8'));
