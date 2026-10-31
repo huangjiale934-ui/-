@@ -98,7 +98,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   fs.writeFileSync(path.join(SITE, 'b.js'), ['t2s.js', 'i18n.js', 'zhmap.js', 'common.js', 'trend.js', 'xlsx.js'].map(P).join('\n;\n'));
   fs.writeFileSync(path.join(SITE, 'b.css'), ['style.css', 'analysis.css'].map(P).join('\n'));
   fs.writeFileSync(path.join(SITE, 'b-home.css'), ['style.css', 'analysis.css', 'home.css'].map(P).join('\n'));
-  const htmls = ['index.html', 'home.html', 'analysis.html', 'ranking.html'];
+  const htmls = ['index.html', 'home.html', 'ranking.html'];   /* 2026-10-31 四版：analysis.html 已删除（并入 index#cmp） */
   for (const h of htmls) {
     const hp = path.join(SITE, h);
     if (!fs.existsSync(hp)) continue;

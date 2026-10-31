@@ -408,7 +408,9 @@
    ========================================================== */
 
 /* ---------- 市场涨跌温度计 ---------- */
-.mk-thermo-panel { margin: 0 0 26px; }   /* 2026-10-23：上下留白加大 */
+.mk-thermo-panel { margin: 36px 0 30px; }   /* 2026-10-31 四版（用户要求）：整栏下移并加大 */
+.mk-thermo-panel .mk-thermo-head { margin-bottom: 18px; }
+.mk-thermo-panel .mk-thermo-head h3 { font-size: 17px; }
 .mk-thermo-head { margin-bottom: 14px; }
 .mk-thermo-head h3 { font-size: 15px; margin: 0 0 3px; color: var(--text); }
 .mk-thermo-head .ph { font-size: 12px; color: var(--text-3); margin: 0; }
@@ -685,8 +687,10 @@
   .ts-box { padding: 10px 12px; }
   .ts-v { font-size: 20px; }
 }
-/* 兜底：任何残余溢出都不产生横向滚动条（clip 不建立滚动容器，不影响 sticky 头部） */
-body { overflow-x: clip; }
+/* 兜底：任何残余溢出都不产生横向滚动条。2026-10-31 四版：必须放在 html 上——
+   放 body 上在 WebKit 内核会破坏后代 position:sticky（行情栏固定失效的根因） */
+html { overflow-x: clip; }
+body { overflow-x: visible; }
 
 /* ==========================================================
    桌面三列图表布局调优（≤1180px 用两列，不受影响）
@@ -939,19 +943,24 @@ body { overflow-x: clip; }
 .hero-btns { margin-top: 24px; gap: 14px; }
 .hero .cta { min-width: 200px; padding: 13px 22px; font-size: 16px; }
 .hero-stats { min-width: 0; }
-.hero #mkKpi { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0; }
+/* 2026-10-31 四版（用户要求）：右侧四张 KPI 卡整体增大 10% */
+.hero-stats .mk-card { padding: 21px 21px 19px; border-radius: 13px; }
+.hero-stats .mk-k { font-size: 13.5px; }
+.hero-stats .mk-v { font-size: 30px; margin: 9px 0 7px; }   /* 同上（选择器兜底） */
+.hero-stats .mk-v small { font-size: 14px; }
+.hero #mkKpi { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 0; }
 .hero #mkKpi .mk-card {
   background: #fff;
   border: 1px solid #e3eef8;
-  border-radius: 14px;
+  border-radius: 15px;
   box-shadow: 0 6px 18px rgba(16, 64, 104, 0.06);
-  padding: 16px 18px;
+  padding: 18px 20px;   /* 2026-10-31 四版：KPI 卡整体 +10% */
   transition: box-shadow 0.18s;
 }
 .hero #mkKpi .mk-card:hover { box-shadow: 0 10px 24px rgba(16, 64, 104, 0.10); }
-.hero #mkKpi .mk-k { font-size: 12px; }
-.hero #mkKpi .mk-v { font-size: 25px; margin: 6px 0 3px; }
-.hero #mkKpi .mk-s { font-size: 11.5px; line-height: 1.45; }
+.hero #mkKpi .mk-k { font-size: 13px; }
+.hero #mkKpi .mk-v { font-size: 30px; margin: 9px 0 6px; }   /* 2026-10-31 四版：KPI 卡整体 +10% */
+.hero #mkKpi .mk-s { font-size: 12.5px; line-height: 1.45; }
 .mk-head { margin-top: 6px; }
 
 @media (max-width: 1080px) {
@@ -968,7 +977,7 @@ body { overflow-x: clip; }
   .hero .cta { min-width: 0; font-size: 14.5px; padding: 11px 16px; }
   .hero #mkKpi { grid-template-columns: 1fr 1fr; gap: 10px; max-width: none; }
   .hero #mkKpi .mk-card { padding: 12px 13px; }
-  .hero #mkKpi .mk-v { font-size: 21px; }
+  .hero #mkKpi .mk-v { font-size: 24px; }
   .hero #mkKpi .mk-s { font-size: 10.5px; }
 }
 
@@ -1096,8 +1105,8 @@ body { overflow-x: clip; }
 .hero-copy { width: fit-content; max-width: 100%; }
 .cta { flex-direction: row; align-items: center; gap: 9px; min-width: 0; padding: 11px 18px; font-size: 17px; border-radius: 11px; }
 .cta svg { margin-bottom: 0; flex: none; width: 17px; height: 17px; }
-.hero-btns { margin-top: 0; gap: 12px; }
-.hero-btns .cta { flex: 1 1 0; justify-content: center; white-space: nowrap; min-width: 0; padding: 11px 18px; font-size: 17px; }
+.hero-btns { margin-top: 26px; gap: 16px; }
+.hero-btns .cta { flex: 1 1 0; justify-content: center; white-space: nowrap; min-width: 0; padding: 10px 16px; font-size: 16px; border-radius: 10px; }
 @media (max-width: 620px) {
   .hero-copy { width: auto; }
   .hero-btns { flex-direction: column; }

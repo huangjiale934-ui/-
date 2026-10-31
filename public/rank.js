@@ -45,8 +45,8 @@
     location.replace('index.html#db');
   }
   const S = {
-    /* 2026-10-30（用户明确要求）：取消「默认选中近1年回报榜」。打开排名页不预选任何榜单，
-       主表按基金规模降序、冠军区隐藏；点标签才进入对应榜，再次点同一标签 = 取消选中。
+    /* 2026-10-31 四版（用户要求）：打开排名页不预选任何榜单（标签无选中），
+       但主表默认按「近 1 年年率化」由高至低（不高亮该列）；点标签进入对应榜。
        深链 ?rk= / #board 仍然有效。 */
     board: BOARDS.some((b) => b.id === HASH0) ? HASH0 : (BOARDS.some((b) => b.id === QSB) ? QSB : ''),
     type: '', sub: '', risk: '', trustee: '', kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', top: 10, sortKey: null, sortDir: null, calYear: '',
@@ -63,7 +63,8 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-  const FALLBACK_BOARD = { id: '', name: '全部基金', desc: '尚未选择榜单：按积金局基金编号顺序显示；点击上方任一标签开始排名', metric: null, dir: null };
+  /* 2026-10-31 四版（用户要求）：未选榜单时默认按「近 1 年年率化」由高至低（列不高亮，仅默认序） */
+  const FALLBACK_BOARD = { id: '', name: '全部基金', desc: '默认按近 1 年年率化回报由高至低；点击上方任一标签切换榜单', metric: 'ann1', dir: 'desc' };
   function cur() { return BOARDS.find((b) => b.id === S.board) || FALLBACK_BOARD; }
 
   function init() {
@@ -450,8 +451,7 @@
      thead 与 tbody 由同一个可见列顺序数组生成；维度联动=改数组而非移动 DOM。 */
   const CELL_FUND = {
     rank: (x, medal, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' + medal + '</td>',
-    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div>' +
-      barHTML(cur(), x, window.__rkRanked || null) + '</td>',   /* 2026-10-31：名称下小字删除，计划名称移独立列 */
+    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div></td>',   /* 2026-10-31 四版：名称下的对比横线一并删除（用户不需要） */
     scheme: (x) => '<td data-c="scheme" data-l="' + TT('计划名称') + '" class="fz"><div>' + esc(x.scheme || '—') + '</div>' +
       (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
     trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
@@ -538,7 +538,7 @@
     $('#rkYearSwitch').style.display = isCal ? '' : 'none';
 
     // 排名主榜
-    const ranked = sortRows(pool(), b.metric || null, b.metric ? b.dir : null);
+    const ranked = sortRows(pool(), b.metric || null, b.metric ? b.dir : null);   /* 名次/冠军口径 */
     window.__rkRanked = ranked;   /* 2026-10-26：行内对比条需要全榜最大值（CELL_FUND 在模块作用域） */
     // 分类冠军（当前筛选下，按当前榜单指标）；区块标题随榜单类型切换（发行人榜 ≠ 各类别冠军）
     const chT = $('#rkChampTitle'), chD = $('#rkChampDesc');
@@ -552,9 +552,10 @@
     if (b.agg === 'trustee') renderAggChampions(ranked);
     else renderChampions(ranked, b);
 
-    // 表格：若用户手动点了其他列排序，则按用户排序；否则按榜单指标
+    // 表格：若用户手动点了其他列排序，则按用户排序；否则按榜单指标；
+    // 2026-10-31 四版：无榜（全部基金）时默认按近 1 年年率化降序（S.sortKey 为 null → 无高亮）
     const key = S.sortKey || b.metric || null;
-    const dir = key ? (S.sortDir || b.dir || 'desc') : null;
+    const dir = key ? (S.sortDir || (b.metric ? b.dir : 'desc')) : null;
     let rows = key ? sortRows(pool(), key, dir) : pool();
     const total = rows.length;
     const shown = rows.slice(0, S.top);
@@ -602,18 +603,21 @@
     }));
 
     /* 维度列高亮（2026-10-26）：高亮当前榜单对应的列；切换榜单/取消后自动清除。
-       列的位置由 rkVisibleOrder 的数组决定，这里只加 class，不移动 DOM。 */
+       列的位置由 rkVisibleOrder 的数组决定，这里只加 class，不移动 DOM。
+       2026-10-31 四版（用户要求）：未选任何榜单（全部基金、默认近1年序）时不高亮任何列。 */
     const tblEl = document.querySelector('#rkTable');
     if (tblEl) {
       tblEl.querySelectorAll('.dim-hl').forEach((n) => n.classList.remove('dim-hl'));
-      const mk = (!b.agg && b.metric) ? b.metric : '';
+      const mk = (!b.agg && b.metric && S.board) ? b.metric : '';
       if (mk) {   /* 含「稳健低风险榜 / 历年回报榜」——维度本身就是该列时也高亮 */
         tblEl.querySelectorAll('#rkThead [data-c="' + mk + '"], #rkTbody [data-c="' + mk + '"]')
           .forEach((n) => n.classList.add('dim-hl'));
       }
     }
 
-    syncHeader(key, dir);
+    /* 2026-10-31 四版（用户要求）：无榜默认按近1年年率化排序，但该列【不高亮】——
+       高亮只跟随用户手动点选的列（S.sortKey），默认序仅体现在行顺序上 */
+    syncHeader(S.sortKey, S.sortKey ? S.sortDir : null);
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
 

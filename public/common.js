@@ -960,7 +960,7 @@ window.mpfSelfRank = function (id, y1) {
 };
 
 /* ================= 基金详情统一渲染（2026-10-20 v4） =================
- * 小窗（#mBody）与「放大」页（analysis.html #anDetail）共用同一份 HTML 与同一个顺序，
+ * 小窗（#mBody）与「放大」视图（index.html#cmp 内 #anDetail）共用同一份 HTML 与同一个顺序，
  * 保证「放大 = 纯粹放大」：不多模块、不换顺序，只是版心更宽。
  * 顺序（用户 2026-10-20 定稿）：
  *   ① 表头：醒目价格 + 资产类别 / 3年表现 / 3年波幅 / 收费（含同类星级）
@@ -1801,7 +1801,7 @@ window.openDetail = function (id) {
       } catch (e) {}
       window.anOpen(x.id, { replace: true });
     } else {
-      window.location.href = 'analysis.html?open=' + encodeURIComponent(x.id);
+      window.location.href = 'index.html?open=' + encodeURIComponent(x.id) + '#cmp';   /* 2026-10-31 四版：第三页已删除，落合并页 */
     }
   };
 };

@@ -171,8 +171,8 @@
     if (v == null) return '<div class="chart-empty">' + TT('暂无回报数据') + '</div>';
     const lo = Math.min(-10, Math.floor((v - 12) / 5) * 5);
     const hi = Math.max(10, Math.ceil((v + 12) / 5) * 5);
-    const W = 168, H = 308;
-    const tubeX = 52, tubeW = 40, tubeTop = 16, tubeH = 226;
+    const W = 178, H = 344;   /* 2026-10-31 四版（用户要求）：温度计整体加大 */
+    const tubeX = 54, tubeW = 43, tubeTop = 16, tubeH = 262;
     const tubeBot = tubeTop + tubeH;
     const bulbCx = tubeX + tubeW / 2, bulbCy = tubeBot + 30, bulbR = 30;
     const pos = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
@@ -838,24 +838,34 @@
       return;
     }
     const s = sliceSeries(it.series, range);
-    const W = 1000, H = 468, padL = 46, padR = 16, padT = 16, padB = 40;   /* 2026-10-31 三版：主图上下拉长 20%（390→468） */
+    /* 2026-10-31 四版（用户要求）：恒指/上证等外部指数直接画公开点位值（纵轴=指数点），
+       不再归一化成基期 100；自算 MPF 指数保持基期 100 口径 */
+    const RAWV = (cur === 'HSI' || cur === 'SSE');
+    const W = 1000, H = 524, padL = 58, padR = 16, padT = 16, padB = 82;   /* 四版：再加高，给倾斜年份标签留足空间 */
     const base = s[0][1] || 1;
-    const pts = s.map((r) => [r[0], (r[1] / base) * 100]);
+    const pts = RAWV ? s.map((r) => [r[0], r[1]]) : s.map((r) => [r[0], (r[1] / base) * 100]);
     let mn = Math.min.apply(null, pts.map((p) => p[1]));
     let mx = Math.max.apply(null, pts.map((p) => p[1]));
     const padv = (mx - mn) * 0.08 || 1; mn -= padv; mx += padv;
-    /* 2026-10-31 三版（用户反馈：纵轴间隔不规律）：改为整 10（跨度过大时整 20）等间隔刻度 */
+    /* 纵轴等间隔整数刻度：自算指数整 10/20；真实点位按量级取 1/2/5 整数步长 */
     let step = 10;
-    if ((mx - mn) / step > 11) step = 20;
-    if ((mx - mn) / step > 11) step = 25;
+    if (RAWV) {
+      const span0 = mx - mn;
+      const mag = Math.pow(10, Math.floor(Math.log10(Math.max(span0 / 8, 1e-9))));
+      step = [1, 2, 5, 10].map((m) => m * mag).find((v) => span0 / v <= 9) || 10 * mag;
+    } else {
+      if ((mx - mn) / step > 11) step = 20;
+      if ((mx - mn) / step > 11) step = 25;
+    }
     const lo = Math.floor(mn / step) * step;
     const hi = Math.ceil(mx / step) * step;
+    const fmtTick = (v) => RAWV ? Math.round(v).toLocaleString('en-US') : String(Math.round(v));
     const X = (i) => padL + (W - padL - padR) * (i / (pts.length - 1));
     const Y = (v) => padT + (H - padT - padB) * (1 - (v - lo) / (hi - lo));
     let grid = '', yl = '';
     for (let v = lo; v <= hi + step / 1000; v += step) {
       grid += '<line x1="' + padL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#eef2f7" stroke-width="1"/>';
-      yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + Math.round(v) + '</text>';
+      yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + fmtTick(v) + '</text>';
     }
     /* 2026-10-31 三版（用户反馈）：横坐标按跨度自适应——
        ≤13 个月标每月「3月」；≤74 个月标每年 3/6/9 月；更长时间跨度只标年份。
@@ -903,9 +913,9 @@
         const gx = X(i).toFixed(1), gy = Y(pts[i][1]).toFixed(1);
         guide.setAttribute('x1', gx); guide.setAttribute('x2', gx); guide.setAttribute('opacity', '1');
         dot.setAttribute('cx', gx); dot.setAttribute('cy', gy); dot.setAttribute('opacity', '1');
-        const dpct = pts[i][1] - 100;
+        const dpct = RAWV ? (s[i][1] - base) / base * 100 : pts[i][1] - 100;
         bub.hidden = false;
-        bub.textContent = pts[i][0] + ' · ' + pts[i][1].toFixed(1) + ' 点（' + (dpct >= 0 ? '+' : '') + dpct.toFixed(1) + '%）';
+        bub.textContent = pts[i][0] + ' · ' + (RAWV ? Math.round(pts[i][1]).toLocaleString('en-US') : pts[i][1].toFixed(1)) + TT(' 点') + '（' + (dpct >= 0 ? '+' : '') + dpct.toFixed(1) + '%）';
         bub.style.left = Math.min(Math.max(X(i) / W * 100, 14), 86) + '%';
         bub.style.top = (Y(pts[i][1]) / H * 100) + '%';
       });

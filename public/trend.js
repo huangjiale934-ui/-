@@ -598,7 +598,7 @@ window.TREND = (function () {
         if (!f) return;
         if (typeof window.openDetail === 'function') window.openDetail(f.id);
         else if (typeof window.anOpen === 'function') window.anOpen(f.id);
-        else location.href = 'analysis.html?open=' + encodeURIComponent(f.id);
+        else location.href = 'index.html?open=' + encodeURIComponent(f.id) + '#cmp';   /* 2026-10-31 四版 */
       });
     }
 

@@ -1778,20 +1778,22 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
    2026-10-31 三版追加（用户十六项反馈）
    ========================================================== */
 /* ① 排名徽标已在 .medal 处改蓝色系 */
-/* ② 页脚折叠行的展开箭头：加大、左移（避开右下角计算器/回到顶部悬浮按钮）、改蓝色 */
-.foot-fold .ff-arrow { font-size: 15px; color: var(--brand, #0866bb); font-weight: 700; margin-right: 78px; transition: transform 0.2s, margin 0.2s; }
+/* ② 2026-10-31 四版（用户要求）：折叠箭头加大加粗蓝色；两行箭头用同一右内边距对齐，并避开悬浮按钮 */
+.foot-fold summary { padding-right: 134px; }
+.foot-fold .ff-arrow { font-size: 16px; color: #0866bb; font-weight: 700; width: 22px; text-align: center; line-height: 1; align-self: center; }
 .foot-fold[open] .ff-arrow { transform: rotate(180deg); }
-@media (max-width: 560px) { .foot-fold .ff-arrow { margin-right: 8px; } }
-/* ③ 估值日分布行（#foldSpec）：去掉上边框整线、细身、上移，与上下文字左对齐 */
-#foldSpec { margin-top: 2px; border: 0; border-radius: 0; background: none; }
-#foldSpec summary { padding: 7px 2px; }
-#foldSpec[open] summary { border-bottom: 0; }
-#foldSpec summary:hover { background: none; }
-#foldSpec .ff-body { padding: 2px 2px 10px; }
+@media (max-width: 560px) { .foot-fold summary { padding-right: 56px; } }
+/* ③ 2026-10-31 四版（用户澄清）：恢复 #foldSpec 卡片框，只删它上方 .foot 的通栏分隔线 */
+#foldSpec { margin-top: 8px; }
+#foldSpec summary { padding: 8px 134px 8px 13px; }   /* 右侧同全局 134px：两行箭头对齐且避让悬浮钮 */
+/* 2026-10-31 四版（用户要求）：估值日分布行上方的通栏横线删除（仅页 2；首页页脚不动） */
+.wrap .foot { border-top: 0; margin-top: 8px; }
 /* ④ 表格工具栏：搜索框并入排名维度一行后的紧凑样式 */
 .f-summary-new { row-gap: 8px; }
-.tb-search { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--border-strong);
-  border-radius: 8px; height: 34px; padding: 0 10px; flex: 0 1 250px; min-width: 170px; color: var(--text-3); }
+.tb-search { display: flex; align-items: center; gap: 7px; background: #fff; border: 1px solid #d5e3f0;
+  border-radius: 8px; height: 34px; padding: 0 9px; flex: 0 1 190px; min-width: 145px; color: var(--text-3);
+  transition: border-color .15s, box-shadow .15s; }
+/* 2026-10-31 四版（用户要求）：搜索框缩小，不留大片空白 */
 .tb-search:focus-within { border-color: var(--brand-2, #378add); }
 .tb-search svg { flex: none; }
 .tb-search input { border: 0; outline: none; height: 100%; width: 100%; min-width: 0; font-size: 13px;
@@ -1799,3 +1801,37 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .tb-count { font-size: 13px; color: var(--text-2); white-space: nowrap; }
 .tb-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
 @media (max-width: 900px) { .tb-right { margin-left: 0; } }
+
+/* ==========================================================
+   2026-10-31 四版（用户要求）：筛选控件统一设计语言 + 版式调整
+   ========================================================== */
+/* 单行筛选行：维度最左（margin-right:auto 把四个下拉+搜索框推到右侧） */
+.f-row-split .dim-pick { margin-right: auto; }
+.f-row-split .tb-search { margin-left: 4px; }
+/* 统一控件外观：34px 高、浅蓝描边、8px 圆角、聚焦蓝光圈 */
+.f-item select, .f-item input[type="text"], .f-item input[type="number"],
+.dim-pick select, .range select, .range input[type="number"] {
+  height: 34px; font-size: 12.5px; background: #fff; color: var(--text);
+  border: 1px solid #d5e3f0; border-radius: 8px; padding: 0 10px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.f-item select:hover, .f-item input:hover, .dim-pick select:hover, .range select:hover, .range input:hover { border-color: #7fb2de; }
+.f-item select:focus, .f-item input:focus, .dim-pick select:focus, .range select:focus, .range input:focus {
+  border-color: var(--brand, #0866bb); box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.10); outline: none;
+}
+.f-item > label { font-size: 12px; color: var(--text-3); }
+.tb-search:focus-within { border-color: var(--brand, #0866bb); box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.10); }
+/* ⑮ 页2表头：H11 居中 tabs（白卡居中、选中=蓝色加粗无底） */
+.pg-head { justify-content: center; margin-bottom: 14px; }
+.db-tabs { background: #fff; border: 1px solid var(--line, #e3ecf4); border-radius: 12px; padding: 5px; gap: 4px; box-shadow: 0 1px 6px rgba(20, 50, 80, .05); }
+.dbt { padding: 8px 24px; border-radius: 8px; font-size: 14.5px; font-weight: 600; }
+.dbt:hover { color: var(--brand, #0866bb); }
+.dbt.on { background: none; color: var(--brand, #0866bb); box-shadow: none; font-weight: 800; }
+/* ⑫ MPFA 基金榜单表：上下更松、字号加大一号（用 #rkTable tbody 前缀提权，压过 analysis.css 的紧凑规则） */
+#rkTable { font-size: 14.5px; }
+#rkTable tbody td { padding: 12px 9px; }
+#rkTable tbody .fund-name { font-size: 14.5px; line-height: 1.4; }
+#rkTable tbody .tag { font-size: 12px; }
+#rkTable tbody .btn-detail { font-size: 12.5px; padding: 5px 12px; }
+#rkTable thead th { font-size: 12.5px; padding: 11px 8px; }
+@media (max-width: 720px) { .pg-head { justify-content: flex-start; } .dbt { padding: 8px 12px; font-size: 13px; } }

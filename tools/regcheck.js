@@ -200,9 +200,9 @@ const rawHtml = {};
   chk((n === 'home' ? '首页' : '资料库') + '·HTML div 配平',
     od > 0 && od === cd, '开' + od + ' / 闭' + cd);
 });
-/* 2026-10-31（用户要求）：第三页并入资料库第三板块，analysis.html 仅作旧链接跳转页 */
-chk('可视化对比已并入资料库（analysis.html 跳转 + index 含 anSec）',
-  /location\.replace\('index\.html#cmp'\)/.test(rawHtml.analysis || '') && /id="anSec"/.test(rawHtml.index || ''));
+/* 2026-10-31 四版（用户要求）：原第三页文件直接删除（并入资料库第三板块） */
+chk('四版·原第三页已删除且对比板块并入资料库（无 analysis.html + index 含 anSec）',
+  !fs.existsSync(path.join(__dirname, '..', 'public', 'analysis.html')) && /id="anSec"/.test(rawHtml.index || ''));
 
 /* ---- 第七轮：语言补全 / 榜单提示 / 对比入口 / 风险小图例 / 更新时间 / 估值日提示 ---- */
 chk('首页·概览双卡：数据更新+积金局资料截至（2026-10-31 恢复）', /class="upd-live"/.test(home) && /数据更新 <b>/.test(home) && /class="upd-of"/.test(home));
@@ -522,8 +522,9 @@ chk('排名·冠军卡小字跟随榜单（podRefText / POD_REF）', (function (
   try { const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
     return /function podRefText/.test(r) && /POD_REF\[b\.metric\]/.test(r) && /podRefText\(b, x\)/.test(r); } catch (e) { return false; }
 })());
-chk('排名·页面抽检：榜首条 left:0 满格红、页面无 bz 元素', (function () {
-  return /style="left:0;width:100\.0%;background:var\(--up\)"/.test(rk) && rk.indexOf('class="bz"') < 0;
+chk('四版·排名抽检：名称下不再有对比横线（用户取消）、页面无 bz 元素', (function () {
+  const cell = /<td data-c="fund"[^>]*>[\s\S]{0,220}?<\/td>/.exec(rk);
+  return cell ? cell[0].indexOf('class="bar"') < 0 && cell[0].indexOf('fund-name') >= 0 : false;
 })());
 chk('词条·累积短名三语已补（近5年累积 / 近10年累积）', (function () {
   try { const t = i18nText();
@@ -811,7 +812,7 @@ chk('v3·trend.js 健壮性（hideGoto 判空 + _t/_tq 包装不走 window）', 
     return /const gotoBtn = q\('\.tr-goto'\);\s*\n\s*if \(gotoBtn\)/.test(j) &&
       /function _t\(s\) \{ return \(typeof TT === 'function'\)/.test(j) && !/window\.TT \?/.test(j); } catch (e) { return false; }
 })());
-chk('v3·数据版本徽标（四页）+ 明细提示', ['home', 'index', 'ranking', 'analysis'].every((p) => /id="verChip"/.test(read(p))) &&
+chk('v3·数据版本徽标（三页）+ 明细提示', ['home', 'index', 'ranking'].every((p) => /id="verChip"/.test(read(p))) &&
   /官方资料（积金局）：2026-09-30/.test(an));
 chk('v3·简繁英搜索（zhmap 映射 + 英文名接口 + 归一化函数）', (function () {
   try {
@@ -1715,9 +1716,9 @@ chk('三版·⑨列名与筛选统一「受托人」口径',
   />受托人 <span class="arrow">↕<\/span><\/th>/.test(rawIdxHtml) &&
   /trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕<\/span><\/th>'/.test(readSrc('app.js')) &&
   /trustee: '<th data-c="trustee" data-i18n-parts>受托人<\/th>'/.test(readSrc('rank.js')));
-chk('三版·⑩估值日分布行细身（#foldSpec 去边框）', /#foldSpec \{ margin-top: 2px; border: 0;/.test(readSrc('style.css')));
-chk('三版·⑪页脚折叠箭头加大左移蓝色（避让悬浮按钮）',
-  /\.foot-fold \.ff-arrow \{ font-size: 15px; color: var\(--brand/.test(readSrc('style.css')) && /margin-right: 78px/.test(readSrc('style.css')));
+chk('四版·⑩估值日分布行恢复卡框 + 上方通栏线删除', /#foldSpec \{ margin-top: 8px; \}/.test(readSrc('style.css')) && /\.wrap \.foot \{ border-top: 0;/.test(readSrc('style.css')));
+chk('四版·⑪页脚折叠箭头 16px 蓝色 + 两行统一右内边距对齐（134px 避让悬浮钮）',
+  /\.foot-fold \.ff-arrow \{ font-size: 16px; color: #0866bb/.test(readSrc('style.css')) && /\.foot-fold summary \{ padding-right: 134px; \}/.test(readSrc('style.css')));
 chk('三版·⑫回到顶部悬停展开「回到顶部」（tt-txt，同计算器蓝）',
   /\.to-top:hover \{ background: var\(--brand-2/.test(readSrc('style.css')) && /\.tt-txt/.test(readSrc('style.css')) &&
   rawIdxHtml.indexOf('tt-txt') >= 0 && home.indexOf('tt-txt') >= 0);

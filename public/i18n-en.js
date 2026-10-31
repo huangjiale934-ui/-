@@ -1118,6 +1118,7 @@
 
   '基金名称／计划名称／受托人': 'Fund / scheme / trustee',
 
+  ' 点': ' pts',
   '受托人：{v}': 'Trustee: {v}',
   '家受托人': 'trustees',
   '月': 'M',
