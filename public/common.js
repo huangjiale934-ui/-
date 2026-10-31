@@ -1404,7 +1404,7 @@ window.buildTopBarsSVG = function (d, opts) {
     '.tb-sum{font-size:22px;font-weight:700;fill:#142846}' +
     '.tb-src{font-size:18px;fill:#6b7785}</style>';
   const svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" ' +
-    ((opts && opts.fixedSize) ? ('width="' + W + '" height="' + H + '"') : 'width="100%" height="auto"') +
+    ((opts && opts.fixedSize) ? ('width="' + W + '" height="' + H + '"') : 'width="100%" style="height:auto"') +
     ' role="img" aria-label="' + esc('前十大持仓柱状图') + '">' +
     ((opts && opts.embedStyle) ? style : '') +
     '<text x="40" y="52" class="tb-title">前十大持倉（佔基金資產淨值 %）</text>' +
@@ -1689,7 +1689,7 @@ window.buildRoseSVG = function (d, titleText, opts) {
     '.alr3-sub{font-size:17px;fill:#6b7785}' +
     '.alr3-src{font-size:20px;fill:#6b7785}</style>';
   /* fixedSize：导出 PNG 用（<img> 加载无尺寸 SVG 会按 300x150 默认渲染导致失真） */
-  const sizeAttr = (opts && opts.fixedSize) ? ('width="' + W + '" height="' + H + '"') : 'width="100%" height="auto"';
+  const sizeAttr = (opts && opts.fixedSize) ? ('width="' + W + '" height="' + H + '"') : 'width="100%" style="height:auto"';
   const svg = '<svg class="alr3-svg" viewBox="0 0 ' + W + ' ' + H + '" ' + sizeAttr + ' role="img" aria-label="' + ariaText + '">' +
     ((opts && opts.embedStyle) ? ROSE_STYLE : '') +
     segs + labs + leads + center +
