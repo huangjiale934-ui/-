@@ -38,7 +38,12 @@ var r = root || document;
 var nodes = r.querySelectorAll('[data-i18n]');
 for (var i = 0; i < nodes.length; i++) {
 var k = nodes[i].getAttribute('data-i18n');
-if (k) nodes[i].textContent = t(k);
+if (k) {
+nodes[i].textContent = t(k);
+/* 2026-10-31：ⓘ 悬浮文案随语言切换（data-tip 与 data-i18n 同键时才生效） */
+var _dt = nodes[i].getAttribute('data-tip');
+if (_dt && t(_dt) !== _dt) nodes[i].setAttribute('data-tip', t(_dt));
+}
 }
 var phs = r.querySelectorAll('[data-i18n-ph]');
 for (var j = 0; j < phs.length; j++) {

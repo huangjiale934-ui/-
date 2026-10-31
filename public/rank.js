@@ -174,55 +174,38 @@
     '<th data-i18n-parts class="c" style="width:86px">' + TT('详情') + '</th>';
 
   function buildTabs() {
-    /* 2026-10-30（用户要求）：不要左侧组名列、不要分 5 行——
-       像「基金最新数据」的排名维度一样，全部标签一整行流式平铺（放不下自动换行）。 */
-    $('#rkTabs').innerHTML = BOARDS.map((b) =>
-      '<button class="tab' + (b.id === S.board ? ' on' : '') +
-      (b.id === S.board && S.sortDir === 'asc' ? ' asc' : '') +
-      '" data-b="' + b.id + '" data-dir="' + (b.dir || 'desc') + '" aria-pressed="' + (b.id === S.board) + '">' +
-      esc(TT(b.name)) + '</button>'
-    ).join('');
-
-    const note = $('#rkTabsNote');
-    if (note) note.innerHTML = TQ('共 <b>{n}</b> 个排名维度 · 点一次按默认方向排名，再点反向，第三次取消', { n: BOARDS.length });
-
-    /* 2026-10-26 修（既有 bug）：容器事件委托——navperf 到达后 buildTabs() 重建标签不丢监听 */
-    const rkTabsEl = $('#rkTabs');
-    if (rkTabsEl && !rkTabsEl.__tabBound) {
-      rkTabsEl.__tabBound = 1;
-      rkTabsEl.addEventListener('click', (e) => {
-        const t = e.target.closest ? e.target.closest('.tab') : null;
-        if (!t || !t.dataset.b) return;
-        /* 2026-10-30：三态——与资料库 bindSelfTabs 完全一致：
-           ① 点一次 = 该榜默认方向（BOARDS.dir，多为降序）
-           ② 再点同标签 = 反向
-           ③ 第三次 = 取消，回「全部基金」（按积金局编号原序，不排序不高亮） */
-        const k = t.dataset.b;
-        const bd = BOARDS.find((x) => x.id === k) || {};
-        const first = t.dataset.dir || 'desc';
-        const second = first === 'asc' ? 'desc' : 'asc';
-        if (window.__rkCancelDim) window.__rkCancelDim();
-        if (S.board !== k) { S.board = k; S.sortKey = null; S.sortDir = null; }
-        else if (S.sortDir == null || S.sortDir === first) { S.sortKey = bd.metric || null; S.sortDir = second; }
-        else { S.board = ''; S.sortKey = null; S.sortDir = null; }
-        if (history.replaceState) history.replaceState(null, '', S.board ? '#' + S.board : '#');
-        paintTabs();
-        renderYearSwitch();
-        render();
-        /* 2026-10-26：列联动已并入 render（数组单源），不再二次移动 DOM */
-      });
+    /* 2026-10-31（用户要求）：榜单标签行删除，改为工具栏「排名维度」下拉（默认无=全部基金）。
+       深链 ?rk= / #board 仍然有效；选中榜后表头三态排序不受影响。 */
+    const sel = document.getElementById('rkDimSel');
+    if (sel) {
+      const fill = () => {
+        sel.innerHTML = '<option value="">' + esc(TT('无（全部基金）')) + '</option>' +
+          BOARDS.map((b) => '<option value="' + b.id + '">' + esc(TT(b.name)) + '</option>').join('');
+        sel.value = S.board || '';
+      };
+      fill();
+      if (!sel.__langBound) {
+        sel.__langBound = 1;
+        document.addEventListener('mpf:lang', () => buildTabs());
+      }
+      if (!sel.__bound) {
+        sel.__bound = 1;
+        sel.addEventListener('change', () => {
+          S.board = sel.value;
+          S.sortKey = null; S.sortDir = null;
+          if (history.replaceState) history.replaceState(null, '', S.board ? '#' + S.board : '#');
+          renderYearSwitch();
+          render();
+        });
+      }
     }
-    paintTabs();
     renderYearSwitch();
   }
 
-  /* 标签三态视觉（与资料库 .st.on / .st.on.asc 一致）：选中=实心蓝+↓，升序=+↑ */
+  /* 下拉与状态同步（深链 / 表头交互后由 syncHeader 调用） */
   function paintTabs() {
-    $$('#rkTabs .tab').forEach((o) => {
-      const on = o.dataset.b === S.board;
-      o.classList.toggle('on', on);
-      o.classList.toggle('asc', on && S.sortDir === 'asc');
-    });
+    const sel = document.getElementById('rkDimSel');
+    if (sel && document.activeElement !== sel) sel.value = S.board || '';
   }
 
   function renderYearSwitch() {

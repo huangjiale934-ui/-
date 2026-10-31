@@ -278,8 +278,10 @@ function fmtDT(ts) {
 }
 
 function renderUpdateTime() {
+  /* 2026-10-31（用户要求）：页头「数据更新时间 · N 条基金」chip 删除（三页），仅保留数据版本徽标 */
+  if (DATA.updatedAt) fillVerChip({ updatedAt: DATA.updatedAt, dataAsOf: DATA.dataAsOf });
   const el = document.querySelector('.upd .t');
-  if (!el || !DATA.updatedAt) return;
+  if (!el || !DATA.updatedAt) { renderSrcNote(); return; }   /* 2026-10-31：.upd 移除后仍须渲染口径说明 */
   /* 2026-10-14：页头只显示本站更新时间 */
   el.textContent = TQ('数据更新 {t}', { t: fmtDT(DATA.updatedAt) });
   const dot = document.querySelector('.upd .dot');
@@ -452,12 +454,39 @@ function navDateDistHTML() {
     '</div>';
 }
 
-/** 2026-10-31（用户要求）：估值日分布卡删除；风险级别图例改放「数据统计口径说明」行中间空位 */
+/** 2026-10-31 二版（用户要求）：
+ * ① 风险级别图例放「数据统计口径说明」行中间（逐个写级别数字，悬浮看级别名）；
+ * ② 估值日分布卡只在资料库页恢复（analysis/页3 保持删除）；点日期筛选沿用 .ndk 事件。 */
 function renderNavDistCard() {
-  const el = document.getElementById('ffRisk');
-  if (!el) return;
-  el.innerHTML = [1, 2, 3, 4, 5, 6, 7].map((lv) =>
-    '<i style="background:' + MPF_RISK.color(lv) + '" title="' + esc(lv + ' ' + MPF_RISK.label(lv)) + '"></i>').join('');
+  const lg = document.getElementById('ffRisk');
+  if (lg) {
+    const LIGHT = { 1: 1, 2: 1, 3: 1 };   /* 浅色底用深字，保证对比度 */
+    lg.innerHTML = [1, 2, 3, 4, 5, 6, 7].map((lv) => {
+      const c = MPF_RISK.color(lv);
+      return '<i style="background:' + c + ';color:' + (LIGHT[lv] ? '#0b3a66' : '#fff') +
+        '" title="' + esc(lv + ' 级 · ' + MPF_RISK.label(lv)) + '">' + lv + '</i>';
+    }).join('');
+  }
+  const el = document.getElementById('navDistCard');
+  if (!el) return;   /* 仅资料库页有此卡 */
+  const funds = (DATA.funds || []).filter((x) => x.navStatus === 'verified' && x.nav != null);
+  if (!funds.length) { el.hidden = true; el.innerHTML = ''; return; }
+  const map = {};
+  funds.forEach((x) => { const k = x.navAsOf || 'none'; map[k] = (map[k] || 0) + 1; });
+  const keys = Object.keys(map).filter((k) => k !== 'none').sort().reverse();
+  if (map.none) keys.push('none');
+  let max = 0;
+  keys.forEach((k) => { if (map[k] > max) max = map[k]; });
+  const onKey = (typeof F !== 'undefined' && F && F.navDate) ? F.navDate : '';
+  el.hidden = false;
+  el.innerHTML =
+    '<div class="ndc-head"><b>' + TT('净值估值日分布') + '</b>' +
+    '<span>' + TQ('共 {n} 只已核对官方净值；点日期只看该日，再点取消', { n: funds.length }) + '</span></div>' +
+    '<div class="ndc-list">' +
+    keys.map((k) => '<button type="button" class="ndc ndk' + (onKey === k ? ' on' : '') + (map[k] === max ? ' peak' : '') +
+      '" data-navdate="' + k + '"><b>' + (k === 'none' ? TT('无估值日') : k.slice(5).replace('-', '/')) + '</b>' +
+      '<span>' + TQ('{n} 只', { n: map[k] }) + '</span></button>').join('') +
+    '</div>';
 }
 window.renderNavDistCard = renderNavDistCard;
 
@@ -802,6 +831,10 @@ function makeSorter(thList, state, onSort) {
     /* 表头排序与「排名维度」卡片互斥：表头动过之后，卡片不再显示选中态 */
     const tabs = document.querySelector('#selfTabs');
     if (tabs) tabs.querySelectorAll('.st').forEach((n) => { n.classList.remove('on'); n.classList.remove('asc'); });
+    /* 2026-10-31：维度改下拉后，表头排序同样把下拉复位为「无」 */
+    const dsel = document.getElementById('dimSel');
+    if (dsel) dsel.value = '';
+    window.__dimActive = false;
   };
   thList.forEach((th) => {
     th.addEventListener('click', () => {
@@ -2437,19 +2470,19 @@ function initDCABuild() {
   fab.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/></svg><span>' + TT('供款计算器') + '</span>';
   document.body.appendChild(fab);
 
-  /* 2026-10-31（用户要求）：1 分钟无交互自动缩成圆形图标（沿用配色与计算器图案），
+  /* 2026-10-31 二版（用户要求）：10 秒无交互自动缩成圆形图标（沿用配色与计算器图案），
      悬停展开为胶囊，点击才打开面板；面板打开期间不收缩。 */
   let dcaIdleTimer = null;
   function dcaResetIdle() {
     clearTimeout(dcaIdleTimer);
     fab.classList.remove('idle');
-    dcaIdleTimer = setTimeout(() => { if (wrap.hidden) fab.classList.add('idle'); }, 60000);
+    dcaIdleTimer = setTimeout(() => { if (wrap.hidden) fab.classList.add('idle'); }, 10000);
   }
   dcaResetIdle();
   fab.addEventListener('click', dcaResetIdle);
   fab.addEventListener('mouseenter', () => fab.classList.remove('idle'));
   fab.addEventListener('mouseleave', () => {
-    if (wrap.hidden) { clearTimeout(dcaIdleTimer); dcaIdleTimer = setTimeout(() => fab.classList.add('idle'), 60000); }
+    if (wrap.hidden) { clearTimeout(dcaIdleTimer); dcaIdleTimer = setTimeout(() => fab.classList.add('idle'), 10000); }
   });
   document.addEventListener('click', (e) => {
     if (e.target.closest && (e.target.closest('.dca-wrap'))) dcaResetIdle();

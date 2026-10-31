@@ -21,12 +21,6 @@
     <div class="lang-sw" id="langSw" role="group" aria-label="语言"><button type="button" data-lang="zh-Hans">简</button><button type="button" data-lang="zh-Hant">繁</button><button type="button" data-lang="en">EN</button></div>
     <div class="hdr-right">
       <div class="ver-chip" id="verChip"><span data-i18n="数据版本">数据版本</span><b>—</b></div>
-      <div class="upd">
-        <span class="dot"></span>
-        <!-- 状态行完全由 JS 接管（缓存命中时若带 data-i18n 会被静态值覆盖，导致一直显示"数据加载中"） -->
-        <span class="t">数据加载中…</span>
-        <span class="cnt"></span>
-      </div>
       <button class="btn-refresh" data-i18n-title="立即同步最新数据">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
           <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
@@ -50,24 +44,6 @@
   </div>
   <div id="dbSec">
   <p class="scope-note" id="dbScopeNote">本表数据取自 11 家受托人官网（每交易日更新），排名与涨跌指标由本平台自行计算；因各发行人公布时间不一致，少数基金可能滞后 1–2 天。如需完全对齐的日度数据，请切换到「MPFA 基金榜单」查看积金局每月底发布的列表。</p>
-<div class="self-tabs" id="selfTabs">
-    <span class="stl">排名维度</span>
-    <button type="button" class="st" data-k="selfY1" data-dir="desc">近1年</button>
-    <button type="button" class="st" data-k="selfD1" data-dir="desc">日涨跌</button>
-    <button type="button" class="st" data-k="selfW1" data-dir="desc">近1周</button>
-    <button type="button" class="st" data-k="selfM1" data-dir="desc">近1月</button>
-    <button type="button" class="st" data-k="selfYtd" data-dir="desc">年初至今</button>
-    <button type="button" class="st" data-k="selfY3a" data-dir="desc">近3年年化</button>
-    <button type="button" class="st" data-k="selfY5a" data-dir="desc">近5年年化</button>
-    <button type="button" class="st" data-k="selfMdd" data-dir="desc">近1年回撤</button>
-    <button type="button" class="st" data-k="selfMdd5" data-dir="desc">近5年回撤</button>
-    <!-- 2026-10-19：新增自算维度（风险调整 / 波动 / 胜率 / 超额） -->
-    <button type="button" class="st" data-k="sharpe1" data-dir="desc">夏普比率</button>
-    <button type="button" class="st" data-k="vol1" data-dir="asc">年化波动率</button>
-    <button type="button" class="st" data-k="vol3" data-dir="asc">3年波幅</button>
-    <button type="button" class="st" data-k="posM12" data-dir="desc">正收益月份</button>
-    <button type="button" class="st" data-k="excess1" data-dir="desc">超额收益（恒指）</button>
-  </div>
   <div class="stats" id="stats"></div>
 
   <div class="card filters">
@@ -137,6 +113,7 @@
 
   <div class="card">
     <div class="f-summary">
+      <div class="dim-pick"><label for="dimSel" data-i18n="排名维度">排名维度</label><select id="dimSel"></select></div>
       <div><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">0</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip"></span></div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <label data-i18n-parts  class="muted" for="perPage" style="font-size:12px">每页显示</label>
@@ -195,10 +172,6 @@
 
   <div id="rkSec" hidden>
   <p class="scope-note scope-mpfa" id="rkScopeNote">本页数据全部来自积金局「强积金基金平台」，目前更新至 <b id="rkScopeDate">—</b>。</p>
-<div class="tabs-head">
-    <span class="th-note" id="rkTabsNote"></span>
-  </div>
-  <div class="tabs" id="rkTabs"></div>
   <div class="tabs year-tabs" id="rkYearSwitch" style="display:none"></div>
 
   <div class="card filters rk-filters" style="margin-bottom:14px">
@@ -269,6 +242,7 @@
 
   <div class="card">
     <div class="f-summary">
+      <div class="dim-pick"><label for="rkDimSel" data-i18n="排名维度">排名维度</label><select id="rkDimSel"></select></div>
       <div><span data-i18n="当前榜单共">当前榜单共</span> <b id="rkRcnt">0</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip"></span></div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <label class="muted" for="rkRTop" style="font-size:12px" data-i18n-parts>每页显示</label>
@@ -341,6 +315,7 @@
 
 
   <div class="foot">
+  <div class="ndcard" id="navDistCard" hidden></div>
     <details class="foot-fold" id="foldSpec">
       <summary>
         <span class="ff-b"><span data-i18n="本次净值核对时间：">本次净值核对时间：</span><b id="navCheckAt">—</b></span>

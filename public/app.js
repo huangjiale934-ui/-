@@ -15,48 +15,63 @@
     annLaunch: '推出至今年率化回报', mgmtFee: '基金管理费', launchTs: '推出日期',  /* 渲染时 TT() */
   };
 
-  /* 2026-10-22（用户要求）：排名维度卡片改三态，且默认不选中任何维度
-     ① 点一次 = 该维度默认方向（多为最大在前） ② 再点 = 反向 ③ 第三次 = 取消，回名次顺序 */
+  /* 2026-10-31（用户要求）：排名维度标签行改为工具栏下拉（默认「无」）。
+     选中维度 = 该维度默认方向排序（波动/波幅类为升序）；选「无」= 回名次顺序；
+     表头点击仍可再改方向（互斥逻辑在 common.makeSorter 内同步复位下拉）。 */
+  const DIMS = [
+    ['selfY1', '近1年', 'desc'], ['selfD1', '日涨跌', 'desc'], ['selfW1', '近1周', 'desc'],
+    ['selfM1', '近1月', 'desc'], ['selfYtd', '年初至今', 'desc'], ['selfY3a', '近3年年化', 'desc'],
+    ['selfY5a', '近5年年化', 'desc'], ['selfMdd', '近1年回撤', 'desc'], ['selfMdd5', '近5年回撤', 'desc'],
+    ['sharpe1', '夏普比率', 'desc'], ['vol1', '年化波动率', 'asc'], ['vol3', '3年波幅', 'asc'],
+    ['posM12', '正收益月份', 'desc'], ['excess1', '超额收益（恒指）', 'desc'],
+  ];
+
   function bindSelfTabs() {
-    const box = document.querySelector('#selfTabs');
-    if (!box || box.__bound) return;
-    box.__bound = 1;
-    let chipKey = '';
-    /* 2026-10-27 修（用户反馈：GitHub 站列越点越多）：维度联动放出的列改为「临时」——
-       只存在于 DIM_EXTRA，不写进 colSet、不落 localStorage，取消/切换维度即消失。 */
-    const paintChips = () => {
-      box.querySelectorAll('.st').forEach((n) => {
-        const on = !!chipKey && n.dataset.k === chipKey;
-        n.classList.toggle('on', on);
-        n.classList.toggle('asc', on && S.dir === 'asc');
-        n.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
+    const sel = document.getElementById('dimSel');
+    if (!sel) return;
+    const fill = () => {
+      sel.innerHTML = '<option value="">' + TT('无（按名次顺序）') + '</option>' +
+        DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
+      sel.value = (window.__dimActive && S.key) ? S.key : '';
     };
-    paintChips();
-    window.__dimActive = false;   /* 初始无维度选中 */
-    box.addEventListener('click', (e) => {
-      const b = e.target.closest ? e.target.closest('.st') : null;
-      if (!b) return;
-      const k = b.dataset.k;
-      const first = b.dataset.dir || 'desc';
-      const second = first === 'asc' ? 'desc' : 'asc';
-      if (chipKey !== k) { chipKey = k; S.key = k; S.dir = first; }
-      else if (S.dir === first) { S.dir = second; }
-      else { chipKey = ''; S.key = 'size'; S.dir = 'desc'; }   // ③ 取消 → 默认规模/名次顺序
+    fill();
+    if (!window.__dimSelLangBound) {
+      window.__dimSelLangBound = 1;
+      document.addEventListener('mpf:lang', () => {
+        const s2 = document.getElementById('dimSel');
+        if (s2) { s2.innerHTML = '<option value="">' + TT('无（按名次顺序）') + '</option>' +
+          DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
+          s2.value = (window.__dimActive && S.key) ? S.key : ''; }
+      });
+    }
+    if (sel.__bound) return;
+    sel.__bound = 1;
+    sel.addEventListener('change', () => {
+      const k = sel.value;
+      if (!k) { window.__dimCancel(); return; }
+      const d = DIMS.find((x) => x[0] === k);
+      window.__dimApply(k, d ? d[2] : 'desc');
+    });
+    /* 供下拉与表头共同使用的状态机 */
+    window.__dimApply = (k, first) => {
+      S.key = k; S.dir = first;
       /* 联动放出：非默认列临时显示（不写 colSet，刷新后回到用户自己的列设置） */
-      DIM_EXTRA = (chipKey && COL_DEFS.find((c) => c.k === k) && COL_DEFAULT.indexOf(k) < 0) ? k : '';
+      DIM_EXTRA = (COL_DEFS.find((c) => c.k === k) && COL_DEFAULT.indexOf(k) < 0) ? k : '';
       S.page = 1;
-      paintChips();
-      /* 卡片与表头互斥：点卡片后清掉表头箭头，避免两处同时显示「已排序」 */
       const th = document.getElementById('thead');
       if (th) th.querySelectorAll('th.sorted').forEach((n) => {
         n.classList.remove('sorted');
         const a = n.querySelector('.arrow');
         if (a) a.textContent = '↕';
       });
-      window.__dimActive = !!chipKey;   /* 2026-10-26：维度激活标记 → visibleOrder 插队 + render 高亮 */
+      window.__dimActive = true;
       render();
-    });
+    };
+    window.__dimCancel = () => {
+      S.key = 'size'; S.dir = 'desc'; DIM_EXTRA = ''; S.page = 1;
+      window.__dimActive = false;
+      render();
+    };
   }
 
   function init() {

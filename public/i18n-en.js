@@ -1085,6 +1085,28 @@
   '数据取自积金局「基金便览」按月发布；条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）': 'Monthly MPFA factsheets; bars show each class 12-month annualised net return (net of fees)',
   '风险级别图例（1 级最低 → 7 级最高）': 'Risk class legend (1 lowest - 7 highest)',
 
+  '积金表现指数': 'MPF Performance Indices',
+  '积金市场指数': 'MPF Market Index',
+  '股票积金': 'Equity MPF',
+  '混合积金': 'Mixed MPF',
+  '债券积金': 'Bond MPF',
+  '上证指数': 'SSE Composite',
+  '股票基金指数': 'Equity fund index',
+  '混合资产基金指数': 'Mixed assets fund index',
+  '债券基金指数': 'Bond fund index',
+  '积金局最新公布 · 各类基金过去 12 月年率化净回报': 'MPFA latest · Past 12 months annualised net return by class',
+  '无（按名次顺序）': 'None (by row no.)',
+  '无（全部基金）': 'None (all funds)',
+  '近5年回撤': '5Y drawdown',
+  '夏普比率': 'Sharpe',
+  '年化波动率': 'Volatility',
+  '正收益月份': 'Positive months',
+  '超额收益（恒指）': 'Excess vs HSI',
+  '暂无指数数据': 'No index data',
+  '以全市场成分基金「近 1 年 · 年率化回报」为冷热口径（规模加权平均）；蓝为涨、绿为跌。积金局口径按季更新，此处用本站每日净值实时计算。': 'Basis: all constituent funds by recent 1-year annualised return (AUM-weighted); blue = gain, green = loss. Computed daily from site NAVs.',
+  '数据取自积金局「基金便览」按月发布；条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）。悬浮任意一行可看该类别内最高／最低的单只基金回报。': 'Monthly MPFA factsheets; bars show each class 12-month annualised net return (net of fees). Hover a row for the best/worst fund in that class.',
+  '自算指数：以 2015 年首个净值为基期 100，按各基金资产规模加权合成（与市场温度计同口径）；随每日净值自动更新，仅供参考。': 'Self-calculated index: base 100 at the first 2015 NAV, AUM-weighted; updated daily. For reference only.',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

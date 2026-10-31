@@ -305,7 +305,7 @@
   function yearLine(rows) {
     const rows2 = (rows || []).filter((r) => (r.wavg != null ? r.wavg : r.avg) != null);
     if (rows2.length < 2) return '<div class="chart-empty">' + TT('暂无历年回报数据') + '</div>';
-    const W = 372, H = 330, padL = 32, padR = 14, padT = 22, padB = 34;   /* 2026-10-31（用户要求）：图上下延伸 */
+    const W = 372, H = 240, padL = 32, padR = 14, padT = 22, padB = 34;   /* 2026-10-31 二版（用户要求）：图收窄协调 */
     const pw = W - padL - padR, ph = H - padT - padB;
     let minV = 0, maxV = 0;
     rows2.forEach((r) => { const A = (r.wavg != null ? r.wavg : r.avg); minV = Math.min(minV, A, r.median == null ? A : r.median); maxV = Math.max(maxV, A, r.median == null ? A : r.median); });
@@ -512,9 +512,9 @@
     const yrTip = document.getElementById('yrTip');
     if (yrTip && m.dataAsOf) yrTip.dataset.tip = TQ('数据取自积金局「曆年回報」列，截止至 {d}', { d: m.dataAsOf });
     $$('.mk-asof').forEach((el) => {
+      /* 2026-10-31（用户要求）：「数据更新时间」小字删除，仅保留积金局资料截至 */
       el.innerHTML = m.dataAsOf
-        ? '<span class="upd-live"><i></i>' + TQ('数据更新时间 <b>{t}</b>', { t: fmtDT(m.updatedAt || Date.now()) }) + '</span>' +
-          '<span class="upd-of">' + TQ('积金局资料截至 <b>{d}</b>', { d: m.dataAsOf }) + '</span>'
+        ? '<span class="upd-of">' + TQ('积金局资料截至 <b>{d}</b>', { d: m.dataAsOf }) + '</span>'
         : '';
     });
 
@@ -574,8 +574,6 @@
     // 按基金数目计的类别第一（与按规模计可能不同，两句都写出来避免误读）
     const topCount = types.slice().sort((a, b) => (b.count || 0) - (a.count || 0))[0];
     const dy = m.byYear && m.byYear.length ? m.byYear[m.byYear.length - 1] : null;
-    /* 2026-10-31（用户要求）：图下方「市场解读」两段文字说明删除（口径并入标题悬浮） */
-    $('#mkRead').innerHTML = '';
 
     renderTop('#mkTop1', m.topReturn, (x) => pctv(x.ann1), (x) => x.ann1);
     renderTop('#mkTop4', m.topReturn5, (x) => pctv(x.ann5), (x) => x.ann5);
@@ -611,7 +609,6 @@
       .map((x, i) => '<li>' +
         '<span class="r r' + (i < 3 ? i + 1 : '0') + '">' + (i + 1) + '</span>' +
         '<span class="n" title="' + esc(x.fund) + (x.scheme ? ' · ' + esc(x.scheme) : '') + '">' + esc(x.fund) + '</span>' +
-        '<span class="t">' + esc(x.trustee) + '</span>' +
         '<span class="v ' + (colorVal == null ? '' : (colorVal(x) >= 0 ? 'up' : 'down')) + '">' + fmt(x) + '</span>' +
         '</li>')
       .join('');
@@ -706,14 +703,15 @@
    雅虎财经式：导航下方一行小卡（随页面滚动、不固定），展示
    MPF 市场指数（规模加权）+ 五大类规模加权指数 + 恒生指数。 */
 (function () {
+  /* 2026-10-31（用户要求）：市场/股/混/债 + 恒指 + 上证，全部可见；「基金」改「积金」 */
   var NAMES = {
-    MPFAVG: 'MPF 市场指数', MPF_STOCK: '股票基金', MPF_MIX: '混合资产',
-    MPF_BOND: '债券基金', MPF_MONEY: '货币市场', MPF_GUAR: '保证基金', HSI: '恒生指数',
+    MPFAVG: '积金市场指数', MPF_STOCK: '股票积金', MPF_MIX: '混合积金',
+    MPF_BOND: '债券积金', HSI: '恒生指数', SSE: '上证指数',
   };
-  var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'MPF_MONEY', 'MPF_GUAR', 'HSI'];
+  var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];
 
   function spark(series, up) {
-    var w = 76, h = 26, n = series.length;
+    var w = 58, h = 24, n = series.length;   /* 2026-10-31 二版：收窄让名称完整显示 */
     if (n < 2) return '';
     var mn = Math.min.apply(null, series), mx = Math.max.apply(null, series);
     var rg = mx - mn || 1;
@@ -762,4 +760,135 @@
       var box = document.getElementById('mktTicker');
       if (box) box.style.display = 'none';
     });
+})();
+
+/* ================= 积金表现指数（2026-10-31，用户要求；参考 GUM 版式、自有设计语言） =================
+   四张卡=四大类规模加权自算指数的区间累计回报（点卡切换）；下方为该指数的面积走势图（基期=100）。 */
+(function () {
+  const KEYS = [['MPFAVG', '积金市场指数'], ['MPF_STOCK', '股票基金指数'], ['MPF_MIX', '混合资产基金指数'], ['MPF_BOND', '债券基金指数']];
+  const RANGES = [['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['all', '全部']];
+  let DB = null, cur = 'MPFAVG', range = '3y';
+
+  function esc2(s) {
+    let o = String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    if (window.__t2sActive && window.t2s) o = window.t2s(o);
+    return o;
+  }
+  function TT(s) { return (typeof window.t === 'function' && window.t(s, s)) || s; }
+
+  function sliceSeries(rows, rg) {
+    if (!rows || !rows.length) return [];
+    if (rg === 'all') return rows;
+    const days = rg === '1y' ? 365 : rg === '3y' ? 365 * 3 : 365 * 5;
+    const last = new Date(rows[rows.length - 1][0]).getTime();
+    const cutoff = last - days * 86400000;
+    const out = rows.filter((r) => new Date(r[0]).getTime() >= cutoff);
+    return out.length > 1 ? out : rows.slice(-2);
+  }
+  function cum(series) {
+    if (!series || series.length < 2) return null;
+    const a = series[0][1], b = series[series.length - 1][1];
+    return a ? (b / a - 1) * 100 : null;
+  }
+
+  function renderRanges() {
+    const box = document.getElementById('piRanges');
+    if (!box) return;
+    box.innerHTML = RANGES.map(([k, label]) =>
+      '<button type="button" class="yr-tab' + (k === range ? ' on' : '') + '" data-pr="' + k + '">' + esc2(TT(label)) + '</button>').join('');
+    box.querySelectorAll('.yr-tab').forEach((b) =>
+      b.addEventListener('click', () => { range = b.dataset.pr; render(); }));
+  }
+
+  function renderCards() {
+    const box = document.getElementById('piCards');
+    if (!box || !DB) return;
+    box.innerHTML = KEYS.map(([k, label]) => {
+      const it = DB.items[k];
+      if (!it) return '';
+      const s = sliceSeries(it.series, range);
+      const c = cum(s);
+      const cls = c == null ? 'flat' : (c >= 0 ? 'up' : 'down');
+      return '<button type="button" class="pi-card' + (k === cur ? ' on' : '') + '" data-pi="' + k + '">' +
+        '<span class="pi-k">' + esc2(TT(label)) + '</span>' +
+        '<b class="pi-v ' + cls + '">' + (c == null ? '—' : (c >= 0 ? '+' : '') + c.toFixed(2) + '%') + '</b>' +
+        '<span class="pi-sub">' + (s.length ? esc2(s[0][0].slice(0, 7)) + ' = 100' : '') + '</span></button>';
+    }).join('');
+    box.querySelectorAll('.pi-card').forEach((b) =>
+      b.addEventListener('click', () => { cur = b.dataset.pi; render(); }));
+  }
+
+  function renderChart() {
+    const host = document.getElementById('piChart');
+    if (!host || !DB) return;
+    const it = DB.items[cur];
+    if (!it || !it.series || it.series.length < 2) {
+      host.innerHTML = '<div class="chart-empty">' + esc2(TT('暂无指数数据')) + '</div>';
+      return;
+    }
+    const s = sliceSeries(it.series, range);
+    const W = 1000, H = 300, padL = 46, padR = 16, padT = 16, padB = 30;
+    const base = s[0][1] || 1;
+    const pts = s.map((r) => [r[0], (r[1] / base) * 100]);
+    let mn = Math.min.apply(null, pts.map((p) => p[1]));
+    let mx = Math.max.apply(null, pts.map((p) => p[1]));
+    const padv = (mx - mn) * 0.08 || 1; mn -= padv; mx += padv;
+    const X = (i) => padL + (W - padL - padR) * (i / (pts.length - 1));
+    const Y = (v) => padT + (H - padT - padB) * (1 - (v - mn) / (mx - mn));
+    let grid = '', yl = '';
+    for (let g = 0; g <= 4; g++) {
+      const v = mn + (mx - mn) * g / 4;
+      grid += '<line x1="' + padL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#eef2f7" stroke-width="1"/>';
+      yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + v.toFixed(0) + '</text>';
+    }
+    const seen = {}; let xt = '';
+    pts.forEach((p, i) => {
+      const y = p[0].slice(0, 4);
+      if (!seen[y]) { seen[y] = 1; xt += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="pi-yk">' + y + '</text>'; }
+    });
+    const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
+    const areaD = lineD + ' L' + X(pts.length - 1).toFixed(1) + ' ' + (H - padB) + ' L' + padL + ' ' + (H - padB) + ' Z';
+    const last = pts[pts.length - 1];
+    host.innerHTML =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="auto" role="img" aria-label="' + esc2(TT('积金表现指数')) + '">' +
+      '<defs><linearGradient id="piGrad" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#0866bb" stop-opacity="0.26"/><stop offset="1" stop-color="#0866bb" stop-opacity="0.02"/></linearGradient></defs>' +
+      grid + yl + xt +
+      '<path d="' + areaD + '" fill="url(#piGrad)"/>' +
+      '<path d="' + lineD + '" fill="none" stroke="#0866bb" stroke-width="2.2"/>' +
+      '<circle cx="' + X(pts.length - 1).toFixed(1) + '" cy="' + Y(last[1]).toFixed(1) + '" r="3.5" fill="#0866bb"/>' +
+      '<line id="piGuide" x1="0" y1="' + padT + '" x2="0" y2="' + (H - padB) + '" stroke="#9db8d4" stroke-dasharray="3 3" opacity="0"/>' +
+      '<circle id="piDot" r="4" fill="#fff" stroke="#0866bb" stroke-width="2" opacity="0"/>' +
+      '<rect id="piHit" x="' + padL + '" y="0" width="' + (W - padL - padR) + '" height="' + H + '" fill="transparent"/></svg>' +
+      '<div class="pi-bubble" id="piBubble" hidden></div>';
+    const svg = host.querySelector('svg'), hit = host.querySelector('#piHit'),
+      guide = host.querySelector('#piGuide'), dot = host.querySelector('#piDot'), bub = host.querySelector('#piBubble');
+    if (hit) {
+      hit.addEventListener('mousemove', (e) => {
+        const r = svg.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width * W;
+        let i = Math.round((x - padL) / (W - padL - padR) * (pts.length - 1));
+        i = Math.max(0, Math.min(pts.length - 1, i));
+        const gx = X(i).toFixed(1), gy = Y(pts[i][1]).toFixed(1);
+        guide.setAttribute('x1', gx); guide.setAttribute('x2', gx); guide.setAttribute('opacity', '1');
+        dot.setAttribute('cx', gx); dot.setAttribute('cy', gy); dot.setAttribute('opacity', '1');
+        const dpct = pts[i][1] - 100;
+        bub.hidden = false;
+        bub.textContent = pts[i][0] + ' · ' + pts[i][1].toFixed(1) + ' 点（' + (dpct >= 0 ? '+' : '') + dpct.toFixed(1) + '%）';
+        bub.style.left = Math.min(Math.max(X(i) / W * 100, 14), 86) + '%';
+        bub.style.top = (Y(pts[i][1]) / H * 100) + '%';
+      });
+      hit.addEventListener('mouseleave', () => {
+        guide.setAttribute('opacity', '0'); dot.setAttribute('opacity', '0'); bub.hidden = true;
+      });
+    }
+  }
+
+  function render() { renderRanges(); renderCards(); renderChart(); }
+
+  fetch('/api/perf-idx').then((r) => (r.ok ? r.json() : null)).then((j) => {
+    if (!j || !j.items) return;
+    DB = j;
+    render();
+  }).catch(() => {});
 })();

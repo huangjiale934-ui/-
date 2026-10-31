@@ -34,12 +34,6 @@
     </div>
     <div class="hdr-right">
       <div class="ver-chip" id="verChip"><span data-i18n="数据版本">数据版本</span><b>—</b></div>
-      <div class="upd">
-        <span class="dot"></span>
-        <!-- 状态行完全由 JS 接管（与其他两页一致） -->
-        <span class="t">数据加载中…</span>
-        <span class="cnt"></span>
-      </div>
       <button class="btn-refresh" data-i18n-title="立即同步最新数据">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
           <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
@@ -104,12 +98,22 @@
       </div>
     </div>
 
+    <!-- 2026-10-31（用户要求）：积金表现指数（参考 GUM 版式、自有设计语言）——四大类规模加权自算指数 -->
+    <div class="mk-panel perf-idx">
+      <div class="pi-head">
+        <h3><span data-i18n="积金表现指数">积金表现指数</span><span class="h3-tip" data-tip="自算指数：以 2015 年首个净值为基期 100，按各基金资产规模加权合成（与市场温度计同口径）；随每日净值自动更新，仅供参考。">ⓘ</span></h3>
+        <div class="pi-ranges" id="piRanges"></div>
+      </div>
+      <div class="pi-cards" id="piCards"><div class="sk sk-chart" style="height:86px"></div></div>
+      <div class="pi-chart" id="piChart"><div class="sk sk-chart"></div></div>
+    </div>
+
     <!-- 最新资讯 + 历年走势（2026-10-22：随排行榜一起上移，位于排行榜之后） -->
     <div class="mk-charts2">
       <div class="mk-panel news-panel">
         <div class="news-head">
           <div>
-            <h3 data-i18n="MPF 最新资讯">MPF 最新资讯</h3>
+            <h3><span data-i18n="MPF 最新资讯">MPF 最新资讯</span><span class="h3-tip" data-tip="来源：积金局「新闻稿」。本平台仅展示标题与日期并链接至官网原文，不转载内容。">ⓘ</span></h3>
           </div>
           <a class="news-more" href="https://www.mpfa.org.hk/tc/info-centre/press-releases" target="_blank" rel="noopener" data-i18n="查看全部 →">查看全部 →</a>
         </div>
@@ -120,17 +124,15 @@
         </ul>
       </div>
       <div class="mk-panel">
-        <h3 data-i18n="市场整体回报走势">市场整体回报走势<span class="h3-tip" id="yrTip" data-tip="数据取自积金局「曆年回報」列">ⓘ</span></h3>
+        <h3><span data-i18n="市场整体回报走势">市场整体回报走势</span><span class="h3-tip" id="yrTip" data-tip="数据取自积金局「曆年回報」列，截止至 {d}">ⓘ</span></h3>
         <div class="mk-slot" id="mkYearLine"><div class="sk sk-chart"></div></div>
-        <!-- 市场解读：2026-10-20 移入右栏，填满资讯块带来的高度差 -->
-        <div class="mk-read mk-slot" id="mkRead"><div class="sk sk-text"></div></div>
       </div>
     </div>
 
     <!-- 市场涨跌温度计 -->
     <div class="mk-panel mk-thermo-panel">
       <div class="mk-thermo-head">
-        <h3 data-i18n="市场涨跌温度计">市场涨跌温度计<span class="h3-tip" data-tip="以全市场成分基金「近 1 年 · 年率化回报」为冷热口径（规模加权）；蓝为涨、绿为跌">ⓘ</span></h3>
+        <h3><span data-i18n="市场涨跌温度计">市场涨跌温度计</span><span class="h3-tip" data-tip="以全市场成分基金「近 1 年 · 年率化回报」为冷热口径（规模加权平均）；蓝为涨、绿为跌。积金局口径按季更新，此处用本站每日净值实时计算。">ⓘ</span></h3>
       </div>
       <div class="mk-slot mk-thermo-slot" id="mkThermo"><div class="sk sk-thermo"></div></div>
     </div>
@@ -161,7 +163,7 @@
     <div class="mk-official">
       <div class="mk-panel">
         <div class="mo-head">
-          <h3 data-i18n="积金局最新公布 · 各基金种类的过去 12 个月年率化净回报">积金局最新公布 · 各基金种类的过去 12 个月年率化净回报<span class="h3-tip" data-tip="数据取自积金局「基金便览」按月发布；条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）">ⓘ</span></h3>
+          <h3><span data-i18n="积金局最新公布 · 各类基金过去 12 月年率化净回报">积金局最新公布 · 各类基金过去 12 月年率化净回报</span><span class="h3-tip" data-tip="数据取自积金局「基金便览」按月发布；条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）。悬浮任意一行可看该类别内最高／最低的单只基金回报。">ⓘ</span></h3>
           <a class="mo-src" id="moSrc" href="https://www.mpfa.org.hk/tc/info-centre/press-releases/20261006" target="_blank" rel="noopener"></a>
         </div>
         <div class="mk-slot" id="mkOfficial"><div class="sk sk-chart"></div></div>
@@ -204,10 +206,6 @@
         <b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b>
         <div class="muted" data-i18n="专业 · 高效 · 安全 · 省心 —— 期待与您共创大湾区发展新机遇">专业 · 高效 · 安全 · 省心 —— 期待与您共创大湾区发展新机遇</div>
       </div>
-    </div>
-    <div class="foot-links">
-      <a href="index.html" data-i18n="强积金资料库">强积金资料库</a>
-      <a href="analysis.html" data-i18n="基金可视化对比">基金可视化对比</a>
     </div>
     <div class="disclaimer">
       <b data-i18n="风险提示与免责声明：">风险提示与免责声明：</b><span data-i18n="本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。">本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。</span>

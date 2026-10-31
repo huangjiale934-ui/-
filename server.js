@@ -611,12 +611,33 @@ const server = http.createServer(async (req, res) => {
   }
 
   /* 2026-10-31（用户要求）：首页顶部行情栏——规模加权 MPF 指数 + 恒指，轻量（每指数近 40 点 sparkline） */
+  /* 2026-10-31（用户要求）：积金表现指数——四大类规模加权自算指数，月度抽样降载（~20KB） */
+  if (p === '/api/perf-idx') {
+    return fs.readFile(path.join(__dirname, 'data', 'index.json'), (err, buf) => {
+      if (err) return send(res, 404, JSON.stringify({ error: '指数数据未生成' }));
+      try {
+        const j = JSON.parse(buf.toString('utf8'));
+        const K4 = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND'];
+        const items = {};
+        K4.forEach((k) => {
+          const it = j.items && j.items[k];
+          if (!it || !it.series || it.series.length < 2) return;
+          const s2 = it.series;
+          const step = Math.max(1, Math.round(s2.length / 260));
+          items[k] = { name: it.name, asOf: s2[s2.length - 1][0],
+            series: s2.filter((x, i) => i % step === 0 || i === s2.length - 1) };
+        });
+        return sendRaw(req, res, 200, JSON.stringify({ updatedAt: j.updatedAt, items }), MIME['.json'], { cache: 'public, max-age=900' });
+      } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }
+    });
+  }
+
   if (p === '/api/ticker') {
     return fs.readFile(path.join(__dirname, 'data', 'index.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '指数数据未生成' }));
       try {
         const j = JSON.parse(buf.toString('utf8'));
-        const KEYS = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'MPF_MONEY', 'MPF_GUAR', 'HSI'];
+        const KEYS = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];   /* 2026-10-31（用户要求）：市场/股/混/债 + 恒指 + 上证，删货币/保证 */
         const items = {};
         KEYS.forEach((k) => {
           const it = j.items && j.items[k];

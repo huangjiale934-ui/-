@@ -1738,6 +1738,15 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .dca-fab.idle:hover span { display: inline; }
 
 /* 2026-10-31：折叠栏 summary 行的风险图例（紧凑胶囊） */
-.ff-risk { display: inline-flex; gap: 4px; align-items: center; margin: 0 14px; }
+.ff-risk { flex: 1 1 auto; display: flex; gap: 5px; align-items: center; justify-content: center; margin: 0 18px; }
 .ff-risk i { width: 15px; height: 15px; border-radius: 4px; cursor: help; }
 .src-brief { margin: 0 0 10px; padding: 9px 12px; background: var(--surface-2, #f4f8fc); border-radius: 8px; font-size: 12.5px; line-height: 1.7; color: var(--text-2, #3d5470); }
+
+
+/* 2026-10-31 二版（用户要求）：图例逐个写级别数字；排名维度下拉 */
+.ff-risk i { width: 18px; height: 16px; border-radius: 4px; font-size: 10.5px; font-weight: 700;
+  line-height: 16px; text-align: center; font-style: normal; cursor: help; }
+.dim-pick { display: inline-flex; align-items: center; gap: 7px; }
+.dim-pick label { font-size: 12.5px; color: var(--text-2); white-space: nowrap; }
+.dim-pick select { padding: 4px 8px; font-size: 12.5px; border: 1px solid var(--border); border-radius: 7px;
+  background: #fff; color: var(--text); min-width: 150px; }
