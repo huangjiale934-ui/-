@@ -1072,3 +1072,39 @@ body { overflow-x: clip; }
 .pi-bubble { position: absolute; transform: translate(-50%, -130%); background: var(--text, #16283e); color: #fff;
   font-size: 12px; padding: 5px 9px; border-radius: 7px; pointer-events: none; white-space: nowrap; z-index: 3; }
 @media (max-width: 720px) { .pi-cards { grid-template-columns: 1fr 1fr; } }
+
+
+/* ===== 2026-10-31 三版（用户十六项反馈） ===== */
+/* hero：公司 logo 行 + 单行主标题 + 按钮横排 */
+.hero-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.hero-brand img { height: 36px; width: auto; display: block; }
+.hero-brand span { font-size: 15px; font-weight: 600; color: var(--text, #16283e); letter-spacing: 0.5px; }
+.hero h1 { font-size: 38px; margin-bottom: 18px; }
+.cta { flex-direction: row; align-items: center; gap: 10px; min-width: 0; padding: 14px 22px; font-size: 16.5px; }
+.cta svg { margin-bottom: 0; flex: none; }
+/* 概览区：删标题后 chips 右对齐 */
+.mk-head { justify-content: flex-end; }
+/* 六榜 → 四榜 2×2：行距加大、徽标金银铜、入场动画 */
+.mk-tops { grid-template-columns: repeat(2, 1fr); gap: 22px; margin-bottom: 40px; }
+.mk-top { padding: 18px 20px 14px; animation: mkFadeUp .5s ease both; }
+.mk-top:nth-child(2) { animation-delay: .06s; }
+.mk-top:nth-child(3) { animation-delay: .12s; }
+.mk-top:nth-child(4) { animation-delay: .18s; }
+@keyframes mkFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.mk-top li { padding: 11px 10px; }
+.mk-top .n { font-size: 14px; }
+.mk-top .r.r1 { background: #f0b429; color: #5b3c00; }
+.mk-top .r.r2 { background: #c3ccd6; color: #2c3947; }
+.mk-top .r.r3 { background: #e2b08a; color: #6b3f1d; }
+.mk-top li:hover { background: var(--brand-soft, #edf7ff); transform: translateX(3px); }
+.mk-top li { transition: background .15s, transform .15s; }
+/* 表现指数：模块加高后与下模块间距 +20% */
+.perf-idx { margin-bottom: 34px; }
+.pi-bubble { background: #fff; border: 1px solid var(--brand, #0866bb); color: var(--text, #16283e); box-shadow: 0 4px 14px rgba(8, 60, 110, .14); }
+/* 积金局表：右侧环形图下移 */
+.mo-right { padding-top: 34px; }
+/* 走势图下移一点 */
+#mkYearLine { padding-top: 8px; }
+
+/* 走势标题与年份标签间距再加大 */
+.mk-panel h3 + #mkYearLine, .mk-panel #mkYearLine { margin-top: 6px; }

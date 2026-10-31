@@ -1750,3 +1750,24 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .dim-pick label { font-size: 12.5px; color: var(--text-2); white-space: nowrap; }
 .dim-pick select { padding: 4px 8px; font-size: 12.5px; border: 1px solid var(--border); border-radius: 7px;
   background: #fff; color: var(--text); min-width: 150px; }
+
+
+/* ===== 2026-10-31 三版（用户十六项反馈） ===== */
+/* 页头：数据版本徽标加大；更新数据按钮已删 */
+.ver-chip { font-size: 12.5px; padding: 4.5px 13px; gap: 6px; }
+.ver-chip b { font-size: 12.5px; }
+/* 回到顶部：悬停展开文字（配色同计算器） */
+.to-top { width: 42px; overflow: hidden; justify-content: center; }
+.to-top .tt-x { display: none; white-space: nowrap; font-size: 12.5px; font-weight: 600; margin-left: 7px; }
+.to-top:hover { width: auto; padding-left: 15px; padding-right: 15px; }
+.to-top:hover .tt-x { display: inline; }
+/* 口径行估值分布 chips */
+.ff-nav { flex: 1 1 auto; display: flex; justify-content: center; margin: 0 18px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.ff-nav .navdist { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.ff-nav .navdist b { cursor: pointer; }
+.ff-nav .ndhint { font-style: normal; color: var(--text-3); }
+/* 表格：种类二级小字（无下划线） */
+.cell-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+/* 页2 标题与切换按钮同行 */
+.pg-head { display: flex; align-items: center; flex-wrap: wrap; }
+.pg-head h1 { margin: 0; }

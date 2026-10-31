@@ -1107,6 +1107,20 @@
   '数据取自积金局「基金便览」按月发布；条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）。悬浮任意一行可看该类别内最高／最低的单只基金回报。': 'Monthly MPFA factsheets; bars show each class 12-month annualised net return (net of fees). Hover a row for the best/worst fund in that class.',
   '自算指数：以 2015 年首个净值为基期 100，按各基金资产规模加权合成（与市场温度计同口径）；随每日净值自动更新，仅供参考。': 'Self-calculated index: base 100 at the first 2015 NAV, AUM-weighted; updated daily. For reference only.',
 
+  '估值日分布：': 'NAV date distribution:',
+  '（点击只看该日，再点取消）': '(click to show that date only; click again to cancel)',
+  '无': 'None',
+  '计划名称': 'Scheme name',
+  '数据更新 <b>{t}</b>': 'Data updated <b>{t}</b>',
+  '筛选条件：': 'Filters:',
+  '筛选条件：无': 'Filters: none',
+  '香港强积金数据平台': 'Hong Kong MPF Data Platform',
+
+  '基金名称／计划名称／受托人': 'Fund / scheme / trustee',
+
+  '各类基金过去 12 个月年率化净回报': 'Past 12 months annualised net return by fund class',
+  '积金局最新公布（按月更新）：数据取自积金局「基金便览」，条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）。悬浮任意一行可看该类别内最高／最低的单只基金回报。': 'Latest MPFA release (monthly): bars show each class 12-month annualised net return (net of fees), from MPFA factsheets. Hover a row for the best/worst fund in that class.',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

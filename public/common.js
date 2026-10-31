@@ -446,7 +446,8 @@ function navDateDistHTML() {
   const keys = Object.keys(map).filter((k) => k !== 'none').sort().reverse();
   if (map.none) keys.push('none');
   /* 资料库（#fType）= 筛选表格；可视化对比页（#anTbody2）= 筛选下方基金列表 —— 均可点击 */
-  const clickable = !!document.querySelector('#fType') || !!document.querySelector('#anTbody2');
+  /* 2026-10-31 二版：估值日筛选只属于「基金最新数据」（db 段可见时）与可视化对比页；MPFA 榜单不需要 */
+  const clickable = !!document.querySelector('#dbSec:not([hidden]) #fType') || !!document.querySelector('#anTbody2');
   return '<div class="navdist">' + TT('净值估值日分布：') +
     keys.map((k) => '<b' + (clickable ? ' class="ndk" data-navdate="' + k + '"' : '') + '>' +
       (k === 'none' ? TT('无估值日') : k.slice(5).replace('-', '/')) + ' ×' + map[k] + '</b>').join('') +
@@ -454,39 +455,27 @@ function navDateDistHTML() {
     '</div>';
 }
 
-/** 2026-10-31 二版（用户要求）：
- * ① 风险级别图例放「数据统计口径说明」行中间（逐个写级别数字，悬浮看级别名）；
- * ② 估值日分布卡只在资料库页恢复（analysis/页3 保持删除）；点日期筛选沿用 .ndk 事件。 */
+/** 2026-10-31 三版（用户要求）：
+ * 风险级别图例删除；估值日分布 chips 与「数据统计口径说明」放同一行（#ffNavdist，
+ * 仅「基金最新数据」段显示——rank 段由切换脚本控制显隐）；可视化对比页保留原 srcNoteTop。 */
 function renderNavDistCard() {
-  const lg = document.getElementById('ffRisk');
-  if (lg) {
-    const LIGHT = { 1: 1, 2: 1, 3: 1 };   /* 浅色底用深字，保证对比度 */
-    lg.innerHTML = [1, 2, 3, 4, 5, 6, 7].map((lv) => {
-      const c = MPF_RISK.color(lv);
-      return '<i style="background:' + c + ';color:' + (LIGHT[lv] ? '#0b3a66' : '#fff') +
-        '" title="' + esc(lv + ' 级 · ' + MPF_RISK.label(lv)) + '">' + lv + '</i>';
-    }).join('');
-  }
-  const el = document.getElementById('navDistCard');
-  if (!el) return;   /* 仅资料库页有此卡 */
   const funds = (DATA.funds || []).filter((x) => x.navStatus === 'verified' && x.nav != null);
-  if (!funds.length) { el.hidden = true; el.innerHTML = ''; return; }
+  if (!funds.length) { const f0 = document.getElementById('ffNavdist'); if (f0) f0.innerHTML = ''; return; }
   const map = {};
   funds.forEach((x) => { const k = x.navAsOf || 'none'; map[k] = (map[k] || 0) + 1; });
   const keys = Object.keys(map).filter((k) => k !== 'none').sort().reverse();
   if (map.none) keys.push('none');
-  let max = 0;
-  keys.forEach((k) => { if (map[k] > max) max = map[k]; });
+  const clickable = !!document.querySelector('#dbSec:not([hidden]) #fType') || !!document.querySelector('#anTbody2');
   const onKey = (typeof F !== 'undefined' && F && F.navDate) ? F.navDate : '';
-  el.hidden = false;
-  el.innerHTML =
-    '<div class="ndc-head"><b>' + TT('净值估值日分布') + '</b>' +
-    '<span>' + TQ('共 {n} 只已核对官方净值；点日期只看该日，再点取消', { n: funds.length }) + '</span></div>' +
-    '<div class="ndc-list">' +
-    keys.map((k) => '<button type="button" class="ndc ndk' + (onKey === k ? ' on' : '') + (map[k] === max ? ' peak' : '') +
-      '" data-navdate="' + k + '"><b>' + (k === 'none' ? TT('无估值日') : k.slice(5).replace('-', '/')) + '</b>' +
-      '<span>' + TQ('{n} 只', { n: map[k] }) + '</span></button>').join('') +
-    '</div>';
+  const chips = '<span class="navdist ff-nav-in">' + TT('估值日分布：') +
+    keys.map((k) => '<b' + (clickable ? ' class="ndk" data-navdate="' + k + '"' : '') +
+      (onKey === k ? ' style="outline:2px solid var(--brand,#0866bb)"' : '') + '>' +
+      (k === 'none' ? TT('无估值日') : k.slice(5).replace('-', '/')) + ' ×' + map[k] + '</b>').join('') +
+    (clickable ? '<i class="ndhint">' + TT('（点击只看该日，再点取消）') + '</i>' : '') + '</span>';
+  const fn = document.getElementById('ffNavdist');
+  if (fn) fn.innerHTML = chips;
+  const elTop = document.getElementById('srcNoteTop');
+  if (elTop && document.getElementById('anTbody2')) elTop.innerHTML = chips;   /* 可视化对比页保留 */
 }
 window.renderNavDistCard = renderNavDistCard;
 
@@ -2481,8 +2470,9 @@ function initDCABuild() {
   dcaResetIdle();
   fab.addEventListener('click', dcaResetIdle);
   fab.addEventListener('mouseenter', () => fab.classList.remove('idle'));
+  /* 2026-10-31 二版（用户要求）：首次 10 秒收起后，只在悬停时展开、移开立即收起 */
   fab.addEventListener('mouseleave', () => {
-    if (wrap.hidden) { clearTimeout(dcaIdleTimer); dcaIdleTimer = setTimeout(() => fab.classList.add('idle'), 10000); }
+    if (wrap.hidden) { clearTimeout(dcaIdleTimer); fab.classList.add('idle'); }
   });
   document.addEventListener('click', (e) => {
     if (e.target.closest && (e.target.closest('.dca-wrap'))) dcaResetIdle();

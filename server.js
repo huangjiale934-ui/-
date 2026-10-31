@@ -623,9 +623,17 @@ const server = http.createServer(async (req, res) => {
           const it = j.items && j.items[k];
           if (!it || !it.series || it.series.length < 2) return;
           const s2 = it.series;
-          const step = Math.max(1, Math.round(s2.length / 260));
-          items[k] = { name: it.name, asOf: s2[s2.length - 1][0],
-            series: s2.filter((x, i) => i % step === 0 || i === s2.length - 1) };
+          /* 2026-10-31 二版（用户要求：数据要连续不跳点）：按 ISO 周聚合（取周内最后交易日），
+             曲线连续且体积可控（~600 周/指数） */
+          const wk = {};
+          s2.forEach(([d, v]) => {
+            const dt = new Date(d + 'T00:00:00Z');
+            const dow = (dt.getUTCDay() + 6) % 7;
+            const key = new Date(dt.getTime() - dow * 86400000).toISOString().slice(0, 10);
+            wk[key] = v;
+          });
+          const wseries = Object.keys(wk).sort().map((x) => [x, wk[x]]);
+          items[k] = { name: it.name, asOf: s2[s2.length - 1][0], series: wseries };
         });
         return sendRaw(req, res, 200, JSON.stringify({ updatedAt: j.updatedAt, items }), MIME['.json'], { cache: 'public, max-age=900' });
       } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }

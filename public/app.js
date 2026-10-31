@@ -30,7 +30,7 @@
     const sel = document.getElementById('dimSel');
     if (!sel) return;
     const fill = () => {
-      sel.innerHTML = '<option value="">' + TT('无（按名次顺序）') + '</option>' +
+      sel.innerHTML = '<option value="">' + TT('无') + '</option>' +
         DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
       sel.value = (window.__dimActive && S.key) ? S.key : '';
     };
@@ -39,7 +39,7 @@
       window.__dimSelLangBound = 1;
       document.addEventListener('mpf:lang', () => {
         const s2 = document.getElementById('dimSel');
-        if (s2) { s2.innerHTML = '<option value="">' + TT('无（按名次顺序）') + '</option>' +
+        if (s2) { s2.innerHTML = '<option value="">' + TT('无') + '</option>' +
           DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
           s2.value = (window.__dimActive && S.key) ? S.key : ''; }
       });
@@ -207,7 +207,7 @@
   function resetAll() {
     Object.assign(F, { kw: '', type: '', sub: '', trustee: '', risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' });
     ['#kw', '#fType', '#fTrustee', '#fRisk', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
-    $('#fRetDim').value = 'ann1';
+    /* 2026-10-31（用户要求）：涨跌幅/回撤/费率第二行筛选已下线 */
     document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
     fillSub(); S.page = 1; render();
   }
@@ -217,7 +217,6 @@
   /* 2026-10-19：列序对齐「基金最新数据」表格（名次 + 自算指标） */
   const COL_DEFS = [
     { i: 1, k: 'rank', n: '名次', lock: true },
-    { i: 2, k: 'cmp', n: '对比', lock: true },
     { i: 3, k: 'fund', n: '成分基金' },
     { i: 4, k: 'trustee', n: '发行人（受托人）' },
     { i: 5, k: 'type', n: '基金种类' },
@@ -240,14 +239,16 @@
     { i: 22, k: 'size', n: '基金规模' },
     { i: 23, k: 'mgmtFee', n: '基金管理费' },
     { i: 24, k: 'launchTs', n: '推出日期' },
+    { i: 24, k: 'cmp', n: '对比', lock: true },
     { i: 25, k: 'ops', n: '操作' },
   ];
   /* 2026-10-19：默认显示列（按领导最新指定截图）：
      名次/对比/成分基金/发行人/风险级别/单位资产净值/日涨跌/近1个月/年初至今/近3年年化/
      近1年最大回撤/基金规模/操作 —— 其余列（种类、近1年、波动率、夏普、超额、正收益月份、管理费、推出日期）放列设置 */
   /* 2026-10-22（用户要求）：「近1年」改为默认列，其余列不变 */
-  const COL_DEFAULT = ['rank', 'cmp', 'fund', 'trustee', 'risk', 'nav',
-    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfY3a', 'selfMdd', 'size', 'ops'];
+  /* 2026-10-31（用户要求）：对比列移到操作（详情）左侧 */
+  const COL_DEFAULT = ['rank', 'fund', 'trustee', 'risk', 'nav',
+    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfY3a', 'selfMdd', 'size', 'cmp', 'ops'];
   /* 2026-10-27（用户要求）：「精简模式」下线，改为「默认模式」——一键回到用户指定的 14 列 */
   let colSet = null;
   let DIM_EXTRA = '';   /* 2026-10-27：维度联动临时放出的列（不持久化） */
@@ -311,9 +312,7 @@
     $('#fSub').addEventListener('change', () => { F.sub = $('#fSub').value; S.page = 1; render(); });
     $('#fTrustee').addEventListener('change', () => { F.trustee = $('#fTrustee').value; S.page = 1; render(); });
     $('#fRisk').addEventListener('change', () => { F.risk = $('#fRisk').value; S.page = 1; render(); });
-    $('#fRetDim').addEventListener('change', () => { F.retDim = $('#fRetDim').value; S.page = 1; render(); });
-    [['#fRetMin', 'retMin'], ['#fRetMax', 'retMax'], ['#fDdMin', 'ddMin'], ['#fDdMax', 'ddMax'], ['#fFeeMax', 'feeMax']]
-      .forEach(([sel, k]) => $(sel).addEventListener('input', debounce(() => { F[k] = $(sel).value; S.page = 1; render(); }, 300)));
+    /* 2026-10-31（用户要求）：第二行筛选（涨跌幅/回撤/管理费）删除，相关绑定移除 */
     $('#btnReset').addEventListener('click', resetAll);   /* 2026-10-14：复用 resetAll（含估值日标签） */
     $('#perPage').addEventListener('change', () => {
       S.size = parseInt($('#perPage').value, 10) || 10;
@@ -389,7 +388,8 @@
     }));
 
     /* 2026-10-23（核验报告）：筛选后明确写「已筛选」，避免把「全市场 451」误读成计数没刷新 */
-    $('#cntTip').textContent = total === DATA.count ? TT('（全市场）') : TQ('（已筛选结果，全市场共 {n} 条）', { n: DATA.count });
+    /* 2026-10-31（用户要求）：不再显示（全市场） */
+    $('#cntTip').textContent = '';
     renderPager(pages, total);
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
@@ -398,12 +398,14 @@
      此前「移动 thead 的 DOM」方案在 tbody 重渲染后表头/表体错位（数据装反）——已废弃。
      现在 thead 与 tbody 都由同一个可见列顺序数组生成，物理上不可能错位。 */
   const CELL_FNS = {
-    rank: (x, rk) => '<td data-c="rank" class="c rank-cell" data-l="' + TT('名次') + '">' + (rk || '') + '</td>',
+    rank: (x, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' +
+      (rk != null && rk <= 3 ? '<span class="medal g' + rk + '">' + rk + '</span>' : '<span class="rank-cell">' + (rk || '') + '</span>') + '</td>',
     cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
     fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) + (x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '') + '</div>' +
-      '<div class="sub-line">' + esc(typeLabel(x.subtype || x.type)) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div></td>',
+      (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
     trustee: (x) => '<td data-c="trustee" data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
-    type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span></td>',
+    type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span>' +
+      '<div class="cell-sub">' + esc(typeLabel(x.subtype || x.type)) + '</div></td>',
     risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
     nav: (x) => '<td data-c="nav" data-l="' + TT('单位资产净值') + '" class="r num">' + navCell(x) + '</td>',
     selfD1: (x) => '<td data-c="selfD1" data-l="' + TT('日涨跌') + '" class="r num ' + cls(x.selfD1) + '">' + pct(x.selfD1) + '</td>',
@@ -523,9 +525,9 @@
     if (F.feeMax !== '') c.push([TQ('管理费 ≤ {v}%', { v: F.feeMax }), 'fee']);
     if (F.navDate) c.push([TQ('估值日：{v}', { v: F.navDate === 'none' ? TT('无估值日') : F.navDate.slice(5).replace('-', '/') }), 'navDate']);
     $('#chips').innerHTML = c.length
-      ? '<span class="muted" style="font-size:12px">' + TT('已选条件：') + '</span>' +
+      ? '<span class="muted" style="font-size:12px">' + TT('筛选条件：') + '</span>' +
         c.map((x) => '<span class="chip">' + esc(x[0]) + '<span class="x" data-c="' + x[1] + '">×</span></span>').join('')
-      : '<span class="muted" style="font-size:12px">' + TT('未设置筛选条件，当前显示全市场基金') + '</span>';
+      : '<span class="muted" style="font-size:12px">' + TT('筛选条件：无') + '</span>';
     $$('#chips .x').forEach((b) => b.addEventListener('click', () => {
       const k = b.dataset.c;
       if (k === 'kw') { F.kw = ''; $('#kw').value = ''; }
@@ -533,9 +535,6 @@
       if (k === 'sub') { F.sub = ''; fillSub(); }
       if (k === 'trustee') { F.trustee = ''; $('#fTrustee').value = ''; }
       if (k === 'risk') { F.risk = ''; $('#fRisk').value = ''; }
-      if (k === 'ret') { F.retMin = F.retMax = ''; $('#fRetMin').value = ''; $('#fRetMax').value = ''; }
-      if (k === 'dd') { F.ddMin = F.ddMax = ''; $('#fDdMin').value = ''; $('#fDdMax').value = ''; }
-      if (k === 'fee') { F.feeMax = ''; $('#fFeeMax').value = ''; }
       if (k === 'navDate') {
         F.navDate = '';
         document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));

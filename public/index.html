@@ -31,19 +31,15 @@
 </header>
 
 <div class="wrap">
-  <div class="page-head">
+  <div class="page-head pg-head">
     <h1 data-i18n="强积金资料库">强积金资料库</h1>
-    <p data-i18n="全市场强积金成分基金一览与排行榜 · 「基金最新数据」取自 11 家受托人官网（每日），「MPFA 基金榜单」取自积金局「強積金基金平台」（每月），由广州精研数据有限公司自动同步整理">全市场强积金成分基金一览与排行榜 · 「基金最新数据」取自 11 家受托人官网（每日），「MPFA 基金榜单」取自积金局「強積金基金平台」（每月），由广州精研数据有限公司自动同步整理</p>
+    <div class="db-tabs" role="tablist" aria-label="模块切换" style="margin-left:16px">
+      <button type="button" class="dbt on" id="dbtDb" data-dbtab="db" data-i18n="基金最新数据">基金最新数据</button>
+      <button type="button" class="dbt" id="dbtRank" data-dbtab="rank" data-i18n="MPFA 基金榜单">MPFA 基金榜单</button>
+    </div>
   </div>
 
-  
-  <!-- 模块切换：基金列表（资料库）/ 排名榜单（原独立页面并入，2026-10-14） -->
-  <div class="db-tabs" role="tablist" aria-label="模块切换">
-    <button type="button" class="dbt on" id="dbtDb" data-dbtab="db" data-i18n="基金最新数据">基金最新数据</button>
-    <button type="button" class="dbt" id="dbtRank" data-dbtab="rank" data-i18n="MPFA 基金榜单">MPFA 基金榜单</button>
-  </div>
   <div id="dbSec">
-  <p class="scope-note" id="dbScopeNote">本表数据取自 11 家受托人官网（每交易日更新），排名与涨跌指标由本平台自行计算；因各发行人公布时间不一致，少数基金可能滞后 1–2 天。如需完全对齐的日度数据，请切换到「MPFA 基金榜单」查看积金局每月底发布的列表。</p>
   <div class="stats" id="stats"></div>
 
   <div class="card filters">
@@ -53,7 +49,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
           <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
         </svg>
-        <input type="text" id="kw" data-i18n-ph="基金名称／计划名称／受托人（支持简体／繁体／英文）" placeholder="基金名称／计划名称／受托人（支持简体／繁体／英文）">
+        <input type="text" id="kw" data-i18n-ph="基金名称／计划名称／受托人" placeholder="基金名称／计划名称／受托人">
       </div>
       <div class="f-item">
         <label data-i18n-parts>基金种类</label>
@@ -73,42 +69,10 @@
       </div>
     </div>
 
-    <div class="f-row f-row-sub" style="margin-top:12px">
-      <div class="f-item">
-        <label data-i18n-parts>涨跌幅区间（%）</label>
-        <div class="range">
-          <select id="fRetDim" style="min-width:118px">
-            <option data-i18n-parts  value="ann1">近 1 年回报</option>
-            <option data-i18n-parts  value="ann5">近 5 年年化</option>
-            <option data-i18n-parts  value="ann10">近 10 年年化</option>
-            <option data-i18n-parts  value="annLaunch">推出至今年化</option>
-            <option data-i18n-parts  value="cum1">近 1 年累积</option>
-          </select>
-          <input type="number" id="fRetMin" data-i18n-ph="最小" placeholder="最小">
-          <span data-i18n="至">至</span>
-          <input type="number" id="fRetMax" data-i18n-ph="最大" placeholder="最大">
-        </div>
-      </div>
-      <div class="f-item">
-        <label data-i18n-parts>最大回撤区间（%） <span class="hint">近5年最差年度</span></label>
-        <div class="range">
-          <input type="number" id="fDdMin" data-i18n-ph="如 -30" placeholder="如 -30">
-          <span data-i18n="至">至</span>
-          <input type="number" id="fDdMax" data-i18n-ph="如 0" placeholder="如 0">
-        </div>
-      </div>
-      <div class="f-item">
-        <label data-i18n-parts>基金管理费上限（%）</label>
-        <div class="range">
-          <input type="number" id="fFeeMax" data-i18n-ph="如 0.8" placeholder="如 0.8">
-        </div>
-      </div>
-      <div class="f-item f-reset">
-        <button class="btn ghost" id="btnReset" data-i18n="重置条件">重置条件</button>
-      </div>
     </div>
 
     <div class="chips" id="chips"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:-6px"><button class="btn ghost sm" id="btnReset" data-i18n="重置条件">重置条件</button></div>
   </div>
 
   <div class="card">
@@ -123,7 +87,6 @@
           <option data-i18n-parts  value="50">50 条</option>
           <option data-i18n-parts  value="100">100 条</option>
         </select>
-        <span class="muted" style="font-size:12px" data-i18n="点击表头排序 · 点基金名称或「详情」查看资料">点击表头排序 · 点基金名称或「详情」查看资料</span>
         <button class="btn ghost sm" id="idxExport" data-i18n="导出当前结果">导出当前结果</button>
       </div>
     </div>
@@ -182,7 +145,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
           <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
         </svg>
-        <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称／受托人（支持简体／繁体／英文）" placeholder="基金名称／计划名称／受托人（支持简体／繁体／英文）">
+        <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称／受托人" placeholder="基金名称／计划名称／受托人">
       </div>
       <div class="f-item">
         <label data-i18n-parts>基金种类</label>
@@ -253,7 +216,6 @@
           <option data-i18n-parts  value="100">100 条</option>
           <option data-i18n-parts  value="9999">全部</option>
         </select>
-        <span class="muted" style="font-size:12px" data-i18n="点击表头可排序 · 勾选基金加入对比 · 点「详情」查看基金完整资料">点击表头可排序 · 勾选基金加入对比 · 点「详情」查看基金完整资料</span>
         <div class="rk-cols" id="rkColBtnWrap"><button type="button" class="btn ghost sm" id="rkColBtn">列设置</button>
           <div class="rk-colpop" id="rkColPop" hidden>
             <!-- 2026-10-19：改为逐列勾选（与「基金最新数据」列设置同款），内容由 rank.js 按当前榜单动态生成 -->
@@ -315,17 +277,16 @@
 
 
   <div class="foot">
-  <div class="ndcard" id="navDistCard" hidden></div>
+  <p class="scope-note" id="dbScopeNote" style="margin:10px 2px">本表数据取自 11 家受托人官网（每交易日更新），排名与涨跌指标由本平台自行计算；因各发行人公布时间不一致，少数基金可能滞后 1–2 天。如需完全对齐的日度数据，请切换到「MPFA 基金榜单」查看积金局每月底发布的列表。</p>
     <details class="foot-fold" id="foldSpec">
       <summary>
         <span class="ff-b"><span data-i18n="本次净值核对时间：">本次净值核对时间：</span><b id="navCheckAt">—</b></span>
-        <span class="ff-risk" id="ffRisk" data-i18n-title="风险级别图例（1 级最低 → 7 级最高）"></span>
+        <span class="ff-nav" id="ffNavdist"></span>
         <span class="ff-a" data-i18n="数据统计口径说明">数据统计口径说明</span>
         <span class="ff-arrow">▾</span>
       </summary>
       <div class="ff-body">
       <div class="src-brief" data-i18n="数据来源：积金局「强积金基金平台」公布的基金资讯表；单位资产净值取自各受托人／保荐人官网，每日自动同步。本页资料仅供参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。">数据来源：积金局「强积金基金平台」公布的基金资讯表；单位资产净值取自各受托人／保荐人官网，每日自动同步。本页资料仅供参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。</div>
-        <div class="src-note src-note-top" id="srcNoteTop"></div>
         <div class="src-note" id="srcNote"></div>
       </div>
     </details>
@@ -335,7 +296,6 @@
     </details>
     <div class="copyright" data-i18n="© 2026 广州精研数据有限公司 · 保留所有权利">© 2026 广州精研数据有限公司 · 保留所有权利</div>
   </div>
-</div>
 
 <!-- 对比栏（与排名页共用，跨页保持；来源：common.js CMPX） -->
 <div class="cmp" id="cmp">
@@ -400,6 +360,11 @@
     if (!keepHash) { try { history.replaceState(null, '', isRank ? '#rank' : '#db'); } catch (e) {} }
     try { window.dispatchEvent(new Event('resize')); } catch (e) {}
     if (window.__syncTableScroll) window.__syncTableScroll();
+    /* 2026-10-31（用户要求）：估值日分布 chips 与说明行仅「基金最新数据」段显示 */
+    var fnN = document.getElementById('ffNavdist');
+    if (fnN) fnN.style.display = isRank ? 'none' : '';
+    var snN = document.getElementById('dbScopeNote');
+    if (snN) snN.style.display = isRank ? 'none' : '';
   }
   var b1 = document.getElementById('dbtDb'), b2 = document.getElementById('dbtRank');
   if (b1) b1.addEventListener('click', function () { show('db'); });

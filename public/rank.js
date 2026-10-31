@@ -179,7 +179,7 @@
     const sel = document.getElementById('rkDimSel');
     if (sel) {
       const fill = () => {
-        sel.innerHTML = '<option value="">' + esc(TT('无（全部基金）')) + '</option>' +
+        sel.innerHTML = '<option value="">' + esc(TT('无')) + '</option>' +
           BOARDS.map((b) => '<option value="' + b.id + '">' + esc(TT(b.name)) + '</option>').join('');
         sel.value = S.board || '';
       };
@@ -451,8 +451,9 @@
   const CELL_FUND = {
     rank: (x, medal, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' + medal + '</td>',
     fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div>' +
-      '<div class="sub-line">' + esc(x.scheme) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div>' +
-      barHTML(cur(), x, window.__rkRanked || null) + '</td>',
+      barHTML(cur(), x, window.__rkRanked || null) + '</td>',   /* 2026-10-31：名称下小字删除，计划名称移独立列 */
+    scheme: (x) => '<td data-c="scheme" data-l="' + TT('计划名称') + '" class="fz"><div>' + esc(x.scheme || '—') + '</div>' +
+      (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
     trustee: (x) => '<td data-c="trustee" data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
     type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>',
     risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
@@ -484,6 +485,7 @@
   const TH_FUND = {
     rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
     fund: '<th data-c="fund" data-i18n-parts class="f-main fz">成分基金</th>',
+    scheme: '<th data-c="scheme" data-i18n-parts>计划名称</th>',
     trustee: '<th data-c="trustee" data-i18n-parts>发行人</th>',
     type: '<th data-c="type" data-i18n-parts>基金种类</th>',
     risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险级别 <span class="arrow">↕</span></th>',
@@ -575,7 +577,7 @@
           ? /* 自算榜行：固定前段（与 selfHead 对齐） */
             '<td class="c" data-l="' + TT('名次') + '">' + medal + '</td>' +
             '<td class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(x.fund) + '</div>' +
-              '<div class="sub-line">' + esc(x.scheme) + (x.groupSize > 1 ? ' · ' + TQ('{n} 个单位类别', { n: x.groupSize }) : '') + '</div>' +
+              (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') +
               barHTML(b, x, ranked) + '</td>' +
             '<td data-l="' + TT('发行人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>' +
             '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>' +
@@ -822,12 +824,12 @@
     const tbl = document.querySelector('#rkTable');
     const box = document.querySelector('#rkColChecks');
     if (!btn || !pop || !tbl || !box) return;
-    const KEY = 'mpf-rk-cols-v5';   /* 2026-10-26 升版：新增抗跌/总开支/新锐列，需对老用户重置隐藏集 */
+    const KEY = 'mpf-rk-cols-v6';   /* 2026-10-31：计划名称列 + 种类默认隐藏，重置老用户列设置 */   /* 2026-10-26 升版：新增抗跌/总开支/新锐列，需对老用户重置隐藏集 */
 
     /* 列定义：k=列键、n=显示名、lock=必显 */
     const FUND = [
       /* 2026-10-26（用户要求）：基金规模列移到回报组之后（原管理费位置），管理费移出默认显示 */
-      ['rank', '名次', 1], ['fund', '成分基金', 1], ['trustee', '发行人', 0],
+      ['rank', '名次', 1], ['fund', '成分基金', 1], ['scheme', '计划名称', 0], ['trustee', '发行人', 0],
       ['type', '基金种类', 0], ['risk', '风险级别', 0],
       ['ann1', '近1年年率化', 0], ['ann5', '近5年年率化', 0], ['ann10', '近10年年率化', 0],
       ['annLaunch', '推出至今年率化', 0], ['size', '基金规模', 0], ['mgmtFee', '管理费', 0],
@@ -856,9 +858,10 @@
       ['cmp', '对比', 1], ['ops', '详情', 1],
     ];
     const MODES = { fund: FUND, agg: AGG, self: SELF };
+    /* 2026-10-31（用户要求）：基金种类默认不显示 */
     const DEFAULT_OFF = ['cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee', 'worstYear', 'fer', 'launchTs',
-      'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025'];
-    const SLIM_OFF = ['trustee', 'type', 'risk', 'size', 'ann5', 'ann10', 'annLaunch', 'mgmtFee',
+      'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025', 'type', 'scheme'];
+    const SLIM_OFF = ['trustee', 'type', 'scheme', 'risk', 'size', 'ann5', 'ann10', 'annLaunch', 'mgmtFee',
       'worstYear', 'fer', 'launchTs',
       'cum1', 'cum5', 'cum10', 'cumLaunch', 'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025',
       'selfW1', 'selfY3a', 'selfY5a', 'selfMdd5', 'count', 'sizeSum', 'ann5Avg', 'ann10Avg',

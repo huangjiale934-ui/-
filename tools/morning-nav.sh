@@ -75,6 +75,7 @@ write_ustat running "重算自算指标"
 node navperf.js || { echo "!!! navperf 失败，中止"; write_ustat error "navperf 失败"; exit 1; }
 node tools/fix-nulls.js || true
 node tools/merge-nav.js || { echo "!!! merge-nav 失败，中止"; exit 1; }
+node mpfindex.js || echo "!!! 自算指数失败（继续）"
 node tools/nav-consistency.js || echo "!!! nav-consistency 未通过（详见输出）"
 node tools/gap-check.js || true
 # 2026-10-29（5.0）：早间同样跑链接巡检，避免友链在数据更新后退化

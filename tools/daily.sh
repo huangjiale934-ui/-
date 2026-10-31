@@ -97,6 +97,7 @@ soft_step "5/9 资产分布解析" "$PY" alloc_fill.py
 node tools/holdings-txn.js check --restore || echo "!!! 持仓事务：已检测到退化并回滚到抓取前快照"
 step "6/9 重算自算指标" node navperf.js
 step "6.5/9 修正 n.a. 被写成 0 的字段" node tools/fix-nulls.js
+step "6.7/9 自算指数（MPFAVG/五大类，2026-10-31 用户要求每日更新）" node mpfindex.js
 step "7/9 指数补齐" node indexbuild.js
 # 2026-10-24：merge-nav 必须在最后一次写 funds.json/hist 之后执行——
 # 原先排在 1.5 位，后面步骤继续写档会覆盖对齐成果（核验 D08a：30 只净值与 hist 错位 1–2 天）

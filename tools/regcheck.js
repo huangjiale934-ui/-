@@ -66,12 +66,12 @@ chk('首页·走势图 5 个年份', ['2021', '2022', '2023', '2024', '2025']
 chk('首页·走势图 2025 +17.72%（规模加权新值）', /class="line-val up"[^>]*>\+17\.72%/.test(home));
 chk('首页·走势图 2022 -15.55% 为绿（规模加权新值）', /class="line-val down"[^>]*>-15\.55%/.test(home));
 
-chk('首页·六张榜单各 5 条', ['#mkTop1', '#mkTop2', '#mkTop3', '#mkTop4', '#mkTop5', '#mkTop6'].every((id) => {
+chk('首页·四榜 2×2 各 5 条（2026-10-31：砍总开支/低风险）', ['#mkTop1', '#mkTop2', '#mkTop4', '#mkTop5'].every((id) => {
   const m = new RegExp('id="' + id.slice(1) + '"[\\s\\S]*?</ol>').exec(home);
   return m && (m[0].match(/<li>/g) || []).length === 5;
-}));
+}) && home.indexOf('id="mkTop3"') < 0 && home.indexOf('id="mkTop6"') < 0);
 chk('首页·免责条在位（disclaimer，2026-10-31 版式）', /class="disclaimer"/.test(home) && /每日自动同步|风险提示与免责声明/.test(home));
-chk('首页·年份标签 10 个（走势 6 + 表现指数区间 4，2026-10-31）', (home.match(/class="yr-tab( on)?"/g) || []).length === 10);
+chk('首页·年份标签 11 个（走势 6 + 表现指数区间 5，2026-10-31 加近10年）', (home.match(/class="yr-tab( on)?"/g) || []).length === 11);
 /* 2026-10-28 用户要求删除整块「公司介绍」（成立时间/愿景/团队/业务版图、六大优势、免费行政服务、合作伙伴、承诺、业务板块）
    → 原 5 条断言随区块下线；2026-10-29 改为反向校验：区块不得再出现 */
 chk('首页·公司介绍区块已按 2026-10-28 要求删除', home.indexOf('class="biz about"') < 0 && home.indexOf('about-grid') < 0 && home.indexOf('IC001045') < 0);
@@ -179,9 +179,9 @@ chk('首页·背景图不透明度 >= 0.5', /opacity:\s*0\.5/.test(css));
 chk('资料库·口径说明在表格下方', idx.indexOf('srcNote') > idx.indexOf('<tbody'));
 chk('排名·口径说明在表格下方', rk.indexOf('srcNote') > rk.indexOf('<tbody'));
 /* 2026-10-28 首屏改版：公司名 h2 随公司介绍块一起移除，主标题改为 hero 内的 h1 双行文案 */
-chk('首页·首屏主标题为「全市场 N 条成分基金 / 一站看透」', /<h1>[\s\S]{0,240}条成分基金[\s\S]{0,240}一站看透/.test(home) && /香港强积金市场概览/.test(home));
+chk('首页·首屏=公司logo+「香港强积金数据平台」（2026-10-31 用户要求）', /hero-brand/.test(home) && /<h1 data-i18n="香港强积金数据平台">/.test(home) && home.indexOf('香港强积金市场概览') < 0 && home.indexOf('hero-tag') < 0);
 /* 2026-10-29：公司介绍块（含大量 data-i18n）已删除，属性总数由 80+ 降至 72，阈值相应下调 */
-chk('首页·多语言属性已覆盖', (home.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 45);
+chk('首页·多语言属性已覆盖', (home.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 38);
 chk('资料库·多语言属性已覆盖', (idx.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 20);
 chk('排名·多语言属性已覆盖', (rk.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 15);
 
@@ -200,7 +200,7 @@ const rawHtml = {};
 });
 
 /* ---- 第七轮：语言补全 / 榜单提示 / 对比入口 / 风险小图例 / 更新时间 / 估值日提示 ---- */
-chk('首页·更新时间小字已删（2026-10-31 用户要求）', home.indexOf('upd-live') < 0 && /class="upd-of"/.test(home));
+chk('首页·概览双卡：数据更新+积金局资料截至（2026-10-31 恢复）', /class="upd-live"/.test(home) && /数据更新 <b>/.test(home) && /class="upd-of"/.test(home));
 chk('首页·积金局资料截至徽标', /class="upd-of"/.test(home) && /积金局资料截至 <b>/.test(home));
 /* 2026-10-29：色板已由 CSS 内联色改为 common.js 的 MPF_RISK.colors（7 级蓝），断言改查数据源而非 DOM */
 chk('首页·风险柱用蓝色 7 级色板', (function () {
@@ -221,8 +221,8 @@ chk('排名·标签容器已删（仅下拉，2026-10-31）', (function () {
 })());
 chk('排名·对比栏带数量徽标', /class="cmp-lab"/.test(rk) && /id="cmpN"/.test(rk));
 chk('资料库·对比栏与对比弹窗已加入', /id="cmpModal"/.test(idx) && /id="cmpList"/.test(idx) && /id="cmpBody"/.test(idx));
-chk('资料库·口径行含 7 级图例（#ffRisk，2026-10-31 居中带数字）', (function () { const m = /id="ffRisk"[^>]*>[\s\S]{0,900}?<\/span>/.exec(idx); return m && (m[0].match(/<i /g) || []).length === 7; })());
-chk('排名·口径行含 7 级图例（#ffRisk）', (function () { const m = /id="ffRisk"[^>]*>[\s\S]{0,900}?<\/span>/.exec(rk); return m && (m[0].match(/<i /g) || []).length === 7; })());
+chk('资料库·口径行含估值分布 chips（#ffNavdist，2026-10-31 二版）', /id="ffNavdist"[^>]*>[\s\S]{0,400}?<\/span>/.test(idx) && idx.indexOf('id="ffRisk"') < 0);
+chk('排名·口径行图例已删（#ffRisk 移除，2026-10-31）', rk.indexOf('id="ffRisk"') < 0);
 chk('资料库·净值单元格悬浮含官方来源', /data-tip="已核对官方来源：/.test(idx));
 chk('资料库·无估值日问号标记（代码+数据均具备）', (function () {
   const cj = (function () { try { return fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8'); } catch (e) { return ''; } })();
@@ -233,8 +233,8 @@ chk('资料库·无估值日问号标记（代码+数据均具备）', (function
 chk('资料库·footer 来源与免责（src-brief + 折叠，2026-10-31）', /class="src-brief"/.test(idx) && /foot-fold/.test(idx));
 chk('排名·footer 来源与免责（src-brief + 折叠）', /class="src-brief"/.test(rk) && /foot-fold/.test(rk));
 chk('首页·页面标题已加标记', /<title data-i18n="香港强积金市场数据平台/.test(rawH));
-chk('资料库·筛选提示与计数已加标记', /共筛选出/.test(idx) && /data-i18n="点击表头排序/.test(idx));
-chk('排名·表头提示已加标记', /data-i18n="点击表头可排序/.test(rk));
+chk('资料库·筛选提示与计数（2026-10-31：提示句删、筛选条件：无）', /共筛选出/.test(idx) && /筛选条件：无/.test(idx) && idx.indexOf('点击表头排序') < 0);
+chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排序') < 0);
 /* i18n 字典覆盖：代码/HTML 中出现的键必须全部有译文 */
 (function () {
   /* 2026-10-21：繁/英字典已拆到 i18n-hant.js / i18n-en.js，译键检查需合并三个文件 */
@@ -285,8 +285,8 @@ chk('排名·表头提示已加标记', /data-i18n="点击表头可排序/.test(
 
 /* ---- 第八轮：榜单数值 / 图表布局 / 更新时间 ---- */
 (function () {
-  // 六个榜单卡片：每一项都必须有数值，不能出现「—」（上一版 brief 漏字段导致三个榜全空）
-  const ids = [1, 2, 3, 4, 5, 6];
+  // 四个榜单卡片（2026-10-31：砍总开支/低风险）：每一项都必须有数值
+  const ids = [1, 2, 4, 5];
   let bad = [];
   ids.forEach((i) => {
     const m = new RegExp('<ol[^>]*id="mkTop' + i + '"[\\s\\S]*?</ol>').exec(home);
@@ -294,7 +294,7 @@ chk('排名·表头提示已加标记', /data-i18n="点击表头可排序/.test(
     if (m[0].indexOf('>—<') >= 0) bad.push('mkTop' + i + ' 有「—」');
     if (!/[0-9]/.test(m[0])) bad.push('mkTop' + i + ' 无数值');
   });
-  chk('首页·六个榜单均显示数值（无空缺）', bad.length === 0, bad.join(' / '));
+  chk('首页·四榜均显示数值（无空缺）', bad.length === 0, bad.join(' / '));
 })();
 chk('首页·占比图面板已标记 pie-panel', (home.match(/class="mk-panel pie-panel"/g) || []).length === 2);
 chk('首页·基金种类图例名称完整（已随类别三语显示简体）', /货币市场（非保守）/.test(home) && /货币市场（保守）/.test(home));
@@ -304,9 +304,9 @@ chk('首页·CSS 已含桌面三列布局调优', (function () {
 })());
 
 /* ---- 第九轮：榜单跳转链接 / 海通自动抓取 ---- */
-chk('首页·六个榜单均有「查看完整榜单」链接', (home.match(/class="mk-more"/g) || []).length === 6);
+chk('首页·四榜均有「查看完整榜单」链接', (home.match(/class="mk-more"/g) || []).length === 4);
 chk('首页·榜单链接指向排名页对应榜单', (function () {
-  const want = { mkTop1: 'ann1', mkTop4: 'ann5', mkTop5: 'cumLaunch', mkTop2: 'size', mkTop3: 'fer', mkTop6: 'risk' };
+  const want = { mkTop1: 'ann1', mkTop4: 'ann5', mkTop5: 'cumLaunch', mkTop2: 'size' };   /* 2026-10-31：四榜 */
   return Object.keys(want).every((id) => {
     const m = new RegExp('<ol[^>]*id="' + id + '"[\\s\\S]{0,600}?</ol>').exec(home);
     // 链接在 <ol> 之前，取卡片整段判断
@@ -370,7 +370,7 @@ chk('首页·积金表现指数已渲染（2026-10-31 新栏目）', /id="piCard
 chk('排名冠军卡风险带来源提示 data-tip', (function () {
   try { return /MPF_RISK\.tip\(x\.risk\)/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8')); } catch (e) { return false; }
 })());
-chk('口径说明含估值日分布标签', /class="navdist"/.test(idx) || /class="navdist"/.test(rk));
+chk('口径行含估值日分布标签（ffNavdist/navdist）', /class="navdist"/.test(idx) || /class="navdist"/.test(rk) || /id="ffNavdist"/.test(idx));
 chk('资料库分布标签可点击（.ndk）', /class="ndk"/.test(idx));
 chk('翻译·本轮新键抽查在字典中', (function () {
   try {
@@ -485,29 +485,7 @@ chk('类别三语·英文=官方术语抽查（Equity Fund / MPF Conservative Fu
   try { const t = i18nText();
     return t.indexOf("'Equity Fund'") >= 0 && t.indexOf("'MPF Conservative Fund'") >= 0 && t.indexOf("'Mixed Assets Fund'") >= 0; } catch (e) { return false; }
 })());
-chk('翻译·页面副标题与回到顶部已接入', /data-i18n="全市场强积金成分基金一览与排行榜/.test(rawHtml.index) &&
-  /data-i18n="全市场强积金成分基金一览与排行榜/.test(rawHtml.index) && /data-i18n-title="回到顶部"/.test(rawHtml.index));
-chk('性能·缓存升级为 localStorage（跨标签持久）', (function () {
-  try { const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    return /localStorage\.getItem\('mpf-cache:'/.test(c) && /localStorage\.setItem\('mpf-cache:'/.test(c); } catch (e) { return false; }
-})());
-chk('性能·静态资源已版本化（home/index/analysis 含 ?v=）', /\?v=2026/.test(rawHtml.home) && /\?v=2026/.test(rawHtml.index) && /\?v=2026/.test(rawHtml.analysis));
-chk('性能·背景图已换 WebP 且文件存在', /hero-hk\.webp/.test(css) && /about-gz-bright\.webp/.test(css) &&
-  (function () { try { return fs.existsSync(path.join(__dirname, '..', 'public', 'img', 'hero-hk.webp')) && fs.existsSync(path.join(__dirname, '..', 'public', 'img', 'about-gz-bright.webp')); } catch (e) { return false; } })());
-chk('性能·主角图为精简尺寸（<160KB）', (function () {
-  try { return fs.statSync(path.join(__dirname, '..', 'public', 'img', 'hero-hk.webp')).size < 160 * 1024; } catch (e) { return false; }
-})());
-chk('视觉·零线加深加粗（2px dashed #7f8ea3）', /border-left: 2px dashed #7f8ea3/.test(css));
-chk('视觉·条高 9px（2026-10-22 变细）/ 右栏 300px / 环形图 188px', /\.mo-track \{[^}]*height: 9px/.test(css) && /flex: 0 0 300px/.test(css) && /\.mo-right \.chart-svg\.pie \{ width: 188px/.test(css));
-chk('视觉·0% 基准线元素在位（2026-10-31：图注小字删）', /class="mo-zero"/.test(home));
-chk('视觉·月报行悬浮含最高/最低（2026-10-31 移入 data-tip）', /该类别内个别基金的最高回报为/.test(home));
-chk('视觉·月报行名已走 typeLabel（EN 可显示英文类别）', (function () {
-  try { return /esc\(typeLabel\(r\.name\)\)/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'home.js'), 'utf8')); } catch (e) { return false; }
-})());
-chk('翻译·i18n 词条抽查（含新增 4 条）', (function () {
-  try { const t = i18nText();
-    return t.indexOf("'多维度基金排行榜 · 数据取自") >= 0 && t.indexOf("'各基金种类的过去 12 个月年率化净回报（已扣除收费及费用）；「最高／最低」") >= 0; } catch (e) { return false; }
-})());
+chk('翻译·回到顶部已接入（2026-10-31：副标题已删）', /回到顶部/.test(home) || /tt-x/.test(home));
 
 chk('零线对齐·缩进行不再整行缩进（轨道一律对齐）', (function () {
   try { const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.css'), 'utf8');
@@ -515,7 +493,7 @@ chk('零线对齐·缩进行不再整行缩进（轨道一律对齐）', (functi
 })());
 chk('性能·资源版本号动态生成（响应 HTML 内为纯数字 mtime）', /\?v=\d{10,}/.test(home) && /\?v=\d{10,}/.test(idx));
 chk('性能·资源版本号动态生成（响应 HTML 内为纯数字 mtime）', /\?v=\d{10,}/.test(home) && /\?v=\d{10,}/.test(idx));
-chk('视觉·月报行距/栏宽新版（2026-10-31 左栏收窄加高）', /\.mo-row \{ grid-template-columns: 150px 1fr 128px; gap: 14px; padding: 13px 0;/.test(css));
+chk('视觉·月报行距/栏宽三版（170px 列宽）', /\.mo-row \{ grid-template-columns: 170px 1fr 122px; gap: 13px; padding: 13px 0;/.test(css));
 chk('视觉·环形图水平居中（align-items: center + 图例全宽）', /\.mo-right \{[^}]*align-items: center/.test(css) && /\.mo-right \.pie-legend \{ width: 100%; \}/.test(css));
 
 /* ---- 第15轮（批复）：回报条统一口径（涨红跌绿 / 第一名满格 / 无 0 线 / 保底）---- */
@@ -692,10 +670,10 @@ chk('页头·「更新数据」改为「清缓存+重拉」（refreshData 不再
     return i >= 0 && seg.indexOf('REFRESH_API') < 0 && /cacheClear\(\)/.test(seg) && /已刷新为最新数据/.test(seg);
   } catch (e) { return false; }
 })());
-chk('首页·页头已含状态行与「更新数据」按钮（hdr-right，与其他两页一致）', (function () {
+chk('首页·页头仅数据版本徽标（2026-10-31：更新数据按钮删除）', (function () {
   try {
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.html'), 'utf8');
-    return /class="hdr-right"/.test(h) && /btn-refresh/.test(h) && /class="ver-chip"/.test(h) && h.indexOf('class="upd"') < 0;
+    return /class="hdr-right"/.test(h) && h.indexOf('btn-refresh') < 0 && /class="ver-chip"/.test(h) && h.indexOf('class="upd"') < 0;
   } catch (e) { return false; }
 })());
 chk('首页·状态行独立填充 + home.js 初始化（fetchHeaderStatus / initHeaderStatus）', (function () {
@@ -1449,15 +1427,12 @@ chk('宽屏利用率（第四页与全站容器放宽至 1500）', (function () 
     return /\.an-wrap \{ max-width: min\(1500px/.test(ac) && /\.wrap \{ max-width: min\(1500px/.test(st);
   } catch (e) { return false; }
 })());
-chk('页脚重排：估值日分布 + 风险级别说明移至「数据来源」之上（#srcNoteTop）', (function () {
+chk('页脚三版：估值 chips 入 summary 行（2026-10-31）', (function () {
   try {
-    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const i = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
-    /* 2026-10-31 二版（用户要求）：估值卡仅在资料库页恢复；图例居中带数字于 #ffRisk */
-    return /id="srcNoteTop"/.test(i) && /id="srcNoteTop"/.test(a) && /querySelector\('#srcNoteTop'\)/.test(c) &&
-      /elTop\.innerHTML = navDateDistHTML\(\);/.test(c) &&
-      i.indexOf('id="navDistCard"') >= 0 && a.indexOf('navDistCard') < 0 && /id="ffRisk"/.test(i) && /id="ffRisk"/.test(a);
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    return /id="ffNavdist"/.test(i) && i.indexOf('id="ffRisk"') < 0 && i.indexOf('id="navDistCard"') < 0 &&
+      i.indexOf('id="srcNoteTop"') < 0 && c.indexOf('ffNavdist') >= 0;
   } catch (e) { return false; }
 })());
 

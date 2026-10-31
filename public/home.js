@@ -305,10 +305,10 @@
   function yearLine(rows) {
     const rows2 = (rows || []).filter((r) => (r.wavg != null ? r.wavg : r.avg) != null);
     if (rows2.length < 2) return '<div class="chart-empty">' + TT('暂无历年回报数据') + '</div>';
-    const W = 372, H = 240, padL = 32, padR = 14, padT = 22, padB = 34;   /* 2026-10-31 二版（用户要求）：图收窄协调 */
+    const W = 372, H = 264, padL = 32, padR = 14, padT = 22, padB = 34;   /* 2026-10-31 三版（用户要求）：图加高 10% */
     const pw = W - padL - padR, ph = H - padT - padB;
     let minV = 0, maxV = 0;
-    rows2.forEach((r) => { const A = (r.wavg != null ? r.wavg : r.avg); minV = Math.min(minV, A, r.median == null ? A : r.median); maxV = Math.max(maxV, A, r.median == null ? A : r.median); });
+    rows2.forEach((r) => { const A = (r.wavg != null ? r.wavg : r.avg); minV = Math.min(minV, A); maxV = Math.max(maxV, A); });
     const sc = niceScale(minV, maxV, 4);
     const X = (i) => padL + (pw / (rows2.length - 1)) * i;
     const Y = (v) => padT + ph * (1 - (v - sc.lo) / (sc.hi - sc.lo));
@@ -336,10 +336,7 @@
       const cx = X(i);
       const lx = Math.max(padL + 16, Math.min(W - padR - 16, cx));
       dots += '<text class="chart-xlab" x="' + fx(cx) + '" y="' + (padT + ph + 16) + '" text-anchor="middle">' + esc(r.year) + '</text>';
-      if (r.median != null) {
-        dots += '<circle cx="' + fx(cx) + '" cy="' + fx(Y(r.median)) + '" r="3" fill="#fff" stroke="' + C_FLAT + '" stroke-width="1.6">'
-          + '<title>' + r.year + ' ' + TT('中位数') + '：' + pctv(r.median) + '</title></circle>';
-      }
+      /* 2026-10-31 三版（用户要求）：中位数线/点删除（对普通用户意义不大） */
       const A = (r.wavg != null ? r.wavg : r.avg);
       if (A != null) {
         const c = A > 0 ? C_UP : A < 0 ? C_DOWN : C_FLAT;
@@ -351,12 +348,10 @@
     });
 
     return '<div class="chart-head"><ul class="chart-legend">'
-      + '<li><i style="background:' + C_UP + '"></i>' + TT('规模加权平均') + '</li>'
-      + '<li><i class="ln-dash"></i>' + TT('中位数') + '</li></ul></div>'
+      + '<li><i style="background:' + C_UP + '"></i>' + TT('规模加权平均') + '</li></ul></div>'
       + '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(TT('市场整体回报走势')) + '">'
       + grid
       + '<path d="' + area + '" fill="#e8f0f9" opacity="0.85"/>'
-      + line('median', C_FLAT, true)
       + line('avg', '#1a6fb5', false)
       + '<line class="chart-zero" x1="' + padL + '" y1="' + fx(y0) + '" x2="' + (W - padR) + '" y2="' + fx(y0) + '"/>'
       + dots + '</svg>';
@@ -512,9 +507,10 @@
     const yrTip = document.getElementById('yrTip');
     if (yrTip && m.dataAsOf) yrTip.dataset.tip = TQ('数据取自积金局「曆年回報」列，截止至 {d}', { d: m.dataAsOf });
     $$('.mk-asof').forEach((el) => {
-      /* 2026-10-31（用户要求）：「数据更新时间」小字删除，仅保留积金局资料截至 */
+      /* 2026-10-31 二版（用户要求）：恢复「数据更新」卡（左）+ 积金局资料截至（右） */
       el.innerHTML = m.dataAsOf
-        ? '<span class="upd-of">' + TQ('积金局资料截至 <b>{d}</b>', { d: m.dataAsOf }) + '</span>'
+        ? '<span class="upd-live"><i></i>' + TQ('数据更新 <b>{t}</b>', { t: fmtDT(m.updatedAt || Date.now()) }) + '</span>' +
+          '<span class="upd-of">' + TQ('积金局资料截至 <b>{d}</b>', { d: m.dataAsOf }) + '</span>'
         : '';
     });
 
@@ -579,8 +575,6 @@
     renderTop('#mkTop4', m.topReturn5, (x) => pctv(x.ann5), (x) => x.ann5);
     renderTop('#mkTop5', m.topCumLaunch, (x) => pctv(x.cumLaunch), (x) => x.cumLaunch);
     renderTop('#mkTop2', m.topSize, (x) => fmtSize(x.size), null);
-    renderTop('#mkTop3', m.lowFee, (x) => num(x.fer, 2) + '%', null);
-    renderTop('#mkTop6', m.lowRisk, (x) => (x.risk == null ? 'n.a.' : x.risk + ' ' + TT('级')), null);
     try { renderSelfTop(window.__MPF_FUNDS || (typeof DATA !== 'undefined' ? DATA.funds : null)); } catch (e) {}
   }
 
@@ -766,8 +760,8 @@
    四张卡=四大类规模加权自算指数的区间累计回报（点卡切换）；下方为该指数的面积走势图（基期=100）。 */
 (function () {
   const KEYS = [['MPFAVG', '积金市场指数'], ['MPF_STOCK', '股票基金指数'], ['MPF_MIX', '混合资产基金指数'], ['MPF_BOND', '债券基金指数']];
-  const RANGES = [['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['all', '全部']];
-  let DB = null, cur = 'MPFAVG', range = '3y';
+  const RANGES = [['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['10y', '近 10 年'], ['all', '全部']];
+  let DB = null, cur = 'MPFAVG', range = '5y';   /* 2026-10-31 二版（用户要求）：默认近 5 年 */
 
   function esc2(s) {
     let o = String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -779,7 +773,7 @@
   function sliceSeries(rows, rg) {
     if (!rows || !rows.length) return [];
     if (rg === 'all') return rows;
-    const days = rg === '1y' ? 365 : rg === '3y' ? 365 * 3 : 365 * 5;
+    const days = rg === '1y' ? 365 : rg === '3y' ? 365 * 3 : rg === '5y' ? 365 * 5 : 365 * 10;
     const last = new Date(rows[rows.length - 1][0]).getTime();
     const cutoff = last - days * 86400000;
     const out = rows.filter((r) => new Date(r[0]).getTime() >= cutoff);
@@ -812,7 +806,7 @@
       return '<button type="button" class="pi-card' + (k === cur ? ' on' : '') + '" data-pi="' + k + '">' +
         '<span class="pi-k">' + esc2(TT(label)) + '</span>' +
         '<b class="pi-v ' + cls + '">' + (c == null ? '—' : (c >= 0 ? '+' : '') + c.toFixed(2) + '%') + '</b>' +
-        '<span class="pi-sub">' + (s.length ? esc2(s[0][0].slice(0, 7)) + ' = 100' : '') + '</span></button>';
+        '</button>';   /* 2026-10-31 二版：基期小字删除（基期恒为 2015，口径见标题ⓘ） */
     }).join('');
     box.querySelectorAll('.pi-card').forEach((b) =>
       b.addEventListener('click', () => { cur = b.dataset.pi; render(); }));
@@ -827,7 +821,7 @@
       return;
     }
     const s = sliceSeries(it.series, range);
-    const W = 1000, H = 300, padL = 46, padR = 16, padT = 16, padB = 30;
+    const W = 1000, H = 390, padL = 46, padR = 16, padT = 16, padB = 30;   /* 2026-10-31 二版：模块上下拉长 30% */
     const base = s[0][1] || 1;
     const pts = s.map((r) => [r[0], (r[1] / base) * 100]);
     let mn = Math.min.apply(null, pts.map((p) => p[1]));
@@ -841,10 +835,17 @@
       grid += '<line x1="' + padL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#eef2f7" stroke-width="1"/>';
       yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + v.toFixed(0) + '</text>';
     }
-    const seen = {}; let xt = '';
+    /* 2026-10-31 二版（用户要求）：横坐标按跨度自适应——
+       ≤13 个月标每月；≤6 年标每年 3/6/9/12 月；更长时间跨度只标年份 */
+    const mspan = (new Date(pts[pts.length - 1][0]) - new Date(pts[0][0])) / 2592000000;
+    const seenm = {}; let xt = '';
     pts.forEach((p, i) => {
-      const y = p[0].slice(0, 4);
-      if (!seen[y]) { seen[y] = 1; xt += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="pi-yk">' + y + '</text>'; }
+      const y = p[0].slice(0, 4); const mo = Number(p[0].slice(5, 7));
+      let lab = null;
+      if (mspan <= 13) { if (!seenm[p[0].slice(0, 7)]) { lab = mo + '月'; seenm[p[0].slice(0, 7)] = 1; } }
+      else if (mspan <= 74) { if ((mo === 3 || mo === 6 || mo === 9 || mo === 12) && !seenm[p[0].slice(0, 7)]) { lab = y.slice(2) + '/' + mo; seenm[p[0].slice(0, 7)] = 1; } }
+      else if (mo === 1 && !seenm[y]) { lab = y; seenm[y] = 1; }
+      if (lab) xt += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle" class="pi-yk">' + lab + '</text>';
     });
     const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
     const areaD = lineD + ' L' + X(pts.length - 1).toFixed(1) + ' ' + (H - padB) + ' L' + padL + ' ' + (H - padB) + ' Z';
