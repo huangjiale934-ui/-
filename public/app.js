@@ -1,6 +1,10 @@
 /* 板块一：强积金资料库 */
 (function () {
   const S = { key: 'size', dir: 'desc', page: 1, size: 10 };
+  /* 2026-11-01（6.0）：三态排序的「取消」必须永远回页面默认（规模降序）。
+     不能把 makeSorter 绑定时的 state 当默认——表头每次重绘都会重绑，
+     D0 会跟着当前列漂移，第三下点击等于什么也没复位。 */
+  const DEF_SORT = { key: 'size', dir: 'desc' };
   const F = { kw: '', type: '', sub: '', trustee: '', risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' };
   let ROWS = [];
   let YEARS = [];
@@ -80,7 +84,7 @@
       YEARS = d.years || [];
       buildFilters();
       buildMobileSort();
-      makeSorter($$('#thead th'), S, render);
+      makeSorter($$('#thead th'), S, render, DEF_SORT);
       bindAll();
       initDualScroll('#tscroll', '#topScroll', '#scrollGhost');
       window.__onRefresh = () => { buildFilters(); render(); };
@@ -382,7 +386,7 @@
         ' <button type="button" class="btn sm" style="margin-left:10px" onclick="window.clearAllFilters && clearAllFilters()">' + TT('一键清除全部筛选') + '</button></div></td></tr>';
 
     /* 表头由本函数重建 → 三态排序监听需随之重绑（元素是新的，无旧监听残留） */
-    makeSorter($$('#thead th'), S, render);
+    makeSorter($$('#thead th'), S, render, DEF_SORT);
     /* 维度高亮：维度激活时给对应列的 th/td 加标记 */
     if (window.__dimActive && S.key && S.key !== 'size') {
       $$('#fundTable [data-c="' + S.key + '"]').forEach((n) => n.classList.add('dim-hl'));

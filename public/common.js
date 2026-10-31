@@ -821,8 +821,9 @@ window.fundMatch = fundMatch;
    ② 再点同一列 → 反向（「最小在前」= 升序）
    ③ 第三次点击 → 取消排序，恢复页面默认顺序（名次/规模）
    绑定时的 state 即为「默认顺序」，取消时还原。 */
-function makeSorter(thList, state, onSort) {
-  const D0 = { key: state.key, dir: state.dir };
+function makeSorter(thList, state, onSort, defaultSort) {
+  /* defaultSort：页面真正的默认序（不随当前列漂移），第三下「取消」回到它 */
+  const D0 = defaultSort ? { key: defaultSort.key, dir: defaultSort.dir } : { key: state.key, dir: state.dir };
   /* 2026-11-01（6.0）：只负责把「当前排序状态」画到表头。
      renderThead 每次重绘都会重建 th，旧标记随之丢失 → 绑定后必须立即再画一次，
      否则点完列后所有箭头都回到 ↕，用户看不出当前按哪列排。 */
