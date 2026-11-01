@@ -604,7 +604,8 @@
     if (!list || !list.length) { el.innerHTML = '<li class="mk-empty">' + TT('暂无数据') + '</li>'; return; }
     el.innerHTML = list
       .map((x, i) => '<li>' +
-        '<span class="r r' + (i < 3 ? i + 1 : '0') + '">' + (i + 1) + '</span>' +
+        /* 2026-11-02（第十九轮，按样图）：只有 1-3 有圆标；4/5 留同宽空位、不显示数字 */
+        '<span class="r r' + (i < 3 ? i + 1 : '0') + '">' + (i < 3 ? i + 1 : '') + '</span>' +
         '<span class="n" title="' + esc(fundFullName(x)) + (x.scheme ? ' · ' + esc(x.scheme) : '') + '">' + esc(fundFullName(x)) + '</span>' +
         '<span class="v ' + (colorVal == null ? '' : (colorVal(x) >= 0 ? 'up' : 'down')) + '">' + fmt(x) + '</span>' +
         '</li>')

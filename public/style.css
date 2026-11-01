@@ -2017,16 +2017,16 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .mpfsel-custom input { flex: 1 1 auto; width: auto; min-width: 0; }
 
 /* 2026-11-02（第十八轮，用户要求）：行情栏左侧关闭按钮（仅当次会话隐藏，刷新后恢复） */
-.mkt-ticker { position: relative; }
-.mkt-ticker .tk-track { padding-left: 30px; }
-.tk-close { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); z-index: 2;
+/* 2026-11-02：只加关闭按钮，绝不能改 .mkt-ticker 的 position（sticky 吸顶会失效，行情栏会脱离标题栏） */
+.mkt-ticker .tk-track { padding-left: 20px; }   /* 只给 × 让出 6px，行情卡片位置基本不动 */
+.tk-close { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); z-index: 2;
   display: inline-flex; align-items: center; justify-content: center;
-  width: 18px; height: 18px; padding: 0; border-radius: 50%; cursor: pointer;
+  width: 16px; height: 16px; padding: 0; border-radius: 50%; cursor: pointer;
   border: 1px solid #d6e6f4; background: #fff; color: #8fa3b8;
   transition: color .15s, border-color .15s, background-color .15s; }
 .tk-close:hover { color: var(--brand, #0866bb); border-color: #7fb2de; background: #f2f8fe; }
 .tk-close:focus-visible { outline: 2px solid rgba(8,102,187,.35); outline-offset: 1px; }
-@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 26px; } .tk-close { left: 5px; } }
+@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 18px; } .tk-close { left: 1px; } }
 
 /* ==========================================================================
    2026-11-02（第十八轮，用户要求）：排名维度多选面板
@@ -2053,3 +2053,55 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
   border-top: 1px solid #eef2f7; }
 .dim-tip { font-size: 11px; color: #9aa9b8; }
 #dimClear { border: 0; background: none; color: var(--brand, #0866bb); font: inherit; font-size: 12px; cursor: pointer; padding: 2px 4px; }
+
+/* 2026-11-02（第十九轮，用户要求）：数据版本往中间、语言切换贴最右 */
+.hdr-right { margin-left: auto; margin-right: auto; }
+.hdr-right + .lang-sw { margin-left: 0; }
+@media (max-width: 760px) { .hdr-right { margin-right: 0; } }
+
+/* ==========================================================================
+   2026-11-02（第十九轮，用户要求）：
+   ① 搜索框不要再拉满整行（收窄到固定宽），受托人提前到搜索框右侧；
+   ② 左侧筛选框与右侧「列设置 / 导出」按钮严格同高同基线。
+   ========================================================================== */
+@media (min-width: 1201px) {
+  .f-row-merged > .dim-item { flex: 0 0 128px !important; min-width: 128px !important; }
+  .f-row-merged > .f-search { flex: 0 0 210px !important; min-width: 210px !important; max-width: 210px !important; }
+  .f-row-merged > .f-trustee { flex: 0 0 150px !important; min-width: 150px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 150px !important; min-width: 150px !important; }
+}
+@media (max-width: 1200px) {
+  .f-row-merged > .dim-item { flex: 0 0 108px !important; min-width: 108px !important; }
+  .f-row-merged > .f-search { flex: 0 0 146px !important; min-width: 146px !important; max-width: none; }
+  .f-row-merged > .f-trustee { flex: 0 0 106px !important; min-width: 106px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 96px !important; min-width: 96px !important; }
+}
+/* 控件基线统一：36px 高、字体 13px、按钮 inline-flex 居中 */
+.f-row-merged .tb-tail .btn { height: 36px; line-height: 34px; font-size: 13px; padding: 0 12px; box-sizing: border-box; }
+.f-row-merged .tb-per-label { line-height: 18px; }
+.f-row-merged .tb-count { line-height: 18px; }
+
+/* ==========================================================================
+   2026-11-02（第十九轮）：榜单页表头与「基金最新数据」完全同款
+   ① 单行筛选（排名维度→搜索→受托人→种类→细类→风险→计数/每页/列设置/导出）
+   ② 高级区间筛选收进「更多筛选」
+   ③ 表头字号/内边距与 #fundTable 一致
+   ========================================================================== */
+.f-row-merged > .f-trustee,
+.f-row-merged > .f-type,
+.f-row-merged > .f-sub,
+.f-row-merged > .f-risk { flex: 1 1 124px !important; min-width: 92px !important; }
+.rk-more { margin-top: 10px; }
+.rk-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12.5px; color: var(--brand, #0866bb); list-style: none; }
+.rk-more > summary::-webkit-details-marker { display: none; }
+.rk-more > summary::after { content: '▾'; font-size: 10px; }
+.rk-more[open] > summary::after { content: '▴'; }
+.rk-more .f-row-sub { margin-top: 10px; }
+.rk-filters .rk-more { border-top: 1px dashed #e6eef7; padding-top: 8px; }
+#rkTable thead th { font-size: 14px; padding: 10px 6px; }
+#rkTable tbody td { font-size: 15px; }
+/* 榜单页 6 个筛选 + 工具栏：窄屏允许换行，绝不能横向溢出 */
+.card.filters.rk-filters .f-row-main.f-row-merged { flex-wrap: wrap; row-gap: 10px; }
+@media (max-width: 1200px) { .rk-filters .tb-count { font-size: 12px; } }
+#rkRtip { display: none; }   /* 与「每页显示」重复，隐藏以腾出一行宽度 */

@@ -245,6 +245,7 @@
 '全部区间': 'All range',
 '请选择有效的起止日期': 'Please pick a valid start and end date',
 '确定': 'Apply',
+'更多筛选': 'More filters',
 '自定义': 'Custom',
 '自定义每页条数': 'Custom rows per page',
 '名称': 'Name',
