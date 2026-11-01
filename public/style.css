@@ -2289,3 +2289,8 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
 
 /* 2026-11-02（第二十一轮，用户要求）：行情栏关闭按钮再大 20%、右移一点 */
 .tk-close svg { width: 9px; height: 9px; }
+
+/* 2026-11-02：窄档下拉按钮内边距再收 1px，保证「全部受托人」完整显示 */
+@media (max-width: 1150px) {
+  .f-row-merged .f-item .mpfsel-btn { padding-left: 6px; padding-right: 6px; gap: 6px; }
+}
