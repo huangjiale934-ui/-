@@ -1980,7 +1980,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 1092 左右宽度：优先保证下拉文案完整，搜索框让位 */
 @media (max-width: 1200px) {
   .f-row-merged > .dim-item { flex: 0 0 112px !important; min-width: 112px !important; }
-  .f-row-merged > .f-search { flex: 1 1 140px !important; min-width: 120px !important; max-width: none; }
+  .f-row-merged > .f-search { flex: 1 1 140px !important; min-width: 100px !important; max-width: none; }
   .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 94px !important; min-width: 94px !important; }
   .f-row-merged > .f-trustee { flex: 0 0 104px !important; min-width: 104px !important; }
   .f-row-merged .tb-tail { gap: 7px; }
