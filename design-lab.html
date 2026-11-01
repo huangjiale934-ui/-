@@ -169,6 +169,12 @@
   .reco .r span{font-size:11.8px;color:var(--ink3)}
   .reco .r i{font-style:normal;color:var(--brand);font-weight:700}
   .foot{margin-top:8px;font-size:12px;color:var(--ink3);text-align:center}
+  .mockwrap{cursor:zoom-in}
+  .ov{position:fixed;inset:0;background:rgba(8,22,40,.58);backdrop-filter:blur(3px);z-index:99;
+    display:flex;align-items:center;justify-content:center;padding:24px}
+  .ovbox{background:#fff;border-radius:14px;padding:12px;box-shadow:0 24px 70px rgba(0,0,0,.35);max-width:96vw;max-height:92vh;overflow:auto}
+  .ovbox .mock{transform:none;width:1040px}
+  .ovtip{font-size:11px;color:#fff;opacity:.8;margin-top:8px;text-align:center}
 </style>
 </head>
 <body>
@@ -183,7 +189,7 @@
 <main>
   <section id="nav">
     <h2>一、第 2 页「表头 + 导航」20 种方案</h2>
-    <p class="lead">现状的问题：切换「基金最新数据 / MPFA 基金榜单 / 可视化对比」要<b>点顶部胶囊</b>，改排序又要<b>点排名维度</b>——两个地方、两套视觉。下面 20 案都在解决同一件事：<b>把「我在哪一页」和「按什么排」收到一个视觉体系里</b>。带 ★ 的是我认为最省事、最稳的四个。</p>
+    <p class="lead"><b>提示：点任意缩略图可放大到 1:1 查看。</b>现状的问题：切换「基金最新数据 / MPFA 基金榜单 / 可视化对比」要<b>点顶部胶囊</b>，改排序又要<b>点排名维度</b>——两个地方、两套视觉。下面 20 案都在解决同一件事：<b>把「我在哪一页」和「按什么排」收到一个视觉体系里</b>。带 ★ 的是我认为最省事、最稳的四个。</p>
     <div class="reco">
       <div class="r"><b><i>A04</i> 左侧分组导航（首选）</b><span>三个板块一次点击直达，不再「顶部点一次、里面再点一次」；以后加页面只加一行。</span></div>
       <div class="r"><b><i>A01</i> 现状 + 收成一行（最稳）</b><span>保留现在的胶囊 Tabs，只把筛选合成一行，改动最小、当天可上。</span></div>
@@ -304,6 +310,20 @@ NAVS.forEach((v, i) => {
     <div class="opt-desc">${v.d}</div>
     <div class="opt-body"><div class="mockwrap"><div class="mock"><div class="bar"><i></i><i></i><i></i><u></u></div><div class="page">${v.body}</div></div></div></div>`;
   navGrid.appendChild(el);
+});
+
+/* 点击缩略图放大 */
+document.addEventListener('click', (e) => {
+  const w = e.target.closest && e.target.closest('.mockwrap');
+  if (!w) return;
+  const clone = w.querySelector('.mock').cloneNode(true);
+  clone.style.transform = 'none';
+  const ov = document.createElement('div');
+  ov.className = 'ov';
+  ov.innerHTML = '<div><div class="ovbox"></div><div class="ovtip">点击任意处关闭</div></div>';
+  ov.querySelector('.ovbox').appendChild(clone);
+  document.body.appendChild(ov);
+  ov.addEventListener('click', () => ov.remove());
 });
 
 const cardGrid = document.getElementById('cardGrid');
