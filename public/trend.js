@@ -16,12 +16,15 @@ window.TREND = (function () {
   /* 2026-10-18：draw 闭包令牌——每次重绘 +1，旧 move 闭包发现令牌过期即失效，
      杜绝「点击图表时上一次的线条数据覆盖 tooltip」的残留浮窗问题 */
   let MOVE_SEQ = 0;
+  /* 2026-11-02（第二十一轮，用户要求）：去掉「1周」，新增「10年 / 全部」；
+     「选择日期」保留并放在区间按钮最后（最右）。 */
   const RANGES = [
-    ['1w', '1周'],
     ['1m', '1个月'],
     ['1y', '1年'],
     ['3y', '3年'],
     ['5y', '5年'],
+    ['10y', '10年'],
+    ['all', '全部'],
   ];
   const COLORS = ['#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#db2777'];
   const MAX_ITEMS = 8;
@@ -117,6 +120,7 @@ window.TREND = (function () {
     else if (key === '1y') d.setUTCFullYear(d.getUTCFullYear() - 1);
     else if (key === '3y') d.setUTCFullYear(d.getUTCFullYear() - 3);
     else if (key === '5y') d.setUTCFullYear(d.getUTCFullYear() - 5);
+    else if (key === '10y') d.setUTCFullYear(d.getUTCFullYear() - 10);
     else if (key === '3m') d.setUTCMonth(d.getUTCMonth() - 3);
     else if (key === '6m') d.setUTCMonth(d.getUTCMonth() - 6);
     return d.getTime();
@@ -718,7 +722,6 @@ window.TREND = (function () {
             '<button type="button" class="tr-r" data-r="custom">' + esc0( _t('选择日期')) + '</button>' +
           '</div>' +
           '<div class="tr-tools2">' +
-            '<button type="button" class="tr-r tr-r-all' + (S.range === 'all' ? ' on' : '') + '" data-r="all">' + esc0( _t('全部区间')) + '</button>' +
             '<button type="button" class="tr-tool tr-clear" title="' + esc0( _t('清空所有已选基金并重置筛选（保留指数）')) + '">' + esc0( _t('清空筛选')) + '</button>' +
           '</div>' +
         '</div>' +
@@ -735,7 +738,7 @@ window.TREND = (function () {
         '<div class="tr-tablewrap"></div>' +
         (o.hideGoto ? '' :
           '<div class="tr-gotowrap"><button type="button" class="btn tr-goto"' + (hasFund ? '' : ' style="display:none"') + '>' + esc0( _t('查看具体基金分析')) + '</button></div>') +
-        '<div class="tr-note">' + esc0( _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。基金净值取自各发行人官网（每交易日），指数为收盘价；自算口径不含分红再投资与费用调整。')) + '</div>';
+        '<div class="tr-note">' + esc0( _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。')) + '</div>';
     }
 
     /* 「清空筛选」：清空全部对比对象（含指数）并重置面板筛选（2026-10-17） */
@@ -755,13 +758,6 @@ window.TREND = (function () {
 
     /* 「全部取消」按钮已改在 .tr-panels 委托内处理（该处 stopPropagation 会拦截 box 级监听） */
 
-    /* 「全部区间」按钮单独绑定（不在 .tr-ranges 容器内） */
-    q('.tr-r-all').addEventListener('click', () => {
-      S.range = 'all';
-      qa('.tr-r').forEach((x) => x.classList.toggle('on', x === q('.tr-r-all')));
-      q('.tr-daterow').hidden = true;
-      draw();
-    });
 
     function renderLegend() {
       const el = q('.tr-legend');
@@ -975,7 +971,8 @@ window.TREND = (function () {
       const H = Math.max(220, Math.round(svg.clientHeight || 300));
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       /* 2026-10-19：纵轴刻度移到左边 → 左侧留白给标签，右侧不再留 */
-      const PL = 64, PR = W - 12, PT = 24, PB = H - 26;
+      /* 2026-11-02：底部留白 26 → 40，给「年份斜排 + 月份」两级横轴留位置 */
+      const PL = 64, PR = W - 12, PT = 24, PB = H - 40;
       const win = currentWindow();
       if (!win) {
         /* 2026-10-21：区分「没选」与「选了但该基金无日度净值」，避免用户以为图坏了 */
@@ -1034,8 +1031,7 @@ window.TREND = (function () {
       const Y = (v) => PT + (1 - (v - ymin) / (ymax - ymin)) * (PB - PT);
 
       let g = '';
-      /* 纵轴说明：单线=实际值；多线=指数化 */
-      g += '<text x="8" y="13" class="tr-ylab">' + esc0(single ? _t('实际值：净值 / 指数点位') : _t('累计涨跌幅（区间起点 = 0%）')) + '</text>';
+      /* 2026-11-02（第二十一轮，用户要求）：删除图内「累计涨跌幅（区间起点 = 0%）」说明文字 */
       /* 刻度条数随上下界与步长决定（保证 5%/10% 这种整齐值） */
       const NGY = Math.min(12, Math.max(2, Math.round((ymax - ymin) / (stepY || 1))));
       const yfmt = (v) => (single ? (Math.abs(v) >= 100 ? Math.round(v).toString() : v.toFixed(2)) : (Math.round(v * 10) / 10).toFixed(1) + '%');
@@ -1052,15 +1048,45 @@ window.TREND = (function () {
         g += '<line x1="' + PL + '" y1="' + y0.toFixed(1) + '" x2="' + PR + '" y2="' + y0.toFixed(1) +
              '" stroke="#e05252" stroke-width="1" stroke-dasharray="4 3" opacity="0.75"/>';
       }
-      const NX = 5;
-      for (let i = 0; i <= NX; i++) {
-        const t = t0 + (t1 - t0) * (i / NX);
-        const x = X(t);
-        const lab = dstr(t).replace(/-/g, '/');
-        const anchor = i === 0 ? 'start' : (i === NX ? 'end' : 'middle');
-        const xx = i === 0 ? PL : (i === NX ? PR : x);
-        g += '<text x="' + xx.toFixed(1) + '" y="' + (H - 8) + '" text-anchor="' + anchor + '" class="tr-xlab">' + lab + '</text>';
-      }
+      /* 2026-11-02（第二十一轮，用户要求）：横轴改为与首页「积金表现指数」同一套规则——
+         ≤13 个月逐月标注（标在月末）；≤74 个月只标 3/6/9 月 + 年份（斜排、不带「年」）；
+         更长只标年份；每个 1 月 1 日画一条小竖线作为年份分界。 */
+      (function xAxis() {
+        const d0 = new Date(t0), d1 = new Date(t1);
+        const m0 = d0.getUTCFullYear() * 12 + d0.getUTCMonth();
+        const m1 = d1.getUTCFullYear() * 12 + d1.getUTCMonth();
+        const span = m1 - m0;
+        const monthly = span <= 12;
+        const quarter = span > 12 && span <= 74;   /* 10 年以上只标年份 */
+        const EN = (document.documentElement.lang || '').indexOf('en') === 0;
+        const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const axisY = PB + 16;
+        const monthLab = (mo) => (EN ? MON[mo] : (mo + 1) + _t('月'));
+        for (let m = m0; m <= m1; m++) {
+          const mo = ((m % 12) + 12) % 12;
+          if (monthly) { if (mo === 11) continue; }
+          else if (!quarter) continue;
+          else if (!(mo === 2 || mo === 5 || mo === 8)) continue;
+          const endMs = Date.UTC(Math.floor(m / 12), mo + 1, 1) - 86400000;
+          if (endMs < t0 || endMs > t1) continue;
+          const x = X(endMs);
+          if (x < PL + 10 || x > PR - 6) continue;
+          g += '<text x="' + x.toFixed(1) + '" y="' + axisY + '" text-anchor="middle" class="tr-xlab">' + monthLab(mo) + '</text>';
+        }
+        const yStart = d0.getUTCFullYear(), yEnd = d1.getUTCFullYear();
+        const totalY = Math.max(1, yEnd - yStart + 1);
+        const pxPerYear = (PR - PL) / totalY;
+        const yStep = Math.max(1, Math.ceil(54 / Math.max(1, pxPerYear)));
+        for (let y = yEnd; y >= yStart; y -= yStep) {
+          const ms = Date.UTC(y, 0, 1);
+          if (ms < t0 || ms > t1) continue;
+          const x = X(ms);
+          if (x < PL + 2 || x > PR - 4) continue;
+          g += '<line x1="' + x.toFixed(1) + '" y1="' + PB + '" x2="' + x.toFixed(1) + '" y2="' + (PB + 5) + '" stroke="#9fbdd9" stroke-width="1.2"/>';
+          const lx = Math.max(x + 18, PL + 16);
+          g += '<text x="' + lx.toFixed(1) + '" y="' + (axisY + 2) + '" text-anchor="end" class="tr-xlab tr-xlab-year" transform="rotate(-40 ' + lx.toFixed(1) + ' ' + (axisY + 2) + ')">' + y + '</text>';
+        }
+      })();
       /* 两条线时填充其间色带（参照合作方站） */
       if (lines.length === 2) {
         const A = lines[0].win.norm, B = lines[1].win.norm;
@@ -1178,7 +1204,7 @@ window.TREND = (function () {
     let cachedAll = null;
     /* 未选基金（仅指数线）→ 全量基金区间统计（2026-10-15）；弹窗内（hideGoto）不启用 */
     function renderAllFundsTable(wrap) {
-      const key = { '1w': 'w1', '1m': 'm1', '1y': 'y1', '3y': 'y3', '5y': 'y5', 'all': 'all' }[S.range];
+      const key = { '1m': 'm1', '1y': 'y1', '3y': 'y3', '5y': 'y5', '10y': 'y10', 'all': 'all' }[S.range];
       const head = '<thead><tr><th>' + esc0( _t('名称')) + '</th><th class="r">' + esc0( _t('最新点位')) + '</th><th class="r">' + esc0( _t('区间收益')) + '</th><th class="r">' + esc0( _t('区间最大回撤')) + '</th><th class="r">' + esc0( _t('最大回撤起始日期')) + '</th><th class="r">' + esc0( _t('最大回撤结束日期')) + '</th></tr></thead>';
       if (!key) {
         wrap.innerHTML = '<div class="tr-allnote">' + esc0( _t('该区间为自定义日期——请先勾选基金，再查看逐只区间统计。')) + '</div>';

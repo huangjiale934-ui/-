@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>首页榜单卡 · 20 套方案（C01–C20）</title>
+<style>
+  :root{
+    --brand:#0866bb; --brand2:#2e7fc0; --brand-deep:#084e8c; --brand-soft:#e8f2fc;
+    --ink:#16283e; --ink2:#4a6178; --ink3:#8595a8; --line:#e3ecf4; --bg:#f4f8fc;
+    --up:#d92b2b; --down:#0f8a4d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+  header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:16px 26px}
+  header h1{margin:0 0 4px;font-size:17px;letter-spacing:-.2px}
+  header p{margin:0;font-size:12.5px;color:var(--ink3)}
+  main{padding:20px 26px 60px;max-width:1760px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px}
+  .opt{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px;box-shadow:0 4px 14px rgba(16,40,70,.05)}
+  .opt h3{margin:0 0 2px;font-size:13px;display:flex;align-items:center;gap:8px}
+  .opt h3 b{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:19px;padding:0 6px;border-radius:6px;background:var(--brand-soft);color:var(--brand);font-size:11.5px}
+  .opt p{margin:0 0 10px;font-size:11.5px;color:var(--ink3);line-height:1.5}
+  .frame{background:var(--bg);border-radius:10px;padding:10px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px 12px;box-shadow:0 2px 8px rgba(20,50,80,.05)}
+  .hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+  .hd h4{margin:0;font-size:15px;letter-spacing:-.1px}
+  .hd a{font-size:11.5px;color:var(--brand);text-decoration:none}
+  .row{display:flex;align-items:center;gap:10px}
+  .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vv{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .up{color:var(--up)} .dn{color:var(--down)}
+
+  /* C01 样图原版 */
+  .c01 .row{padding:13px 0;font-size:14px}
+  .c01 .r{flex:0 0 24px;height:24px;line-height:24px;text-align:center;border-radius:50%;font-size:12.5px;font-weight:700;color:var(--brand2)}
+  .c01 .r1{background:var(--brand-deep);color:#fff}
+  .c01 .r2{background:var(--brand2);color:#fff}
+  .c01 .r3{background:#dbeaf8;color:#0b3a66}
+  .c01 .vv{font-weight:700;font-size:14.5px}
+
+  /* C02 斑马纹 */
+  .c02 .row{padding:11px 10px;font-size:13.5px;border-radius:8px}
+  .c02 .row:nth-child(odd){background:#f6faff}
+  .c02 .r{flex:0 0 22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:#e8f2fc;color:var(--brand);font-size:12px;font-weight:700}
+  .c02 .vv{font-weight:600;font-size:14px}
+
+  /* C03 前三整行浅蓝 */
+  .c03 .row{padding:12px 8px;font-size:13.5px;border-radius:8px;margin:1px 0}
+  .c03 .row.top{background:linear-gradient(90deg,#eaf4ff,#f7fbff)}
+  .c03 .r{flex:0 0 20px;text-align:center;font-size:12.5px;font-weight:800;color:var(--brand)}
+  .c03 .vv{font-weight:700}
+
+  /* C04 左侧竖条 */
+  .c04 .row{padding:12px 6px 12px 12px;font-size:13.5px;border-bottom:1px solid #f2f6fa;position:relative}
+  .c04 .row:last-child{border-bottom:0}
+  .c04 .r{flex:0 0 22px;text-align:center;font-size:12.5px;font-weight:800;color:var(--ink3)}
+  .c04 .row.top::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:2px;background:var(--brand)}
+  .c04 .row.top .r{color:var(--brand)}
+
+  /* C05 进度条 */
+  .c05 .row{padding:10px 0;font-size:13px}
+  .c05 .r{flex:0 0 18px;font-size:12px;font-weight:700;color:var(--brand)}
+  .c05 .bar{flex:0 0 64px;height:5px;border-radius:3px;background:#eef4fa;overflow:hidden}
+  .c05 .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#2e7fc0,#8dc4ee)}
+  .c05 .vv{flex:0 0 62px;text-align:right;font-weight:700;font-size:13.5px}
+
+  /* C06 迷你走势 */
+  .c06 .row{padding:10px 0;font-size:13px;gap:8px}
+  .c06 .r{flex:0 0 18px;font-weight:800;color:var(--brand);font-size:12px}
+  .c06 .spark{flex:0 0 56px;height:18px}
+  .c06 .vv{flex:0 0 58px;text-align:right;font-weight:700}
+
+  /* C07 胶囊徽标 */
+  .c07 .row{padding:9px 0;font-size:13.5px}
+  .c07 .r{flex:0 0 auto;padding:2px 8px;border-radius:20px;background:#eef4fa;color:var(--brand);font-size:11.5px;font-weight:700}
+  .c07 .row.top .r{background:var(--brand);color:#fff}
+  .c07 .vv{font-weight:700}
+
+  /* C08 两行式 */
+  .c08 .row{padding:11px 0;align-items:flex-start;gap:10px;border-bottom:1px dashed #eef3f9}
+  .c08 .row:last-child{border-bottom:0}
+  .c08 .r{flex:0 0 20px;height:20px;line-height:20px;border-radius:6px;background:#eef4fa;color:var(--brand);text-align:center;font-size:11.5px;font-weight:700;margin-top:1px}
+  .c08 .mv{flex:1;min-width:0}
+  .c08 .nm2{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .c08 .sub{font-size:11px;color:var(--ink3);margin-top:2px}
+  .c08 .vv{font-weight:700;font-size:14px;padding-top:2px}
+
+  /* C09 冠军放大 */
+  .c09 .top1{display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;background:linear-gradient(120deg,#084e8c,#2e7fc0);color:#fff;margin-bottom:6px}
+  .c09 .top1 .nm{font-size:14px;font-weight:700}
+  .c09 .top1 .vv{font-size:16px;font-weight:800}
+  .c09 .row{padding:9px 4px;font-size:13px}
+  .c09 .r{flex:0 0 18px;color:var(--ink3);font-size:12px;font-weight:700}
+  .c09 .vv{font-weight:600}
+
+  /* C10 深色标题栏 */
+  .c10{padding:0;overflow:hidden}
+  .c10 .hd{margin:0;padding:12px 16px;background:#0d2c4d;color:#fff}
+  .c10 .hd a{color:#9fc8ef}
+  .c10 .bd{padding:6px 16px 10px}
+  .c10 .row{padding:10px 0;font-size:13.5px}
+  .c10 .r{flex:0 0 20px;height:20px;line-height:20px;border-radius:50%;background:rgba(13,44,77,.08);color:#0d2c4d;text-align:center;font-size:11.5px;font-weight:700}
+  .c10 .row.top .r{background:#0d2c4d;color:#fff}
+  .c10 .vv{font-weight:700}
+
+  /* C11 细分割线 */
+  .c11 .row{padding:11px 0;font-size:13.5px;border-bottom:1px solid #f0f5fa}
+  .c11 .row:last-child{border-bottom:0}
+  .c11 .r{flex:0 0 22px;text-align:center;font-size:12px;font-weight:800;color:var(--ink3)}
+  .c11 .row.top .r{color:var(--brand)}
+  .c11 .vv{font-weight:600}
+
+  /* C12 圆角块 */
+  .c12 .row{padding:9px 10px;margin:4px 0;border-radius:9px;background:#f7fafd;font-size:13px}
+  .c12 .row.top{background:#eaf4ff}
+  .c12 .r{flex:0 0 20px;text-align:center;font-size:12px;font-weight:800;color:var(--brand)}
+  .c12 .vv{font-weight:700}
+
+  /* C13 No.1 */
+  .c13 .row{padding:11px 0;font-size:13.5px}
+  .c13 .r{flex:0 0 34px;font-size:11px;color:var(--ink3);font-weight:700;letter-spacing:.02em}
+  .c13 .row.top .r{color:var(--brand)}
+  .c13 .vv{font-weight:700}
+
+  /* C14 01/02 */
+  .c14 .row{padding:11px 0;font-size:13.5px}
+  .c14 .r{flex:0 0 26px;font-size:16px;font-weight:800;color:#cfe0ef;font-variant-numeric:tabular-nums}
+  .c14 .row.top .r{color:var(--brand)}
+  .c14 .vv{font-weight:700}
+
+  /* C15 箭头 */
+  .c15 .row{padding:11px 0;font-size:13.5px}
+  .c15 .r{flex:0 0 20px;height:20px;line-height:20px;border-radius:6px;background:var(--brand-soft);color:var(--brand);text-align:center;font-size:11.5px;font-weight:700}
+  .c15 .vv{font-weight:700;display:inline-flex;align-items:center;gap:3px}
+  .c15 .vv svg{opacity:.75}
+
+  /* C16 名称两行 */
+  .c16 .row{padding:10px 0;align-items:flex-start}
+  .c16 .r{flex:0 0 20px;font-size:12px;font-weight:800;color:var(--brand);padding-top:1px}
+  .c16 .nm{white-space:normal;line-height:1.35;font-size:12.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .c16 .vv{font-size:15px;font-weight:800}
+
+  /* C17 奖牌色 */
+  .c17 .row{padding:11px 0;font-size:13.5px}
+  .c17 .r{flex:0 0 22px;height:22px;line-height:22px;border-radius:50%;text-align:center;font-size:12px;font-weight:700;background:#eef4fa;color:var(--ink3)}
+  .c17 .r1{background:#f3d9a4;color:#7a5a12}
+  .c17 .r2{background:#e2e8ee;color:#4a5560}
+  .c17 .r3{background:#f0d5c2;color:#7a4a2a}
+  .c17 .vv{font-weight:700}
+
+  /* C18 排行榜式 */
+  .c18 .row{padding:10px 0;font-size:13.5px}
+  .c18 .r{flex:0 0 26px;text-align:right;font-size:12px;color:var(--ink3);font-weight:600}
+  .c18 .nm{font-weight:600}
+  .c18 .vv{font-weight:800;color:var(--up);min-width:70px;text-align:right}
+
+  /* C19 玻璃渐变 */
+  .c19{background:linear-gradient(160deg,#f2f8ff,#e6f1fc);border-color:#d8e8f8}
+  .c19 .row{padding:11px 0;font-size:13.5px}
+  .c19 .r{flex:0 0 22px;height:22px;line-height:22px;border-radius:50%;background:rgba(255,255,255,.85);color:var(--brand);text-align:center;font-size:12px;font-weight:700;box-shadow:0 1px 3px rgba(20,50,80,.08)}
+  .c19 .row.top .r{background:var(--brand);color:#fff}
+  .c19 .vv{font-weight:700}
+
+  /* C20 极简 */
+  .c20{padding:16px 16px 10px}
+  .c20 .row{padding:12px 0;font-size:13.5px;gap:0}
+  .c20 .nm{font-weight:500}
+  .c20 .rk{display:none}
+  .c20 .vv{font-weight:700;min-width:66px;text-align:right}
+  .c20 .meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink3);margin-top:2px}
+
+  .ov{position:fixed;inset:0;background:rgba(8,22,40,.55);backdrop-filter:blur(3px);z-index:99;display:flex;align-items:center;justify-content:center;padding:24px}
+  .ovbox{background:#fff;border-radius:14px;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.35);max-width:min(560px,94vw)}
+  .ovbox .card{box-shadow:none;border-color:var(--line);transform:scale(1.12);transform-origin:center}
+  .ovtip{margin-top:12px;text-align:center;font-size:11.5px;color:#fff;opacity:.85}
+  .foot{margin-top:22px;text-align:center;font-size:12.5px;color:var(--ink3)}
+</style>
+</head>
+<body>
+<header>
+  <h1>首页四个榜单卡 · 20 套方案</h1>
+  <p>每套都是真实卡片的 1:1 版式（5 行真实榜单数据）。点任意卡片可放大查看；选定后回我编号（如 C12），我只改首页这四张卡，标题栏与其它模块不动。</p>
+</header>
+<main>
+  <div class="grid" id="grid"></div>
+  <p class="foot">数据示例：近 1 年回报领先（截至 2026-10-31）。</p>
+</main>
+<script>
+const DATA = [
+  ['海通韩国基金 - A类别', '+57.10%', 1],
+  ['海通韩国基金 - T类别', '+57.10%', 2],
+  ['宏利MPF日本股票基金', '+28.74%', 3],
+  ['海通环球分散基金 - T类别', '+28.68%', 4],
+  ['我的亚洲股票基金', '+25.79%', 5],
+];
+const HEAD = '<div class="hd"><h4>近 1 年回报领先</h4><a href="#">查看完整榜单 ›</a></div>';
+
+function rows(kind){
+  return DATA.map(([n,v,i])=>{
+    const top = i<=3 ? ' top':'';
+    switch(kind){
+      case 'c01': return `<div class="row${top}"><span class="r r${i}">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c02': return `<div class="row"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c03': return `<div class="row${top}"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c04': return `<div class="row${top}"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c05': return `<div class="row"><span class="r">${i}</span><span class="nm">${n}</span><span class="bar"><i style="width:${[100,100,50,50,45][i-1]}%"></i></span><span class="vv up">${v}</span></div>`;
+      case 'c06': return `<div class="row"><span class="r">${i}</span><span class="nm">${n}</span>${spark(i)}<span class="vv up">${v}</span></div>`;
+      case 'c07': return `<div class="row${top}"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c08': return `<div class="row"><span class="r">${i}</span><span class="mv"><div class="nm2">${n}</div><div class="sub">近 1 年 · 年率化</div></span><span class="vv up">${v}</span></div>`;
+      case 'c09': return i===1 ? `<div class="top1"><span class="nm">${n}</span><span class="vv">${v}</span></div>` : `<div class="row"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c10': return `<div class="row${top}"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c11': return `<div class="row${top}"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c12': return `<div class="row${top}"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c13': return `<div class="row${top}"><span class="r">No.${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c14': return `<div class="row${top}"><span class="r">${String(i).padStart(2,'0')}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c15': return `<div class="row"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v} ${arrow()}</span></div>`;
+      case 'c16': return `<div class="row"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c17': return `<div class="row"><span class="r r${i}">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c18': return `<div class="row"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv">${v}</span></div>`;
+      case 'c19': return `<div class="row${top}"><span class="r">${i}</span><span class="nm">${n}</span><span class="vv up">${v}</span></div>`;
+      case 'c20': return `<div><div class="row"><span class="nm">${n}</span><span class="vv up">${v}</span></div><div class="meta"><span>第 ${i} 名</span><span>近 1 年</span></div></div>`;
+    }
+  }).join('');
+}
+function spark(i){
+  const seeds=[[2,4,3,6,5,8,7,9],[1,3,4,3,6,5,7,8],[3,2,4,5,4,6,7,6],[2,3,2,4,3,5,4,6],[1,2,3,2,4,5,4,6]][i-1];
+  const pts=seeds.map((v,k)=>`${k*8+1},${18-v*1.7}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 58 18"><polyline points="${pts}" fill="none" stroke="#2e7fc0" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+}
+function arrow(){ return '<svg width="9" height="9" viewBox="0 0 10 10"><path d="M5 8V2M2 5l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+
+const T = [
+  ['C01','样图原版','1–3 蓝色圆标、4/5 蓝色数字，无分割线，行高 52px。'],
+  ['C02','斑马纹','奇偶行浅蓝底交替，序号用小圆标，扫读更快。'],
+  ['C03','前三名整行浅蓝','冠军区一眼可见，4/5 回归白底。'],
+  ['C04','左侧竖条','前三名左侧 3px 蓝条，克制但明确。'],
+  ['C05','收益进度条','在名称与收益之间加相对强度条，看出领先幅度。'],
+  ['C06','迷你走势','每行一条 8 点迷你折线，兼顾趋势感（需接历史净值数据）。'],
+  ['C07','胶囊序号','序号改胶囊形，1 名实心蓝，其余浅蓝。'],
+  ['C08','两行式','名称上、口径下，收益右对齐，信息更完整。'],
+  ['C09','冠军放大','第 1 名单独做成深蓝渐变条，其余紧凑排列。'],
+  ['C10','深色标题栏','标题栏深藏青、正文白，卡片层次更强。'],
+  ['C11','细分割线','行间 1px 浅线，传统榜单感，最稳。'],
+  ['C12','圆角块','每行独立浅底圆角块，块感强、移动端友好。'],
+  ['C13','No.1 写法','序号用 No.1–No.5，偏「排行榜」语感。'],
+  ['C14','两位数序号','01–05 大号淡蓝数字，视觉更现代。'],
+  ['C15','涨跌箭头','收益右侧加向上箭头，方向感更强。'],
+  ['C16','名称两行','名称允许两行，收益用大号加粗，适合长名称。'],
+  ['C17','奖牌色','金/银/铜三色圆标，其余浅灰。'],
+  ['C18','排行榜式','名次右对齐小灰字、名称加粗、收益大号红。'],
+  ['C19','玻璃渐变','卡片浅蓝渐变底、圆标带白底阴影，质感更轻。'],
+  ['C20','极简无序号','去掉序号，仅名称 + 收益，底部小字「第 n 名」。'],
+];
+
+const grid = document.getElementById('grid');
+grid.innerHTML = T.map(([id,name,desc]) => `
+  <section class="opt">
+    <h3><b>${id}</b>${name}</h3>
+    <p>${desc}</p>
+    <div class="frame">
+      <div class="card ${id.toLowerCase()}">
+        ${id==='C10' ? HEAD + '<div class="bd">'+rows(id.toLowerCase())+'</div>' : HEAD + rows(id.toLowerCase())}
+      </div>
+    </div>
+  </section>`).join('');
+
+document.addEventListener('click', (e) => {
+  const opt = e.target.closest('.opt');
+  if (!opt) return;
+  const clone = opt.querySelector('.card').cloneNode(true);
+  const ov = document.createElement('div');
+  ov.className = 'ov';
+  ov.innerHTML = '<div><div class="ovbox"></div><div class="ovtip">点任意处关闭</div></div>';
+  ov.querySelector('.ovbox').appendChild(clone);
+  document.body.appendChild(ov);
+  ov.addEventListener('click', () => ov.remove());
+});
+</script>
+</body>
+</html>

@@ -2018,15 +2018,15 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 
 /* 2026-11-02（第十八轮，用户要求）：行情栏左侧关闭按钮（仅当次会话隐藏，刷新后恢复） */
 /* 2026-11-02：只加关闭按钮，绝不能改 .mkt-ticker 的 position（sticky 吸顶会失效，行情栏会脱离标题栏） */
-.mkt-ticker .tk-track { padding-left: 20px; }   /* 只给 × 让出 6px，行情卡片位置基本不动 */
-.tk-close { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); z-index: 2;
+.mkt-ticker .tk-track { padding-left: 28px; }   /* 2026-11-02：× 加大 20% 并右移，让出 14px */
+.tk-close { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); z-index: 2;
   display: inline-flex; align-items: center; justify-content: center;
-  width: 16px; height: 16px; padding: 0; border-radius: 50%; cursor: pointer;
+  width: 19px; height: 19px; padding: 0; border-radius: 50%; cursor: pointer;
   border: 1px solid #d6e6f4; background: #fff; color: #8fa3b8;
   transition: color .15s, border-color .15s, background-color .15s; }
 .tk-close:hover { color: var(--brand, #0866bb); border-color: #7fb2de; background: #f2f8fe; }
 .tk-close:focus-visible { outline: 2px solid rgba(8,102,187,.35); outline-offset: 1px; }
-@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 18px; } .tk-close { left: 1px; } }
+@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 26px; } .tk-close { left: 5px; } }
 
 /* ==========================================================================
    2026-11-02（第十八轮，用户要求）：排名维度多选面板
@@ -2116,39 +2116,50 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .f-row-merged .tb-per .mpfsel { width: 100%; }
 .f-row-merged .tb-per .mpfsel-btn { height: 36px; }
 
-/* ② 左侧分组导航（替代顶部三胶囊） */
-.db-shell { display: grid; grid-template-columns: 126px minmax(0, 1fr); gap: 14px; align-items: start; }
-.db-side { position: sticky; top: 112px; background: #fff; border: 1px solid var(--line, #e3ecf4);
-  border-radius: 12px; padding: 9px 6px; box-shadow: 0 2px 10px rgba(20, 50, 80, .05); }
-.db-side-grp { font-size: 10.5px; color: #8aa0b4; font-weight: 700; letter-spacing: .03em; padding: 4px 7px 7px; }
-.db-nav { display: flex; align-items: center; gap: 6px; width: 100%; height: 36px; padding: 0 7px;
-  border: 0; border-radius: 8px; background: none; font: inherit; font-size: 12.5px; font-weight: 500;
+/* ② 左侧分组导航：贴浏览器左边、固定全高（2026-11-02 第二十一轮，用户要求） */
+.db-shell { display: block; }
+body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; }
+.db-side { position: fixed; left: 0; top: 100px; bottom: 0; width: 196px; z-index: 40;
+  display: flex; flex-direction: column; overflow-y: auto;
+  background: #fff; border-right: 1px solid var(--line, #e3ecf4); border-top: 1px solid var(--line, #e3ecf4);
+  border-radius: 0; padding: 12px 10px 16px; box-shadow: 2px 0 12px rgba(20, 50, 80, .04); }
+.db-side-grp { font-size: 11px; color: #8aa0b4; font-weight: 700; letter-spacing: .03em; padding: 4px 10px 8px; }
+.db-nav { display: flex; align-items: center; gap: 9px; width: 100%; height: 40px; padding: 0 10px;
+  border: 0; border-radius: 8px; background: none; font: inherit; font-size: 14px; font-weight: 500;
   color: #2c4258; cursor: pointer; text-align: left; white-space: nowrap; transition: background-color .15s, color .15s; }
-.db-nav svg { flex: none; color: #7d94a9; transition: color .15s; }
+.db-nav svg { flex: none; width: 16px; height: 16px; color: #7d94a9; transition: color .15s; }
 .db-nav:hover { background: #f3f8fe; color: var(--brand, #0866bb); }
 .db-nav:hover svg { color: var(--brand, #0866bb); }
 .db-nav.on { background: #e8f2fc; color: var(--brand, #0866bb); font-weight: 700; }
 .db-nav.on svg { color: var(--brand, #0866bb); }
-.db-side-note { margin: 9px 7px 2px; padding-top: 9px; border-top: 1px solid #eef3f9;
+.db-sub { margin: 3px 0 6px 14px; padding-left: 6px; border-left: 1px solid #e6eef7; }
+.db-sub[hidden] { display: none; }
+.db-sub .an-prov { padding: 2px 0; }
+.db-sub .an-pitem { font-size: 12.5px; padding: 7px 9px; border-radius: 7px; gap: 6px; }
+.db-sub .an-pitem b { font-size: 11px; padding: 1px 6px; }
+.db-side-note { margin: auto 10px 2px; padding-top: 12px; border-top: 1px solid #eef3f9;
   font-size: 11px; color: #93a6b8; line-height: 1.5; }
 
 /* 中等屏幕收成图标栏（悬停展开文字），给表格留足宽度 */
-@media (max-width: 1010px) {
-  .db-shell { grid-template-columns: 54px minmax(0, 1fr); gap: 12px; }
-  .db-side { padding: 8px 6px; width: 54px; z-index: 6; transition: width .16s ease, box-shadow .16s ease; }
-  .db-side:hover { width: 152px; box-shadow: 0 10px 28px rgba(16, 40, 70, .16); }
+@media (max-width: 1000px) {
+  body.db-page .wrap { padding-left: 68px; }
+  .db-side { width: 54px; padding: 10px 6px; transition: width .16s ease, box-shadow .16s ease; }
+  .db-side:hover { width: 196px; box-shadow: 0 10px 28px rgba(16, 40, 70, .16); }
   .db-side-grp, .db-side-note { display: none; }
-  .db-nav { justify-content: center; padding: 0; height: 38px; }
+  .db-nav { justify-content: center; padding: 0; }
   .db-nav span { display: none; }
-  .db-side:hover .db-nav { justify-content: flex-start; padding: 0 7px; }
+  .db-side:hover .db-nav { justify-content: flex-start; padding: 0 10px; }
   .db-side:hover .db-nav span { display: inline; }
+  .db-sub { display: none; }
 }
 /* 窄屏（手机）改为横向条 */
 @media (max-width: 760px) {
-  .db-shell { grid-template-columns: 1fr; gap: 10px; }
-  .db-side { position: static; display: flex; gap: 6px; padding: 6px; overflow-x: auto; }
-  .db-nav { width: auto; flex: 0 0 auto; padding: 0 10px; }
+  body.db-page .wrap { padding-left: 14px; }
+  .db-side { position: static; width: auto; flex-direction: row; gap: 6px; overflow-x: auto;
+    border-radius: 10px; border: 1px solid var(--line, #e3ecf4); padding: 6px; margin-bottom: 10px; }
+  .db-nav { width: auto; flex: 0 0 auto; padding: 0 10px; height: 36px; }
   .db-nav span { display: inline; }
+  .db-sub { display: none; }
 }
 
 /* 2026-11-02：有侧边栏后内容区变窄，紧凑档再收一档，保证 1080 左右仍是一行 */
@@ -2230,3 +2241,51 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 #rkTable thead th[data-c="ops"] { width: 78px !important; }
 #rkTable tbody .btn-detail { padding-left: 8px; padding-right: 8px; }
 @media (max-width: 1150px) { #rkTable thead th[data-c="fund"] { min-width: 164px; } }
+
+/* 2026-11-02（第二十一轮）：侧边栏固定贴左后内容区再窄一点，表格内边距收到 3px */
+@media (min-width: 1001px) and (max-width: 1150px) {
+  #fundTable thead th, #fundTable tbody td { padding-left: 3px; padding-right: 3px; }
+}
+
+/* ==========================================================================
+   2026-11-02（第二十一轮，用户要求）
+   ① 搜索框与受托人同宽、占位只写「基金名称／计划名称」
+   ② 右侧工具栏与左侧筛选严格同一基线
+   ③ 榜单说明条由绿改蓝；基金表说明条与表格同宽
+   ④ 榜单表「成分基金」列收窄到与基金表一致
+   ========================================================================== */
+.scope-note.scope-mpfa { background: #eef4fd; color: #35507a; }
+.scope-note.scope-db { margin: 12px 2px 0; }
+
+@media (min-width: 1151px) {
+  .f-row-merged > .dim-item { flex: 0 0 140px !important; min-width: 140px !important; }
+  .f-row-merged > .f-search { flex: 0 0 160px !important; min-width: 160px !important; max-width: 160px !important; }
+  .f-row-merged > .f-trustee { flex: 0 0 160px !important; min-width: 160px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 150px !important; min-width: 150px !important; }
+}
+@media (max-width: 1150px) {
+  .f-row-merged > .dim-item { flex: 0 0 92px !important; min-width: 92px !important; }
+  .f-row-merged > .f-search { flex: 0 0 96px !important; min-width: 96px !important; max-width: 96px !important; }
+  .f-row-merged > .f-trustee { flex: 0 0 96px !important; min-width: 96px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 90px !important; min-width: 90px !important; }
+  .f-row-merged .f-item.tb-per { flex: 0 0 74px !important; min-width: 74px !important; width: 74px; }
+  .f-row-merged .tb-tail { gap: 6px; }
+  .f-row-merged .tb-tail .btn { padding: 0 6px; }
+  .f-row-merged .tb-tail .tb-count { margin-left: 6px; }
+  .f-row-merged .f-item .mpfsel-btn { padding-left: 7px; padding-right: 7px; }
+}
+/* 右侧工具栏：与左侧标签同顶、与输入框同底 */
+.f-row-merged .tb-tail { align-items: flex-end; }
+.f-row-merged .tb-tail .tb-count { display: flex; align-items: center; height: 36px; }
+.f-row-merged .tb-per label { display: block; height: 18px; line-height: 18px; margin: 0; }
+.f-row-merged .tb-tail .btn { box-sizing: border-box; }
+
+#rkTable thead th[data-c="fund"] { width: 190px; }
+
+/* 二级菜单（发行人）：选中改为浅蓝，与全站导航一致 */
+.db-sub .an-pitem.on { background: #e8f2fc; color: var(--brand, #0866bb); font-weight: 600; }
+.db-sub .an-pitem.on b { background: #fff; color: var(--brand, #0866bb); border-color: #d3e5f7; }
+.db-sub .an-pitem b { background: #f2f7fc; color: #7d94a9; border: 1px solid transparent; border-radius: 20px; }
+
+/* 2026-11-02（第二十一轮，用户要求）：行情栏关闭按钮再大 20%、右移一点 */
+.tk-close svg { width: 9px; height: 9px; }

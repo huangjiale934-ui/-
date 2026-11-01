@@ -786,7 +786,7 @@ chk('第四页·表格含实际值（指数点位千分位 + 基金净值 HKD）
 })());
 chk('第四页·数据来源行（官方截至日期 · 净值最新日期 · 已核实/451 动态）', /官方资料截至 <b>\d{4}-\d{2}-\d{2}<\/b> · 单位净值最新 <b>\d{4}-\d{2}-\d{2}<\/b> · 已核实 (44[5-9]|45[01])\/451 条/.test(an));
 chk('第四页·图上方双选择器（选择指数 / 选择基金）+ 面板容器', /data-panel="idx"/.test(an) && /data-panel="fund"/.test(an) && /tr-p-list-idx/.test(an) && /tr-p-list-fund/.test(an));
-chk('第四页·区间按钮 5 档 + 选择日期 + 全部区间', ['1w', '1m', '1y', '3y', '5y', 'custom', 'all'].every((r) => new RegExp('data-r="' + r + '"').test(an)) && /tr-daterow/.test(an));
+chk('第四页·区间按钮（2026-11-02：1个月/1年/3年/5年/10年/全部 + 选择日期，去掉 1 周与独立「全部区间」按钮）', ['1m', '1y', '3y', '5y', '10y', 'all', 'custom'].every((r) => new RegExp('data-r="' + r + '"').test(an)) && !/1w/.test(an) && !/tr-r-all/.test(an) && /tr-daterow/.test(an));
 chk('第四页·区间统计表五列（名称/区间收益/区间最大回撤/起止日期；2026-10-20 删除「最新点位」列）', !/最新点位/.test(an) && /区间收益/.test(an) && /区间最大回撤/.test(an) && /最大回撤起始日期/.test(an) && /最大回撤结束日期/.test(an) && /恒生指数/.test(an));
 chk('第四页·「查看具体基金分析」按钮 + 返回对比文案', /查看具体基金分析/.test(readSrc('analysis.js')) && (function () {
   try { const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
@@ -1248,7 +1248,9 @@ chk('1017批·②清空筛选连指数一起清（items=[]）+ 空态提示', (f
 chk('1017批·③单线真实值模式（raw 绘制 + 轴标签 + note 隐藏）', (function () {
   try {
     const t = fs.readFileSync(path.join(__dirname, '..', 'public', 'trend.js'), 'utf8');
-    return t.indexOf('const single = lines.length === 1;') >= 0 && t.indexOf('实际值：净值 / 指数点位') >= 0 &&
+    /* 2026-11-02：图内「实际值 / 累计涨跌幅」说明文字已按用户要求删除，改为断言 raw/norm 取数逻辑 */
+    return t.indexOf('const single = lines.length === 1;') >= 0 &&
+      t.indexOf('const P = (L) => (single ? L.win.raw : L.win.norm);') >= 0 &&
       t.indexOf("noteEl.style.display = single ? 'none' : ''") >= 0;
   } catch (e) { return false; }
 })());
@@ -1771,3 +1773,30 @@ chk('二十轮·④左侧分组导航取代顶部三胶囊（三个板块入口�
 chk('二十轮·⑤首页榜单卡 1-5 全部写出序号（1-3 圆标、4-5 蓝色数字）',
   /\(i \+ 1\) \+ '<\/span>'/.test(readSrc('home.js')) &&
   /\.mk-top \.r\.r0 \{ background: transparent; color: #3d86c6/.test(readSrc('home.css')));
+
+/* ===== 2026-11-02 第二十一轮（10 条反馈）===== */
+chk('二十一轮·①侧边栏贴左固定 + 对比发行人列表收为二级菜单',
+  /\.db-side \{ position: fixed; left: 0; top: 100px; bottom: 0;/.test(readSrc('style.css')) &&
+  /body\.db-page \.wrap \{ max-width: none; padding-left: 208px/.test(readSrc('style.css')) &&
+  /id="dbSubCmp"/.test(rawIdxHtml) && /id="anProv"/.test(rawIdxHtml) &&
+  rawIdxHtml.indexOf('class="an-side"') < 0 && /dsub\.hidden = !isCmp/.test(rawIdxHtml));
+chk('二十一轮·②榜单排名维度写出实际口径（近 1 年回报）',
+  /esc\(TT\('近 1 年回报'\)\)/.test(readSrc('rank.js')) && rawIdxHtml.length > 0);
+chk('二十一轮·③搜索框与受托人同宽、占位只写基金名称／计划名称',
+  rawIdxHtml.indexOf('data-i18n-ph="基金名称／计划名称"') >= 0 &&
+  rawIdxHtml.indexOf('基金名称／计划名称／受托人') < 0 &&
+  /\.f-row-merged > \.f-search \{ flex: 0 0 96px/.test(readSrc('style.css')) &&
+  /\.f-row-merged > \.f-trustee \{ flex: 0 0 96px/.test(readSrc('style.css')));
+chk('二十一轮·④基金表说明条移入 #dbSec、与表格同宽且蓝色调',
+  (function () {
+    const a = rawIdxHtml.indexOf('id="dbScopeNote"');
+    const b = rawIdxHtml.indexOf('id="rkSec"');
+    return a > 0 && b > a && /\.scope-note\.scope-db \{ margin: 12px 2px 0/.test(readSrc('style.css'));
+  })() && /\.scope-note\.scope-mpfa \{ background: #eef4fd; color: #35507a; \}/.test(readSrc('style.css')));
+chk('二十一轮·⑤走势图：区间含 10年/全部、高度 +20%、无图内纵轴说明、说明简写',
+  /'10y', '10年'/.test(readSrc('trend.js')) && /'all', '全部'/.test(readSrc('trend.js')) &&
+  /#anCompare \.tr-svg \{ height: 342px/.test(readSrc('analysis.css')) &&
+  readSrc('trend.js').indexOf("_t('累计涨跌幅（区间起点 = 0%）')") < 0 &&
+  readSrc('trend.js').indexOf('基金净值取自各发行人官网（每交易日）') < 0);
+chk('二十一轮·⑥行情栏关闭按钮放大 20% 并右移',
+  /\.tk-close \{ position: absolute; left: 8px;[\s\S]{0,220}width: 19px; height: 19px/.test(readSrc('style.css')));

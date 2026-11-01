@@ -180,7 +180,9 @@
     const sel = document.getElementById('rkDimSel');
     if (sel) {
       const fill = () => {
-        sel.innerHTML = '<option value="">' + esc(TT('无')) + '</option>' +
+        /* 2026-11-02（第二十一轮，用户要求）：未选具体榜单时，下拉要写出实际排名口径
+           （默认按近 1 年年率化降序），不再显示「无」 */
+        sel.innerHTML = '<option value="">' + esc(TT('近 1 年回报')) + '</option>' +
           BOARDS.map((b) => '<option value="' + b.id + '">' + esc(TT(b.name)) + '</option>').join('');
         sel.value = S.board || '';
       };
