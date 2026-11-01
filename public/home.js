@@ -813,26 +813,57 @@
       grid += '<line x1="' + padL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#eef2f7" stroke-width="1"/>';
       yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + fmtTick(v) + '</text>';
     }
-    /* 横坐标按跨度自适应——≤13 个月每格一个月；≤74 个月只标 3/6/9 月；更长只标年份。
-       1 月的位置一律用倾斜年份代替「1月」，避免同一位置出现两个标签。 */
+    /* 横坐标按跨度自适应——≤13 个月每格一个月；≤74 个月标 3/6/9 月 + 年份；更长只标年份。
+       2026-11-02（第十七轮，用户要求）：
+       · 年份不再带「年」字（简繁英统一显示 2025）；
+       · 季度轴上的年份移到「9 月与次年 3 月」正中（= 12 月 1 日），与 3/6/9 月形成等距节奏；
+       · 每个年份分界（1 月 1 日）画一条小竖线，直观标出年份切换位置。 */
     const mspan = mi1 - mi0;
     let xt = '';
     const EN = (document.documentElement.lang || '').indexOf('en') === 0;
     const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const yearTxt = (yy) => EN ? yy : yy + TT('年');
+    const monthly = mspan <= 13;
+    const quarter = mspan > 13 && mspan <= 74;
+    const yearTxt = (yy) => String(yy);
     const monthTxt = (mo) => EN ? (MON[mo - 1] || mo) : mo + TT('月');
+    const axisY = H - padB;
     const yearLab = (x, y, txt) =>
       '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="end" class="pi-yk pi-yk-year" transform="rotate(-40 ' + x.toFixed(1) + ' ' + y + ')">' + txt + '</text>';
     for (let m = Math.ceil(mi0 - 0.02); m <= Math.floor(mi1 + 0.001); m++) {
       const mo = ((m % 12) + 12) % 12 + 1;
       const yy = Math.floor(m / 12);
       const isJan = mo === 1;
-      const show = (mspan <= 13) || (mspan <= 74 ? (isJan || mo === 3 || mo === 6 || mo === 9) : isJan);
+      const show = monthly || (quarter ? (isJan || mo === 3 || mo === 6 || mo === 9) : isJan);
       if (!show) continue;
       const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
       if (x < padL + 24 || x > W - padR - 10) continue;
-      if (isJan) xt += yearLab(x + 18, (H - padB) + 18, yearTxt(yy));  /* 旋转后 bbox 中心补偿，视觉上正好落在 1 月刻度 */
-      else xt += '<text x="' + x.toFixed(1) + '" y="' + ((H - padB) + 16) + '" text-anchor="middle" class="pi-yk">' + monthTxt(mo) + '</text>';
+      if (isJan) {
+        /* 月度轴 / 年度轴：1 月位置直接写年份；季度轴的年份统一放到 12 月（下一段） */
+        if (!quarter) xt += yearLab(x + 18, axisY + 18, yearTxt(yy));
+        continue;
+      }
+      xt += '<text x="' + x.toFixed(1) + '" y="' + (axisY + 16) + '" text-anchor="middle" class="pi-yk">' + monthTxt(mo) + '</text>';
+    }
+    if (quarter) {
+      /* 年份标签：落在上一年 12 月 1 日 = 9 月与次年 3 月的正中 */
+      for (let yy = Math.floor(mi0 / 12); yy <= Math.floor(mi1 / 12) + 1; yy++) {
+        let m = yy * 12 - 1;
+        /* 首个不完整的年份（数据从年中开始）没有左侧 9 月可参照，就落在 1 月刻度上 */
+        if (m < mi0 - 0.02) m = yy * 12;
+        if (m < mi0 - 0.02 || m > mi1 + 0.001) continue;
+        const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
+        if (x < padL + 4 || x > W - padR - 10) continue;
+        xt += yearLab(x + 18, axisY + 18, yearTxt(yy));
+      }
+    }
+    /* 年份分界小竖线（1 月 1 日）：让「哪里换年」一眼可见 */
+    let ytick = '';
+    for (let yy = Math.floor(mi0 / 12); yy <= Math.floor(mi1 / 12) + 1; yy++) {
+      const m = yy * 12;
+      if (m < mi0 + 0.02 || m > mi1 - 0.001) continue;
+      const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
+      if (x < padL + 1 || x > W - padR - 1) continue;
+      ytick += '<line x1="' + x.toFixed(1) + '" y1="' + axisY + '" x2="' + x.toFixed(1) + '" y2="' + (axisY + 8) + '" stroke="#7fa8cc" stroke-width="1.8"/>';
     }
     const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
     const areaD = lineD + ' L' + X(pts.length - 1).toFixed(1) + ' ' + (H - padB) + ' L' + padL + ' ' + (H - padB) + ' Z';
@@ -841,7 +872,7 @@
       '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc2(TT('积金表现指数')) + '">' +
       '<defs><linearGradient id="piGrad" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" stop-color="#0866bb" stop-opacity="0.26"/><stop offset="1" stop-color="#0866bb" stop-opacity="0.02"/></linearGradient></defs>' +
-      grid + yl + xt +
+      grid + yl + ytick + xt +
       '<path d="' + areaD + '" fill="url(#piGrad)"/>' +
       '<path d="' + lineD + '" fill="none" stroke="#0866bb" stroke-width="2.2"/>' +
       '<circle cx="' + X(pts.length - 1).toFixed(1) + '" cy="' + Y(last[1]).toFixed(1) + '" r="3.5" fill="#0866bb"/>' +

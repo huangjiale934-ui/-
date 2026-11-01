@@ -139,7 +139,6 @@
     const f = DATA.funds;
     fill('#fType', uniq(f.map((x) => x.type)), (v) => typeLabel(v));
     fill('#fTrustee', uniq(f.map((x) => x.trustee)));
-    fill('#fRisk', uniq(f.map((x) => x.risk)).sort((a, b) => a - b), (v) => TQ('风险级别 {n}', { n: v }));
     fillSub();
   }
 
@@ -216,7 +215,7 @@
   /** 重置全部筛选（含估值日标签，2026-10-14） */
   function resetAll() {
     Object.assign(F, { kw: '', type: '', sub: '', trustee: '', risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' });
-    ['#kw', '#fType', '#fTrustee', '#fRisk', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
+    ['#kw', '#fType', '#fTrustee', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
     /* 2026-10-31（用户要求）：涨跌幅/回撤/费率第二行筛选已下线 */
     document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
     fillSub(); S.page = 1; render();
@@ -258,15 +257,16 @@
   /* 2026-10-22（用户要求）：「近1年」改为默认列，其余列不变 */
   /* 2026-10-31（用户要求）：对比列移到操作（详情）左侧 */
   /* 2026-11-01（6.0，用户要求）：近3年年化移出默认列（仍可在列设置勾选），表格更宽松 */
+  /* 2026-11-02（第十七轮，用户要求）：近1年最大回撤也移出默认列（仍在列设置），表格再松一档 */
   const COL_DEFAULT = ['rank', 'fund', 'trustee', 'risk', 'nav',
-    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfMdd', 'size', 'cmp', 'ops'];
+    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'size', 'cmp', 'ops'];
   /* 2026-10-27（用户要求）：「精简模式」下线，改为「默认模式」——一键回到用户指定的 14 列 */
   let colSet = null;
   let DIM_EXTRA = '';   /* 2026-10-27：维度联动临时放出的列（不持久化） */
-  try { const raw = localStorage.getItem('mpf-cols-v8'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
+  try { const raw = localStorage.getItem('mpf-cols-v9'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
   if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
   function applyCols(save) {
-    if (save !== false) { try { localStorage.setItem('mpf-cols-v8', JSON.stringify([...colSet])); } catch (e) {} }
+    if (save !== false) { try { localStorage.setItem('mpf-cols-v9', JSON.stringify([...colSet])); } catch (e) {} }
     /* 2026-10-26 重做：列显隐改为「不渲染」（visibleOrder 过滤），不再用 CSS 隐藏——
        与维度列插队机制统一，从机制上杜绝表头/表体错位 */
     try { localStorage.removeItem('mpf-cols-v5'); localStorage.removeItem('mpf-cols-v6'); } catch (e) {}
@@ -295,7 +295,8 @@
       '<button type="button" class="cp-b" id="colAll">' + TT('全部列') + '</button></div>' +
       '<div class="cp-list" id="colChecks">' + COL_DEFS.map((c) =>
         '<label' + (c.lock ? ' class="cp-lock"' : '') + '><input type="checkbox" value="' + c.k + '"' + (c.lock ? ' disabled checked' : '') + '>' + TT(c.n) + '</label>').join('') + '</div>';
-    host.parentNode.insertBefore(pop, host.nextSibling);
+    /* 2026-11-02：工具栏已并入筛选行，弹层挂在工具栏内部，才能贴着「列设置」按钮弹出 */
+    host.appendChild(pop);
     btn.addEventListener('click', (e) => { e.stopPropagation(); pop.hidden = !pop.hidden; applyCols(false); });
     document.getElementById('colClose').addEventListener('click', () => { pop.hidden = true; });
     document.addEventListener('click', (e) => { if (!pop.hidden && !e.target.closest('#colPop') && e.target.id !== 'colBtn') pop.hidden = true; });
@@ -322,7 +323,6 @@
     $('#fType').addEventListener('change', () => { F.type = $('#fType').value; F.sub = ''; fillSub(); S.page = 1; render(); });
     $('#fSub').addEventListener('change', () => { F.sub = $('#fSub').value; S.page = 1; render(); });
     $('#fTrustee').addEventListener('change', () => { F.trustee = $('#fTrustee').value; S.page = 1; render(); });
-    $('#fRisk').addEventListener('change', () => { F.risk = $('#fRisk').value; S.page = 1; render(); });
     /* 2026-10-31（用户要求）：第二行筛选（涨跌幅/回撤/管理费）与「重置条件」按钮已删除；重置走空态「一键清除」 */
     const bReset = $('#btnReset');
     if (bReset) bReset.addEventListener('click', resetAll);
@@ -344,7 +344,6 @@
       if (F.type && x.type !== F.type) return false;
       if (F.sub && x.subtype !== F.sub) return false;
       if (F.trustee && x.trustee !== F.trustee) return false;
-      if (F.risk !== '' && String(x.risk) !== String(F.risk)) return false;
       if (F.retMin !== '' && !(x[F.retDim] != null && x[F.retDim] >= parseFloat(F.retMin))) return false;
       if (F.retMax !== '' && !(x[F.retDim] != null && x[F.retDim] <= parseFloat(F.retMax))) return false;
       /* 2026-10-19：与参考版式一致——「最大回撤区间」按近5年最差年度（worstYear）筛 */

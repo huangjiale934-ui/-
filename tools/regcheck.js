@@ -244,7 +244,10 @@ chk('资料库·无估值日问号标记（代码+数据均具备）', (function
 chk('资料库·footer 来源与免责（src-brief + 折叠，2026-10-31）', /class="src-brief"/.test(idx) && /foot-fold/.test(idx));
 chk('排名·footer 来源与免责（src-brief + 折叠）', /class="src-brief"/.test(rk) && /foot-fold/.test(rk));
 chk('首页·页面标题已加标记', /<title data-i18n="香港强积金市场数据平台/.test(rawH));
-chk('资料库·筛选提示与计数（2026-10-31：提示句删、筛选条件：无）', /共筛选出/.test(idx) && /筛选条件：无/.test(idx) && idx.indexOf('点击表头排序') < 0);
+chk('资料库·筛选与工具栏合并一行（2026-11-02：排名维度→搜索→下拉→共筛选出→每页显示→导出，无「筛选条件：无」）',
+  /class="f-row f-row-main f-row-merged"/.test(idx) && /id="dimSel"/.test(idx) && /class="tb-tail"/.test(idx) &&
+  /共筛选出/.test(idx) && idx.indexOf('筛选条件：无') < 0 && idx.indexOf('点击表头排序') < 0 &&
+  idx.indexOf('id="fRisk"') < 0 && idx.indexOf('class="f-lead"') < 0);
 chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排序') < 0);
 /* i18n 字典覆盖：代码/HTML 中出现的键必须全部有译文 */
 (function () {

@@ -336,8 +336,8 @@ table.data td {
   text-align: center;
 }
 /* 2026-11-01（6.0，用户要求）：资料库表整体放大一号（去掉近3年列后更宽松） */
-#fundTable thead th { font-size: 13px; }
-#fundTable tbody td { font-size: 14.5px; }
+#fundTable thead th { font-size: 14px; }
+#fundTable tbody td { font-size: 15.5px; }   /* 2026-11-02（第十七轮）：再去一列，字再放大一号 */
 #fundTable tbody .cell-sub { font-size: 12px; }
 
 /* 行状态：斑马纹 + 悬停 */
@@ -1932,4 +1932,57 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 @media (max-width: 640px) {
   .f-lead { flex: 1 1 100%; margin: 0 0 2px; }
   .f-item.f-search { flex: 1 1 100%; }
+}
+
+
+/* ==========================================================================
+   2026-11-02（第十七轮，用户要求）：筛选区 + 工具栏合并为「一行」
+   顺序：排名维度 → 基金搜索 → 种类 → 细类 → 受托人 …… 共筛选出 → 每页显示 → 列设置 → 导出
+   ========================================================================== */
+.card.filters .f-row-main.f-row-merged { flex-wrap: nowrap; gap: 10px; align-items: flex-end; }
+.f-row-merged > .f-item { min-width: 0 !important; }
+.f-row-merged > .dim-item { flex: 0 0 118px !important; min-width: 118px !important; }
+.f-row-merged > .f-search { flex: 1 1 176px !important; min-width: 118px !important; }
+.f-row-merged > .f-type,
+.f-row-merged > .f-sub { flex: 0 1 112px !important; min-width: 86px !important; }
+.f-row-merged > .f-trustee { flex: 0 1 122px !important; min-width: 92px !important; }
+.f-row-merged .tb-tail { display: flex; align-items: center; gap: 8px; flex: 0 0 auto;
+  margin-left: auto; height: 36px; position: relative; }
+.f-row-merged .tb-per-label { font-size: 12.5px; color: var(--text-2); white-space: nowrap; margin: 0; }
+.f-row-merged .tb-count { font-size: 12.5px; }
+.f-row-merged .tb-count b { font-size: 13px; }
+.tb-tail .mpfsel { width: 88px; flex: 0 0 auto; }
+.tb-tail .mpfsel-btn { height: 36px; }
+
+/* 搜索框：外层就是框，内部 input 不能再自带边框（用户截图里的「框中框」） */
+.f-item .tb-search input[type="text"] { border: 0 !important; background: transparent !important;
+  box-shadow: none !important; height: 100%; padding: 0; border-radius: 0; }
+.f-row-merged .tb-search { height: 36px; }
+.f-row-merged .dim-item .mpfsel-btn { height: 36px; }
+
+@media (max-width: 980px) {
+  .card.filters .f-row-main.f-row-merged { flex-wrap: wrap; }
+  .f-row-merged > .dim-item { flex: 0 0 auto !important; min-width: 108px !important; }
+  .f-row-merged > .f-search { flex: 1 1 200px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub, .f-row-merged > .f-trustee { flex: 1 1 42% !important; }
+  .f-row-merged .tb-tail { flex: 1 1 100%; margin-left: 0; height: auto; flex-wrap: wrap; }
+}
+
+/* 2026-11-02（第十七轮）：合并行内所有控件统一 36px 高、搜索框不再吃掉全部空白 */
+.f-row-merged .mpfsel-btn { height: 36px; }
+.f-row-merged .tb-tail .btn { height: 36px; padding: 0 12px; }
+.f-row-merged > .f-search { flex: 0 1 240px !important; max-width: 264px; }
+
+/* 2026-11-02（第十七轮）：字号再放大后，收紧单元格左右内边距，给「成分基金」留出一行显示的空间 */
+#fundTable thead th { padding-left: 6px; padding-right: 6px; }
+#fundTable tbody td { padding-left: 6px; padding-right: 6px; }
+#fundTable thead th[data-c="fund"] { min-width: 184px; }
+/* 1092 左右宽度：优先保证下拉文案完整，搜索框让位 */
+@media (max-width: 1200px) {
+  .f-row-merged > .dim-item { flex: 0 0 112px !important; min-width: 112px !important; }
+  .f-row-merged > .f-search { flex: 1 1 140px !important; min-width: 120px !important; max-width: none; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 94px !important; min-width: 94px !important; }
+  .f-row-merged > .f-trustee { flex: 0 0 104px !important; min-width: 104px !important; }
+  .f-row-merged .tb-tail { gap: 7px; }
+  .f-row-merged .tb-count { font-size: 12px; }
 }
