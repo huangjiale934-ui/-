@@ -815,6 +815,66 @@ window.ensureNamesEn = ensureNamesEn;
 window.toSimp = toSimp;
 window.fundMatch = fundMatch;
 
+/* 2026-11-01（6.0）：英文名显示——官方英文名表 names-en（按基金 id），
+   英文模式下表格/详情/榜单统一用英文名；受托人用官方英文品牌名。 */
+const TRUSTEE_EN = {
+  HSBC: 'HSBC', 中國人壽: 'China Life', 中銀保誠: 'BOC-Prudential', 交通: 'BOCOM', 友邦信託: 'AIA',
+  宏利: 'Manulife', 東亞: 'BEA', 永明: 'Sun Life', 渣打信托: 'Standard Chartered', 萬通: 'YF Life', 銀聯信託: 'BCT',
+};
+function isEn() { return (document.documentElement.lang || '').indexOf('en') === 0; }
+/* /api/market 的榜单只给中文名、没有 id：用当前基金表反查 id 后再取英文名 */
+function nameIdOf(x) {
+  if (!x) return '';
+  if (x.id != null) return String(x.id);
+  const key = x.fund || x.fundBase;
+  if (!key) return '';
+  if (!window.__zhNameId) {
+    const m = {};
+    (DATA.funds || []).forEach((f) => { if (f.fund) m[f.fund] = f.id; if (f.fundBase && m[f.fundBase] == null) m[f.fundBase] = f.id; });
+    window.__zhNameId = m;
+  }
+  return window.__zhNameId[key] || '';
+}
+function fundDisplayName(x) {
+  if (!x) return '';
+  if (isEn() && window.__mpfNamesEn) {
+    const e = window.__mpfNamesEn[String(nameIdOf(x))];
+    if (e && e.fund) return e.fund;
+  }
+  return x.fundBase || x.fund || '';
+}
+function schemeDisplay(x) {
+  if (!x) return '';
+  if (isEn() && window.__mpfNamesEn) {
+    const e = window.__mpfNamesEn[String(x.id)];
+    if (e && e.scheme) return e.scheme;
+  }
+  return x.scheme || '';
+}
+function trusteeDisplay(t) {
+  if (!isEn() || !t) return t || '';
+  return TRUSTEE_EN[t] || TRUSTEE_EN[toSimp(t)] || t;
+}
+/* 完整名（含 A/T 类别后缀）：首页榜单、MPFA 榜单没有单位标签，必须用全名区分 */
+function fundFullName(x) {
+  if (!x) return '';
+  if (isEn() && window.__mpfNamesEn) {
+    const e = window.__mpfNamesEn[String(nameIdOf(x))];
+    if (e && e.fund) return e.fund;
+  }
+  return x.fund || x.fundBase || '';
+}
+window.fundDisplayName = fundDisplayName;
+window.fundFullName = fundFullName;
+window.schemeDisplay = schemeDisplay;
+window.trusteeDisplay = trusteeDisplay;
+window.isEnLang = isEn;
+/* 英文模式才加载英文名表（约 50KB），切到英文时补加载并重绘 */
+function maybeNamesEn() { if (!isEn()) return; ensureNamesEn().then(() => { const f = () => { if (window.__onRefresh) window.__onRefresh(); document.dispatchEvent(new Event('mpf:names')); }; f(); setTimeout(f, 900); }); }
+document.addEventListener('mpf:lang', maybeNamesEn);
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeNamesEn);
+else maybeNamesEn();
+
 /* ---------- 排序：点击表头切换升/降 ---------- */
 /* 表头排序：三态（2026-10-22 用户要求）
    ① 第一次点击 → 按该列默认方向（多为「最大在前」= 降序）
@@ -849,9 +909,11 @@ function makeSorter(thList, state, onSort, defaultSort) {
     /* 表头排序与「排名维度」卡片互斥：表头动过之后，卡片不再显示选中态 */
     const tabs = document.querySelector('#selfTabs');
     if (tabs) tabs.querySelectorAll('.st').forEach((n) => { n.classList.remove('on'); n.classList.remove('asc'); });
-    /* 2026-10-31：维度改下拉后，表头排序同样把下拉复位为「无」 */
+    /* 2026-10-31：维度改下拉后，表头排序同样把下拉复位；
+       2026-11-01（6.0）：默认项现在是「基金规模」（value=size），不再有「无」；
+       当前排序列若在维度清单里就显示它，否则回落到基金规模（避免出现空选项） */
     const dsel = document.getElementById('dimSel');
-    if (dsel) dsel.value = '';
+    if (dsel) dsel.value = dsel.querySelector('option[value="' + (state.key || 'size') + '"]') ? (state.key || 'size') : 'size';
     window.__dimActive = false;
   };
   markActive();   /* 新建/重建表头后立刻标记当前列 */
@@ -929,7 +991,6 @@ function mountHeader(active) {
   const navs = [
     ['home.html', '首页', 'home'],
     ['index.html', '强积金资料库', 'db'],
-    ['index.html#cmp', 'MPF基金可视化对比', 'an'],   /* 2026-10-31：对比页并入资料库第三板块 */
   ];
   const tb = (k) => (typeof window.t === 'function' ? window.t(k) : k);
   document.querySelector('.nav').innerHTML = navs
@@ -1287,8 +1348,8 @@ window.fundDetailHTML = function (x, opts) {
     : ((window.__TPERF && window.__TPERF.funds) ? (window.__TPERF.funds[String(x.id)] || null) : null);
   const unitTag = x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '';
   const title = opts.withTitle === false ? '' :
-    '<div class="fd-title">' + esc(x.fundBase || x.fund) + unitTag + '</div>' +
-    '<div class="fd-sub">' + esc(x.scheme) + ' · ' + esc(x.trustee) + ' · <span class="tag g">' + esc(typeLabel(x.typeFull)) + '</span></div>';
+    '<div class="fd-title">' + esc(fundDisplayName(x)) + unitTag + '</div>' +
+    '<div class="fd-sub">' + esc(schemeDisplay(x)) + ' · ' + esc(trusteeDisplay(x.trustee)) + ' · <span class="tag g">' + esc(typeLabel(x.typeFull)) + '</span></div>';
   return '<div class="fd">' +
     title +
     fdHead(x, pf) +
@@ -1328,16 +1389,24 @@ window.ensureHoldings = function (id) {
   const key = id ? String(id) : '__all__';
   if (__hldgPending[key]) return __hldgPending[key];
   const url = id ? '/api/holdings?id=' + encodeURIComponent(id) : '/api/holdings';
-  __hldgPending[key] = fetch(url, { cache: 'default' })
-    .then((r) => (r.ok ? r.json() : null))
+  /* 2026-11-01（6.0）：失败重试 2 次，并把错误状态记在 H.__error 上。
+     原来 catch 里直接吞掉返回空对象 → 详情页永远停在「正在读取数据」（用户已反馈两次）。 */
+  const once = (attempt) => fetch(url, { cache: 'default' })
+    .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .catch((e) => {
+      if (attempt < 2) return new Promise((res) => setTimeout(res, 500 * (attempt + 1))).then(() => once(attempt + 1));
+      throw e;
+    });
+  __hldgPending[key] = once(0)
     .then((j) => {
       if (j && j.funds) Object.assign(H.funds, j.funds);
       if (j && j.updatedAt) H.updatedAt = j.updatedAt;
       if (j && j.count) H.count = j.count;
       if (j && j.source) H.source = j.source;
+      H.__error = null;
       return H;
     })
-    .catch(() => H)
+    .catch((e) => { H.__error = String((e && e.message) || e || 'network'); return H; })
     .then((x) => { delete __hldgPending[key]; return x; });
   return __hldgPending[key];
 };
@@ -1786,9 +1855,10 @@ window.openDetail = function (id) {
   if (!x || !title) return;
   setFundParam(id);
 
-  title.textContent = x.fundBase || x.fund;
+  title.textContent = fundDisplayName(x);
+  title.dataset.fid = String(x.id);
   document.querySelector('#mSub').innerHTML =
-    esc(x.scheme) + ' · ' + esc(x.trustee) + ' · <span class="tag g">' + esc(typeLabel(x.typeFull)) + '</span>' +
+    esc(schemeDisplay(x)) + ' · ' + esc(trusteeDisplay(x.trustee)) + ' · <span class="tag g">' + esc(typeLabel(x.typeFull)) + '</span>' +
     (x.groupSize > 1 ? ' · <span class="tag unit">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</span>' : '');
 
   /* 2026-10-20 v4：小窗内容 = 详情页同一份渲染（withTitle:false，标题在 modal 头部） */
@@ -1801,7 +1871,7 @@ window.openDetail = function (id) {
   const stillOpen = () => {
     const t = document.querySelector('#mTitle');
     const m = document.querySelector('#modal');
-    return !!t && t.textContent === (x.fundBase || x.fund) && m && m.classList.contains('show');
+    return !!t && t.dataset.fid === String(x.id) && m && m.classList.contains('show');
   };
 
   mountFD(x, stillOpen);
@@ -1890,6 +1960,24 @@ function fillFDHolds(x, alive) {
   const paint = () => {
     clearTimeout(guard);
     if (!hb.isConnected || (alive && !alive())) return;
+    /* 2026-11-01（6.0）：没有数据时不再无限骨架屏——区分「读取失败」与「官方未公布」，失败可重试 */
+    const d = window.__HLDG && window.__HLDG.funds && window.__HLDG.funds[String(x.id)];
+    if (!d) {
+      const err = window.__HLDG && window.__HLDG.__error;
+      const t1 = err ? TT('持仓数据暂时读取失败（网络或服务繁忙）') : TT('该基金暂未公布前十大持仓');
+      const t2 = err ? TT('投资组合分布暂时读取失败') : TT('该基金暂未公布投资组合分布');
+      const btn = err ? '<button type="button" class="btn ghost sm fd-retry">' + TT('重试') + '</button>' : '';
+      hb.innerHTML = '<div class="sect-title"><i class="st-accent"></i>' + TT('前十大持仓') + '</div><div class="fd-empty">' + t1 + btn + '</div>';
+      ab.innerHTML = '<div class="sect-title"><i class="st-accent"></i>' + TT('投资组合分布') + '</div><div class="fd-empty">' + t2 + '</div>';
+      const b = hb.querySelector('.fd-retry');
+      if (b) b.addEventListener('click', () => {
+        window.__HLDG.__error = null;
+        hb.innerHTML = window.fdBone(TT('前十大持仓'));
+        ab.innerHTML = window.fdBone(TT('投资组合分布'));
+        fillFDHolds(x, alive);
+      });
+      return;
+    }
     /* 兜底：渲染函数返回空也保留模块（用户强调「没数据也要有栏目」） */
     const hHtml = window.holdBlockHTML ? window.holdBlockHTML(String(x.id)) : '';
     const aHtml = window.allocBlockHTML ? window.allocBlockHTML(String(x.id)) : '';
@@ -2326,7 +2414,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const m = document.querySelector('#modal');
       const t = document.querySelector('#mTitle');
       if (!m || !m.classList.contains('show') || !t || !DATA.count) return;
-      const f = (DATA.funds || []).find((x) => (x.fundBase || x.fund) === t.textContent);
+      const fid = t.dataset.fid;
+      const f = (DATA.funds || []).find((x) => String(x.id) === String(fid)) || (DATA.funds || []).find((x) => (x.fundBase || x.fund) === t.textContent);
       if (f) window.openDetail(f.id);
     })();
     if (!DATA.count) return;
@@ -2348,14 +2437,19 @@ function initToTop() {
   const btn = document.getElementById('toTop');
   if (!btn) return;
   const tables = ['#tscroll', '#rkTscroll'].map((s) => document.querySelector(s)).filter(Boolean);
-  const visible = () => btn.classList.toggle('show',
-    window.scrollY > 420 || tables.some((t) => t.scrollTop > 420));
+  /* 2026-11-01（6.0）：阈值降到 80px，并监听任意内部滚动容器（capture），
+     避免「表内滚到底但窗口没动」时按钮不出现（用户已反馈多次） */
+  const visible = () => {
+    const inTable = tables.some((t) => t.scrollTop > 60);
+    btn.classList.toggle('show', window.scrollY > 80 || inTable);
+  };
   window.addEventListener('scroll', visible, { passive: true });
+  document.addEventListener('scroll', visible, true);
   tables.forEach((t) => t.addEventListener('scroll', visible, { passive: true }));
   visible();
   btn.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    tables.forEach((t) => t.scrollTo({ top: 0, behavior: 'smooth' }));
+    document.querySelectorAll('#tscroll,#rkTscroll').forEach((t) => t.scrollTo({ top: 0, behavior: 'smooth' }));
   });
 }
 
@@ -3090,4 +3184,155 @@ document.addEventListener('mpf:lang', () => {
   });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+})();
+
+/* ======================= 自定义下拉（2026-11-01，6.0） =======================
+ * 原生 <select> 的弹层由系统绘制，灰白底无法跟随站点设计语言（用户反馈）。
+ * 这里保留原生 select 负责取值与 change 事件，外层用按钮 + 自绘 listbox 显示。 */
+(function () {
+  const IDS = ['#fType', '#fSub', '#fTrustee', '#fRisk', '#perPage', '#dimSel', '#rkRType', '#rkRSub',
+    '#rkRTrustee', '#rkRRisk', '#rkRTop', '#rkDimSel', '#rkRRetDim'];
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function enhance(sel) {
+    if (!sel || sel.__mpfsel) return;
+    sel.__mpfsel = 1;
+    const wrap = document.createElement('span');
+    wrap.className = 'mpfsel';
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    sel.classList.add('mpfsel-native');
+    sel.setAttribute('tabindex', '-1');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mpfsel-btn';
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.innerHTML = '<span class="mpfsel-txt"></span><svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="#0866bb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    wrap.appendChild(btn);
+    const pop = document.createElement('div');
+    pop.className = 'mpfsel-pop';
+    pop.setAttribute('role', 'listbox');
+    pop.hidden = true;
+    wrap.appendChild(pop);
+
+    const sync = () => {
+      const o = sel.options[sel.selectedIndex];
+      btn.querySelector('.mpfsel-txt').textContent = o ? o.textContent : '';
+      btn.disabled = !!sel.disabled;
+      btn.setAttribute('aria-expanded', pop.hidden ? 'false' : 'true');
+    };
+    const build = () => {
+      pop.innerHTML = Array.from(sel.options).map((o, i) =>
+        '<button type="button" role="option" class="mpfsel-opt' + (i === sel.selectedIndex ? ' on' : '') + '" data-i="' + i + '"' + (o.disabled ? ' disabled' : '') + '>' + esc(o.textContent) + '</button>').join('');
+    };
+    const open = () => {
+      if (btn.disabled) return;
+      /* 同时只允许一个下拉展开 */
+      document.querySelectorAll('.mpfsel.open').forEach((w) => {
+        if (w === wrap) return;
+        w.classList.remove('open');
+        const p2 = w.querySelector('.mpfsel-pop');
+        if (p2) p2.hidden = true;
+        const b2 = w.querySelector('.mpfsel-btn');
+        if (b2) b2.setAttribute('aria-expanded', 'false');
+      });
+      build();
+      pop.hidden = false;
+      wrap.classList.add('open');
+      const r = btn.getBoundingClientRect();
+      const up = (window.innerHeight - r.bottom < 230) && r.top > 230;
+      pop.classList.toggle('up', up);
+      const cur = pop.querySelector('.mpfsel-opt.on');
+      if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+      btn.setAttribute('aria-expanded', 'true');
+    };
+    const close = () => {
+      pop.hidden = true;
+      wrap.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    };
+    btn.addEventListener('click', (e) => { e.stopPropagation(); if (pop.hidden) open(); else close(); });
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (pop.hidden) open(); }
+      else if (e.key === 'Escape') close();
+    });
+    pop.addEventListener('click', (e) => {
+      const b = e.target.closest ? e.target.closest('.mpfsel-opt') : null;
+      if (!b || b.disabled) return;
+      sel.selectedIndex = parseInt(b.dataset.i, 10);
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      sync(); close(); btn.focus();
+    });
+    document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    sel.addEventListener('change', sync);
+    /* 选项被 buildFilters / 语言切换重建时，按钮文案自动跟随 */
+    try { new MutationObserver(sync).observe(sel, { childList: true, subtree: true, attributes: true }); } catch (e) {}
+    sync();
+  }
+  function initCustomSelects() {
+    IDS.forEach((s) => { const el = document.querySelector(s); if (el) enhance(el); });
+  }
+  window.__initCustomSelects = initCustomSelects;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCustomSelects);
+  else initCustomSelects();
+})();
+
+/* ======================= 简体彻底化（2026-11-01，6.0） =======================
+ * 用户要求：只要当前是简体，页面上的所有字（包括基金名、计划名、受托人、持仓公司、
+ * 资讯标题、下拉项、SVG 文本、placeholder/title）都必须是简体。
+ * 之前只在 esc()/TT() 出口做转换，覆盖不到数据原值与第三方渲染。
+ * 这里加一层 DOM 兜底：语言为 zh-Hans 时，任何新增/重绘的文本与属性统一过 t2s。
+ * 说明：t2s 是「繁→简」逐字映射，对已简化的文本是幂等的；用 MutationObserver 防漏。 */
+(function () {
+  const ATTRS = ['placeholder', 'title', 'aria-label', 'data-tip', 'alt'];
+  let busy = false, queued = false;
+  function convAttrs(root) {
+    if (!root.querySelectorAll) return;
+    root.querySelectorAll(ATTRS.map((a) => '[' + a + ']').join(',')).forEach((el) => {
+      for (const a of ATTRS) {
+        const v = el.getAttribute(a);
+        if (!v || !/[\u4e00-\u9fa5]/.test(v)) continue;
+        const nv = window.t2s(v);
+        if (nv !== v) { busy = true; el.setAttribute(a, nv); busy = false; }
+      }
+    });
+  }
+  function convText(root) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(n) {
+        const p = n.parentNode;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        const tag = p.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'TEXTAREA') return NodeFilter.FILTER_REJECT;
+        return /[\u4e00-\u9fa5]/.test(n.nodeValue || '') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    });
+    const list = [];
+    let n;
+    while ((n = walker.nextNode())) list.push(n);
+    for (const node of list) {
+      const v = window.t2s(node.nodeValue);
+      if (v !== node.nodeValue) { busy = true; node.nodeValue = v; busy = false; }
+    }
+  }
+  function run() {
+    if (!window.__t2sActive || typeof window.t2s !== 'function') return;
+    convText(document.body);
+    convAttrs(document.body);
+  }
+  function schedule() {
+    if (queued || !window.__t2sActive) return;
+    queued = true;
+    setTimeout(() => { queued = false; run(); }, 120);
+  }
+  window.__applyT2S = run;
+  window.__scheduleT2S = schedule;
+  document.addEventListener('mpf:lang', () => setTimeout(schedule, 30));
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+  else schedule();
+  try {
+    new MutationObserver(() => { if (!busy) schedule(); })
+      .observe(document.documentElement, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS });
+  } catch (e) {}
 })();

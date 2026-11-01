@@ -185,6 +185,7 @@ function buildMarketStat(c) {
      注意：新增榜单时必须同时在这里补上对应字段，否则前端拿到 undefined 会显示「—」
      （上一版「近5年回报领先 / 推出至今累积回报 / 低风险优选」三个榜就是这么空掉的）。 */
   const brief = (f) => ({
+    id: f.id,   /* 2026-11-01（6.0）：市场榜带上 id，英文模式才能映射官方英文名 */
     fund: f.fundBase || f.fund,
     scheme: f.scheme || '',
     trustee: f.trustee,

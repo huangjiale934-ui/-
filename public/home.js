@@ -605,7 +605,7 @@
     el.innerHTML = list
       .map((x, i) => '<li>' +
         '<span class="r r' + (i < 3 ? i + 1 : '0') + '">' + (i + 1) + '</span>' +
-        '<span class="n" title="' + esc(x.fund) + (x.scheme ? ' · ' + esc(x.scheme) : '') + '">' + esc(x.fund) + '</span>' +
+        '<span class="n" title="' + esc(fundFullName(x)) + (x.scheme ? ' · ' + esc(x.scheme) : '') + '">' + esc(fundFullName(x)) + '</span>' +
         '<span class="v ' + (colorVal == null ? '' : (colorVal(x) >= 0 ? 'up' : 'down')) + '">' + fmt(x) + '</span>' +
         '</li>')
       .join('');
@@ -624,6 +624,12 @@
   document.addEventListener('mpf:lang', () => {
     if (!lastM) return;
     /* 让出主线程一帧再重绘 5 张 SVG 图表：文字先变、图表随后，点击手感不掉帧 */
+    setTimeout(() => render(lastM), 16);
+  });
+  /* 2026-11-01（6.0）：英文名表异步到达后重绘榜单（否则首页仍是中文名） */
+  document.addEventListener('mpf:names', () => {
+    if (!lastM) return;
+    __selfDone = false;
     setTimeout(() => render(lastM), 16);
   });
 
@@ -789,39 +795,45 @@
     const lo = Math.floor(mn / step) * step;
     const hi = Math.ceil(mx / step) * step;
     const fmtTick = (v) => RAWV ? Math.round(v).toLocaleString('en-US') : String(Math.round(v));
-    const X = (i) => padL + (W - padL - padR) * (i / (pts.length - 1));
+    /* 2026-11-01（6.0，用户反馈）：横轴原按「第几个周点」等距，4 周月与 5 周月宽度差 ~25%，
+       同一段数据里月份间隔忽大忽小。改成「月份等宽」时间轴：x = 连续月序号（含日/当月天数），
+       每个月占完全相同的宽度，月刻度落在每月 1 号边界上。 */
+    const miOf = (iso) => {
+      const d = new Date(iso + 'T00:00:00');
+      const days = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      return d.getFullYear() * 12 + d.getMonth() + (d.getDate() - 1) / days;
+    };
+    const MI = pts.map((p) => miOf(p[0]));
+    const mi0 = MI[0], mi1 = MI[MI.length - 1];
+    const plotW = W - padL - padR;
+    const X = (i) => padL + plotW * ((MI[i] - mi0) / (mi1 - mi0 || 1));
     const Y = (v) => padT + (H - padT - padB) * (1 - (v - lo) / (hi - lo));
     let grid = '', yl = '';
     for (let v = lo; v <= hi + step / 1000; v += step) {
       grid += '<line x1="' + padL + '" y1="' + Y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + Y(v).toFixed(1) + '" stroke="#eef2f7" stroke-width="1"/>';
       yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + fmtTick(v) + '</text>';
     }
-    /* 2026-10-31 三版（用户反馈）：横坐标按跨度自适应——
-       ≤13 个月标每月「3月」；≤74 个月标每年 3/6/9 月；更长时间跨度只标年份。
-       年份一律在 1 月的位置、倾斜 -40° 标注（参考 GUM），与月份标签明显区分；
-       月份标签不再带年份。 */
-    const mspan = (new Date(pts[pts.length - 1][0]) - new Date(pts[0][0])) / 2592000000;
-    const seenm = {}; const seenY = {}; let xt = '';
-    /* 2026-11-01（6.0）：英文模式下 TT('年')='yrs'、TT('月')='M'，直接拼会成「2022yrs/3M」。
-       改为按语言显式输出：EN = 2022 / Mar，简繁 = 2022年 / 3月。 */
+    /* 横坐标按跨度自适应——≤13 个月每格一个月；≤74 个月只标 3/6/9 月；更长只标年份。
+       1 月的位置一律用倾斜年份代替「1月」，避免同一位置出现两个标签。 */
+    const mspan = mi1 - mi0;
+    let xt = '';
     const EN = (document.documentElement.lang || '').indexOf('en') === 0;
     const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const yearTxt = (yy) => EN ? yy : yy + TT('年');
     const monthTxt = (mo) => EN ? (MON[mo - 1] || mo) : mo + TT('月');
     const yearLab = (x, y, txt) =>
       '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="end" class="pi-yk pi-yk-year" transform="rotate(-40 ' + x.toFixed(1) + ' ' + y + ')">' + txt + '</text>';
-    pts.forEach((p, i) => {
-      const yy = p[0].slice(0, 4); const mo = Number(p[0].slice(5, 7));
-      let lab = null;
-      if (mo === 1 && !seenY[yy]) {
-        seenY[yy] = 1;
-        xt += yearLab(X(i) + 6, (H - padB) + 18, yearTxt(yy));
-        return;
-      }
-      if (mspan <= 13) { if (!seenm[p[0].slice(0, 7)]) { lab = monthTxt(mo); seenm[p[0].slice(0, 7)] = 1; } }
-      else if (mspan <= 74) { if ((mo === 3 || mo === 6 || mo === 9) && !seenm[p[0].slice(0, 7)]) { lab = monthTxt(mo); seenm[p[0].slice(0, 7)] = 1; } }
-      if (lab) xt += '<text x="' + X(i).toFixed(1) + '" y="' + ((H - padB) + 16) + '" text-anchor="middle" class="pi-yk">' + lab + '</text>';
-    });
+    for (let m = Math.ceil(mi0 - 0.02); m <= Math.floor(mi1 + 0.001); m++) {
+      const mo = ((m % 12) + 12) % 12 + 1;
+      const yy = Math.floor(m / 12);
+      const isJan = mo === 1;
+      const show = (mspan <= 13) || (mspan <= 74 ? (isJan || mo === 3 || mo === 6 || mo === 9) : isJan);
+      if (!show) continue;
+      const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
+      if (x < padL + 24 || x > W - padR - 10) continue;
+      if (isJan) xt += yearLab(x + 6, (H - padB) + 18, yearTxt(yy));
+      else xt += '<text x="' + x.toFixed(1) + '" y="' + ((H - padB) + 16) + '" text-anchor="middle" class="pi-yk">' + monthTxt(mo) + '</text>';
+    }
     const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
     const areaD = lineD + ' L' + X(pts.length - 1).toFixed(1) + ' ' + (H - padB) + ' L' + padL + ' ' + (H - padB) + ' Z';
     const last = pts[pts.length - 1];
@@ -843,8 +855,11 @@
       hit.addEventListener('mousemove', (e) => {
         const r = svg.getBoundingClientRect();
         const x = (e.clientX - r.left) / r.width * W;
-        let i = Math.round((x - padL) / (W - padL - padR) * (pts.length - 1));
-        i = Math.max(0, Math.min(pts.length - 1, i));
+        /* 月等宽轴不是均匀刻度：按 X(i) 二分找最近点 */
+        let loI = 0, hiI = pts.length - 1;
+        while (loI < hiI) { const mid = (loI + hiI) >> 1; if (X(mid) < x) loI = mid + 1; else hiI = mid; }
+        let i = loI;
+        if (i > 0 && Math.abs(X(i - 1) - x) < Math.abs(X(i) - x)) i--;
         const gx = X(i).toFixed(1), gy = Y(pts[i][1]).toFixed(1);
         guide.setAttribute('x1', gx); guide.setAttribute('x2', gx); guide.setAttribute('opacity', '1');
         dot.setAttribute('cx', gx); dot.setAttribute('cy', gy); dot.setAttribute('opacity', '1');

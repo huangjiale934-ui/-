@@ -352,21 +352,24 @@
 .mk-top .ph { font-size: 12px; color: var(--text-3); margin: 0 0 12px; }
 .mk-top ol { list-style: none; margin: 0; padding: 0; }
 .mk-top li {
-  display: flex; align-items: center; gap: 9px; padding: 7px 0;
-  border-top: 1px solid #f0f3f7; font-size: 12.5px;
+  display: flex; align-items: center; gap: 10px; padding: 9px 0;
+  border-top: 0; font-size: 13px;
 }
 .mk-top li:first-child { border-top: 0; }
+/* 2026-11-01（6.0，用户选定样图）：行内不再有分割线；序号改圆形，1-3 蓝色系、4-5 浅灰蓝（补齐序号） */
 .mk-top .r {
-  flex: 0 0 20px; height: 20px; line-height: 20px; text-align: center;
-  border-radius: 7px; background: #eef6fd; color: #0866bb;
-  font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+  flex: 0 0 22px; height: 22px; line-height: 22px; text-align: center;
+  border-radius: 50%; background: #eef6fd; color: #0866bb;
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
 }
 /* 2026-10-22（领导）：名次 1-5 改用浅蓝 / 浅绿交替，不再金银铜 */
-.mk-top .r.r1 { background: #d7e8f8; color: #0759a0; }
-.mk-top .r.r2 { background: #e2eefb; color: #0866bb; }
-.mk-top .r.r3 { background: #edf7ff; color: #0866bb; }
+.mk-top .r.r1 { background: #1f6fb5; color: #fff; }
+.mk-top .r.r2 { background: #3d86c6; color: #fff; }
+.mk-top .r.r3 { background: #cfe4f5; color: #0b3a66; }
+/* 2026-11-01：样图只画了 1-3，4/5 也补上序号（浅灰蓝圆） */
+.mk-top .r.r0 { background: #eef3f8; color: #5b7186; }
 .mk-top .n {
-  flex: 1; min-width: 0; color: var(--text);
+  flex: 1; min-width: 0; color: var(--text); font-size: 13px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .mk-top .t { flex: 0 0 auto; font-size: 11px; color: var(--text-3); }

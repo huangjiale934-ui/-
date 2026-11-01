@@ -24,12 +24,12 @@
     /* 2026-10-31（用户要求）：本页并入「强积金资料库」第三板块（index.html#cmp）。
        合并模式下导航高亮由页内板块切换脚本控制，这里只在独立页才自挂导航。 */
     const MERGED = !!document.getElementById('dbSec') && !!document.getElementById('anSec');
-    if (!MERGED) mountHeader('an');
-    else mountHeader((location.hash || '') === '#cmp' ? 'an' : 'db');
+    if (!MERGED) mountHeader('db');
+    else mountHeader('db');
     document.addEventListener('mpf:dbtab', (e) => {
       if (!MERGED) return;
       const tab = e && e.detail;
-      if (tab === 'cmp') { mountHeader('an'); if (typeof window.__anRemount === 'function') window.__anRemount(); }
+      if (tab === 'cmp') { mountHeader('db'); if (typeof window.__anRemount === 'function') window.__anRemount(); }
       else mountHeader('db');
     });
     /* 板块切换脚本在首次进入对比板块时调用：重挂走势图（隐藏容器内首挂宽度为 0） */

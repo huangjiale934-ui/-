@@ -119,7 +119,7 @@ a:hover { text-decoration: underline; }
   border-radius: 8px;
   border: 1px solid transparent;
   color: #304864;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 500;
   transition: all 0.15s;
   white-space: nowrap;
@@ -335,6 +335,10 @@ table.data td {
   vertical-align: middle;
   text-align: center;
 }
+/* 2026-11-01（6.0，用户要求）：资料库表整体放大一号（去掉近3年列后更宽松） */
+#fundTable thead th { font-size: 13px; }
+#fundTable tbody td { font-size: 14.5px; }
+#fundTable tbody .cell-sub { font-size: 12px; }
 
 /* 行状态：斑马纹 + 悬停 */
 table.data tbody tr { background: var(--surface); transition: background 0.12s; }
@@ -879,7 +883,7 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 /* ---------- 回到顶部 ---------- */
 /* 2026-10-31（用户要求）：悬停向左展开「回到顶部」文字、移开收起；配色与计算器同款品牌蓝；无首次计时 */
 .to-top {
-  position: fixed; right: 20px; bottom: 24px; z-index: 70;
+  position: fixed; right: 20px; bottom: 24px; z-index: 90;
   height: 44px; width: 44px; border-radius: 999px;
   border: 1px solid var(--border); background: var(--brand, #0866bb); color: #fff;
   box-shadow: 0 6px 20px rgba(8, 102, 187, 0.30);
@@ -1447,6 +1451,14 @@ table.data th:hover { background: var(--brand-soft); }
    控件统一 36px 高、6px 圆角、13px 字号；label 固定 18px 保证两行基线对齐。
    ========================================================== */
 .card.filters { padding: 18px 20px 14px; }
+/* 2026-11-01（6.0，用户要求）：搜索/筛选区与下方表格合并为一张卡——中间不留缝、不留分隔线 */
+.card.filters { margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 0; box-shadow: none; }
+.card.filters + .card { border-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
+/* 2026-11-01（6.0）：筛选行左侧标题与搜索标签 */
+.f-lead { flex: 0 0 auto; align-self: flex-start; font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 18px; height: 18px; margin: 0 4px 0 -4px; white-space: nowrap; }
+.f-item.f-search { flex: 0 0 190px; }
+.f-item.f-search .tb-search { flex: 1 1 auto; width: 100%; min-width: 0; }
+#perPage, #rkRTop { min-width: 92px; }
 .f-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
 .f-row + .f-row { margin-top: 14px; }
 .f-item { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -1765,7 +1777,9 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 回到顶部悬停展开文字：见上方「回到顶部」主规则（.tt-txt） */
 /* 口径行估值分布 chips */
 .ff-nav { flex: 1 1 auto; display: flex; justify-content: center; margin: 0 18px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-.ff-nav .navdist { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-3); white-space: nowrap; }
+.ff-nav .navdist { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--text-3); white-space: nowrap;
+  /* 2026-11-01（6.0，用户多次要求）：页脚这行估值 chips 上方不要任何横线 */
+  border-top: 0; padding-top: 0; margin-top: 0; }
 .ff-nav .navdist b { cursor: pointer; }
 .ff-nav .ndhint { font-style: normal; color: var(--text-3); }
 /* 表格：种类二级小字（无下划线） */
@@ -1780,7 +1794,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* ① 排名徽标已在 .medal 处改蓝色系 */
 /* ② 2026-10-31 四版（用户要求）：折叠箭头加大加粗蓝色；两行箭头用同一右内边距对齐，并避开悬浮按钮 */
 .foot-fold summary { padding-right: 134px; }
-.foot-fold .ff-arrow { font-size: 21px; color: #0866bb; font-weight: 800; width: 26px; text-align: center; line-height: 1; align-self: center; }
+.foot-fold .ff-arrow { font-size: 42px; color: #0866bb; font-weight: 800; width: 44px; text-align: center; line-height: 0.9; align-self: center; }
 .foot-fold[open] .ff-arrow { transform: rotate(180deg); }
 @media (max-width: 560px) { .foot-fold summary { padding-right: 56px; } }
 /* ③ 2026-10-31 四版（用户澄清）：恢复 #foldSpec 卡片框，只删它上方 .foot 的通栏分隔线 */
@@ -1814,8 +1828,9 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .tb-search { margin-right: 4px; }
 /* 统一控件外观：34px 高、浅蓝描边、8px 圆角、聚焦蓝光圈 */
 .f-item select, .f-item input[type="text"], .f-item input[type="number"],
-.dim-pick select, .range select, .range input[type="number"] {
-  height: 34px; font-size: 12.5px; color: #1b3a5c; font-weight: 600;
+.dim-pick select, .range select, .range input[type="number"],
+#perPage, #rkRTop, #mSortKey {
+  height: 34px; font-size: 12.5px; color: #1b3a5c; font-weight: 400;
   background: #f7fbff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%230866bb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center;
   border: 1.5px solid #b9d4ec; border-radius: 9px; padding: 0 26px 0 10px;
   box-shadow: inset 0 1px 2px rgba(8, 102, 187, 0.05);
@@ -1876,3 +1891,45 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .tk-spark { flex: none; opacity: .9; }
 @media (max-width: 1160px) { .tk-spark { display: none; } }
 @media (max-width: 720px) { .tk-card { padding: 8px 10px; gap: 7px; } }
+
+/* ===== 2026-11-01（6.0）：筛选区与表格合并为一张卡（覆盖官网直角卡片的 !important 规则） ===== */
+.card.filters { margin-bottom: 0 !important; border-bottom: 0 !important; box-shadow: none !important;
+  border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+.card.filters + .card { border-top: 0 !important; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
+
+/* 2026-11-01（6.0）：详情持仓「读取失败 / 官方未公布」空态（不再是无限骨架屏） */
+.fd-empty { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px;
+  color: var(--text-3); font-size: 13px; background: var(--surface-2); border: 1px dashed var(--border); }
+
+/* ===== 2026-11-01（6.0）：自绘下拉（替换系统灰白弹层） ===== */
+.mpfsel { position: relative; display: block; width: 100%; }
+.mpfsel-native { position: absolute !important; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+.mpfsel-btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 34px;
+  padding: 0 10px; background: #f7fbff; border: 1.5px solid #b9d4ec; border-radius: 9px; color: #1b3a5c;
+  font-family: inherit; font-size: 12.5px; font-weight: 400; cursor: pointer; text-align: left;
+  box-shadow: inset 0 1px 2px rgba(8, 102, 187, 0.05); transition: border-color .15s, box-shadow .15s, background-color .15s; }
+.mpfsel-btn:hover { border-color: #7fb2de; background-color: #f2f8fe; }
+.mpfsel.open .mpfsel-btn { border-color: var(--brand, #0866bb); background: #fff; box-shadow: 0 0 0 3px rgba(8, 102, 187, 0.13); }
+.mpfsel-btn svg { flex: none; transition: transform .15s; }
+.mpfsel.open .mpfsel-btn svg { transform: rotate(180deg); }
+.mpfsel-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mpfsel-pop { position: absolute; left: 0; right: 0; top: calc(100% + 5px); z-index: 85; background: #fff;
+  border: 1px solid #dbe8f4; border-radius: 10px; box-shadow: 0 12px 30px rgba(16, 40, 70, 0.16); padding: 5px; max-height: 260px; overflow: auto; }
+.mpfsel-pop.up { top: auto; bottom: calc(100% + 5px); }
+.mpfsel-opt { display: block; width: 100%; padding: 8px 10px; border: 0; background: none; border-radius: 7px;
+  text-align: left; font-family: inherit; font-size: 13px; color: #1b3a5c; cursor: pointer; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+.mpfsel-opt:hover { background: #eef6ff; color: var(--brand, #0866bb); }
+.mpfsel-opt.on { background: #e3f0fb; color: var(--brand, #0866bb); font-weight: 600; }
+.mpfsel-opt.on::after { content: "✓"; float: right; margin-left: 8px; }
+.tb-right .mpfsel { width: auto; min-width: 92px; }
+.dim-pick .mpfsel { width: 150px; }
+
+/* 2026-11-01（6.0）：表格工具栏与表头同属一张卡，去掉工具栏下边线，避免看起来仍有分隔 */
+.f-summary.f-summary-new { border-bottom: 0 !important; }
+
+/* 2026-11-01（6.0）：窄屏时「基金筛选」独占一行、搜索框整行，避免标题被挤在搜索框左侧 */
+@media (max-width: 640px) {
+  .f-lead { flex: 1 1 100%; margin: 0 0 2px; }
+  .f-item.f-search { flex: 1 1 100%; }
+}

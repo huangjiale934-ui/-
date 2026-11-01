@@ -119,9 +119,9 @@ chk('资料库·总条数显示 451', /451/.test(idx));
 const rkHead = (/<thead>[\s\S]*?<\/thead>/.exec(rk) || [''])[0];
 chk('排名·无「近5年最差年度」表头', rkHead.indexOf('最差') < 0);
 chk('排名·维度下拉 17+1 项（2026-10-31：标签行改下拉）', (function () {
-  const m = /<select id="rkDimSel">[\s\S]*?<\/select>/.exec(rk);
+  const m = /<select[^>]*id="rkDimSel"[^>]*>[\s\S]*?<\/select>/.exec(rk);
   return m && (m[0].match(/<option/g) || []).length === 18;
-})(), '实际 ' + (function () { const m = /<select id="rkDimSel">[\s\S]*?<\/select>/.exec(rk); return m ? (m[0].match(/<option/g) || []).length : 0; })());
+})(), '实际 ' + (function () { const m = /<select[^>]*id="rkDimSel"[^>]*>[\s\S]*?<\/select>/.exec(rk); return m ? (m[0].match(/<option/g) || []).length : 0; })());
 chk('排名·维度下拉（2026-10-31：标签行删除，工具栏下拉，默认无）', (function () {
   try {
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
@@ -750,8 +750,8 @@ const an = read('index');
 chk('第四板块·三板块切换按钮（基金最新数据 / MPFA 基金榜单 / 可视化对比）',
   /id="dbtDb"/.test(rawIdxHtml) && /id="dbtRank"/.test(rawIdxHtml) && /id="dbtCmp"/.test(rawIdxHtml) &&
   /data-dbtab="cmp"/.test(rawIdxHtml) && /id="anSec"/.test(rawIdxHtml));
-chk('第四板块·导航含「MPF基金可视化对比」且指向 #cmp（common.js）',
-  /index\.html#cmp', 'MPF基金可视化对比'/.test(readSrc('common.js')));
+chk('第四板块·页头不再单列「MPF基金可视化对比」（2026-11-01 用户要求：第三页已并入资料库）',
+  !/index\.html#cmp', 'MPF基金可视化对比'/.test(readSrc('common.js')));
 /* ---- 第四页 v3 改版：纯对比页 + 左侧发行人栏（版式参照合作方站） ---- */
 chk('第四页·侧栏 + 基金列表联动（已选置顶+分隔线+其余，2026-10-17 v2）', /id="anProv"/.test(an) && /id="anTbody2"/.test(an) && (function () {
   try {
@@ -1611,7 +1611,7 @@ chk('数据扩展·宏利持仓/分布（67 只 holdings + 官方回报 trustee-
 
 /* ===== 2026-10-22 傍晚批：浅色调 / 自算指数 / 排行榜去标题 ===== */
 chk('1022b·排行榜标题已移除', !/mk-rank[\s\S]{0,200}?市场排行榜/.test(home));
-chk('1022c·名次徽标为浅蓝族（非金银铜）', /mk-top \.r\.r1 \{ background: #d7e8f8/.test(css) && /mk-top \.r\.r2 \{ background: #e2eefb/.test(css) && !/mk-top \.r\.r1 \{ background: #f6e2c4/.test(css));
+chk('1022c·名次徽标为蓝色族（2026-11-01 样图：1-2 实心蓝、3 浅蓝、4-5 浅灰蓝）', /mk-top \.r\.r1 \{ background: #1f6fb5/.test(css) && /mk-top \.r\.r2 \{ background: #3d86c6/.test(css) && /mk-top \.r\.r3 \{ background: #cfe4f5/.test(css) && !/mk-top \.r\.r1 \{ background: #f6e2c4/.test(css));
 chk('1022b·浮窗为浅蓝底（非黑）', (function () { try { const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8'); return /\.mpf-tip \{[\s\S]{0,600}?background: #edf7ff/.test(c) && !/background: rgba\(24, 38, 58/.test(c); } catch (e) { return false; } })());
 chk('1023·品牌蓝与官网一致（#0866bb）', (function () { try { return /--brand: #0866bb/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8')); } catch (e) { return false; } })());
 chk('1022b·MPF 自算指数已生成（7 条）', (function () {
@@ -1723,8 +1723,8 @@ chk('三版·⑨列名与筛选统一「受托人」口径',
   /trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕<\/span><\/th>'/.test(readSrc('app.js')) &&
   /trustee: '<th data-c="trustee" data-i18n-parts>受托人<\/th>'/.test(readSrc('rank.js')));
 chk('五版·⑩估值日分布行：卡框保留、顶部边线删除 + 上方通栏线删除', /#foldSpec \{ margin-top: 8px; border-top: 0; border-radius: 0 0 10px 10px; \}/.test(readSrc('style.css')) && /\.wrap \.foot \{ border-top: 0;/.test(readSrc('style.css')));
-chk('五版·⑪页脚折叠箭头 21px 蓝色加粗 + 两行统一右内边距对齐（134px 避让悬浮钮）',
-  /\.foot-fold \.ff-arrow \{ font-size: 21px; color: #0866bb/.test(readSrc('style.css')) && /\.foot-fold summary \{ padding-right: 134px; \}/.test(readSrc('style.css')));
+chk('五版·⑪页脚折叠箭头 42px（用户要求 +100%）蓝色加粗 + 两行统一右内边距对齐（134px 避让悬浮钮）',
+  /\.foot-fold \.ff-arrow \{ font-size: 42px; color: #0866bb/.test(readSrc('style.css')) && /\.foot-fold summary \{ padding-right: 134px; \}/.test(readSrc('style.css')));
 chk('三版·⑫回到顶部悬停展开「回到顶部」（tt-txt，同计算器蓝）',
   /\.to-top:hover \{ background: var\(--brand-2/.test(readSrc('style.css')) && /\.tt-txt/.test(readSrc('style.css')) &&
   rawIdxHtml.indexOf('tt-txt') >= 0 && home.indexOf('tt-txt') >= 0);

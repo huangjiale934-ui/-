@@ -33,26 +33,27 @@
   function bindSelfTabs() {
     const sel = document.getElementById('dimSel');
     if (!sel) return;
+    /* 2026-11-01（6.0，用户要求）：不再显示「无」——默认维度就是基金规模（= 规模降序） */
     const fill = () => {
-      sel.innerHTML = '<option value="">' + TT('无') + '</option>' +
+      sel.innerHTML = '<option value="size">' + esc(TT('基金规模')) + '</option>' +
         DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
-      sel.value = (window.__dimActive && S.key) ? S.key : '';
+      sel.value = (window.__dimActive && S.key) ? S.key : 'size';
     };
     fill();
     if (!window.__dimSelLangBound) {
       window.__dimSelLangBound = 1;
       document.addEventListener('mpf:lang', () => {
         const s2 = document.getElementById('dimSel');
-        if (s2) { s2.innerHTML = '<option value="">' + TT('无') + '</option>' +
+        if (s2) { s2.innerHTML = '<option value="size">' + esc(TT('基金规模')) + '</option>' +
           DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
-          s2.value = (window.__dimActive && S.key) ? S.key : ''; }
+          s2.value = (window.__dimActive && S.key) ? S.key : 'size'; }
       });
     }
     if (sel.__bound) return;
     sel.__bound = 1;
     sel.addEventListener('change', () => {
       const k = sel.value;
-      if (!k) { window.__dimCancel(); return; }
+      if (!k || k === 'size') { window.__dimCancel(); return; }
       const d = DIMS.find((x) => x[0] === k);
       window.__dimApply(k, d ? d[2] : 'desc');
     });
@@ -101,6 +102,8 @@
         }).catch(() => {});
       }
       bindNavDateDist();
+      /* 2026-11-01（6.0）：空闲时预取持仓（约 0.5MB），详情弹窗打开即用，不再等 3 秒 */
+      setTimeout(() => { if (window.ensureHoldings) window.ensureHoldings(null).catch(() => {}); }, 2500);
     });
     // 语言切换后重绘整表（表头 data-l 标签、详情按钮、净值悬浮说明等）
     /* 2026-11-01（6.0）：下拉 option 是 JS 生成的，必须在语言切换时一并重建，
@@ -254,15 +257,16 @@
      近1年最大回撤/基金规模/操作 —— 其余列（种类、近1年、波动率、夏普、超额、正收益月份、管理费、推出日期）放列设置 */
   /* 2026-10-22（用户要求）：「近1年」改为默认列，其余列不变 */
   /* 2026-10-31（用户要求）：对比列移到操作（详情）左侧 */
+  /* 2026-11-01（6.0，用户要求）：近3年年化移出默认列（仍可在列设置勾选），表格更宽松 */
   const COL_DEFAULT = ['rank', 'fund', 'trustee', 'risk', 'nav',
-    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfY3a', 'selfMdd', 'size', 'cmp', 'ops'];
+    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'selfMdd', 'size', 'cmp', 'ops'];
   /* 2026-10-27（用户要求）：「精简模式」下线，改为「默认模式」——一键回到用户指定的 14 列 */
   let colSet = null;
   let DIM_EXTRA = '';   /* 2026-10-27：维度联动临时放出的列（不持久化） */
-  try { const raw = localStorage.getItem('mpf-cols-v7'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
+  try { const raw = localStorage.getItem('mpf-cols-v8'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
   if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
   function applyCols(save) {
-    if (save !== false) { try { localStorage.setItem('mpf-cols-v7', JSON.stringify([...colSet])); } catch (e) {} }
+    if (save !== false) { try { localStorage.setItem('mpf-cols-v8', JSON.stringify([...colSet])); } catch (e) {} }
     /* 2026-10-26 重做：列显隐改为「不渲染」（visibleOrder 过滤），不再用 CSS 隐藏——
        与维度列插队机制统一，从机制上杜绝表头/表体错位 */
     try { localStorage.removeItem('mpf-cols-v5'); localStorage.removeItem('mpf-cols-v6'); } catch (e) {}
@@ -407,31 +411,55 @@
   /* ═══ 2026-10-26 重做：列顺序数组单源 ═══
      此前「移动 thead 的 DOM」方案在 tbody 重渲染后表头/表体错位（数据装反）——已废弃。
      现在 thead 与 tbody 都由同一个可见列顺序数组生成，物理上不可能错位。 */
+  /* 2026-11-01（6.0，用户要求）：所有「—」都要有悬浮原因（此前只给 3 年/5 年列加了）。
+     短周期用专门文案，长周期沿用 naWhy（成立不足 N 年 / 官方未披露）。 */
+  function naTip(x, key) {
+    const L = { selfW1: '近1周', selfM1: '近1个月', selfY1: '近1年', selfMdd: '近1年最大回撤', vol1: '年化波动率', sharpe1: '夏普比率', excess1: '超额收益', posM12: '正收益月份占比' };
+    if (key === 'selfD1') return TT('该基金净值不足两个交易日，暂无法计算日涨跌（新基金或源站刚更新）。');
+    if (key === 'selfW1') return TT('该基金净值历史不足 1 周，暂无法计算近1周回报。');
+    if (key === 'selfM1') return TT('该基金净值历史不足 1 个月，暂无法计算近1个月回报。');
+    if (key === 'selfYtd') return TT('该基金在年初（1 月 1 日）尚无净值，暂无法计算年初至今回报。');
+    return naWhy(x, 1, TT(L[key] || '该指标'));
+  }
+  function selfCell(x, key, label, fmt, extraCls) {
+    const v = x[key];
+    const tip = v == null ? naTip(x, key) : '';
+    return '<td data-c="' + key + '" data-l="' + TT(label) + '" class="r num ' + (extraCls || '') + '"' +
+      (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + fmt(v) + '</td>';
+  }
+
   const CELL_FNS = {
     rank: (x, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' +
       (rk != null && rk <= 3 ? '<span class="medal g' + rk + '">' + rk + '</span>' : '<span class="rank-cell">' + (rk || '') + '</span>') + '</td>',
     cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
-    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) + (x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '') + '</div>' +
-      (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
-    trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(x.trustee) + '</span></td>',
+    fund: (x) => {
+      /* 2026-11-01（6.0，用户要求）：单位类别不再占一行，改悬浮在「A 类」标签上；标签简称「A 类」 */
+      const utip = (x.groupSize > 1)
+        ? TQ('该基金共有 {n} 个单位类别；此处显示 {u} 类的净值与回报。', { n: x.groupSize, u: x.unit || '' })
+        : TQ('该基金仅 1 个单位类别（{u} 类）。', { u: x.unit || '' });
+      return '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(fundDisplayName(x)) +
+        (x.unit ? '<span class="tag unit" data-tip="' + esc(utip) + '" aria-label="' + esc(utip) + '">' + TQ('{u} 类', { u: esc(x.unit) }) + '</span>' : '') +
+        '</div></td>';
+    },
+    trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(trusteeDisplay(x.trustee)) + '</span></td>',
     type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span>' +
       '<div class="cell-sub">' + esc(typeLabel(x.subtype || x.type)) + '</div></td>',
     risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
     nav: (x) => '<td data-c="nav" data-l="' + TT('单位资产净值') + '" class="r num">' + navCell(x) + '</td>',
-    selfD1: (x) => '<td data-c="selfD1" data-l="' + TT('日涨跌') + '" class="r num ' + cls(x.selfD1) + '">' + pct(x.selfD1) + '</td>',
-    selfW1: (x) => '<td data-c="selfW1" data-l="' + TT('近1周') + '" class="r num ' + cls(x.selfW1) + '">' + pct(x.selfW1) + '</td>',
-    selfM1: (x) => '<td data-c="selfM1" data-l="' + TT('近1个月') + '" class="r num ' + cls(x.selfM1) + '">' + pct(x.selfM1) + '</td>',
-    selfYtd: (x) => '<td data-c="selfYtd" data-l="' + TT('年初至今') + '" class="r num ' + cls(x.selfYtd) + '">' + pct(x.selfYtd) + '</td>',
-    selfY1: (x) => '<td data-c="selfY1" data-l="' + TT('近1年') + '" class="r num ' + cls(x.selfY1) + '">' + pct(x.selfY1) + '</td>',
+    selfD1: (x) => selfCell(x, 'selfD1', '日涨跌', (v) => pct(v), cls(x.selfD1)),
+    selfW1: (x) => selfCell(x, 'selfW1', '近1周', (v) => pct(v), cls(x.selfW1)),
+    selfM1: (x) => selfCell(x, 'selfM1', '近1个月', (v) => pct(v), cls(x.selfM1)),
+    selfYtd: (x) => selfCell(x, 'selfYtd', '年初至今', (v) => pct(v), cls(x.selfYtd)),
+    selfY1: (x) => selfCell(x, 'selfY1', '近1年', (v) => pct(v), cls(x.selfY1)),
     selfY3a: (x) => { const t = x.selfY3a == null ? naWhy(x, 3, TT('近3年年化')) : ''; return '<td data-c="selfY3a" data-l="' + TT('近3年年化') + '" class="r num ' + cls(x.selfY3a) + '"' + (t ? ' data-tip="' + esc(t) + '"' : '') + '>' + pct(x.selfY3a) + '</td>'; },
     selfY5a: (x) => { const t = x.selfY5a == null ? naWhy(x, 5, TT('近5年年化')) : ''; return '<td data-c="selfY5a" data-l="' + TT('近5年年化') + '" class="r num ' + cls(x.selfY5a) + '"' + (t ? ' data-tip="' + esc(t) + '"' : '') + '>' + pct(x.selfY5a) + '</td>'; },
-    selfMdd: (x) => '<td data-c="selfMdd" data-l="' + TT('近1年最大回撤') + '" class="r num down">' + pct(x.selfMdd) + '</td>',
+    selfMdd: (x) => selfCell(x, 'selfMdd', '近1年最大回撤', (v) => pct(v), 'down'),
     selfMdd5: (x) => { const t = x.selfMdd5 == null ? naWhy(x, 5, TT('近5年最大回撤')) : ''; return '<td data-c="selfMdd5" data-l="' + TT('近5年最大回撤') + '" class="r num down"' + (t ? ' data-tip="' + esc(t) + '"' : '') + '>' + pct(x.selfMdd5) + '</td>'; },
-    vol1: (x) => '<td data-c="vol1" data-l="' + TT('年化波动率（近1年）') + '" class="r num">' + pct(x.vol1) + '</td>',
+    vol1: (x) => selfCell(x, 'vol1', '年化波动率（近1年）', (v) => pct(v)),
     vol3: (x) => { const t = x.vol3 == null ? naWhy(x, 3, TT('3年波幅')) : ''; return '<td data-c="vol3" data-l="' + TT('3年波幅') + '" class="r num"' + (t ? ' data-tip="' + esc(t) + '"' : '') + '>' + pct(x.vol3) + '</td>'; },
-    sharpe1: (x) => '<td data-c="sharpe1" data-l="' + TT('夏普比率（近1年）') + '" class="r num">' + (x.sharpe1 == null ? '—' : x.sharpe1.toFixed(2)) + '</td>',
-    excess1: (x) => '<td data-c="excess1" data-l="' + TT('超额收益（对恒指·近1年）') + '" class="r num ' + cls(x.excess1) + '">' + pct(x.excess1) + '</td>',
-    posM12: (x) => '<td data-c="posM12" data-l="' + TT('正收益月份占比') + '" class="r num">' + (x.posM12 == null ? '—' : x.posM12.toFixed(0) + '%') + '</td>',
+    sharpe1: (x) => selfCell(x, 'sharpe1', '夏普比率（近1年）', (v) => (v == null ? '—' : v.toFixed(2))),
+    excess1: (x) => selfCell(x, 'excess1', '超额收益（对恒指·近1年）', (v) => pct(v), cls(x.excess1)),
+    posM12: (x) => selfCell(x, 'posM12', '正收益月份占比', (v) => (v == null ? '—' : v.toFixed(0) + '%')),
     size: (x) => {
       /* 2026-10-30（5.0）：规模与风险级别统一——积金局未公布时显示 n.a. 并给悬浮说明 */
       const tip = x.size == null ? TT('积金局未公布该基金规模（新基金或官方未披露），故显示 n.a.，并非本站缺少数据。') : '';
@@ -456,7 +484,7 @@
     trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>',
     type: '<th data-c="type" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>',
     risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
-    nav: '<th data-c="nav" data-i18n-parts data-k="nav" data-defdir="desc" class="sortable r">单位资产净值<br><small>取自各受托人官网</small> <span class="arrow">↕</span></th>',
+    nav: '<th data-c="nav" data-i18n-parts data-k="nav" data-defdir="desc" class="sortable r" title="取自各受托人官网公布的单位资产净值；悬浮每个数值可看来源与估值日">单位资产净值 <span class="arrow">↕</span></th>',
     selfD1: '<th data-c="selfD1" data-i18n-parts data-k="selfD1" data-defdir="desc" class="sortable r">日涨跌 <span class="arrow">↕</span></th>',
     selfW1: '<th data-c="selfW1" data-i18n-parts data-k="selfW1" data-defdir="desc" class="sortable r">近1周 <span class="arrow">↕</span></th>',
     selfM1: '<th data-c="selfM1" data-i18n-parts data-k="selfM1" data-defdir="desc" class="sortable r">近1个月 <span class="arrow">↕</span></th>',
@@ -491,7 +519,10 @@
   }
   function renderThead(order) {
     const th = document.getElementById('thead');
-    if (th) th.innerHTML = order.map((k) => TH_HTML[k] || '').join('');
+    if (!th) return;
+    th.innerHTML = order.map((k) => TH_HTML[k] || '').join('');
+    /* 2026-11-01（6.0）：表头是重建的，data-i18n 文案需要立即翻译（否则英文模式仍是中文表头） */
+    if (typeof window.applyI18n === 'function') window.applyI18n(th);
   }
 
   function rowHtml(x, rk, order) {
