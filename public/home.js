@@ -831,7 +831,7 @@
       if (!show) continue;
       const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
       if (x < padL + 24 || x > W - padR - 10) continue;
-      if (isJan) xt += yearLab(x + 6, (H - padB) + 18, yearTxt(yy));
+      if (isJan) xt += yearLab(x + 18, (H - padB) + 18, yearTxt(yy));  /* 旋转后 bbox 中心补偿，视觉上正好落在 1 月刻度 */
       else xt += '<text x="' + x.toFixed(1) + '" y="' + ((H - padB) + 16) + '" text-anchor="middle" class="pi-yk">' + monthTxt(mo) + '</text>';
     }
     const lineD = pts.map((p, i) => (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ');
