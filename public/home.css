@@ -1108,12 +1108,12 @@ body { overflow-x: visible; }
 @keyframes mkFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 /* 2026-10-31 三版（用户反馈）：小标题与列表拉开距离；字号统一为 17px（与「MPF 最新资讯」一致） */
 .mk-top h3 { font-size: 17px; margin: 0 0 14px; }
-.mk-top li { padding: 11px 10px; }
+.mk-top li { padding: 14px 0; }   /* 2026-11-02：按样图行高 52px */
 .mk-top .n { font-size: 14px; }
 /* 排名徽标：蓝色系 1 深 → 3 浅（与全站风险级别蓝阶一致） */
 .mk-top .r.r1 { background: #084e8c; color: #fff; }
 .mk-top .r.r2 { background: #2e7fc0; color: #fff; }
-.mk-top .r.r3 { background: #cfe4f5; color: #0b3a66; }
+.mk-top .r.r3 { background: #dbeaf8; color: #0b3a66; }   /* 样图浅蓝 */
 .mk-top li:hover { background: var(--brand-soft, #edf7ff); transform: translateX(3px); }
 .mk-top li { transition: background .15s, transform .15s; }
 /* 首页模块标题统一为「MPF 最新资讯ⓘ」格式：17px */
