@@ -3227,7 +3227,7 @@ document.addEventListener('mpf:lang', () => {
       btn.disabled = !!sel.disabled;
       btn.setAttribute('aria-expanded', pop.hidden ? 'false' : 'true');
     };
-    const isPerPage = sel.id === 'perPage';
+    const isPerPage = sel.id === 'perPage' || sel.id === 'rkRTop';   /* 2026-11-02：榜单页每页显示同样支持自定义 */
     const build = () => {
       pop.innerHTML = Array.from(sel.options).map((o, i) =>
         '<button type="button" role="option" class="mpfsel-opt' + (i === sel.selectedIndex ? ' on' : '') + '" data-i="' + i + '"' + (o.disabled ? ' disabled' : '') + '>' + esc(o.textContent) + '</button>').join('');

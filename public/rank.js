@@ -49,7 +49,7 @@
        但主表默认按「近 1 年年率化」由高至低（不高亮该列）；点标签进入对应榜。
        深链 ?rk= / #board 仍然有效。 */
     board: BOARDS.some((b) => b.id === HASH0) ? HASH0 : (BOARDS.some((b) => b.id === QSB) ? QSB : ''),
-    type: '', sub: '', risk: '', trustee: '', kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', top: 10, sortKey: null, sortDir: null, calYear: '',
+    type: '', sub: '', risk: '', trustee: '', kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', top: 10, page: 1, sortKey: null, sortDir: null, calYear: '',
   };
   let FUND_HEAD = '';   // 基金榜表头（初始 DOM 快照，切换回来时还原）
   let HEAD_MODE = '';   // 当前表头模式，避免重复重绘
@@ -300,7 +300,7 @@
   function bind() {
     $('#rkRType').addEventListener('change', () => { S.type = $('#rkRType').value; render(); });
     $('#rkRTrustee').addEventListener('change', () => { S.trustee = $('#rkRTrustee').value; render(); });
-    $('#rkRTop').addEventListener('change', () => { S.top = parseInt($('#rkRTop').value, 10); render(); });
+    $('#rkRTop').addEventListener('change', () => { S.top = parseInt($('#rkRTop').value, 10); S.page = 1; render(); });
     var kwEl = document.querySelector('#rkKw');
     if (kwEl) kwEl.addEventListener('input', function () { S.kw = this.value.trim(); render(); });
 
@@ -525,7 +525,7 @@
     scheme: '<th data-c="scheme" data-i18n-parts>计划名称</th>',
     trustee: '<th data-c="trustee" data-i18n-parts>受托人</th>',
     type: '<th data-c="type" data-i18n-parts>基金种类</th>',
-    risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险级别 <span class="arrow">↕</span></th>',
+    risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
     ann1: '<th data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>',
     ann5: '<th data-c="ann5" data-i18n-parts data-k="ann5" data-defdir="desc" class="sortable r">近5年<br>年率化 <span class="arrow">↕</span></th>',
     ann10: '<th data-c="ann10" data-i18n-parts data-k="ann10" data-defdir="desc" class="sortable r">近10年<br>年率化 <span class="arrow">↕</span></th>',
@@ -559,6 +559,10 @@
   }
 
   function render() {
+    /* 2026-11-02（第二十轮）：筛选条件或每页条数变化时自动回到第 1 页 */
+    const _fsig = [S.board, S.type, S.sub, S.trustee, S.risk, S.kw, S.retDim, S.retMin, S.retMax,
+      S.ddMin, S.ddMax, S.feeMax, S.calYear, S.top].join('|');
+    if (render._sig !== _fsig) { render._sig = _fsig; S.page = 1; }
     const b = cur();
     const isCal = b.id === 'calYear';
     $('#rkLoading').style.display = 'none';
@@ -595,7 +599,13 @@
     const dir = key ? (S.sortDir || (b.metric ? b.dir : 'desc')) : null;
     let rows = key ? sortRows(pool(), key, dir) : pool();
     const total = rows.length;
-    const shown = rows.slice(0, S.top);
+    /* 2026-11-02（第二十轮，用户要求）：与「基金最新数据」同款分页（每页 N 条 + 页码） */
+    const psize = Math.max(1, S.top);
+    const pages = Math.max(1, Math.ceil(total / psize));
+    if (S.page > pages) S.page = pages;
+    if (S.page < 1) S.page = 1;
+    const st = (S.page - 1) * psize;
+    const shown = rows.slice(st, st + psize);
     $('#rkRcnt').textContent = total;
     $('#rkRcntUnit').textContent = b.agg === 'trustee' ? TT('家受托人') : TT('条');
     $('#rkRtip').textContent = shown.length < total ? TQ('（显示前 {n} 名）', { n: shown.length }) : TT('（全部显示）');
@@ -655,7 +665,36 @@
     /* 2026-10-31 四版（用户要求）：无榜默认按近1年年率化排序，但该列【不高亮】——
        高亮只跟随用户手动点选的列（S.sortKey），默认序仅体现在行顺序上 */
     syncHeader(S.sortKey, S.sortKey ? S.sortDir : null);
+    renderPager(pages, total);
     if (window.__syncTableScroll) window.__syncTableScroll();
+  }
+
+  /* 与 app.js 的 pager 完全同一套样式与文案（照抄基金最新数据的表格分页） */
+  function renderPager(pages, total) {
+    const box = document.getElementById('rkPager');
+    if (!box) return;
+    if (pages <= 1) {
+      box.innerHTML = total ? '<span class="info">' + TQ('共 {n} 条', { n: total }) + '</span>' : '';
+      return;
+    }
+    let h = '<button data-p="' + (S.page - 1) + '"' + (S.page === 1 ? ' disabled' : '') + '>' + TT('上一页') + '</button>';
+    const win = 2;
+    const list = [];
+    for (let i = 1; i <= pages; i++) {
+      if (i === 1 || i === pages || Math.abs(i - S.page) <= win) list.push(i);
+      else if (list[list.length - 1] !== '…') list.push('…');
+    }
+    list.forEach((i) => {
+      if (i === '…') h += '<button disabled>…</button>';
+      else h += '<button data-p="' + i + '" class="' + (i === S.page ? 'on' : '') + '">' + i + '</button>';
+    });
+    h += '<button data-p="' + (S.page + 1) + '"' + (S.page === pages ? ' disabled' : '') + '>' + TT('下一页') + '</button>';
+    h += '<span class="info">' + TQ('第 {p} / {n} 页 · 共 {t} 条', { p: S.page, n: pages, t: total }) + '</span>';
+    box.innerHTML = h;
+    box.querySelectorAll('button[data-p]').forEach((b) => b.addEventListener('click', () => {
+      const p2 = parseInt(b.dataset.p, 10);
+      if (p2 >= 1 && p2 <= pages) { S.page = p2; render(); window.scrollTo({ top: 220, behavior: 'smooth' }); }
+    }));
   }
 
   /** 发行人实力榜的聚合行（列结构与基金榜不同，单独渲染） */

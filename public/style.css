@@ -2100,8 +2100,133 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .rk-more .f-row-sub { margin-top: 10px; }
 .rk-filters .rk-more { border-top: 1px dashed #e6eef7; padding-top: 8px; }
 #rkTable thead th { font-size: 14px; padding: 10px 6px; }
-#rkTable tbody td { font-size: 15px; }
-/* 榜单页 6 个筛选 + 工具栏：窄屏允许换行，绝不能横向溢出 */
-.card.filters.rk-filters .f-row-main.f-row-merged { flex-wrap: wrap; row-gap: 10px; }
+#rkTable tbody td { font-size: 15.5px; }   /* 与 #fundTable 完全一致（用户要求照抄） */
+/* 2026-11-02（第二十轮）：榜单页与基金页同一套筛选行，已不需要单独的换行规则 */
 @media (max-width: 1200px) { .rk-filters .tb-count { font-size: 12px; } }
 #rkRtip { display: none; }   /* 与「每页显示」重复，隐藏以腾出一行宽度 */
+
+/* ==========================================================================
+   2026-11-02（第二十轮，用户选定 A04 侧边栏 + 第 1 项每页显示标签上移）
+   ========================================================================== */
+/* ① 每页显示的标签移到框上方，与其它筛选框一致；共筛选出整体右移一点 */
+.f-row-merged .tb-tail { align-items: flex-end; height: auto; gap: 9px; }
+.f-row-merged .tb-tail .tb-count { display: flex; align-items: center; height: 36px; margin-left: 12px; }
+.f-row-merged .f-item.tb-per { flex: 0 0 86px !important; min-width: 86px !important; width: 86px; }
+.f-row-merged .tb-per label { font-size: 12px; color: var(--text-2); font-weight: 500; line-height: 15px; }
+.f-row-merged .tb-per .mpfsel { width: 100%; }
+.f-row-merged .tb-per .mpfsel-btn { height: 36px; }
+
+/* ② 左侧分组导航（替代顶部三胶囊） */
+.db-shell { display: grid; grid-template-columns: 126px minmax(0, 1fr); gap: 14px; align-items: start; }
+.db-side { position: sticky; top: 112px; background: #fff; border: 1px solid var(--line, #e3ecf4);
+  border-radius: 12px; padding: 9px 6px; box-shadow: 0 2px 10px rgba(20, 50, 80, .05); }
+.db-side-grp { font-size: 10.5px; color: #8aa0b4; font-weight: 700; letter-spacing: .03em; padding: 4px 7px 7px; }
+.db-nav { display: flex; align-items: center; gap: 6px; width: 100%; height: 36px; padding: 0 7px;
+  border: 0; border-radius: 8px; background: none; font: inherit; font-size: 12.5px; font-weight: 500;
+  color: #2c4258; cursor: pointer; text-align: left; white-space: nowrap; transition: background-color .15s, color .15s; }
+.db-nav svg { flex: none; color: #7d94a9; transition: color .15s; }
+.db-nav:hover { background: #f3f8fe; color: var(--brand, #0866bb); }
+.db-nav:hover svg { color: var(--brand, #0866bb); }
+.db-nav.on { background: #e8f2fc; color: var(--brand, #0866bb); font-weight: 700; }
+.db-nav.on svg { color: var(--brand, #0866bb); }
+.db-side-note { margin: 9px 7px 2px; padding-top: 9px; border-top: 1px solid #eef3f9;
+  font-size: 11px; color: #93a6b8; line-height: 1.5; }
+
+/* 中等屏幕收成图标栏（悬停展开文字），给表格留足宽度 */
+@media (max-width: 1010px) {
+  .db-shell { grid-template-columns: 54px minmax(0, 1fr); gap: 12px; }
+  .db-side { padding: 8px 6px; width: 54px; z-index: 6; transition: width .16s ease, box-shadow .16s ease; }
+  .db-side:hover { width: 152px; box-shadow: 0 10px 28px rgba(16, 40, 70, .16); }
+  .db-side-grp, .db-side-note { display: none; }
+  .db-nav { justify-content: center; padding: 0; height: 38px; }
+  .db-nav span { display: none; }
+  .db-side:hover .db-nav { justify-content: flex-start; padding: 0 7px; }
+  .db-side:hover .db-nav span { display: inline; }
+}
+/* 窄屏（手机）改为横向条 */
+@media (max-width: 760px) {
+  .db-shell { grid-template-columns: 1fr; gap: 10px; }
+  .db-side { position: static; display: flex; gap: 6px; padding: 6px; overflow-x: auto; }
+  .db-nav { width: auto; flex: 0 0 auto; padding: 0 10px; }
+  .db-nav span { display: inline; }
+}
+
+/* 2026-11-02：有侧边栏后内容区变窄，紧凑档再收一档，保证 1080 左右仍是一行 */
+@media (max-width: 1200px) {
+  .f-row-merged { gap: 8px; }
+  .f-row-merged > .dim-item { flex: 0 0 104px !important; min-width: 104px !important; }
+  .f-row-merged > .f-search { flex: 0 0 128px !important; min-width: 128px !important; max-width: none; }
+  .f-row-merged > .f-trustee { flex: 0 0 88px !important; min-width: 88px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 88px !important; min-width: 88px !important; }
+  .f-row-merged .f-item.tb-per { flex: 0 0 84px !important; min-width: 84px !important; width: 84px; }
+  .f-row-merged .tb-tail { gap: 8px; }
+  .f-row-merged .tb-tail .tb-count { margin-left: 8px; }
+  .f-row-merged .tb-tail .btn { padding: 0 10px; }
+}
+
+/* 2026-11-02：1080 左右的窗口（含侧边栏）再收一档，保证筛选行绝不横向溢出 */
+@media (max-width: 1100px) {
+  .f-row-merged { gap: 8px; }
+  .f-row-merged > .dim-item { flex: 0 0 98px !important; min-width: 98px !important; }
+  .f-row-merged > .f-search { flex: 0 0 112px !important; min-width: 104px !important; }
+  .f-row-merged > .f-trustee { flex: 0 0 104px !important; min-width: 104px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 104px !important; min-width: 104px !important; }
+  .f-row-merged .f-item.tb-per { flex: 0 0 80px !important; min-width: 80px !important; width: 80px; }
+  .f-row-merged .tb-tail { gap: 7px; }
+  .f-row-merged .tb-tail .tb-count { margin-left: 0; }
+  .f-row-merged .tb-tail .btn { padding: 0 8px; }
+}
+.f-row-merged .tb-count b { margin: 0 2px; }
+
+/* 2026-11-02（第二十轮）：窄屏筛选框改为两列，文案不再被截成「全部…」 */
+@media (max-width: 760px) {
+  .f-row-merged { gap: 10px; }
+  .f-row-merged > .f-item { flex: 1 1 44% !important; min-width: 138px !important; }
+  .f-row-merged > .f-search { flex: 1 1 100% !important; min-width: 100% !important; max-width: none !important; }
+  .f-row-merged .f-item.tb-per { flex: 0 0 96px !important; min-width: 96px !important; width: 96px; }
+  .f-row-merged .tb-tail { flex-wrap: wrap; width: 100%; margin-left: 0; }
+  .f-row-merged .tb-tail .tb-count { flex: 1 0 100%; margin: 0 0 2px; }
+}
+
+/* 2026-11-02：有侧边栏后表格窄了约 120px，两处微收，保证 1080 左右仍不出现横向裁切 */
+@media (max-width: 1250px) {
+  #fundTable thead th[data-c="fund"] { min-width: 158px; }
+  #fundTable thead th[data-c="rank"], #fundTable thead th[data-c="cmp"] { width: 48px !important; }
+  #fundTable thead th, #fundTable tbody td { padding-left: 5px; padding-right: 5px; }
+  #fundTable thead th { font-size: 13.5px; }
+  #fundTable tbody td { font-size: 14.5px; }
+  #fundTable thead th[data-c="ops"] .btn-detail,
+  #fundTable tbody .btn-detail { padding-left: 8px; padding-right: 8px; }
+}
+
+/* 2026-11-02：1011–1150 区间（含侧边栏文字）表格再收一档，保证不出现横向裁切 */
+@media (min-width: 1011px) and (max-width: 1150px) {
+  #fundTable thead th, #fundTable tbody td { padding-left: 4px; padding-right: 4px; }
+  #fundTable tbody td { font-size: 14px; }
+  #fundTable thead th { font-size: 13px; }
+  #fundTable thead th[data-c="ops"] .btn-detail,
+  #fundTable tbody .btn-detail { padding-left: 7px; padding-right: 7px; }
+}
+
+/* 2026-11-02：1011–1100 档再收一点，保证「导出」不被卡片右边界裁切 */
+@media (max-width: 1100px) {
+  .f-row-merged > .dim-item { flex: 0 0 94px !important; min-width: 94px !important; }
+  .f-row-merged > .f-search { flex: 1 1 96px !important; min-width: 90px !important; }
+  .f-row-merged > .f-trustee { flex: 0 0 98px !important; min-width: 98px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 94px !important; min-width: 94px !important; }
+  .f-row-merged .f-item.tb-per { flex: 0 0 78px !important; min-width: 78px !important; width: 78px; }
+  .f-row-merged .tb-tail { gap: 7px; }
+  .f-row-merged .tb-tail .btn { padding: 0 7px; }
+  .f-row-merged .tb-per .mpfsel-btn, .f-row-merged .f-item .mpfsel-btn { padding-left: 7px; padding-right: 7px; }
+}
+
+/* 2026-11-02：榜单表列宽微调——把「风险/详情/名次」多余宽度让给「成分基金」，名称不再折行 */
+#rkTable thead th[data-c="rank"] { width: 46px !important; }
+#rkTable thead th[data-c="cmp"] { width: 38px !important; }
+#rkTable thead th[data-c="risk"] { width: 62px !important; }
+#rkTable thead th[data-c="ops"] { width: 78px !important; }
+#rkTable thead th[data-c="fund"] { min-width: 176px; }
+#rkTable thead th[data-c="trustee"] { width: 72px !important; }
+#rkTable thead th[data-c="ops"] { width: 78px !important; }
+#rkTable tbody .btn-detail { padding-left: 8px; padding-right: 8px; }
+@media (max-width: 1150px) { #rkTable thead th[data-c="fund"] { min-width: 164px; } }

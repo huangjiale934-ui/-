@@ -202,6 +202,7 @@
 '发行人平均指数（等权）': 'Issuer average index (equal-weighted)',
 '{n} 只成员 · 等权': '{n} members · equal-weighted',
 '基金列表': 'Fund list',
+'资料库': 'Database',
 '基金最新数据': 'Latest fund data',
 '近1个月': '1 month',
 '3年波幅': '3Y volatility',

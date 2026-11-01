@@ -140,7 +140,7 @@ chk('排名·默认每页 10 条（HTML selected + S.top=10）', (function () {
   try {
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
-    return /value="10" selected>10 条/.test(h) && /top: 10, sortKey/.test(r);
+    return /value="10" selected>10 条/.test(h) && /top: 10, page: 1, sortKey/.test(r);
   } catch (e) { return false; }
 })());
 chk('排名·冠军卡区块已移到表格之后（表格 < 冠军卡 < 页脚）', (function () {
@@ -1754,3 +1754,20 @@ chk('十八轮·⑦行情栏左侧关闭按钮（刷新恢复）',
 chk('十八轮·⑧排名维度支持多维度叠加排序',
   /window\.__DIMSEL/.test(readSrc('app.js')) && /function sortByDims/.test(readSrc('app.js')) &&
   /sortByDims\(filtered\(\), window\.__DIMSEL\)/.test(readSrc('app.js')) && /class="dim-opt/.test(readSrc('app.js')) && /\.dim-grid \{ display: grid/.test(readSrc('style.css')));
+
+/* ===== 2026-11-02 第二十轮（5 条反馈）===== */
+chk('二十轮·①每页显示标签移到框上方（与其它筛选框一致）+ 计数右移',
+  /class="f-item tb-per"/.test(rawIdxHtml) && /class="f-item tb-per"/.test(idx) &&
+  /\.f-row-merged \.tb-tail \.tb-count \{[^}]*margin-left/.test(readSrc('style.css')));
+chk('二十轮·②榜单页删除「更多筛选」整块',
+  rawIdxHtml.indexOf('id="rkMore"') < 0 && idx.indexOf('id="rkMore"') < 0 && idx.indexOf('更多筛选') < 0);
+chk('二十轮·③榜单表格与基金表同款：分页条 + 来源说明移出卡片',
+  /id="rkPager"/.test(rawIdxHtml) && /function renderPager/.test(readSrc('rank.js')) &&
+  /#rkTable thead th \{ font-size: 14px/.test(readSrc('style.css')));
+chk('二十轮·④左侧分组导航取代顶部三胶囊（三个板块入口仍在）',
+  /class="db-shell"/.test(rawIdxHtml) && /class="db-side"/.test(rawIdxHtml) &&
+  rawIdxHtml.indexOf('class="db-tabs"') < 0 && /id="dbtDb"/.test(rawIdxHtml) &&
+  /id="dbtRank"/.test(rawIdxHtml) && /id="dbtCmp"/.test(rawIdxHtml));
+chk('二十轮·⑤首页榜单卡 1-5 全部写出序号（1-3 圆标、4-5 蓝色数字）',
+  /\(i \+ 1\) \+ '<\/span>'/.test(readSrc('home.js')) &&
+  /\.mk-top \.r\.r0 \{ background: transparent; color: #3d86c6/.test(readSrc('home.css')));

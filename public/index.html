@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="强积金资料库 · 广州精研数据有限公司">强积金资料库 · 广州精研数据有限公司</title>
 <meta name="description" content="香港强积金（MPF）全市场基金资料库，数据覆盖全市场成分基金，支持关键词搜索、基金种类、受托人、涨跌幅、最大回撤筛选，并可一键切换基金可视化对比。">
-<link rel="stylesheet" href="b.css?p=index&v=20261102e">
+<link rel="stylesheet" href="b.css?p=index&v=20261102f">
 </head>
 <body>
 
@@ -29,15 +29,26 @@
   <div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><button type="button" class="tk-close" id="tkClose" title="隐藏行情栏" aria-label="隐藏行情栏"><svg width="8" height="8" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><div class="tk-track"><span class="tk-loading">…</span></div></div>
 
 <div class="wrap">
-  <!-- 2026-10-31（用户要求）：页首大标题「强积金资料库」删除，只留三个板块切换；
-       视觉表头方案待用户从 20 版设计稿中挑选后再替换 -->
-  <div class="page-head pg-head db-head-row">
-    <div class="db-tabs" role="tablist" aria-label="模块切换">
-      <button type="button" class="dbt on" id="dbtDb" data-dbtab="db" data-i18n="基金最新数据">基金最新数据</button>
-      <button type="button" class="dbt" id="dbtRank" data-dbtab="rank" data-i18n="MPFA 基金榜单">MPFA 基金榜单</button>
-      <button type="button" class="dbt" id="dbtCmp" data-dbtab="cmp" data-i18n="可视化对比">可视化对比</button>
-    </div>
-  </div>
+  <!-- 2026-11-02（第二十轮，用户选定 A04）：左侧分组导航取代顶部三胶囊；
+       其余板块结构不动，仅把三个板块（#dbSec/#rkSec/#anSec）包进 .db-main -->
+  <div class="db-shell">
+    <aside class="db-side" aria-label="资料库导航">
+      <div class="db-side-grp" data-i18n="资料库">资料库</div>
+      <button type="button" class="db-nav on" id="dbtDb" data-dbtab="db">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M9 9v11"/></svg>
+        <span data-i18n="基金最新数据">基金最新数据</span>
+      </button>
+      <button type="button" class="db-nav" id="dbtRank" data-dbtab="rank">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>
+        <span data-i18n="MPFA 基金榜单">MPFA 基金榜单</span>
+      </button>
+      <button type="button" class="db-nav" id="dbtCmp" data-dbtab="cmp">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-9Z"/><path d="M14 3.2A9 9 0 0 1 20.8 10H14Z"/></svg>
+        <span data-i18n="可视化对比">可视化对比</span>
+      </button>
+      <div class="db-side-note" data-i18n="数据每日自动同步">数据每日自动同步</div>
+    </aside>
+    <div class="db-main">
 
   <div id="dbSec">
   <div class="stats" id="stats"></div>
@@ -88,13 +99,15 @@
       </div>
       <div class="tb-tail">
         <div class="tb-count"><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">0</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip" hidden></span></div>
-        <label data-i18n-parts class="muted tb-per-label" for="perPage">每页显示</label>
-        <select id="perPage">
-          <option data-i18n-parts  value="10" selected>10 条</option>
-          <option data-i18n-parts  value="20">20 条</option>
-          <option data-i18n-parts  value="50">50 条</option>
-          <option data-i18n-parts  value="100">100 条</option>
-        </select>
+        <div class="f-item tb-per">
+          <label class="muted tb-per-label" for="perPage" data-i18n-parts>每页显示</label>
+          <select id="perPage">
+            <option data-i18n-parts  value="10" selected>10 条</option>
+            <option data-i18n-parts  value="20">20 条</option>
+            <option data-i18n-parts  value="50">50 条</option>
+            <option data-i18n-parts  value="100">100 条</option>
+          </select>
+        </div>
         <button class="btn ghost sm" id="idxExport" data-i18n="导出">导出</button>
       </div>
     </div>
@@ -174,20 +187,18 @@
         <label data-i18n-parts>基金细类</label>
         <select id="rkRSub"><option data-i18n-parts  value="">全部细类</option></select>
       </div>
-      <div class="f-item f-risk">
-        <label data-i18n-parts>风险级别</label>
-        <select id="rkRRisk"><option data-i18n-parts  value="">全部级别</option></select>
-      </div>
       <div class="tb-tail">
         <div class="tb-count"><span data-i18n="当前榜单共">当前榜单共</span> <b id="rkRcnt">0</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip"></span></div>
-        <label class="muted tb-per-label" for="rkRTop" data-i18n-parts>每页显示</label>
-        <select id="rkRTop">
-          <option data-i18n-parts  value="10" selected>10 条</option>
-          <option data-i18n-parts  value="20">20 条</option>
-          <option data-i18n-parts  value="50">50 条</option>
-          <option data-i18n-parts  value="100">100 条</option>
-          <option data-i18n-parts  value="9999">全部</option>
-        </select>
+        <div class="f-item tb-per">
+          <label class="muted tb-per-label" for="rkRTop" data-i18n-parts>每页显示</label>
+          <select id="rkRTop">
+            <option data-i18n-parts  value="10" selected>10 条</option>
+            <option data-i18n-parts  value="20">20 条</option>
+            <option data-i18n-parts  value="50">50 条</option>
+            <option data-i18n-parts  value="100">100 条</option>
+            <option data-i18n-parts  value="9999">全部</option>
+          </select>
+        </div>
         <div class="rk-cols" id="rkColBtnWrap"><button type="button" class="btn ghost sm" id="rkColBtn">列设置</button>
           <div class="rk-colpop" id="rkColPop" hidden>
             <div class="cp-btns"><button type="button" class="cp-b" id="rkColAll">全部列</button><button type="button" class="cp-b" id="rkColSlim">默认模式</button></div>
@@ -197,40 +208,6 @@
         <button class="btn ghost sm" id="rkRExport" data-i18n="导出">导出</button>
       </div>
     </div>
-    <details class="rk-more" id="rkMore">
-      <summary data-i18n="更多筛选">更多筛选</summary>
-      <div class="f-row f-row-sub">
-        <div class="f-item">
-          <label data-i18n-parts>涨跌幅区间（%）</label>
-          <div class="range">
-            <select id="rkRRetDim">
-              <option data-i18n-parts value="ann1">近 1 年回报</option>
-              <option data-i18n-parts value="ann5">近 5 年年化</option>
-              <option data-i18n-parts value="ann10">近 10 年年化</option>
-              <option data-i18n-parts value="annLaunch">推出至今年化</option>
-              <option data-i18n-parts value="cum1">近 1 年累积</option>
-            </select>
-            <input type="number" id="rkRRetMin" data-i18n-ph="最小" placeholder="最小">
-            <span data-i18n="至">至</span>
-            <input type="number" id="rkRRetMax" data-i18n-ph="最大" placeholder="最大">
-          </div>
-        </div>
-        <div class="f-item">
-          <label data-i18n-parts>最大回撤区间（%） <span class="hint">近5年最差年度</span></label>
-          <div class="range">
-            <input type="number" id="rkRDdMin" data-i18n-ph="如 -30" placeholder="如 -30">
-            <span data-i18n="至">至</span>
-            <input type="number" id="rkRDdMax" data-i18n-ph="如 0" placeholder="如 0">
-          </div>
-        </div>
-        <div class="f-item">
-          <label data-i18n-parts>基金管理费上限（%）</label>
-          <div class="range">
-            <input type="number" id="rkRFeeMax" data-i18n-ph="如 0.8" placeholder="如 0.8">
-          </div>
-        </div>
-      </div>
-    </details>
   </div>
 
   <div class="card">
@@ -247,7 +224,7 @@
           <th data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>
           <th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>
           <th data-c="typeFull" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>
-          <th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险 <span class="arrow">↕</span></th>
+          <th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>
                     <th data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>
           <th data-c="ann5" data-i18n-parts data-k="ann5" data-defdir="desc" class="sortable r">近5年<br>年率化 <span class="arrow">↕</span></th>
           <th data-c="ann10" data-i18n-parts data-k="ann10" data-defdir="desc" class="sortable r">近10年<br>年率化 <span class="arrow">↕</span></th>
@@ -271,8 +248,9 @@
       </table>
     </div>
     <div class="loading" id="rkLoading"><div class="spinner"></div><span data-i18n="正在同步最新数据…">正在同步最新数据…</span></div>
-    <p class="scope-note scope-mpfa" id="rkScopeNote">本页数据全部来自积金局「强积金基金平台」，目前更新至 <b id="rkScopeDate">—</b>。</p>
+    <div class="pager" id="rkPager"></div>
   </div>
+  <p class="scope-note scope-mpfa" id="rkScopeNote" style="margin:10px 2px">本页数据全部来自积金局「强积金基金平台」，目前更新至 <b id="rkScopeDate">—</b>。</p>
 
   <div class="card" id="rkChampCard" style="margin:14px 0">
     <div class="board-head" style="border-bottom:none">
@@ -322,6 +300,9 @@
       </div>
     </div>
     <div class="an-view" id="anDetail" hidden></div>
+  </div>
+
+  </div>
   </div>
 
   <div class="foot">
@@ -385,10 +366,10 @@
   </div>
 </div>
 
-<script src="b.js?p=index&v=20261102e"></script>
-<script src="app.js?v=20261102e"></script>
-<script src="rank.js?v=20261102e"></script>
-<script src="analysis.js?v=20261102e"></script>
+<script src="b.js?p=index&v=20261102f"></script>
+<script src="app.js?v=20261102f"></script>
+<script src="rank.js?v=20261102f"></script>
+<script src="analysis.js?v=20261102f"></script>
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg><span class="tt-txt" data-i18n="回到顶部">回到顶部</span></button>
 
 <!-- 板块切换（三板块）：支持 ?rk=<榜单id>、#db/#rank/#cmp 锚点与刷新记忆 -->

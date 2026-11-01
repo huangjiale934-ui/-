@@ -367,7 +367,7 @@
 .mk-top .r.r1 { background: #084e8c; color: #fff; }
 .mk-top .r.r2 { background: #2e7fc0; color: #fff; }
 .mk-top .r.r3 { background: #dbeaf8; color: #0b3a66; }
-.mk-top .r.r0 { background: transparent; color: #7b8fa3; }
+.mk-top .r.r0 { background: transparent; color: #3d86c6; }   /* 4/5 不画圆标，数字仍用蓝色调 */
 .mk-top .n {
   flex: 1; min-width: 0; color: var(--text); font-size: 14px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
