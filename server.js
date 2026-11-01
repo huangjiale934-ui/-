@@ -624,8 +624,9 @@ const server = http.createServer(async (req, res) => {
         K4.forEach((k) => {
           const it = j.items && j.items[k];
           if (!it || !it.series || it.series.length < 2) return;
-          /* 外部指数（恒指/上证）自 2005 年起，裁到 2015-01-01 与 MPF 自算指数同窗口 */
-          const s2 = (k === 'HSI' || k === 'SSE') ? it.series.filter((r) => r[0] >= '2015-01-01') : it.series;
+          /* 2026-11-02（第十八轮，用户要求）：恒指/上证要「发行至今」，不再裁到 2015；
+             MPF 自算指数仍从 2015 起（受基金净值历史限制） */
+          const s2 = it.series;
           if (s2.length < 2) return;
           /* 2026-10-31 二版（用户要求：数据要连续不跳点）：按 ISO 周聚合（取周内最后交易日），
              曲线连续且体积可控（~600 周/指数） */

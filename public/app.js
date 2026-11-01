@@ -30,53 +30,127 @@
     ['posM12', '正收益月份', 'desc'], ['excess1', '超额收益（恒指）', 'desc'],
   ];
 
-  function bindSelfTabs() {
-    const sel = document.getElementById('dimSel');
-    if (!sel) return;
-    /* 2026-11-01（6.0，用户要求）：不再显示「无」——默认维度就是基金规模（= 规模降序） */
-    const fill = () => {
-      sel.innerHTML = '<option value="size">' + esc(TT('基金规模')) + '</option>' +
-        DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
-      sel.value = (window.__dimActive && S.key) ? S.key : 'size';
-    };
-    fill();
-    if (!window.__dimSelLangBound) {
-      window.__dimSelLangBound = 1;
-      document.addEventListener('mpf:lang', () => {
-        const s2 = document.getElementById('dimSel');
-        if (s2) { s2.innerHTML = '<option value="size">' + esc(TT('基金规模')) + '</option>' +
-          DIMS.map((d) => '<option value="' + d[0] + '">' + esc(TT(d[1])) + '</option>').join('');
-          s2.value = (window.__dimActive && S.key) ? S.key : 'size'; }
-      });
-    }
-    if (sel.__bound) return;
-    sel.__bound = 1;
-    sel.addEventListener('change', () => {
-      const k = sel.value;
-      if (!k || k === 'size') { window.__dimCancel(); return; }
-      const d = DIMS.find((x) => x[0] === k);
-      window.__dimApply(k, d ? d[2] : 'desc');
+  /* ===== 排名维度（2026-11-02 第十八轮，用户要求）：支持多维度叠加排序 =====
+     先点的维度优先级最高；按钮显示主维度 +N，面板里用 1/2/3 标注优先级。 */
+  const DIM_ALL = [{ k: 'size', n: '基金规模', d: 'desc' }]
+    .concat(DIMS.map((d) => ({ k: d[0], n: d[1], d: d[2] })));
+  window.__DIMSEL = [{ k: 'size', d: 'desc' }];
+  const dimLabel = (k) => { const x = DIM_ALL.find((d) => d.k === k); return x ? TT(x.n) : k; };
+  const dimDefDir = (k) => { const x = DIM_ALL.find((d) => d.k === k); return x ? x.d : 'desc'; };
+  const dimsActive = () => window.__DIMSEL.length > 1 || (window.__DIMSEL[0] && window.__DIMSEL[0].k !== 'size');
+
+  function syncDimUI() {
+    const a = window.__DIMSEL;
+    const txt = document.getElementById('dimTxt');
+    if (txt) txt.textContent = dimLabel(a[0].k);
+    const cnt = document.getElementById('dimCnt');
+    if (cnt) { cnt.hidden = a.length < 2; cnt.textContent = '+' + (a.length - 1); }
+    const grid = document.getElementById('dimGrid');
+    if (!grid) return;
+    grid.innerHTML = DIM_ALL.map((d) => {
+      const i = a.findIndex((x) => x.k === d.k);
+      return '<button type="button" class="dim-opt' + (i >= 0 ? ' on' : '') + '" data-k="' + d.k + '" role="option" aria-selected="' + (i >= 0) + '">' +
+        '<span class="dim-on">' + (i >= 0 ? i + 1 : '') + '</span><span class="dim-nm">' + esc(TT(d.n)) + '</span></button>';
+    }).join('');
+  }
+
+  function applyDims() {
+    const a = window.__DIMSEL;
+    const first = a[0] || { k: 'size', d: 'desc' };
+    S.key = first.k; S.dir = first.d;
+    /* 联动放出：非默认列临时显示（不写 colSet，刷新后回到用户自己的列设置） */
+    DIM_EXTRA = a.map((x) => x.k).filter((k) => COL_DEFS.some((c) => c.k === k) && COL_DEFAULT.indexOf(k) < 0);
+    window.__dimActive = dimsActive();
+    S.page = 1;
+    const th = document.getElementById('thead');
+    if (th) th.querySelectorAll('th.sorted').forEach((n) => {
+      n.classList.remove('sorted');
+      const ar = n.querySelector('.arrow');
+      if (ar) ar.textContent = '↕';
     });
-    /* 供下拉与表头共同使用的状态机 */
-    window.__dimApply = (k, first) => {
-      S.key = k; S.dir = first;
-      /* 联动放出：非默认列临时显示（不写 colSet，刷新后回到用户自己的列设置） */
-      DIM_EXTRA = (COL_DEFS.find((c) => c.k === k) && COL_DEFAULT.indexOf(k) < 0) ? k : '';
-      S.page = 1;
-      const th = document.getElementById('thead');
-      if (th) th.querySelectorAll('th.sorted').forEach((n) => {
-        n.classList.remove('sorted');
-        const a = n.querySelector('.arrow');
-        if (a) a.textContent = '↕';
-      });
-      window.__dimActive = true;
-      render();
+    const ms = document.getElementById('mSortKey');
+    if (ms) ms.value = S.key;
+    syncDimUI();
+    render();
+  }
+
+  function bindSelfTabs() {
+    const btn = document.getElementById('dimBtn');
+    const pop = document.getElementById('dimPop');
+    if (!btn || !pop) return;
+    if (!window.__dimLangBound) {
+      window.__dimLangBound = 1;
+      document.addEventListener('mpf:lang', () => { syncDimUI(); });
+    }
+    syncDimUI();
+    const closePop = () => { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!pop.hidden) { closePop(); return; }
+      pop.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      const r = pop.getBoundingClientRect();
+      pop.classList.toggle('align-r', r.right > window.innerWidth - 8);
+    });
+    pop.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const b = e.target.closest && e.target.closest('.dim-opt');
+      if (!b) return;
+      const k = b.dataset.k;
+      const a = window.__DIMSEL;
+      const i = a.findIndex((x) => x.k === k);
+      if (i >= 0) a.splice(i, 1);
+      else {
+        /* 首次点非默认维度时替换默认的「基金规模」，让用户点的维度成为第一优先级 */
+        if (a.length === 1 && a[0].k === 'size' && k !== 'size') a.length = 0;
+        a.push({ k: k, d: dimDefDir(k) });
+      }
+      if (!a.length) a.push({ k: 'size', d: 'desc' });
+      applyDims();
+    });
+    const clr = document.getElementById('dimClear');
+    if (clr) clr.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.__DIMSEL = [{ k: 'size', d: 'desc' }];
+      applyDims();
+    });
+    document.addEventListener('click', (e) => {
+      if (pop.hidden) return;
+      if (e.target.closest && e.target.closest('#dimMulti')) return;
+      closePop();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
+    /* 兼容旧调用（表头排序 / 移动端） */
+    window.__dimApply = (k, dir) => { window.__DIMSEL = [{ k: k, d: dir || dimDefDir(k) }]; applyDims(); };
+    window.__dimCancel = () => { window.__DIMSEL = [{ k: 'size', d: 'desc' }]; applyDims(); };
+    /* 表头点击排序：维度复位为「单列」，并同步按钮文案（由 common.makeSorter 调用） */
+    window.__dimFromHeader = (k, dir) => {
+      window.__DIMSEL = [{ k: k, d: dir }];
+      S.key = k; S.dir = dir;
+      window.__dimActive = dimsActive();
+      syncDimUI();
     };
-    window.__dimCancel = () => {
-      S.key = 'size'; S.dir = 'desc'; DIM_EXTRA = ''; S.page = 1;
-      window.__dimActive = false;
-      render();
-    };
+  }
+
+  /* 多维度比较：依次按优先级比较，空值恒排最后 */
+  function cmpDim(x, y, dir) {
+    const xn = x == null || x === '' || (typeof x === 'number' && isNaN(x));
+    const yn = y == null || y === '' || (typeof y === 'number' && isNaN(y));
+    if (xn && yn) return 0;
+    if (xn) return 1;
+    if (yn) return -1;
+    const sgn = dir === 'asc' ? 1 : -1;
+    if (typeof x === 'number' && typeof y === 'number') return (x - y) * sgn;
+    return String(x).localeCompare(String(y), 'zh-Hans-CN') * sgn;
+  }
+  function sortByDims(rows, dims) {
+    return rows.slice().sort((a, b) => {
+      for (let i = 0; i < dims.length; i++) {
+        const r = cmpDim(a[dims[i].k], b[dims[i].k], dims[i].d);
+        if (r) return r;
+      }
+      return 0;
+    });
   }
 
   function init() {
@@ -178,9 +252,10 @@
     const el = $('#mSortKey');
     el.innerHTML = Object.keys(SORT_LABEL).map((k) => '<option value="' + k + '">' + TT(SORT_LABEL[k]) + '</option>').join('');
     el.value = S.key;
-    el.addEventListener('change', () => { S.key = el.value; S.page = 1; render(); });
+    el.addEventListener('change', () => { window.__dimApply(el.value); });
     $('#mSortDir').addEventListener('click', () => {
       S.dir = S.dir === 'asc' ? 'desc' : 'asc';
+      if (window.__DIMSEL && window.__DIMSEL[0]) window.__DIMSEL[0].d = S.dir;
       $('#mSortDir').textContent = S.dir === 'asc' ? TT('升序 ↑') : TT('降序 ↓');
       render();
     });
@@ -262,7 +337,7 @@
     'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'size', 'cmp', 'ops'];
   /* 2026-10-27（用户要求）：「精简模式」下线，改为「默认模式」——一键回到用户指定的 14 列 */
   let colSet = null;
-  let DIM_EXTRA = '';   /* 2026-10-27：维度联动临时放出的列（不持久化） */
+  let DIM_EXTRA = [];   /* 2026-11-02：维度联动临时放出的列（可多选，不持久化） */
   try { const raw = localStorage.getItem('mpf-cols-v9'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
   if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
   function applyCols(save) {
@@ -368,7 +443,7 @@
     /* 2026-11-01（6.0）：兜底补挂自算指标——rank/analysis 板块后加载会整体替换 DATA，
        不补挂就会出现「筛选后所有自算列变 —」。幂等、451 条开销可忽略。 */
     if (window.__PERF_JSON) window.decorateSelfPerf(DATA.funds, window.__PERF_JSON);
-    ROWS = sortRows(filtered(), S.key, S.dir);
+    ROWS = sortByDims(filtered(), window.__DIMSEL);
     const total = ROWS.length;
     $('#cnt').textContent = total;
     $('#loading').style.display = 'none';
@@ -391,8 +466,11 @@
     /* 表头由本函数重建 → 三态排序监听需随之重绑（元素是新的，无旧监听残留） */
     makeSorter($$('#thead th'), S, render, DEF_SORT);
     /* 维度高亮：维度激活时给对应列的 th/td 加标记 */
-    if (window.__dimActive && S.key && S.key !== 'size') {
-      $$('#fundTable [data-c="' + S.key + '"]').forEach((n) => n.classList.add('dim-hl'));
+    if (window.__dimActive) {
+      window.__DIMSEL.forEach((d) => {
+        if (d.k === 'size') return;
+        $$('#fundTable [data-c="' + d.k + '"]').forEach((n) => n.classList.add('dim-hl'));
+      });
     }
     // 表格内勾选 → 加入/移出对比（与排名页共用 CMPX；页底对比栏随之出现）
     $$('#tbody input[data-cmp]').forEach((c) => c.addEventListener('change', () => {
@@ -507,12 +585,15 @@
   function visibleOrder() {
     let order = COL_DEFS.map((c) => c.k).filter((k) => {
       const d = COL_DEFS.find((c) => c.k === k);
-      return d.lock || colSet.has(k) || k === DIM_EXTRA;
+      return d.lock || colSet.has(k) || DIM_EXTRA.indexOf(k) >= 0;
     });
-    if (window.__dimActive && S.key && S.key !== 'size' && S.key !== 'risk' && order.indexOf(S.key) >= 0) {
-      order = order.filter((k) => k !== S.key);
+    /* 2026-11-02：参与排名的列若本来不在可见列里，才临时插到「风险级别」右侧；
+       已经是默认列的（近1年/日涨跌等）保持原位，避免一选维度整张表列顺序乱跳 */
+    const dk = window.__dimActive ? window.__DIMSEL.map((x) => x.k).filter((k) => k !== 'size' && k !== 'risk') : [];
+    const missing = dk.filter((k) => order.indexOf(k) < 0 && COL_DEFS.some((c) => c.k === k));
+    if (missing.length) {
       const ri = order.indexOf('risk');
-      if (ri >= 0) order.splice(ri + 1, 0, S.key);
+      order.splice.apply(order, [ri >= 0 ? ri + 1 : 1, 0].concat(missing));
     }
     return order;
   }

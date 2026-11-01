@@ -245,7 +245,7 @@ chk('资料库·footer 来源与免责（src-brief + 折叠，2026-10-31）', /c
 chk('排名·footer 来源与免责（src-brief + 折叠）', /class="src-brief"/.test(rk) && /foot-fold/.test(rk));
 chk('首页·页面标题已加标记', /<title data-i18n="香港强积金市场数据平台/.test(rawH));
 chk('资料库·筛选与工具栏合并一行（2026-11-02：排名维度→搜索→下拉→共筛选出→每页显示→导出，无「筛选条件：无」）',
-  /class="f-row f-row-main f-row-merged"/.test(idx) && /id="dimSel"/.test(idx) && /class="tb-tail"/.test(idx) &&
+  /class="f-row f-row-main f-row-merged"/.test(idx) && /id="dimBtn"/.test(idx) && /id="dimPop"/.test(idx) && /class="tb-tail"/.test(idx) &&
   /共筛选出/.test(idx) && idx.indexOf('筛选条件：无') < 0 && idx.indexOf('点击表头排序') < 0 &&
   idx.indexOf('id="fRisk"') < 0 && idx.indexOf('class="f-lead"') < 0);
 chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排序') < 0);
@@ -1614,7 +1614,7 @@ chk('数据扩展·宏利持仓/分布（67 只 holdings + 官方回报 trustee-
 
 /* ===== 2026-10-22 傍晚批：浅色调 / 自算指数 / 排行榜去标题 ===== */
 chk('1022b·排行榜标题已移除', !/mk-rank[\s\S]{0,200}?市场排行榜/.test(home));
-chk('1022c·名次徽标为蓝色族（2026-11-01 样图：1-2 实心蓝、3 浅蓝、4-5 浅灰蓝）', /mk-top \.r\.r1 \{ background: #1f6fb5/.test(css) && /mk-top \.r\.r2 \{ background: #3d86c6/.test(css) && /mk-top \.r\.r3 \{ background: #cfe4f5/.test(css) && !/mk-top \.r\.r1 \{ background: #f6e2c4/.test(css));
+chk('1022c·名次徽标为蓝色族（2026-11-02 按样图：1 深导航蓝 / 2 中蓝 / 3 浅蓝深字 / 4-5 无底色）', /mk-top \.r\.r1 \{ background: #084e8c/.test(css) && /mk-top \.r\.r2 \{ background: #2e7fc0/.test(css) && /mk-top \.r\.r3 \{ background: #dbeaf8/.test(css) && /mk-top \.r\.r0 \{ background: transparent/.test(css) && !/mk-top \.r\.r1 \{ background: #f6e2c4/.test(css));
 chk('1022b·浮窗为浅蓝底（非黑）', (function () { try { const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8'); return /\.mpf-tip \{[\s\S]{0,600}?background: #edf7ff/.test(c) && !/background: rgba\(24, 38, 58/.test(c); } catch (e) { return false; } })());
 chk('1023·品牌蓝与官网一致（#0866bb）', (function () { try { return /--brand: #0866bb/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8')); } catch (e) { return false; } })());
 chk('1022b·MPF 自算指数已生成（7 条）', (function () {
@@ -1733,3 +1733,24 @@ chk('三版·⑫回到顶部悬停展开「回到顶部」（tt-txt，同计算�
   rawIdxHtml.indexOf('tt-txt') >= 0 && home.indexOf('tt-txt') >= 0);
 chk('三版·⑬首页模块标题统一格式（17px + 榜单卡标题间距加大）',
   /\.mk-top h3 \{ font-size: 17px; margin: 0 0 14px/.test(css) && /\.mk-panel h3 \{ font-size: 17px; \}/.test(css));
+
+/* ===== 2026-11-02 第十八轮（8 条用户反馈）===== */
+chk('十八轮·①筛选控件加宽 + 自绘下拉按内容自适应且常规项不滚动',
+  /@media \(min-width: 1201px\)/.test(readSrc('style.css')) && /\.mpfsel-pop \{ width: max-content; min-width: 100%/.test(readSrc('style.css')) &&
+  /max-height: calc\(100vh - 140px\)/.test(readSrc('style.css')));
+chk('十八轮·②每页显示支持自定义条数',
+  /mpfsel-custom/.test(readSrc('common.js')) && /applyCustom/.test(readSrc('common.js')) &&
+  /\.mpfsel-pop\.has-custom/.test(readSrc('style.css')));
+chk('十八轮·③投资分布标签 +1 号、引线提前收住',
+  /\.alr3-name \{ font-size: 22px/.test(readSrc('analysis.css')) && /const ex = lx \+ \(side === 'left' \? 12 : -12\)/.test(readSrc('common.js')));
+chk('十八轮·④首页榜单卡严格按样图（行高 52 / 徽标 24 / 无分割线）',
+  /\.mk-top li \{\s*display: flex; align-items: center; gap: 12px; padding: 14px 0;/.test(css) && /\.mk-top \.r \{\s*flex: 0 0 24px; height: 24px;/.test(css));
+chk('十八轮·⑤恒指/上证取全历史（服务端不再裁到 2015）',
+  /恒指\/上证要「发行至今」/.test(readSrc('root:server.js')) && readSrc('root:server.js').indexOf("r[0] >= '2015-01-01'") < 0 && /hist-index-full/.test(readSrc('root:tools/hist-index-full.js')));
+chk('十八轮·⑥横轴月份标月底 + 年份落 1 月 1 日',
+  /const mEnd = Math.min\(m \+ 1, mi1\) - 0.02;/.test(readSrc('home.js')) && /yy \* 12 - mi0/.test(readSrc('home.js')));
+chk('十八轮·⑦行情栏左侧关闭按钮（刷新恢复）',
+  /id="tkClose"/.test(rawIdxHtml) && /id="tkClose"/.test(home) && /\.tk-close \{ position: absolute/.test(readSrc('style.css')) && /box0\.style\.display = 'none'/.test(readSrc('common.js')));
+chk('十八轮·⑧排名维度支持多维度叠加排序',
+  /window\.__DIMSEL/.test(readSrc('app.js')) && /function sortByDims/.test(readSrc('app.js')) &&
+  /sortByDims\(filtered\(\), window\.__DIMSEL\)/.test(readSrc('app.js')) && /class="dim-opt/.test(readSrc('app.js')) && /\.dim-grid \{ display: grid/.test(readSrc('style.css')));

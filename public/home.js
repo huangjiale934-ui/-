@@ -792,7 +792,10 @@
       if ((mx - mn) / step > 11) step = 20;
       if ((mx - mn) / step > 11) step = 25;
     }
-    const lo = Math.floor(mn / step) * step;
+    /* 2026-11-02（第十八轮）：真实点位指数不会为负；8% 留白把下界压到 0 以下时钳到 0，
+       否则恒指长历史图会出现 -5,000 这种无意义刻度 */
+    let lo = Math.floor(mn / step) * step;
+    if (RAWV && lo < 0) lo = 0;
     const hi = Math.ceil(mx / step) * step;
     const fmtTick = (v) => RAWV ? Math.round(v).toLocaleString('en-US') : String(Math.round(v));
     /* 2026-11-01（6.0，用户反馈）：横轴原按「第几个周点」等距，4 周月与 5 周月宽度差 ~25%，
@@ -829,39 +832,34 @@
     const axisY = H - padB;
     const yearLab = (x, y, txt) =>
       '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="end" class="pi-yk pi-yk-year" transform="rotate(-40 ' + x.toFixed(1) + ' ' + y + ')">' + txt + '</text>';
-    for (let m = Math.ceil(mi0 - 0.02); m <= Math.floor(mi1 + 0.001); m++) {
-      const mo = ((m % 12) + 12) % 12 + 1;
-      const yy = Math.floor(m / 12);
-      const isJan = mo === 1;
-      const show = monthly || (quarter ? (isJan || mo === 3 || mo === 6 || mo === 9) : isJan);
-      if (!show) continue;
-      const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
-      if (x < padL + 24 || x > W - padR - 10) continue;
-      if (isJan) {
-        /* 月度轴 / 年度轴：1 月位置直接写年份；季度轴的年份统一放到 12 月（下一段） */
-        if (!quarter) xt += yearLab(x + 18, axisY + 18, yearTxt(yy));
-        continue;
+    /* 2026-11-02（第十八轮，用户要求）：月份刻度标在「月底」——3 月落在 3/31、6 月落在 6/30，
+       这样 9 月→年份分界→3 月的间距与 3/6/9 之间完全一致（此前标在月初，导致年份两侧间距不等）；
+       12 月并入 1 月 1 日的年份分界，不单独标注。 */
+    if (monthly || quarter) {
+      for (let m = Math.ceil(mi0 - 0.02); m <= Math.floor(mi1 + 0.001); m++) {
+        const mo = ((m % 12) + 12) % 12 + 1;
+        if (mo === 12) continue;
+        if (!monthly && mo !== 3 && mo !== 6 && mo !== 9) continue;
+        const mEnd = Math.min(m + 1, mi1) - 0.02;
+        const x = padL + plotW * ((mEnd - mi0) / (mi1 - mi0 || 1));
+        if (x < padL + 6 || x > W - padR - 4) continue;
+        xt += '<text x="' + x.toFixed(1) + '" y="' + (axisY + 16) + '" text-anchor="middle" class="pi-yk">' + monthTxt(mo) + '</text>';
       }
-      xt += '<text x="' + x.toFixed(1) + '" y="' + (axisY + 16) + '" text-anchor="middle" class="pi-yk">' + monthTxt(mo) + '</text>';
     }
-    if (quarter) {
-      /* 年份标签：落在上一年 12 月 1 日 = 9 月与次年 3 月的正中 */
-      for (let yy = Math.floor(mi0 / 12); yy <= Math.floor(mi1 / 12) + 1; yy++) {
-        let m = yy * 12 - 1;
-        /* 首个不完整的年份（数据从年中开始）没有左侧 9 月可参照，就落在 1 月刻度上 */
-        if (m < mi0 - 0.02) m = yy * 12;
-        if (m < mi0 - 0.02 || m > mi1 + 0.001) continue;
-        const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
-        if (x < padL + 4 || x > W - padR - 10) continue;
-        xt += yearLab(x + 18, axisY + 18, yearTxt(yy));
-      }
+    /* 年份标签：落在 1 月 1 日（= 上一年 12/31 月底），与月份同节奏；首个年份若在数据起点之前则跳过 */
+    const y0 = Math.ceil(mi0 / 12), y1 = Math.floor(mi1 / 12);
+    /* 长区间（如恒指全部 37 年）按宽度稀疏年份标签，避免 24px 一个挤成一片 */
+    const yStep = Math.max(1, Math.ceil(58 / Math.max(1, plotW / Math.max(1, y1 - y0 + 1))));
+    /* 从「最后一年」往前推，保证最新年份一定有标签（否则长区间会停在 2024） */
+    for (let yy = y1; yy >= y0; yy -= yStep) {
+      const x = padL + plotW * ((yy * 12 - mi0) / (mi1 - mi0 || 1));
+      if (x < padL - 2 || x > W - padR - 10) continue;
+      xt += yearLab(Math.max(x + 18, padL + 16), axisY + 18, yearTxt(yy));
     }
     /* 年份分界小竖线（1 月 1 日）：让「哪里换年」一眼可见 */
     let ytick = '';
-    for (let yy = Math.floor(mi0 / 12); yy <= Math.floor(mi1 / 12) + 1; yy++) {
-      const m = yy * 12;
-      if (m < mi0 + 0.02 || m > mi1 - 0.001) continue;
-      const x = padL + plotW * ((m - mi0) / (mi1 - mi0 || 1));
+    for (let yy = Math.ceil(mi0 / 12); yy <= Math.floor(mi1 / 12); yy++) {
+      const x = padL + plotW * ((yy * 12 - mi0) / (mi1 - mi0 || 1));
       if (x < padL + 1 || x > W - padR - 1) continue;
       ytick += '<line x1="' + x.toFixed(1) + '" y1="' + axisY + '" x2="' + x.toFixed(1) + '" y2="' + (axisY + 8) + '" stroke="#7fa8cc" stroke-width="1.8"/>';
     }

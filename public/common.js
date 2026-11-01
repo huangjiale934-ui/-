@@ -912,9 +912,9 @@ function makeSorter(thList, state, onSort, defaultSort) {
     /* 2026-10-31：维度改下拉后，表头排序同样把下拉复位；
        2026-11-01（6.0）：默认项现在是「基金规模」（value=size），不再有「无」；
        当前排序列若在维度清单里就显示它，否则回落到基金规模（避免出现空选项） */
-    const dsel = document.getElementById('dimSel');
-    if (dsel) dsel.value = dsel.querySelector('option[value="' + (state.key || 'size') + '"]') ? (state.key || 'size') : 'size';
-    window.__dimActive = false;
+    /* 2026-11-02（第十八轮）：表头排序把「排名维度」复位为单列，并同步按钮文案 */
+    if (window.__dimFromHeader) window.__dimFromHeader(state.key || D0.key, state.dir);
+    else window.__dimActive = false;
   };
   markActive();   /* 新建/重建表头后立刻标记当前列 */
   thList.forEach((th) => {
@@ -1726,15 +1726,18 @@ window.buildRoseSVG = function (d, titleText, opts) {
       const lx = axy[0];
       const ly2 = it.y + 8;
       const anchor = side === 'left' ? 'end' : 'start';
+      /* 2026-11-02（第十八轮，用户要求）：引线提前 12px 收住，不再顶到/压住文字；
+         数字与类别名的间距 26 → 30（数字字号不变，只把两者拉开一点） */
+      const ex = lx + (side === 'left' ? 12 : -12);
       const name = sd.label.length > 10 ? sd.label.slice(0, 10) + '…' : sd.label;
       const neg = sd.w < 0 ? '（負值）' : '';
       return '<path class="alr3-lead" pathLength="1" data-i="' + o.i + '" d="M' + f2(dot[0]) + ' ' + f2(dot[1]) +
         ' L' + f2(exy[0]) + ' ' + f2(exy[1]) +
-        ' C' + f2(exy[0]) + ' ' + f2(exy[1] + (ly2 - exy[1]) * 0.3) + ', ' + f2(lx) + ' ' + f2(ly2 - (ly2 - exy[1]) * 0.3) + ', ' + f2(lx) + ' ' + f2(ly2) +
+        ' C' + f2(exy[0]) + ' ' + f2(exy[1] + (ly2 - exy[1]) * 0.3) + ', ' + f2(ex) + ' ' + f2(ly2 - (ly2 - exy[1]) * 0.3) + ', ' + f2(ex) + ' ' + f2(ly2) +
         '" fill="none" stroke="' + sd.color + '" stroke-opacity="0.6" stroke-width="1.8"/>' +
         '<g class="alr3-lab" data-i="' + o.i + '">' +
         '<text x="' + f2(lx) + '" y="' + f2(it.y) + '" text-anchor="' + anchor + '" class="alr3-pct" fill="' + sd.color + '">' + nf(sd.w, 2) + '%</text>' +
-        '<text x="' + f2(lx) + '" y="' + f2(it.y + 26) + '" text-anchor="' + anchor + '" class="alr3-name">' + esc(name) + esc(neg) + '</text></g>';
+        '<text x="' + f2(lx) + '" y="' + f2(it.y + 30) + '" text-anchor="' + anchor + '" class="alr3-name">' + esc(name) + esc(neg) + '</text></g>';
     }).join('');
   }
   labs += leadLabel(leftO, 'left') + leadLabel(rightO, 'right');
@@ -1754,7 +1757,7 @@ window.buildRoseSVG = function (d, titleText, opts) {
   const ROSE_STYLE = '<style>' +
     'text{font-family:"Microsoft YaHei","Noto Sans TC",sans-serif}' +
     '.alr3-pct{font-size:38px;font-weight:700}' +
-    '.alr3-name{font-size:19px;font-weight:700;fill:#1f2933}' +
+    '.alr3-name{font-size:20px;font-weight:700;fill:#1f2933}' +
     '.alr3-total{font-size:30px;font-weight:700;fill:#0A3D91}' +
     '.alr3-sub{font-size:17px;fill:#6b7785}' +
     '.alr3-src{font-size:20px;fill:#6b7785}</style>';
@@ -3170,7 +3173,11 @@ document.addEventListener('mpf:lang', () => {
   }
 
   function boot() {
-    if (!document.getElementById('mktTicker')) return;
+    var box0 = document.getElementById('mktTicker');
+    if (!box0) return;
+    /* 2026-11-02（第十八轮，用户要求）：左侧 × 关闭整条行情栏；不写 localStorage，刷新后自动恢复 */
+    var xb = box0.querySelector('.tk-close');
+    if (xb && !xb.__bound) { xb.__bound = 1; xb.addEventListener('click', function (e) { e.stopPropagation(); box0.style.display = 'none'; }); }
     pinFallback();
     fetch('/api/ticker').then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) { if (j) render(j); })
@@ -3190,7 +3197,7 @@ document.addEventListener('mpf:lang', () => {
  * 原生 <select> 的弹层由系统绘制，灰白底无法跟随站点设计语言（用户反馈）。
  * 这里保留原生 select 负责取值与 change 事件，外层用按钮 + 自绘 listbox 显示。 */
 (function () {
-  const IDS = ['#fType', '#fSub', '#fTrustee', '#fRisk', '#perPage', '#dimSel', '#rkRType', '#rkRSub',
+  const IDS = ['#fType', '#fSub', '#fTrustee', '#fRisk', '#perPage', '#rkRType', '#rkRSub',
     '#rkRTrustee', '#rkRRisk', '#rkRTop', '#rkDimSel', '#rkRRetDim'];
   const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   function enhance(sel) {
@@ -3220,9 +3227,35 @@ document.addEventListener('mpf:lang', () => {
       btn.disabled = !!sel.disabled;
       btn.setAttribute('aria-expanded', pop.hidden ? 'false' : 'true');
     };
+    const isPerPage = sel.id === 'perPage';
     const build = () => {
       pop.innerHTML = Array.from(sel.options).map((o, i) =>
         '<button type="button" role="option" class="mpfsel-opt' + (i === sel.selectedIndex ? ' on' : '') + '" data-i="' + i + '"' + (o.disabled ? ' disabled' : '') + '>' + esc(o.textContent) + '</button>').join('');
+      /* 2026-11-02（第十八轮，用户要求）：每页显示底部加「自定义条数」 */
+      pop.classList.toggle('has-custom', isPerPage);
+      if (isPerPage) {
+        pop.insertAdjacentHTML('beforeend', '<div class="mpfsel-custom">' +
+          '<input type="number" min="1" max="500" step="1" inputmode="numeric" placeholder="' + (typeof TT === 'function' ? TT('自定义') : '自定义') + '" aria-label="' + (typeof TT === 'function' ? TT('自定义每页条数') : '自定义每页条数') + '">' +
+          '<button type="button" data-ok="1">' + (typeof TT === 'function' ? TT('确定') : '确定') + '</button></div>');
+      }
+    };
+    const applyCustom = () => {
+      const inp = pop.querySelector('.mpfsel-custom input');
+      if (!inp) return;
+      let n = parseInt(inp.value, 10);
+      if (!isFinite(n) || n < 1) n = 1;
+      if (n > 500) n = 500;
+      let idx = Array.from(sel.options).findIndex((o) => String(o.value) === String(n));
+      if (idx < 0) {
+        const o = document.createElement('option');
+        o.value = String(n);
+        o.textContent = n + ' ' + (typeof TT === 'function' ? TT('条') : '条');
+        sel.appendChild(o);
+        idx = sel.options.length - 1;
+      }
+      sel.selectedIndex = idx;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      sync(); close(); btn.focus();
     };
     const open = () => {
       if (btn.disabled) return;
@@ -3241,6 +3274,10 @@ document.addEventListener('mpf:lang', () => {
       const r = btn.getBoundingClientRect();
       const up = (window.innerHeight - r.bottom < 230) && r.top > 230;
       pop.classList.toggle('up', up);
+      /* 2026-11-02：弹层按最长选项自适应宽度；贴右边缘时改为右对齐，避免溢出视口 */
+      pop.classList.remove('align-r');
+      const pr = pop.getBoundingClientRect();
+      if (pr.right > window.innerWidth - 8) pop.classList.add('align-r');
       const cur = pop.querySelector('.mpfsel-opt.on');
       if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
       btn.setAttribute('aria-expanded', 'true');
@@ -3256,11 +3293,15 @@ document.addEventListener('mpf:lang', () => {
       else if (e.key === 'Escape') close();
     });
     pop.addEventListener('click', (e) => {
+      if (e.target.closest && e.target.closest('.mpfsel-custom button')) { applyCustom(); return; }
       const b = e.target.closest ? e.target.closest('.mpfsel-opt') : null;
       if (!b || b.disabled) return;
       sel.selectedIndex = parseInt(b.dataset.i, 10);
       sel.dispatchEvent(new Event('change', { bubbles: true }));
       sync(); close(); btn.focus();
+    });
+    pop.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target && e.target.closest && e.target.closest('.mpfsel-custom')) { e.preventDefault(); applyCustom(); }
     });
     document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });

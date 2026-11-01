@@ -245,6 +245,8 @@
 '全部区间': 'All range',
 '请选择有效的起止日期': 'Please pick a valid start and end date',
 '确定': 'Apply',
+'自定义': 'Custom',
+'自定义每页条数': 'Custom rows per page',
 '名称': 'Name',
 '最新点位': 'Latest level',
 '区间收益': 'Range return',
@@ -1088,6 +1090,8 @@
   '风险级别图例（1 级最低 → 7 级最高）': 'Risk class legend (1 lowest - 7 highest)',
 
   '基金筛选': 'Fund filters',
+  '可叠加多个维度，先点的优先': 'Stack multiple dimensions — the first selected ranks first',
+  '按优先级依次排序': 'Sorted in the order of priority',
   '基金搜索': 'Fund search',
   '重试': 'Retry',
   '持仓数据暂时读取失败（网络或服务繁忙）': 'Holdings could not be loaded (network or service busy)',
