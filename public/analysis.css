@@ -1168,7 +1168,11 @@
    （表格按内容宽度撑开，容器统一滚动，避免最后一列被卡片裁掉） */
 .tr-tablewrap { overflow-x: auto; }
 .tr-tablewrap .tr-tbl { width: max-content; min-width: 100%; }
-@media (max-width: 1439px) {
+/* 1366–1499：15px 会顶到卡片边缘，降一档到 14px（仍明显大于原来的 12px） */
+@media (max-width: 1499px) {
+  .tr-tbl th, .tr-tbl td { font-size: 14px; }
+}
+@media (max-width: 1365px) {
   .tr-tbl th, .tr-tbl td { font-size: 12.5px; }
   .tr-tbl th { padding: 8px 4px; }
   .tr-tbl td { padding: 9px 4px; }
