@@ -366,6 +366,9 @@
 .tr-tbl th { text-align: left; font-weight: 600; color: var(--text-3); font-size: 11.5px; border-bottom: 1px solid var(--border); padding: 7px 8px; white-space: nowrap; }
 .tr-tbl td { padding: 8px; border-bottom: 1px dashed var(--border); vertical-align: top; }
 .tr-tbl .r { text-align: right; }
+/* 2026-11-03（第二十九轮，用户要求）：走势图统计表列头与数值一律居中（名称列仍左对齐） */
+.tr-tbl.tr-center .r, .tr-tbl.tr-center th.r { text-align: center; }
+.tr-tbl.tr-center th:first-child { text-align: left; }
 .tr-tbl td.n { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
 .tr-tbl td.n i { width: 14px; height: 3px; border-radius: 2px; flex: none; }
 .tr-tbl .nm { font-weight: 600; }
@@ -1216,22 +1219,23 @@
 
 
 /* ==========================================================
-   2026-11-03（第二十八轮，用户要求）
-   ④ 详情弹窗：价格 + 四块并排一行，但**不再加宽弹窗**——
-      改为把五块与字号一起收小，回到 900px（原 860 略宽一点即可放下）。
+   2026-11-03（第二十九轮，用户要求）
+   ① 详情弹窗再收窄 15%（900 → 765），表头沿用 E02 浅蓝价格块模板：
+      价格在左 + 四项并排；右侧四块字号各加大一号，内边距收紧（减少空白）。
    ========================================================== */
-.modal-box { max-width: 900px; }
-.modal-bd .fd-head { grid-template-columns: 1.12fr .96fr .96fr .96fr .96fr; margin-top: 10px; }
-.modal-bd .fd-price { grid-column: auto; border-right: 1px solid var(--border-strong); border-bottom: 0; padding: 9px 13px 11px; }
-.modal-bd .fd-cell { padding: 9px 11px 11px; }
-.modal-bd .fd-k { font-size: 10.5px; }
-.modal-bd .fd-v { font-size: 25px; letter-spacing: -0.6px; margin-top: 1px; }
-.modal-bd .fd-v2 { font-size: 14.5px; margin-top: 3px; }
-.modal-bd .fd-v2.fd-type { font-size: 13.5px; }
-.modal-bd .fd-s { font-size: 10.5px; margin-top: 1px; }
-.modal-bd .fd-asof { font-size: 10.5px; }
-.modal-bd .fd-range { font-size: 10.5px; margin-top: 2px; }
-.modal-bd .fd-stars { font-size: 11px; margin-top: 3px; letter-spacing: 1px; }
+.modal-box { max-width: 765px; }
+.modal-bd .fd-head { grid-template-columns: 1.1fr 1fr 1fr 1fr 1fr; margin-top: 8px; }
+.modal-bd .fd-price { grid-column: auto; border-right: 1px solid var(--border-strong); border-bottom: 0;
+  padding: 8px 11px 9px; background: #f2f8fe; }
+.modal-bd .fd-cell { padding: 8px 10px 9px; }
+.modal-bd .fd-k { font-size: 11px; line-height: 1.45; }
+.modal-bd .fd-v { font-size: 26px; letter-spacing: -0.6px; margin-top: 0; line-height: 1.15; }
+.modal-bd .fd-v2 { font-size: 16px; margin-top: 2px; }
+.modal-bd .fd-v2.fd-type { font-size: 15px; }
+.modal-bd .fd-s { font-size: 11px; margin-top: 0; }
+.modal-bd .fd-asof { font-size: 11px; }
+.modal-bd .fd-range { font-size: 11px; margin-top: 1px; }
+.modal-bd .fd-stars { font-size: 12px; margin-top: 2px; letter-spacing: 1px; }
 /* 详情弹窗里的走势图头部一行放得下（与主页面一致，不再换行） */
 .modal-bd .tr-head { flex-wrap: nowrap; }
 .modal-bd .tr-head .tr-toolbar { flex-wrap: nowrap; }
@@ -1258,18 +1262,27 @@
   .cmp-modal #cmpBody table.data tbody tr:hover td:first-child { background: var(--surface-2, #f7fafd); }
 }
 
-/* 2026-11-03（第二十八轮）：详情弹窗内的走势图头部再收一档，900px 宽也能单行 */
-.modal-bd .tr-ctrls { flex-wrap: nowrap; gap: 8px; }
-.modal-bd .tr-head { gap: 8px; }
-.modal-bd .tr-titlebtn { font-size: 15px; }
-.modal-bd .tr-adds { gap: 6px; }
-.modal-bd .tr-adds .tr-sel, .modal-bd .tr-adds .tr-clear { height: 28px; padding: 0 9px; font-size: 12px; }
-.modal-bd .tr-head .tr-r { padding: 4px 8px; font-size: 11.5px; }
-.modal-bd .tr-head .tr-tool { padding: 4px 8px; font-size: 12px; }
+/* 2026-11-03（第二十九轮）：弹窗再窄 135px，走势图工具条与统计表一起收一档，
+   729px 内容宽仍能单行放下「标题 + 添加组 + 区间 + 导出/分享」。 */
+.modal-bd .tr-ctrls { flex-wrap: nowrap; gap: 6px; }
+.modal-bd .tr-head { gap: 6px; }
+.modal-bd .tr-titlebtn { font-size: 14px; }
+.modal-bd .tr-adds { gap: 5px; }
+.modal-bd .tr-adds .tr-sel, .modal-bd .tr-adds .tr-clear { height: 27px; padding: 0 8px; font-size: 11.5px; }
+.modal-bd .tr-rangebox .tr-r { padding: 3px 7px; font-size: 11px; }
+.modal-bd .tr-head .tr-tool { padding: 3px 7px; font-size: 11.5px; }
 
-/* 2026-11-03（第二十八轮）：「最大回撤区间」合并成一列后，弹窗内要给日期留足宽度 */
-.modal-bd .tr-tbl th:nth-child(1), .modal-bd .tr-tbl td:nth-child(1) { width: 20% !important; padding-left: 12px; }
-.modal-bd .tr-tbl th:last-child, .modal-bd .tr-tbl td:last-child { width: 21% !important; }
+/* 2026-11-03（第二十九轮）：统计表去掉问号后重新分配列宽（7 列正好铺满 729px） */
+.modal-bd .tr-tbl { table-layout: fixed; }
+.modal-bd .tr-tbl th, .modal-bd .tr-tbl td { font-size: 11.5px; padding-left: 5px; padding-right: 5px; }
+.modal-bd .tr-tbl th:nth-child(1), .modal-bd .tr-tbl td:nth-child(1) { width: 22% !important; padding-left: 10px; }
+.modal-bd .tr-tbl th:nth-child(2), .modal-bd .tr-tbl td:nth-child(2) { width: 11% !important; }
+.modal-bd .tr-tbl th:nth-child(3), .modal-bd .tr-tbl td:nth-child(3) { width: 11% !important; }
+.modal-bd .tr-tbl th:nth-child(4), .modal-bd .tr-tbl td:nth-child(4) { width: 11% !important; }
+.modal-bd .tr-tbl th:nth-child(5), .modal-bd .tr-tbl td:nth-child(5) { width: 11.5% !important; }
+.modal-bd .tr-tbl th:nth-child(6), .modal-bd .tr-tbl td:nth-child(6) { width: 11.5% !important; }
+.modal-bd .tr-tbl th:nth-child(7), .modal-bd .tr-tbl td:nth-child(7) { width: 22% !important; font-size: 11px; }
+.modal-bd .tr-tbl td.n .nm { max-width: calc(100% - 76px); }
 .cmp-box .tr-tbl th:nth-child(1), .cmp-box .tr-tbl td:nth-child(1) { width: 20% !important; }
 .cmp-box .tr-tbl th:last-child, .cmp-box .tr-tbl td:last-child { width: 21% !important; }
 .modal-bd .tr-tbl td.date, .cmp-box .tr-tbl td.date { white-space: nowrap; }

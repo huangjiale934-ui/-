@@ -70,7 +70,7 @@ chk('首页·走势图 2022 -15.55% 为绿（规模加权新值）', /class="lin
 
 chk('首页·四榜 2×2 各 5 条（2026-10-31：砍总开支/低风险）', ['#mkTop1', '#mkTop2', '#mkTop4', '#mkTop5'].every((id) => {
   const m = new RegExp('id="' + id.slice(1) + '"[\\s\\S]*?</ol>').exec(home);
-  return m && (m[0].match(/<li>/g) || []).length === 5;
+  return m && (m[0].match(/<li[\s>]/g) || []).length === 5;
 }) && home.indexOf('id="mkTop3"') < 0 && home.indexOf('id="mkTop6"') < 0);
 chk('首页·免责条在位（disclaimer，2026-10-31 版式）', /class="disclaimer"/.test(home) && /每日自动同步|风险提示与免责声明/.test(home));
 chk('首页·年份标签 11 个（走势 6 + 表现指数区间 5，2026-10-31 加近10年）', (home.match(/class="yr-tab( on)?"/g) || []).length === 11);
@@ -328,14 +328,14 @@ chk('首页·CSS 已含桌面三列布局调优', (function () {
 
 /* ---- 第九轮：榜单跳转链接 / 海通自动抓取 ---- */
 chk('首页·四榜均有「查看完整榜单」链接', (home.match(/class="mk-more"/g) || []).length === 4);
-chk('首页·榜单链接指向排名页对应榜单', (function () {
-  const want = { mkTop1: 'ann1', mkTop4: 'ann5', mkTop5: 'cumLaunch', mkTop2: 'size' };   /* 2026-10-31：四榜 */
+chk('首页·榜单链接指向同口径榜单（2026-11-03 第二十九轮：自算榜进资料库对应维度）', (function () {
+  const want = { mkTop1: 'dim=selfY1#db', mkTop4: 'dim=selfY5a#db', mkTop5: 'rk=cumLaunch#rank', mkTop2: 'dim=size#db' };
   return Object.keys(want).every((id) => {
     const m = new RegExp('<ol[^>]*id="' + id + '"[\\s\\S]{0,600}?</ol>').exec(home);
     // 链接在 <ol> 之前，取卡片整段判断
     const card = new RegExp('<div class="mk-top">[\\s\\S]*?id="' + id + '"[\\s\\S]*?</div>').exec(home);
     // 2026-10-29：GitHub Pages 部署在 /-/ 子路径，必须用相对链接；原断言强制前导斜杠反而会跳错站
-    return card && card[0].indexOf('index.html?rk=' + want[id] + '#' + want[id]) >= 0;
+    return card && card[0].indexOf('index.html?' + want[id]) >= 0;
   });
 })());
 chk('词条·查看完整榜单（多语言）', (function () {
@@ -1910,14 +1910,14 @@ chk('二十七轮·②页头与行情栏合并（mktTicker 移入 header，数�
 chk('二十七轮·③日期浮层：确定后变清空 + 点空白收起',
   /function syncDgo/.test(readSrc('trend.js')) && /_t\('清空'\) : _t\('确定'\)/.test(readSrc('trend.js')) &&
   /closest\('\.tr-rangebox'\)/.test(readSrc('trend.js')) && /dr\.hidden = true;   \/\* 应用后收起浮层/.test(readSrc('trend.js')));
-chk('二十七轮·④详情弹窗表头与主页一致（一行 + 同一标题 + 加宽）',
+chk('二十七轮·④详情弹窗表头与主页一致（一行 + 同一标题；宽度按最新一轮 765）',
   /title: TT\('基金走势对比图'\)/.test(readSrc('common.js')) &&
-  /\.modal-box \{ max-width: 900px; \}/.test(readSrc('analysis.css')) &&
+  /\.modal-box \{ max-width: 765px; \}/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.tr-head \{ flex-wrap: nowrap; \}/.test(readSrc('analysis.css')));
 chk('二十七轮·⑤⑥对比最优值改蓝色调 + 年份上移到月份同一基线',
   /\.cmp-best \{ background: #e8f1fb !important; color: #084e8c !important/.test(readSrc('style.css')) &&
   /axisY \+ 1\) \+ '" text-anchor="' \+ anc \+ '" class="tr-xlab tr-xlab-year"/.test(readSrc('trend.js')) &&
-  /yearLab\(lx, axisY \+ 16, yearTxt\(yy\), anchor\)/.test(readSrc('home.js')));
+  /yearLab\(lx, axisY \+ 32, yearTxt\(yy\), anchor\)/.test(readSrc('home.js')));
 chk('二十七轮·⑦「总体」改名「全部」',
   !/TT\('总体'\)/.test(readSrc('analysis.js')) && /TT\('全部'\)/.test(readSrc('analysis.js')));
 chk('二十七轮·⑧ⓘ 用首页同款小 i（15px 细描边）',
@@ -1934,7 +1934,7 @@ chk('二十七轮·⑫回顶按钮上移右移（right 36 / bottom 94）',
 chk('二十七轮·⑬页脚两个折叠箭头缩小 15%（42 → 36）',
   /\.foot-fold \.ff-arrow \{ font-size: 36px; width: 38px; \}/.test(readSrc('style.css')));
 chk('二十七轮·⑭详情弹窗价格与四项并排（5 列一行）',
-  /\.modal-bd \.fd-head \{ grid-template-columns: 1\.12fr \.96fr \.96fr \.96fr \.96fr;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{ grid-column: auto;/.test(readSrc('analysis.css')));
 chk('二十七轮·设计页（20 套整页 / 20 套详情头 / 对比表 4 种，放在 public/ 可直接访问）',
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-shell.html')) &&
@@ -1942,16 +1942,15 @@ chk('二十七轮·设计页（20 套整页 / 20 套详情头 / 对比表 4 种�
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-cmp.html')));
 
 /* ===== 2026-11-03 第二十八轮（9 条反馈）===== */
-chk('二十八轮·①详情弹窗收窄到 900（不再加宽），表头五块字号压缩',
-  /\.modal-box \{ max-width: 900px; \}/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v \{ font-size: 25px;/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-cell \{ padding: 9px 11px 11px; \}/.test(readSrc('analysis.css')) &&
-  !/max-width: 1060px/.test(readSrc('analysis.css')));
+chk('二十八轮·①详情弹窗不再加宽（1060 已下线，现 765）',
+  !/max-width: 1060px/.test(readSrc('analysis.css')) &&
+  /\.modal-box \{ max-width: 765px; \}/.test(readSrc('analysis.css')));
 chk('二十八轮·②统计表导出 CSV 已删除（含样式与点击分支）',
   !/csvBar/.test(readSrc('trend.js')) && !/\.tr-tblbar/.test(readSrc('analysis.css')));
-chk('二十八轮·③首页年份与换年竖线分开（左对齐 +8px）',
-  /let lx = xt0 \+ 8, anchor = 'start';/.test(readSrc('home.js')) &&
-  /let lx = x \+ 7, anc = 'start';/.test(readSrc('trend.js')));
+chk('二十九轮·③首页年份改「下移一行居中」（不再左右平移）',
+  /yearLab\(lx, axisY \+ 32, yearTxt\(yy\), anchor\)/.test(readSrc('home.js')) &&
+  !/let lx = xt0 \+ 8/.test(readSrc('home.js')) &&
+  /let lx = xt0, anchor = 'middle';/.test(readSrc('home.js')));
 chk('二十八轮·④对比弹窗也有「添加指数 / 添加基金 / 清空」（headAdds）',
   /headAdds: true/.test(readSrc('common.js')) && /const withAdds = !o\.bareHead \|\| !!o\.headAdds;/.test(readSrc('trend.js')));
 chk('二十八轮·⑤回撤「起始 + 结束」合并为一列（两张统计表都改）',
@@ -1978,3 +1977,35 @@ chk('二十八轮·详情弹窗「放大」先切到对比页（修「点了没�
   /__dbShowTab\('cmp'\)/.test(readSrc('common.js')));
 chk('二十八轮·首页图表网格允许收缩（消除横向滚动 256px）',
   /\.mk-charts > \.mk-panel, \.mk-charts2 > \.mk-panel, \.mk-charts > \.mk-card \{ min-width: 0; \}/.test(readSrc('home.css')));
+
+/* ===== 2026-11-03 第二十九轮（9 条反馈）===== */
+chk('二十九轮·①详情弹窗再收窄 15%（765）+ 表头 E02 浅蓝价格块 + 字号加大一号',
+  /\.modal-box \{ max-width: 765px; \}/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-price \{[^}]*background: #f2f8fe;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v \{ font-size: 26px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2 \{ font-size: 16px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-cell \{ padding: 8px 10px 9px; \}/.test(readSrc('analysis.css')));
+chk('二十九轮·③走势图统计表去问号 + 列头与数值居中',
+  !/class="tr-q"/.test(readSrc('trend.js')) &&
+  /<table class="tr-tbl tr-center">/.test(readSrc('trend.js')) &&
+  /\.tr-tbl\.tr-center \.r, \.tr-tbl\.tr-center th\.r \{ text-align: center; \}/.test(readSrc('analysis.css')));
+chk('二十九轮·⑤侧栏 S12：标题 16px/800 + 简繁英胶囊居中',
+  /\.db-side-grp \{ padding: 2px 6px 7px; font-size: 16px; font-weight: 800;/.test(readSrc('style.css')) &&
+  /\.db-side-lang \{ margin: 0 2px 12px; \}/.test(readSrc('style.css')) &&
+  /\.db-side-lang \.lang-sw \{ display: inline-flex;[^}]*background: #f1f7fd;/.test(readSrc('style.css')));
+chk('二十九轮·⑥公司名下加英文 Guangzhou Data Mining Company',
+  /Guangzhou Data Mining Company/.test(readSrc('index.html')) &&
+  /Guangzhou Data Mining Company/.test(readSrc('home.html')) &&
+  /\.logo-txt \.logo-en \{ display: block; font-size: 8\.8px;/.test(readSrc('style.css')));
+chk('二十九轮·⑦行情指数分隔线加粗（2px + 深一档）',
+  /\.hdr \.tk-card \{ border-right-width: 2px; border-right-color: #d2dfec; \}/.test(readSrc('style.css')));
+chk('二十九轮·⑧首页榜单可点进详情（data-fid + ?f= 深链）',
+  /data-fid="' \+ escA\(x\.id/.test(readSrc('home.js')) &&
+  /index\.html\?f=' \+ encodeURIComponent\(id\) \+ '#db'/.test(readSrc('home.js')) &&
+  /\.mk-top li\[data-fid\] \{ cursor: pointer; \}/.test(readSrc('home.css')));
+chk('二十九轮·⑧资料库支持 ?dim= 深链（落到同一自算维度排序）',
+  /get\('dim'\)/.test(readSrc('app.js')) && /window\.__DIMSEL = \[\{ k: dk, d: hit\.d \|\| 'desc' \}\];/.test(readSrc('app.js')));
+chk('二十九轮·⑦首屏设计页（20 套真实尺寸）在位',
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-hero.html')) &&
+  /1160px; height: 316px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'design-hero.html'), 'utf8')));

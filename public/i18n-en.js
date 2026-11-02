@@ -1,6 +1,7 @@
 /* 英文字典（2026-10-21 按需加载：切到英文时才下载） */
 (function (w) {
   var E = {
+'点击查看该基金详情': 'Open fund details',
 '广州精研数据有限公司': 'Jingyan Data Co., Ltd. (Guangzhou)',
 '香港强积金数据分析平台': 'Hong Kong MPF Data Analytics Platform',
 '首页': 'Home',

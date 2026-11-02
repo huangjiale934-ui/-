@@ -605,13 +605,31 @@
     if (!el) return;
     if (!list || !list.length) { el.innerHTML = '<li class="mk-empty">' + TT('暂无数据') + '</li>'; return; }
     el.innerHTML = list
-      .map((x, i) => '<li>' +
+      .map((x, i) => '<li data-fid="' + escA(x.id == null ? '' : x.id) + '" role="link" tabindex="0"' +
+        ' title="' + escA(TT('点击查看该基金详情')) + '">' +
         /* 2026-11-02（第二十五轮，用户要求）：改回圆形序号 1-5，蓝色由深到浅递减 */
         '<span class="top-tag t' + (i + 1) + '">' + (i + 1) + '</span>' +
         '<span class="n" title="' + esc(fundFullName(x)) + (x.scheme ? ' · ' + esc(x.scheme) : '') + '">' + esc(fundFullName(x)) + '</span>' +
         '<span class="v ' + (colorVal == null ? '' : (colorVal(x) >= 0 ? 'up' : 'down')) + '">' + fmt(x) + '</span>' +
         '</li>')
       .join('');
+    /* 2026-11-03（第二十九轮，用户要求）：榜单里的基金可点击直接打开详情页。
+       首页没有详情弹窗容器，跳合并页的 ?f=<id> 深链（落地即弹窗）。用赋值式 onxxx 覆盖，
+       反复渲染不会累积监听。 */
+    const go = (li) => {
+      const id = li && li.getAttribute('data-fid');
+      if (!id) return;
+      location.href = 'index.html?f=' + encodeURIComponent(id) + '#db';
+    };
+    el.onclick = (e) => {
+      const li = e.target && e.target.closest ? e.target.closest('li[data-fid]') : null;
+      if (li) go(li);
+    };
+    el.onkeydown = (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const li = e.target && e.target.closest ? e.target.closest('li[data-fid]') : null;
+      if (li) { e.preventDefault(); go(li); }
+    };
   }
 
   /* 2026-10-23（核验报告 #3）：首页支持 ?f=<id> 深链——直接转到资料库并打开该基金详情 */
@@ -850,7 +868,8 @@
         xt += '<text x="' + x.toFixed(1) + '" y="' + (axisY + 16) + '" text-anchor="middle" class="pi-yk">' + monthTxt(mo) + '</text>';
       }
     }
-    /* 年份标签：落在 1 月 1 日（= 上一年 12/31 月底），与月份同节奏；首个年份若在数据起点之前则跳过 */
+    /* 年份标签：单独一行放在月份下方（2026-11-03 用户要求：不再左右平移——那会和相邻月份粘住，
+       改为居中挂在「换年竖线」正下方，往下让出一行即可完全分开） */
     const y0 = Math.ceil(mi0 / 12), y1 = Math.floor(mi1 / 12);
     /* 长区间（如恒指全部 37 年）按宽度稀疏年份标签，避免 24px 一个挤成一片 */
     const yStep = Math.max(1, Math.ceil(58 / Math.max(1, plotW / Math.max(1, y1 - y0 + 1))));
@@ -858,11 +877,11 @@
     for (let yy = y1; yy >= y0; yy -= yStep) {
       const xt0 = padL + plotW * ((yy * 12 - mi0) / (mi1 - mi0 || 1));
       if (xt0 < padL - 2 || xt0 > W - padR - 10) continue;
-      /* 2026-11-03（用户要求）：年份与「换年竖线」稍微分开 —— 默认右移 8px 左对齐；
-         靠右放不下时改为左对齐（贴在竖线左侧） */
-      let lx = xt0 + 8, anchor = 'start';
-      if (lx + 32 > W - padR) { lx = xt0 - 8; anchor = 'end'; }
-      xt += yearLab(lx, axisY + 16, yearTxt(yy), anchor);
+      /* 居中为主；贴左右边时改贴边对齐，避免文字被裁 */
+      let lx = xt0, anchor = 'middle';
+      if (lx < padL + 16) { lx = padL; anchor = 'start'; }
+      else if (lx > W - padR - 16) { lx = W - padR; anchor = 'end'; }
+      xt += yearLab(lx, axisY + 32, yearTxt(yy), anchor);
     }
     /* 年份分界小竖线（1 月 1 日）：让「哪里换年」一眼可见 */
     let ytick = '';

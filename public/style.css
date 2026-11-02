@@ -2582,3 +2582,30 @@ body.has-sidebar .dca-fab { display: none !important; }
   .f-row-merged .tb-tail { gap: 5px; }
   .f-row-merged .tb-tail .btn { padding: 0 6px; }
 }
+
+/* ==========================================================
+   2026-11-03（第二十九轮，用户要求）
+   ⑤ 侧栏照 S12 方案：标题更醒目、简繁英胶囊居中挂在标题下方；
+   ⑥ 页头公司名下方加英文 Guangzhou Data Mining Company（照参考图）；
+   ⑦ 顶部行情栏各指数之间的分隔线加粗。
+   ========================================================== */
+.db-side-grp { padding: 2px 6px 7px; font-size: 16px; font-weight: 800; color: #14314f; letter-spacing: .2px; }
+.db-side-lang { margin: 0 2px 12px; }
+.db-side-lang .lang-sw { display: inline-flex; gap: 2px; padding: 2px; background: #f1f7fd; border-radius: 9px; }
+.db-side-lang .lang-sw button { font-size: 11.5px; padding: 3px 10px; border-radius: 7px; }
+.db-side-lang .lang-sw button.on { background: var(--brand, #0866bb); color: #fff; }
+@media (max-width: 760px) {
+  .db-side-lang { margin: 0 0 0 auto; }
+  .db-side-lang .lang-sw button { padding: 2px 8px; font-size: 10.5px; }
+}
+
+/* 公司名两行：中文名 + 英文注册名（英文用字距拉开，参考用户给的 logo 样张） */
+.logo { gap: 9px; }
+.logo-txt b { font-size: 14.5px; line-height: 1.15; letter-spacing: .3px; color: #12314e; }
+.logo-txt .logo-en { display: block; font-size: 8.8px; line-height: 1.2; margin-top: 2.5px;
+  letter-spacing: 1.15px; color: #8a9caf; font-weight: 400; white-space: nowrap; }
+@media (max-width: 720px) { .logo-txt .logo-en { display: none; } }
+
+/* 行情栏指数之间的竖分隔线：1px → 2px 并加深一档 */
+.hdr .tk-card { border-right-width: 2px; border-right-color: #d2dfec; }
+.hdr .tk-card:last-child { border-right: 0; }

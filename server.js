@@ -1211,8 +1211,10 @@ const server = http.createServer(async (req, res) => {
   fs.readFile(full, (err, buf) => {
     if (err) {
       // 带扩展名却找不到的一律 404；无扩展名的未知路径返回 404 页面（此前为 200 首页，SEO 语义不规范）
+      // 2026-11-03（体检）：.html 请求也回落到 404 页面，别再给用户看纯文本「Not Found」
       const looksLikeFile = /\.[a-z0-9]{2,5}$/i.test(file);
-      if (looksLikeFile) return sendRaw(req, res, 404, 'Not Found', 'text/plain; charset=utf-8');
+      const isHtml = /\.html?$/i.test(file);
+      if (looksLikeFile && !isHtml) return sendRaw(req, res, 404, 'Not Found', 'text/plain; charset=utf-8');
       fs.readFile(path.join(PUBLIC_DIR, '404.html'), (e2, b2) => {
         if (e2) return sendRaw(req, res, 404, 'Not Found', 'text/plain; charset=utf-8');
         sendRaw(req, res, 404, b2.toString('utf8').replace(/\?v=[0-9a-zA-Z.]+/g, '?v=' + ASSET_V), MIME['.html'], { cache: 'no-cache' });

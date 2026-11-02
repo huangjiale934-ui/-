@@ -1138,3 +1138,15 @@ body { overflow-x: visible; }
    允许列收缩，图表内部自带 overflow 处理 */
 .mk-charts > .mk-panel, .mk-charts2 > .mk-panel, .mk-charts > .mk-card { min-width: 0; }
 .mk-charts { min-width: 0; }
+
+/* 2026-11-03（第二十九轮，用户要求）：首页四个榜单的基金条目可点击进详情 */
+.mk-top li[data-fid] { cursor: pointer; }
+.mk-top li[data-fid]:focus-visible { outline: 2px solid #0866bb; outline-offset: -2px; border-radius: 5px; }
+
+/* 2026-11-03（第二十九轮）：首屏品牌行与页头统一——图形 + 中文名 + 英文注册名（去掉 JING YAN 拼音图） */
+.hero-brand { gap: 12px; margin-bottom: 16px; }
+.hero-brand img { height: 36px; }
+.hero-brand .hb-txt { display: flex; flex-direction: column; gap: 3px; }
+.hero-brand .hb-txt b { font-size: 16px; font-weight: 700; color: #12314e; letter-spacing: .3px; }
+.hero-brand .hb-txt em { font-style: normal; font-size: 9px; letter-spacing: 1.15px; color: #8698aa; }
+@media (max-width: 620px) { .hero-brand .hb-txt em { display: none; } }

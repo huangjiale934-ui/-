@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230f4c81%27/%3E%3Cpath d=%27M6 22 L12 14 L17 18 L26 8%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>首页首屏 · 20 套方案（真实尺寸 1160×316）</title>
+<style>
+  :root {
+    --brand: #0866bb; --brand-2: #0f7fd4; --ink: #16283e; --t2: #3d5470; --t3: #8595a8;
+    --line: #e3ecf4; --soft: #edf7ff; --up: #d93025; --dn: #12996b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eef3f9; color: var(--ink);
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", system-ui, sans-serif; }
+  .hd { max-width: 1240px; margin: 0 auto; padding: 34px 20px 10px; }
+  .hd h1 { margin: 0 0 10px; font-size: 25px; letter-spacing: .3px; }
+  .hd p { margin: 0 0 6px; color: #55708c; font-size: 13.5px; line-height: 1.85; }
+  .hd b { color: var(--brand); }
+  .hd .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .hd .chips span { font-size: 12px; color: #4d6a86; background: #fff; border: 1px solid #dce8f4;
+    border-radius: 999px; padding: 4px 11px; }
+  .list { max-width: 1200px; margin: 0 auto; padding: 14px 20px 80px; display: flex; flex-direction: column; gap: 18px; }
+  .cell { width: 1160px; margin: 0 auto; background: #fff; border-radius: 13px; box-shadow: 0 4px 18px rgba(20,50,90,.07); overflow: hidden; }
+  .cap { display: flex; align-items: baseline; gap: 10px; padding: 11px 15px; border-bottom: 1px solid #eef3f9; background: #fbfdff; }
+  .cap b { font-size: 13px; color: var(--brand); letter-spacing: .5px; flex: none; }
+  .cap span { font-size: 12.5px; color: #63798f; }
+  .frame { width: 1160px; height: 316px; position: relative; overflow: hidden;
+    background: linear-gradient(108deg, #f5faff 0%, #eaf4fd 55%, #e2f0fc 100%);
+    border-bottom: 1px solid #dfeaf5; }
+  .wrap { position: absolute; inset: 0; padding: 40px 24px; display: flex; align-items: center; gap: 40px; }
+  .copy { flex: 1 1 auto; min-width: 0; }
+  /* 品牌行 */
+  .brand { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+  .brand i { width: 22px; height: 22px; border-radius: 5px; flex: none;
+    background: conic-gradient(from 45deg, #6cc0e5 0 25%, #2f7fc1 0 50%, #b8d96a 0 75%, #8fc93a 0); }
+  .brand .bt { display: flex; flex-direction: column; line-height: 1.15; }
+  .brand b { font-size: 13px; color: #12314e; letter-spacing: .3px; }
+  .brand em { font-style: normal; font-size: 8.5px; letter-spacing: 1.05px; color: #8a9caf; margin-top: 2px; }
+  .h1 { font-size: 42px; line-height: 1.18; margin: 0 0 14px; letter-spacing: .6px; color: #10263f; font-weight: 700; }
+  .h1.sm { font-size: 34px; margin-bottom: 12px; }
+  /* 右：KPI 2×2 */
+  .kpi { flex: 0 0 430px; display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+  .kpi .c { background: #fff; border: 1px solid #e3eef8; border-radius: 15px; padding: 15px 17px;
+    box-shadow: 0 6px 18px rgba(16,64,104,.06); }
+  .kpi .k { font-size: 12px; color: #6d8599; }
+  .kpi .v { font-size: 26px; font-weight: 700; margin: 7px 0 5px; font-variant-numeric: tabular-nums; color: #0f4f8c; }
+  .kpi .v small { font-size: 12.5px; font-weight: 500; color: #7d94a9; margin-left: 3px; }
+  .kpi .s { font-size: 12.5px; color: #8595a8; }
+
+  /* ——— 通用按钮 ——— */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 44px; padding: 0 22px; border-radius: 9px; font-size: 15px; font-weight: 600;
+    border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
+  .btn.solid { background: linear-gradient(135deg, #0b64b4, #1481d0); color: #fff;
+    box-shadow: 0 8px 18px rgba(12,90,160,.22); }
+  .btn.line { background: #fff; color: #0f5c9e; border-color: #bcd8ef; }
+  .btn.ghost { background: transparent; color: #2f6f9f; border-color: transparent; padding: 0 8px; }
+  .btn svg { width: 17px; height: 17px; }
+
+  /* ——— H01 单主 CTA + 文字链 ——— */
+  .h01 .row { display: flex; align-items: center; gap: 22px; }
+  .h01 .links { display: flex; align-items: center; gap: 16px; font-size: 13.5px; }
+  .h01 .links a { color: #2f6f9f; text-decoration: none; border-bottom: 1px dashed #a9c7e0; padding-bottom: 2px; }
+  .h01 .links i { width: 1px; height: 13px; background: #cfe0ee; }
+
+  /* ——— H02 双主按钮 ——— */
+  .h02 .row { display: flex; gap: 13px; }
+  .h02 .btn { min-width: 178px; }
+
+  /* ——— H03 搜索框 ——— */
+  .h03 .search { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 470px; height: 50px;
+    background: #fff; border: 1px solid #cfe1f2; border-radius: 11px; padding: 0 6px 0 15px;
+    box-shadow: 0 8px 20px rgba(20,70,120,.08); }
+  .h03 .search svg { color: #7fa3c2; flex: none; }
+  .h03 .search span { color: #9aacbd; font-size: 14px; flex: 1; }
+  .h03 .search b { height: 38px; padding: 0 18px; border-radius: 8px; background: #0b64b4; color: #fff;
+    font-size: 14px; font-weight: 600; display: flex; align-items: center; }
+  .h03 .tip { margin-top: 11px; font-size: 12.5px; color: #7b93aa; }
+  .h03 .tip i { font-style: normal; color: #0b64b4; margin: 0 3px; }
+
+  /* ——— H04 搜索 + 热门词 ——— */
+  .h04 .comb { display: flex; width: 100%; max-width: 460px; height: 48px; }
+  .h04 .comb .in { flex: 1; background: #fff; border: 1px solid #cfe1f2; border-right: 0;
+    border-radius: 10px 0 0 10px; display: flex; align-items: center; padding: 0 14px;
+    color: #9aacbd; font-size: 13.5px; }
+  .h04 .comb .go { width: 92px; background: #0b64b4; color: #fff; border-radius: 0 10px 10px 0;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+  .h04 .hot { margin-top: 12px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #7b93aa; }
+  .h04 .hot u { text-decoration: none; color: #2f6f9f; background: #fff; border: 1px solid #dbe8f4;
+    border-radius: 999px; padding: 3px 10px; }
+
+  /* ——— H05 三宫格入口 ——— */
+  .h05 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 470px; }
+  .h05 .g { background: #fff; border: 1px solid #dbe8f4; border-radius: 10px; padding: 11px 12px;
+    box-shadow: 0 4px 12px rgba(20,70,120,.05); }
+  .h05 .g .ic { width: 24px; height: 24px; border-radius: 7px; background: #eaf3fc; color: #0b64b4;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+  .h05 .g b { display: block; font-size: 13px; color: #16324c; }
+  .h05 .g em { font-style: normal; font-size: 11px; color: #8ba0b3; }
+
+  /* ——— H06 分段 pill ——— */
+  .h06 .segs { display: inline-flex; background: #fff; border: 1px solid #d7e5f2; border-radius: 999px; padding: 4px; gap: 3px; }
+  .h06 .segs span { font-size: 13.5px; padding: 7px 17px; border-radius: 999px; color: #55738f; }
+  .h06 .segs span.on { background: #0b64b4; color: #fff; font-weight: 600; box-shadow: 0 4px 10px rgba(11,100,180,.25); }
+  .h06 .note { margin-top: 12px; font-size: 12.5px; color: #7b93aa; }
+
+  /* ——— H07 文字导航行 ——— */
+  .h07 .navline { display: flex; align-items: center; gap: 14px; font-size: 14.5px; }
+  .h07 .navline a { color: #0f5c9e; font-weight: 600; text-decoration: none; }
+  .h07 .navline a::after { content: ' ›'; color: #a9c7e0; font-weight: 400; }
+  .h07 .navline a:last-child::after { content: ''; }
+  .h07 .navline i { width: 1px; height: 14px; background: #cfe0ee; }
+  .h07 .navline em { font-style: normal; font-size: 12.5px; color: #8ba0b3; }
+
+  /* ——— H08 状态信息条 ——— */
+  .h08 .bar { display: flex; align-items: center; gap: 10px; max-width: 470px; background: #fff;
+    border: 1px solid #d9e8f5; border-left: 3px solid #2fa36b; border-radius: 9px; padding: 12px 14px;
+    box-shadow: 0 5px 14px rgba(20,70,120,.06); font-size: 13px; color: #3f6383; }
+  .h08 .bar .dot { width: 7px; height: 7px; border-radius: 50%; background: #2fa36b; box-shadow: 0 0 0 3px #e6f5ee; flex: none; }
+  .h08 .bar b { color: #0f4f8c; }
+  .h08 .bar .go { margin-left: auto; color: #0b64b4; font-weight: 700; }
+
+  /* ——— H09 数字徽标行 ——— */
+  .h09 .nums { display: flex; gap: 26px; align-items: flex-end; }
+  .h09 .nums div { line-height: 1.1; }
+  .h09 .nums b { font-size: 25px; color: #0f4f8c; font-variant-numeric: tabular-nums; }
+  .h09 .nums b small { font-size: 12px; color: #7d94a9; font-weight: 500; margin-left: 2px; }
+  .h09 .nums span { display: block; font-size: 11.5px; color: #8ba0b3; margin-top: 5px; }
+  .h09 .nums i { width: 1px; height: 28px; background: #d5e5f2; }
+
+  /* ——— H10 今日亮点 ——— */
+  .h10 .hl { display: flex; align-items: center; gap: 12px; max-width: 480px; background: #eef8f3;
+    border: 1px solid #cfeadd; border-radius: 10px; padding: 11px 14px; font-size: 13.5px; color: #27604a; }
+  .h10 .hl b { color: #14804f; }
+  .h10 .hl .go { margin-left: auto; font-size: 13px; font-weight: 700; color: #14804f; }
+  .h10 .row { display: flex; align-items: center; gap: 16px; }
+
+  /* ——— H11 最新更新卡 ——— */
+  .h11 .card { display: flex; align-items: center; gap: 14px; max-width: 480px; background: #fff;
+    border: 1px solid #e0ecf7; border-radius: 11px; padding: 12px 14px; box-shadow: 0 6px 16px rgba(20,70,120,.07); }
+  .h11 .card .dt { flex: none; text-align: center; border-right: 1px solid #eaf1f8; padding-right: 13px; }
+  .h11 .card .dt b { display: block; font-size: 19px; color: #0f4f8c; line-height: 1.1; }
+  .h11 .card .dt span { font-size: 10.5px; color: #8ba0b3; }
+  .h11 .card .tx { flex: 1; min-width: 0; }
+  .h11 .card .tx b { display: block; font-size: 13px; color: #1b3550; margin-bottom: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .h11 .card .tx span { font-size: 11.5px; color: #8ba0b3; }
+  .h11 .card .go { color: #0b64b4; font-size: 13px; font-weight: 700; flex: none; }
+
+  /* ——— H12/H13/H14 chips ——— */
+  .chipsrow { display: flex; flex-wrap: wrap; gap: 8px; max-width: 590px; align-items: center; }
+  .chipsrow > span.lb { font-size: 12.5px; color: #7b93aa; margin-right: 2px; }
+  .chipsrow a { font-size: 13px; text-decoration: none; color: #2b5878; background: #fff;
+    border: 1px solid #dce8f4; border-radius: 8px; padding: 7px 12px; display: inline-flex; align-items: center; gap: 6px; }
+  .chipsrow a b { color: #0b64b4; font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .chipsrow a.more { color: #0b64b4; border-style: dashed; background: transparent; }
+  .h14 .chipsrow a.r { border-radius: 999px; padding: 6px 13px; }
+  .h14 .chipsrow a.r i { width: 6px; height: 6px; border-radius: 50%; background: #9ec4e2; }
+  .h14 .chipsrow a.r.r1 i { background: #9fd3b8; }
+  .h14 .chipsrow a.r.r2 i { background: #9ec4e2; }
+  .h14 .chipsrow a.r.r3 i { background: #e8c48a; }
+  .h14 .chipsrow a.r.r4 i { background: #e9a98e; }
+  .h14 .chipsrow a.r.r5 i { background: #dd8f8f; }
+
+  /* ——— H15 双卡入口 ——— */
+  .h15 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 470px; }
+  .h15 .duo div { background: #fff; border: 1px solid #dbe8f4; border-radius: 11px; padding: 13px 14px;
+    box-shadow: 0 5px 14px rgba(20,70,120,.05); }
+  .h15 .duo b { display: block; font-size: 14px; color: #16324c; margin-bottom: 4px; }
+  .h15 .duo em { font-style: normal; font-size: 11.5px; color: #8ba0b3; line-height: 1.5; display: block; }
+  .h15 .duo .ar { float: right; color: #0b64b4; font-weight: 700; }
+
+  /* ——— H16 主 CTA + 使用指南 ——— */
+  .h16 .row { display: flex; align-items: center; gap: 14px; }
+  .h16 .guide { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; color: #2f6f9f; }
+  .h16 .guide .pl { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #bcd8ef; background: #fff;
+    display: flex; align-items: center; justify-content: center; color: #0b64b4; }
+
+  /* ——— H17 大标语 ——— */
+  .h17 .slogan { font-size: 30px; line-height: 1.35; color: #12314e; margin: 0 0 8px; font-weight: 700; }
+  .h17 .slogan em { font-style: normal; color: #0b64b4; }
+  .h17 .sub2 { font-size: 13px; color: #6d8ba6; margin-bottom: 18px; }
+
+  /* ——— H18 数据说明行 ——— */
+  .h18 .meta { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: #7b93aa; flex-wrap: wrap; max-width: 500px; }
+  .h18 .meta b { color: #2b5878; font-weight: 600; }
+  .h18 .meta i { width: 1px; height: 11px; background: #d5e5f2; }
+  .h18 .meta a { color: #0b64b4; text-decoration: none; }
+
+  /* ——— H19 时间线 ——— */
+  .h19 .tl { display: flex; align-items: flex-start; gap: 0; max-width: 520px; }
+  .h19 .tl .st { flex: 1; position: relative; padding-top: 16px; }
+  .h19 .tl .st::before { content: ''; position: absolute; top: 3px; left: 0; right: 0; height: 1px; background: #d7e5f2; }
+  .h19 .tl .st::after { content: ''; position: absolute; top: 0; left: 0; width: 7px; height: 7px; border-radius: 50%;
+    background: #0b64b4; box-shadow: 0 0 0 3px #dceafa; }
+  .h19 .tl .st b { display: block; font-size: 12.5px; color: #16324c; }
+  .h19 .tl .st span { font-size: 11px; color: #8ba0b3; }
+
+  /* ——— H20 情绪入口 ——— */
+  .h20 .sent { display: flex; align-items: center; gap: 14px; max-width: 470px; background: #fff;
+    border: 1px solid #e0ecf7; border-radius: 11px; padding: 10px 14px; box-shadow: 0 6px 16px rgba(20,70,120,.07); }
+  .h20 .sent .bars { display: flex; align-items: flex-end; gap: 3px; height: 30px; flex: none; }
+  .h20 .sent .bars i { width: 7px; border-radius: 2px 2px 0 0; background: #bfdcf2; }
+  .h20 .sent .bars i.u { background: #e8a2a2; }
+  .h20 .sent .tx { flex: 1; }
+  .h20 .sent .tx b { display: block; font-size: 13px; color: #16324c; }
+  .h20 .sent .tx span { font-size: 11.5px; color: #8ba0b3; }
+  .h20 .sent .go { color: #0b64b4; font-weight: 700; font-size: 13px; }
+  @media (max-width: 1240px) {
+    .frame { transform-origin: top left; }
+  }
+</style>
+</head>
+<body>
+<div class="hd">
+  <h1>首页首屏 · 20 套新方案</h1>
+  <p>背景：原来两个按钮里的「基金可视化对比」已经并入「强积金资料库」，入口过时；直接删掉左侧又空。</p>
+  <p>下面每套都是 <b>真实尺寸 1160×316</b>（1440 屏、扣除左侧导航后首屏的实际大小），右侧 2×2 指标卡保持线上不变，只重做左侧标题下方那一块。</p>
+  <p>20 套分 6 类设计语言：<b>单一入口 / 搜索 / 导航 / 数据信息 / 筛选 / 内容</b>，不是换配色或改圆角。挑编号告诉我（如「H08」），或说「H03 的搜索框 + H18 的说明行」这类组合也行。</p>
+  <div class="chips">
+    <span>H01–H04 搜索与入口</span><span>H05–H08 导航形态</span><span>H09–H11 数据信息</span>
+    <span>H12–H15 筛选直达</span><span>H16–H17 文案主张</span><span>H18–H20 状态与情绪</span>
+  </div>
+</div>
+<div class="list" id="list"></div>
+
+<script>
+(function () {
+  const KPI =
+    '<div class="kpi">' +
+      '<div class="c"><div class="k">成分基金</div><div class="v">451<small>条</small></div><div class="s">11 家受托人</div></div>' +
+      '<div class="c"><div class="k">受托人 / 发行人</div><div class="v">11<small>家</small></div><div class="s">24 个强积金计划</div></div>' +
+      '<div class="c"><div class="k">市场总规模</div><div class="v">1.68<small>万亿</small></div><div class="s">港元 · 积金局公布</div></div>' +
+      '<div class="c"><div class="k">近 1 年平均回报</div><div class="v" style="color:#c0392b">+3.56<small>%</small></div><div class="s">自算净值口径</div></div>' +
+    '</div>';
+  const BRAND =
+    '<div class="brand"><i></i><div class="bt"><b>广州精研数据有限公司</b><em>Guangzhou Data Mining Company</em></div></div>';
+  const H1 = '<h1 class="h1">香港强积金数据分析平台</h1>';
+  const ico = (p) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+  const I = {
+    db: ico('<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3"/>'),
+    rank: ico('<path d="M5 20V10M12 20V4M19 20v-7"/>'),
+    calc: ico('<rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/>'),
+    search: ico('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
+    arrow: ico('<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>'),
+    play: ico('<path d="M8 5v14l11-7z"/>')
+  };
+
+  const A = [];
+  const add = (id, name, desc, inner, h1) => A.push({ id, name, desc, inner, h1 });
+
+  /* ---------- 一、入口形态 ---------- */
+  add('H01', '极简单入口 + 一行文字链',
+    '只留「进入资料库」一个主按钮，右边跟两条带虚线的文字链接（榜单 / 说明）。最安静的一版。',
+    '<div class="row"><span class="btn solid">' + I.db + '进入强积金资料库</span>' +
+    '<span class="links"><a>MPFA 榜单</a><i></i><a>数据说明</a></span></div>');
+
+  add('H02', '两个平级入口（资料库 / 榜单）',
+    '把过时的「可视化对比」换成「MPFA 基金榜单」——两个都是真实在用的板块，权重对等。',
+    '<div class="row"><span class="btn solid">' + I.db + '强积金资料库</span>' +
+    '<span class="btn line">' + I.rank + 'MPFA 基金榜单</span></div>');
+
+  add('H03', '搜索优先（大输入框）',
+    '标题下直接给搜索。用户来这里十有八九是找某只基金，比按钮更快一步。',
+    '<div class="search">' + I.search + '<span>输入基金名称 / 发行人，如「宏利」「康健」</span><b>搜索</b></div>' +
+    '<div class="tip">也可以<i>按种类</i>或<i>按发行人</i>浏览全部 451 条</div>');
+
+  add('H04', '搜索 + 热门关键词',
+    '搜索框做成输入+按钮一体，下面补三个热搜词，兼顾不知道搜什么的人。',
+    '<div class="comb"><div class="in">搜索基金名称或发行人…</div><div class="go">查询</div></div>' +
+    '<div class="hot">热门<u>宏利</u><u>海通</u><u>恒指基金</u></div>');
+
+  /* ---------- 二、导航形态 ---------- */
+  add('H05', '三宫格入口卡',
+    '资料库 / 榜单 / 计算器各给一张小卡，带图标和一句说明——把侧栏的三个入口在首屏前置。',
+    '<div class="grid3">' +
+      '<div class="g"><div class="ic">' + I.db + '</div><b>资料库</b><em>451 条 · 多维筛选</em></div>' +
+      '<div class="g"><div class="ic">' + I.rank + '</div><b>榜单</b><em>26 个维度</em></div>' +
+      '<div class="g"><div class="ic">' + I.calc + '</div><b>计算器</b><em>退休估算</em></div>' +
+    '</div>');
+
+  add('H06', '分段胶囊导航',
+    '一行 pill 切换「全部基金 / 榜单 / 计算器」，当前项实心。像 App 的顶部分段控件。',
+    '<div class="segs"><span class="on">全部基金</span><span>MPFA 榜单</span><span>供款计算器</span></div>' +
+    '<div class="note">451 条成分基金 · 11 家受托人 · 数据每日自动同步</div>');
+
+  add('H07', '文字导航行（面包屑式）',
+    '不用按钮，用一行加粗文字链接 + 分隔竖线，配一句灰色注脚。最轻、最省高度。',
+    '<div class="navline"><a>强积金资料库</a><i></i><a>MPFA 榜单</a><i></i><a>供款计算器</a></div>' +
+    '<div class="note" style="margin-top:10px;font-size:12.5px;color:#7b93aa">按种类 / 发行人 / 回报 / 回撤筛选，或直接搜索</div>');
+
+  add('H08', '数据状态条（有信息量的入口）',
+    '做成一条浅绿边的状态卡：绿点 + 「数据已更新至 11-03」+ 右侧箭头，点整条进资料库。',
+    '<div class="bar"><i class="dot"></i><span>数据已更新至 <b>2026-11-03 00:17</b> · 距下次同步 22 小时</span><span class="go">进入资料库 →</span></div>');
+
+  /* ---------- 三、数据信息 ---------- */
+  add('H09', '数字徽标行',
+    '不放按钮，直接摆四个关键数字（451 条 / 11 家 / 24 计划 / 每日更新），用竖线分隔。',
+    '<div class="nums"><div><b>451<small>条</small></b><span>成分基金</span></div><i></i>' +
+    '<div><b>11<small>家</small></b><span>受托人</span></div><i></i>' +
+    '<div><b>24<small>个</small></b><span>强积金计划</span></div><i></i>' +
+    '<div><b>26<small>维</small></b><span>排名维度</span></div></div>');
+
+  add('H10', '今日亮点一句话',
+    '给一句会每天变的观察（如「12 只创近一年新高」），后面跟一个「看看是哪些 →」。',
+    '<div class="hl"><span>今日 <b>12 只</b>基金创近一年新高</span><span class="go">看看是哪些 →</span></div>' +
+    '<div class="row" style="margin-top:14px"><span class="btn line" style="height:38px;font-size:13.5px">' + I.db + '进入资料库</span></div>');
+
+  add('H11', '最新更新卡片',
+    '左侧日期块 + 右侧一条最新资讯标题 + 箭头，像新闻客户端的一条推送。',
+    '<div class="card"><div class="dt"><b>11-03</b><span>净值更新</span></div>' +
+    '<div class="tx"><b>积金局提醒：退休计划管理人须严格履行法定审计责任</b><span>MPF 最新资讯 · 每日同步</span></div>' +
+    '<span class="go">→</span></div>');
+
+  /* ---------- 四、筛选直达 ---------- */
+  add('H12', '按种类直达（带数量）',
+    '把最高频的筛选条件做成一行 chips：股票 218 / 混合 96 / 债券 74 / 保证 32，点击直接进资料库并筛好。',
+    '<div class="chipsrow"><span class="lb">按种类</span>' +
+    '<a>股票基金<b>218</b></a><a>混合资产<b>96</b></a><a>债券基金<b>74</b></a><a>保证基金<b>32</b></a>' +
+    '<a class="more">全部 8 类 →</a></div>');
+
+  add('H13', '按发行人直达',
+    '同理换成发行人：宏利 / 银联信托 / 友邦 / HSBC …，最后一个是「全部 11 家」。',
+    '<div class="chipsrow"><span class="lb">按发行人</span>' +
+    '<a>宏利<b>67</b></a><a>银联信托<b>171</b></a><a>友邦<b>21</b></a><a>HSBC<b>77</b></a>' +
+    '<a class="more">全部 11 家 →</a></div>');
+
+  add('H14', '按风险级别直达',
+    '用 1–5 风险级别做成胶囊（带色点），适合保守型成员先按风险筛。',
+    '<div class="chipsrow" style="gap:7px"><span class="lb">按风险</span>' +
+    '<a class="r r1"><i></i>1 级 保守</a><a class="r r2"><i></i>2 级 稳健</a><a class="r r3"><i></i>3 级 平衡</a>' +
+    '<a class="r r4"><i></i>4 级 进取</a><a class="r r5"><i></i>5 级 激进</a></div>');
+
+  add('H15', '双卡入口（找基金 vs 看市场）',
+    '把需求拆成两种意图：一张卡「按条件找基金」，一张卡「先看市场温度」，各带一句说明。',
+    '<div class="duo"><div><span class="ar">→</span><b>按条件找基金</b><em>种类 / 发行人 / 回报 / 回撤<br>451 条逐条可查</em></div>' +
+    '<div><span class="ar">→</span><b>先看市场温度</b><em>涨跌分布 · 26 个榜单<br>每日更新</em></div></div>');
+
+  /* ---------- 五、文案主张 ---------- */
+  add('H16', '主 CTA + 使用指南',
+    '主按钮进资料库，旁边一个圆形播放键「3 分钟了解怎么用」——给新访客一个台阶。',
+    '<div class="row"><span class="btn solid">' + I.db + '进入强积金资料库</span>' +
+    '<span class="guide"><span class="pl">' + I.play + '</span>3 分钟了解怎么用</span></div>');
+
+  add('H17', '大标语替换主标题 + 单 CTA',
+    '标题本身换成一句主张「451 条成分基金，一屏看完」，下面一行小字说明，再给一个入口。',
+    '<div class="sub2" style="margin-bottom:18px">规模、回报、回撤、持仓、收费——逐条可查，每日同步</div>' +
+    '<span class="btn solid" style="height:42px;font-size:14.5px">' + I.arrow + '打开资料库</span>',
+    '<div style="font-size:34px;line-height:1.28;font-weight:700;color:#12314e;margin:0 0 10px;letter-spacing:.4px">451 条成分基金，<em style="font-style:normal;color:#0b64b4">一屏看完</em></div>');
+
+  /* ---------- 六、状态与情绪 ---------- */
+  add('H18', '数据说明行（口径透明）',
+    '用一行小字交代来源与更新：积金局 + 11 家官网 · 每日同步 · 未经增删，末尾带「查看口径 →」。',
+    '<div class="meta"><span>数据来源 <b>积金局 + 11 家受托人官网</b></span><i></i>' +
+    '<span>每日自动同步</span><i></i><span>原值呈现 · 未经增删</span><i></i><a>查看口径 →</a></div>' +
+    '<div class="row" style="margin-top:16px"><span class="btn solid" style="height:40px;font-size:14px">' + I.db + '进入资料库</span></div>');
+
+  add('H19', '三步时间线',
+    '把「数据怎么来」画成三段：每日净值 → 月度公布 → 新闻公告，每段带时间点。',
+    '<div class="tl"><div class="st"><b>每日净值</b><span>发行人官网 · 22:30</span></div>' +
+    '<div class="st"><b>月度公布</b><span>积金局 · 每月初</span></div>' +
+    '<div class="st"><b>新闻公告</b><span>积金局 · 实时</span></div></div>');
+
+  add('H20', '市场情绪入口',
+    '左边一根迷你涨跌柱，右边一句「今天 62% 的基金上涨」，点进温度计/资料库。',
+    '<div class="sent"><div class="bars"><i style="height:12px"></i><i style="height:20px" class="u"></i>' +
+    '<i style="height:9px"></i><i style="height:26px" class="u"></i><i style="height:16px" class="u"></i>' +
+    '<i style="height:22px" class="u"></i><i style="height:14px"></i></div>' +
+    '<div class="tx"><b>今天 62% 的基金上涨</b><span>近 1 年平均 +3.56% · 每日更新</span></div>' +
+    '<span class="go">看分布 →</span></div>');
+
+  document.getElementById('list').innerHTML = A.map((x) =>
+    '<section class="cell">' +
+      '<div class="cap"><b>' + x.id + '</b><span>' + x.name + ' —— ' + x.desc + '</span></div>' +
+      '<div class="frame"><div class="wrap"><div class="copy">' + BRAND + (x.h1 || H1) +
+        '<div class="' + x.id.toLowerCase() + '" style="margin-top:6px">' + x.inner + '</div>' +
+      '</div>' + KPI + '</div></div>' +
+    '</section>').join('');
+})();
+</script>
+</body>
+</html>

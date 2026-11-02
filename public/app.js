@@ -214,6 +214,18 @@
       window.__onRefresh = () => { buildFilters(); render(); };
       bindSelfTabs();
       render();
+      /* 2026-11-03（第二十九轮，用户反馈）：首页「查看完整榜单」原指向积金局榜单（口径不同、数字对不上），
+         改为跳到资料库并按同一自算维度排序 —— 这里解析 ?dim=selfY1 / selfY5a / size 等深链。 */
+      (function applyUrlDim() {
+        try {
+          const dk = (new URLSearchParams(location.search)).get('dim') || '';
+          if (!dk) return;
+          const hit = DIM_ALL.find((d) => d.k === dk);
+          if (!hit) return;
+          window.__DIMSEL = [{ k: dk, d: hit.d || 'desc' }];
+          applyDims();
+        } catch (e) {}
+      })();
       initDbTrend();
       /* 2026-10-19：本页改为「最新净值口径」列表——补入自算指标（日涨跌/年初至今/近1年/近3年/回撤） */
       if (window.ensurePerf) {

@@ -1374,15 +1374,16 @@ window.TREND = (function () {
           '</tr>';
       }).join('');
       wrap.innerHTML =
-        '<div class="tr-tbl-scroll"><table class="tr-tbl">' +
+        '<div class="tr-tbl-scroll"><table class="tr-tbl tr-center">' +
           '<thead><tr>' +
             '<th>' + esc0(_t('名称')) + '</th>' +
             '<th class="r">' + esc0(_t('区间最高')) + '</th>' +
             '<th class="r">' + esc0(_t('区间最低')) + '</th>' +
-            '<th class="r">' + esc0(_t('区间收益')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间收益 = 末值 ÷ 区间起点 − 1（区间起点 = 0%）')) + '">?</span></th>' +
-            '<th class="r">' + esc0(_t('年化波动率')) + ' <span class="tr-q" data-tip="' + esc0(_t('日收益率标准差 × √252，净价口径、未含费用')) + '">?</span></th>' +
-            '<th class="r">' + esc0(_t('区间最大回撤')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间最大回撤 = 运行峰值法，取区间内峰值到谷值的最大跌幅')) + '">?</span></th>' +
-            '<th class="r">' + esc0(_t('最大回撤区间')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间内峰值到谷底：起点 → 谷底日期')) + '">?</span></th>' +
+            /* 2026-11-03（第二十九轮，用户要求）：去掉四个列头的「?」悬浮提示（含义已够直白） */
+            '<th class="r">' + esc0(_t('区间收益')) + '</th>' +
+            '<th class="r">' + esc0(_t('年化波动率')) + '</th>' +
+            '<th class="r">' + esc0(_t('区间最大回撤')) + '</th>' +
+            '<th class="r">' + esc0(_t('最大回撤区间')) + '</th>' +
           '</tr></thead><tbody>' + rows + '</tbody>' +
         '</table></div>';
       void endTs;

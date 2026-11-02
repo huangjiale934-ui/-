@@ -10,8 +10,8 @@
 <!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
 <link rel="preload" as="image" href="img/hero-hk.webp?v=2" media="(min-width: 701px)">
 <link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
-<link rel="stylesheet" href="b.css?p=home&v=20261103b">
-<link rel="stylesheet" href="home.css?v=20261103b">
+<link rel="stylesheet" href="b.css?p=home&v=20261103c">
+<link rel="stylesheet" href="home.css?v=20261103c">
 </head>
 <body class="home page-side">
 
@@ -20,7 +20,7 @@
     <div class="logo">
       <!-- 2026-11-03（第二十八轮，用户要求）：LOGO 只留图形（去掉 JING YAN 拼音），公司名左移、删掉副标题 -->
       <img class="logo-img" src="img/logo-mark.png" alt="精研">
-      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b></div>
+      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span class="logo-en">Guangzhou Data Mining Company</span></div>
     </div>
     <!-- 2026-11-02（第二十七轮）：行情栏并入顶部栏 -->
     <div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><div class="tk-track"><span class="tk-loading">…</span></div></div>
@@ -38,7 +38,7 @@
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-copy">
-      <div class="hero-brand"><img src="img/logo.png" alt="JING YAN"><span data-i18n="广州精研数据有限公司">广州精研数据有限公司</span></div>
+      <div class="hero-brand"><img src="img/logo-mark.png" alt="精研"><span class="hb-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><em>Guangzhou Data Mining Company</em></span></div>
       <h1 data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</h1>
       <div class="hero-btns">
         <a class="cta primary" href="index.html">
@@ -71,13 +71,13 @@
     <div class="mk-rank">
       <!-- 2026-10-22（领导）：标题与说明去掉，模块整体上移；榜单内容不动 -->
       <div class="mk-tops">
-        <div class="mk-top"><h3><span data-i18n="近 1 年回报领先">近 1 年回报领先</span><span class="h3-tip" data-tip="按发行人官网最新净值自算的近 1 年涨幅前 5 名（每日更新，未含分红与费用调整）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=ann1#ann1"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="近 1 年回报领先">近 1 年回报领先</span><span class="h3-tip" data-tip="按发行人官网最新净值自算的近 1 年涨幅前 5 名（每日更新，未含分红与费用调整）。">ⓘ</span></h3><a class="mk-more" href="index.html?dim=selfY1#db"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop1"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3><span data-i18n="近 5 年回报领先">近 5 年回报领先</span><span class="h3-tip" data-tip="按发行人官网净值自算的近 5 年年化回报前 5 名（每日更新）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=ann5#ann5"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="近 5 年回报领先">近 5 年回报领先</span><span class="h3-tip" data-tip="按发行人官网净值自算的近 5 年年化回报前 5 名（每日更新）。">ⓘ</span></h3><a class="mk-more" href="index.html?dim=selfY5a#db"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop4"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3><span data-i18n="推出至今累积回报">推出至今累积回报</span><span class="h3-tip" data-tip="自基金推出以来的累积总回报前 5 名（积金局口径，含费含息）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=cumLaunch#cumLaunch"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="推出至今累积回报">推出至今累积回报</span><span class="h3-tip" data-tip="自基金推出以来的累积总回报前 5 名（积金局口径，含费含息）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=cumLaunch#rank"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop5"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3><span data-i18n="规模领先">规模领先</span><span class="h3-tip" data-tip="按积金局公布的基金资产规模（百万港元）前 5 名。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=size#size"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+        <div class="mk-top"><h3><span data-i18n="规模领先">规模领先</span><span class="h3-tip" data-tip="按积金局公布的基金资产规模（百万港元）前 5 名。">ⓘ</span></h3><a class="mk-more" href="index.html?dim=size#db"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop2"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
       </div>
     </div>
@@ -207,8 +207,8 @@
   <span class="tt-txt" data-i18n="回到顶部">回到顶部</span>
 </button>
 
-<script src="b.js?p=home&v=20261103b"></script>
-<script src="home.js?v=20261103b"></script>
+<script src="b.js?p=home&v=20261103c"></script>
+<script src="home.js?v=20261103c"></script>
 <script src="heat.js"></script>
 <script>renderFriends();</script>
 

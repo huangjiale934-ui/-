@@ -351,20 +351,22 @@ function renderUpdateTime() {
   /* 口径说明的 ⓘ：照抄首页卡片标题上的 i 按钮（.h3-tip 同款：15px 细描边圆圈 + 11.5px 数字） */
   const info = '<i class="ver-info db-tip" role="button" tabindex="0" data-ver="1" title="' + TT('数据口径说明') + '" aria-label="' + TT('数据口径说明') + '">ⓘ</i>';
   el.innerHTML =
-    '<div class="db-side-grp"><span>' + TT('强积金数据分析平台') + '</span></div>' +
+    /* 2026-11-03（第二十九轮体检）：侧栏文案挂 data-i18n —— 切换语言时 i18n 引擎会重新扫描 DOM 并替换，
+       原来只在加载时渲染一次，导致英文模式下侧栏仍显示中文。 */
+    '<div class="db-side-grp"><span data-i18n="强积金数据分析平台">' + TT('强积金数据分析平台') + '</span></div>' +
     /* 2026-11-03（第二十八轮，用户要求）：简繁英切换从页头搬进侧栏，页头把宽度让给行情 */
     '<div class="db-side-lang"></div>' +
     '<a class="db-nav' + (active === 'home' ? ' on' : '') + '" id="navHome" href="home.html">' + I.home +
-      '<span>' + TT('首页') + '</span></a>' +
+      '<span data-i18n="首页">' + TT('首页') + '</span></a>' +
     '<button type="button" class="db-nav' + (dbOn ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
-      '<span>' + TT('基金最新数据') + '</span>' + info + '<i class="db-caret" aria-hidden="true"></i></button>' +
+      '<span data-i18n="基金最新数据">' + TT('基金最新数据') + '</span>' + info + '<i class="db-caret" aria-hidden="true"></i></button>' +
     '<div class="db-sub" id="dbSubCmp"><nav class="an-prov" id="anProv" aria-label="发行人"></nav></div>' +
     '<button type="button" class="db-nav' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
-      '<span>' + TT('MPFA 基金榜单') + '</span>' + info + '</button>' +
-    '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span>' + TT('供款计算器') + '</span></button>' +
+      '<span data-i18n="MPFA 基金榜单">' + TT('MPFA 基金榜单') + '</span>' + info + '</button>' +
+    '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span data-i18n="供款计算器">' + TT('供款计算器') + '</span></button>' +
     /* 2026-11-02（第二十七轮，用户要求）：页头「数据版本」下移到这里，与「数据每日自动同步」合成一句 */
     '<div class="db-side-foot"><div class="db-ver" id="verChip" tabindex="0">' +
-      '<span>' + TT('数据每日自动同步') + '</span><b>—</b></div></div>';
+      '<span data-i18n="数据每日自动同步">' + TT('数据每日自动同步') + '</span><b>—</b></div></div>';
   /* 把页头那颗简繁英搬到侧栏标题下方（保留 #langSw 与 data-lang，i18n.js 的绑定不受影响） */
   const langBox = el.querySelector('.db-side-lang');
   const langSw = document.getElementById('langSw');
@@ -2466,7 +2468,15 @@ window.openCmp = function () {
     /* 弹窗标题写成「基金对比：A vs B vs C」 */
     const ttl = m.querySelector('#cmpTitle') || m.querySelector('.hd h3');
     if (ttl) {
-      const names = list.map((x) => (x.fundBase || x.fund || '')).filter(Boolean);
+      /* 2026-11-03（第二十九轮体检）：同一计划的 A / T 类单位基金名完全相同，
+         标题里会出现「海通韩国基金 vs 海通韩国基金」→ 重名时补上单位类别。 */
+      const base = (x) => (x.fundBase || x.fund || '');
+      const cnt = {};
+      list.forEach((x) => { const b = base(x); cnt[b] = (cnt[b] || 0) + 1; });
+      const names = list.map((x) => {
+        const b = base(x);
+        return (cnt[b] > 1 && x.unit) ? TQ('{u} 类', { u: x.unit }) + ' · ' + b : b;
+      }).filter(Boolean);
       const short = names.map((n) => (n.length > 18 ? n.slice(0, 17) + '…' : n));
       ttl.textContent = TQ('基金对比：{list}', { list: short.join(' vs ') });
       ttl.setAttribute('title', names.join(' vs '));
