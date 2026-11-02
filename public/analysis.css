@@ -342,7 +342,12 @@
 .tr-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 2px 0 6px; }
 .tr-r-all { border: 1px solid var(--border); background: var(--surface); padding: 4px 12px; border-radius: 8px; }
 .tr-r-all.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
-.tr-daterow { display: flex; align-items: center; gap: 8px; margin: 6px 0 8px; flex-wrap: wrap; }
+/* 2026-11-02（第二十六轮）：日期栏改为「选择日期」按钮下方的浮层 */
+.tr-rangebox { position: relative; display: inline-flex; align-items: center; }
+.tr-daterow { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60;
+  display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  background: #fff; border: 1px solid var(--border-strong); border-radius: 9px;
+  padding: 9px 11px; box-shadow: 0 12px 30px rgba(20, 40, 80, .16); margin: 0; }
 .tr-daterow input { border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; font: inherit; font-size: 12.5px;
   background: var(--surface); color: var(--text); }
 .tr-daterow span { color: var(--text-3); }
@@ -1137,11 +1142,18 @@
 
 /* 表格：新增 期初/期末/最高/最低/波动率，名称列内置图例 */
 /* 2026-11-02（第二十五轮）：统计表字号再收一号（15 → 14px），仍比原来的 12px 大 */
-.tr-tbl th:nth-child(1), .tr-tbl td:nth-child(1) { width: 22% !important; }
+/* 2026-11-02（第二十六轮，用户要求）：删掉「期初/期末」两列后重排 ——
+   名称列加宽并右移，其余数字列均分右对齐，整表更透气 */
+.tr-tbl th:nth-child(1), .tr-tbl td:nth-child(1) { width: 27% !important; padding-left: 30px; }
 .tr-tbl th, .tr-tbl td { font-size: 14px; }
-.tr-tbl th { padding: 9px 7px; }
-.tr-tbl td { padding: 11px 7px; }
-.tr-tbl td.n { display: flex; align-items: center; gap: 7px; min-width: 150px; }
+.tr-tbl th { padding: 9px 10px; }
+.tr-tbl td { padding: 11px 10px; }
+/* 2026-11-02（第二十六轮）：名称单元格改行内布局 —— td 用 flex 会脱离表格列宽，
+   名称被压成一小截（弹窗里尤其明显）；table-cell + inline-block 才能按列宽正常分配 */
+.tr-tbl td.n { display: table-cell; white-space: nowrap; }
+.tr-tbl td.n .tr-lg-line { display: inline-block; vertical-align: middle; margin-right: 8px; }
+.tr-tbl td.n .nm { display: inline-block; vertical-align: middle; max-width: calc(100% - 92px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr-tbl td.n .tr-lg-x { display: inline-block; vertical-align: middle; margin-left: 4px; }
 .tr-tbl .tr-lg-line { flex: none; cursor: pointer; }
 .tr-tbl .nm { font-weight: 600; cursor: pointer; }
 .tr-tbl .nm:hover { color: var(--brand); text-decoration: underline; }
@@ -1178,3 +1190,24 @@
 
 /* 2026-11-02（第二十五轮，用户要求）：走势图横轴年份正放并加粗 */
 .tr-xlab-year { font-size: 11.5px; font-weight: 700; fill: var(--text, #16283e); }
+
+/* 2026-11-02（第二十六轮）：详情弹窗内走势图改版（8 列统计表 + 标题工具条）后，
+   弹窗加宽一点，表头允许换行，避免出现横向滚动条 */
+.modal-box { max-width: 860px; }
+.modal-bd .tr-tbl th { white-space: normal; line-height: 1.25; }
+.modal-bd .tr-tbl th, .modal-bd .tr-tbl td { font-size: 12.5px; padding-left: 7px; padding-right: 7px; }
+.modal-bd .tr-tbl { table-layout: fixed; width: 100%; min-width: 0; }
+.modal-bd .tr-tbl th:nth-child(1), .modal-bd .tr-tbl td:nth-child(1) { width: 27% !important; padding-left: 14px; }
+
+/* 2026-11-02（第二十六轮）：基金对比弹窗内的统计表同样收成 8 列可容纳的宽度 */
+.cmp-box .tr-tbl { table-layout: fixed; width: 100%; min-width: 0; }
+.cmp-box .tr-tbl th { white-space: normal; line-height: 1.25; }
+.cmp-box .tr-tbl th, .cmp-box .tr-tbl td { font-size: 12.5px; padding-left: 7px; padding-right: 7px; }
+.cmp-box .tr-tbl th:nth-child(1), .cmp-box .tr-tbl td:nth-child(1) { width: 30% !important; padding-left: 12px; }
+
+/* 2026-11-02：弹窗内的统计表名称列过窄时用省略号，避免压到右侧数字 */
+.modal-bd .tr-tbl td.n, .cmp-box .tr-tbl td.n { overflow: hidden; }
+.modal-bd .tr-tbl .nm, .cmp-box .tr-tbl .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 名称列吃掉剩余空间（否则被压缩到左侧一小截） */
+.modal-bd .tr-tbl .nm, .cmp-box .tr-tbl .nm { flex: 1 1 auto; min-width: 0; }

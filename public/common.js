@@ -322,64 +322,104 @@ function renderUpdateTime() {
 /* ---------- 「数据版本」徽标（页头）：来源与日期一眼可查 ----------
  * 徽标本身体积小：显示数据同步日期；悬浮（移动端点击）按行展开各来源与最新日期，
  * 回应「数据来源与日期要充分说明」。/api/status 到货后补上指数行情与回填进度。 */
-/* ===== 2026-11-02（第二十三轮）：页头「数据版本」右侧的 ⓘ 统一口径说明 =====
-   用户反馈：两套口径（自算 / 积金局）散落在各页，容易混着看。
-   这里给一个唯一入口，讲清「快 2–6 周」与「含费含息」的差别，并提醒不可相减。 */
-(function initVerInfo() {
-  function build() {
-    /* 2026-11-02（第二十四轮，用户要求）：ⓘ 挂到侧栏标题「强积金资料库」右侧；
-       没有侧栏的页面（首页）仍留在页头「数据版本」后面。 */
-    if (document.getElementById('verInfo')) return;
-    const grp = document.querySelector('.db-side-grp');
-    const chip = document.getElementById('verChip');
-    if (!grp && !chip) return;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.id = 'verInfo';
-    btn.className = 'ver-info';
-    btn.textContent = 'i';
-    btn.setAttribute('aria-label', TT('数据口径说明'));
-    btn.setAttribute('title', TT('数据口径说明'));
-    if (grp) grp.appendChild(btn);
-    else chip.parentNode.insertBefore(btn, chip.nextSibling);
-
-    const pop = document.createElement('div');
-    pop.className = 'ver-pop';
-    pop.id = 'verPop';
-    pop.hidden = true;
-    pop.innerHTML =
-      '<b class="vp-t">' + TT('两种口径，请勿混用') + '</b>' +
-      '<div class="vp-r"><i class="vp-d" style="background:#0866bb"></i><span>' +
-        TT('自算（发行人官网，每日）：比积金局快 2–6 周；净价，不含分红再投资与费用。') + '</span></div>' +
-      '<div class="vp-r"><i class="vp-d" style="background:#8fb8da"></i><span>' +
-        TT('积金局（月度）：含费用、含分红再投资，滞后约 1–2 个月。') + '</span></div>' +
-      '<div class="vp-n">' + TT('两者期间与算法不同，不可直接相减。') + '</div>';
-    document.body.appendChild(pop);
-
-    function close() { pop.hidden = true; btn.classList.remove('on'); }
-    function open() {
-      pop.hidden = false;
-      btn.classList.add('on');
-      const r = btn.getBoundingClientRect();
-      const w = pop.offsetWidth || 320;
-      let left = r.left + r.width / 2 - w / 2;
-      left = Math.max(10, Math.min(left, window.innerWidth - w - 10));
-      pop.style.left = Math.round(left) + 'px';
-      pop.style.top = Math.round(r.bottom + 8) + 'px';
-    }
-    btn.addEventListener('click', (e) => { e.stopPropagation(); pop.hidden ? open() : close(); });
-    document.addEventListener('click', (e) => {
-      if (!pop.hidden && !(e.target.closest && (e.target.closest('#verPop') || e.target.closest('#verInfo')))) close();
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-    document.addEventListener('mpf:lang', () => {
-      btn.setAttribute('aria-label', TT('数据口径说明'));
-      const t = pop.querySelector('.vp-t');
-      if (t) t.textContent = TT('两种口径，请勿混用');
+/* ===== 2026-11-02（第二十六轮）：全站左侧导航 + 数据口径 ⓘ =====
+   侧边栏从「资料库页内导航」升级为全站导航：首页 / 基金最新数据 / 可视化对比 /
+   MPFA 基金榜单 / 供款计算器；标题改为「强积金数据分析平台」。
+   ⓘ 口径说明挂在「基金最新数据」「MPFA 基金榜单」的名字右侧（页头那个已删除）。 */
+(function initSidebar() {
+  const el = document.getElementById('dbSide');
+  if (!el) return;
+  const active = el.getAttribute('data-active') || '';
+  const I = {
+    home: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+    db: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M9 9v11"/></svg>',
+    cmp: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-9Z"/><path d="M14 3.2A9 9 0 0 1 20.8 10H14Z"/></svg>',
+    rank: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>',
+    calc: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/></svg>',
+  };
+  const info = '<i class="ver-info" role="button" tabindex="0" data-ver="1" title="' + TT('数据口径说明') + '" aria-label="' + TT('数据口径说明') + '">i</i>';
+  el.innerHTML =
+    '<div class="db-side-grp"><span>' + TT('强积金数据分析平台') + '</span></div>' +
+    '<a class="db-nav' + (active === 'home' ? ' on' : '') + '" id="navHome" href="home.html">' + I.home +
+      '<span>' + TT('首页') + '</span></a>' +
+    '<button type="button" class="db-nav' + (active === 'db' ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
+      '<span>' + TT('基金最新数据') + '</span>' + info + '<i class="db-caret" aria-hidden="true"></i></button>' +
+    '<div class="db-sub" id="dbSubCmp"><nav class="an-prov" id="anProv" aria-label="发行人"></nav></div>' +
+    '<button type="button" class="db-nav' + (active === 'cmp' ? ' on' : '') + '" id="dbtCmp" data-dbtab="cmp">' + I.cmp +
+      '<span>' + TT('可视化对比') + '</span></button>' +
+    '<div class="db-side-div" role="separator"></div>' +
+    '<button type="button" class="db-nav' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
+      '<span>' + TT('MPFA 基金榜单') + '</span>' + info + '</button>' +
+    '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span>' + TT('供款计算器') + '</span></button>' +
+    '<div class="db-side-note">' + TT('数据每日自动同步') + '</div>';
+  /* 侧栏存在时隐藏右下角悬浮计算器（同一功能已有侧栏入口） */
+  document.body.classList.add('has-sidebar');
+  const calc = el.querySelector('#navCalc');
+  if (calc) calc.addEventListener('click', function () {
+    const fab = document.querySelector('.dca-fab');
+    if (fab) fab.click();
+  });
+  /* 首页上的侧栏：点板块入口 = 跳到资料库对应板块 */
+  if (active === 'home') {
+    Array.prototype.forEach.call(el.querySelectorAll('[data-dbtab]'), function (b) {
+      b.addEventListener('click', function () {
+        const t = b.getAttribute('data-dbtab');
+        location.href = 'index.html#' + (t === 'db' ? 'db' : t);
+      });
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
-  else build();
+})();
+
+/* ===== 2026-11-02：数据口径 ⓘ（侧栏「基金最新数据 / MPFA 基金榜单」名字右侧） ===== */
+(function initVerInfo() {
+  const anchors = Array.prototype.slice.call(document.querySelectorAll('.db-side .ver-info'));
+  if (!anchors.length) return;
+  const POP_HTML =
+    '<b class="vp-t">' + TT('两种口径，请勿混用') + '</b>' +
+    '<div class="vp-r"><i class="vp-d" style="background:#0866bb"></i><span>' +
+      TT('自算（发行人官网，每日）：比积金局快 2–6 周；净价，不含分红再投资与费用。') + '</span></div>' +
+    '<div class="vp-r"><i class="vp-d" style="background:#8fb8da"></i><span>' +
+      TT('积金局（月度）：含费用、含分红再投资，滞后约 1–2 个月。') + '</span></div>' +
+    '<div class="vp-n">' + TT('两者期间与算法不同，不可直接相减。') + '</div>';
+  anchors.forEach(function (anchor, idx) {
+    const pop = document.createElement('div');
+    pop.className = 'ver-pop';
+    pop.id = 'verPop' + (idx || '');
+    pop.hidden = true;
+    pop.innerHTML = POP_HTML;
+    document.body.appendChild(pop);
+    function close() { pop.hidden = true; anchor.classList.remove('on'); }
+    function open() {
+      pop.hidden = false;
+      anchor.classList.add('on');
+      const r = anchor.getBoundingClientRect();
+      const w = pop.offsetWidth || 340;
+      const h = pop.offsetHeight || 180;
+      /* 侧栏里的 ⓘ：浮层贴到侧栏右侧展开，不压住发行人列表 */
+      const side = anchor.closest('.db-side');
+      const base = side ? side.getBoundingClientRect().right + 12 : (r.right + 10);
+      let left = base;
+      left = Math.max(10, Math.min(left, window.innerWidth - w - 10));
+      let top = r.top - 6;
+      top = Math.max(10, Math.min(top, window.innerHeight - h - 10));
+      pop.style.left = Math.round(left) + 'px';
+      pop.style.top = Math.round(top) + 'px';
+    }
+    anchor.addEventListener('click', function (e) { e.stopPropagation(); e.preventDefault(); if (pop.hidden) open(); else close(); });
+    anchor.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (pop.hidden) open(); else close(); }
+    });
+    document.addEventListener('click', function (e) {
+      if (!pop.hidden && !(e.target.closest && (e.target === anchor || e.target.closest('.ver-pop')))) close();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  });
+  document.addEventListener('mpf:lang', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('.ver-info'), function (b) {
+      b.setAttribute('title', TT('数据口径说明'));
+      b.setAttribute('aria-label', TT('数据口径说明'));
+    });
+  });
 })();
 
 function fillVerChip(st) {
@@ -1074,9 +1114,12 @@ function mountHeader(active) {
     ['index.html', '强积金资料库', 'db'],
   ];
   const tb = (k) => (typeof window.t === 'function' ? window.t(k) : k);
-  document.querySelector('.nav').innerHTML = navs
-    .map((n) => '<a href="' + n[0] + '" class="' + (active === n[2] ? 'on' : '') + '">' + tb(n[1]) + '</a>')
-    .join('');
+  /* 2026-11-02（第二十六轮，用户要求）：侧栏已成为全站导航，页头不再重复放页面切换链接 */
+  const navEl = document.querySelector('.nav');
+  if (navEl) {
+    navEl.innerHTML = document.querySelector('.db-side') ? '' :
+      navs.map((n) => '<a href="' + n[0] + '" class="' + (active === n[2] ? 'on' : '') + '">' + tb(n[1]) + '</a>').join('');
+  }
   const btn = document.querySelector('.btn-refresh');
   if (btn && !btn.__bound) {
     btn.__bound = 1;
@@ -1434,7 +1477,7 @@ window.fundDetailHTML = function (x, opts) {
   return '<div class="fd">' +
     title +
     fdHead(x, pf) +
-    '<div class="sect-title">' + TT('对比基金走势') + '</div>' +
+    /* 2026-11-02（第二十六轮）：走势图自带标题与工具条，这里不再重复「对比基金走势」小标题 */
     '<div class="an-trendwrap" id="fdTrend"></div>' +
     fdNavSrc(x) +
     fdBasic(x) +
@@ -2003,7 +2046,7 @@ function mountFD(x, alive) {
       /* 2026-10-21：注入 fundMeta，使小窗/详情页的「选择基金」面板与第三页一致（发行人 × 类别两维筛选） */
       const meta = {};
       (DATA.funds || []).forEach((f) => { meta[String(f.id)] = { trustee: f.trustee || '其他', type: f.type || '' }; });
-      TREND.mount(box, [{ type: 'fund', id: x.id }], { bareHead: true, hideGoto: true, fundMeta: meta });
+      TREND.mount(box, [{ type: 'fund', id: x.id }], { hideGoto: true, fundMeta: meta, title: TT('对比基金走势') });
       /* 2026-10-21：历史有缺口的基金（早期源站只有月度价）→ 图例旁加一个悬浮提示 */
       (function () {
         if (!window.__gapsP) window.__gapsP = fetch('/api/hist-gaps').then((r) => r.json()).catch(() => null);
@@ -2016,7 +2059,7 @@ function mountFD(x, alive) {
           el.className = 'gap-flag';
           el.setAttribute('data-tip', TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）', { a: info.first, b: info.last, n: info.n }));
           el.textContent = TT('ⓘ 早期为月度数据');
-          const bar = box.querySelector('.tr-tools2') || box.querySelector('.tr-selects');
+          const bar = box.querySelector('.tr-adds') || box.querySelector('.tr-tools');
           if (bar) bar.appendChild(el);
         });
       })();
@@ -2399,7 +2442,8 @@ window.openCmp = function () {
   if (m) {
     /* 宽度随对比数量变化：2 只时收窄（不再固定 1100px 大片留白），最多 6 只时展宽 */
     const box = m.querySelector('.cmp-box');
-    if (box) box.style.maxWidth = Math.min(1400, 240 + list.length * 200) + 'px';
+    /* 2026-11-02（第二十六轮）：走势图下方统计表改成 8 列后，2 只对比时弹窗略加宽 */
+    if (box) box.style.maxWidth = Math.min(1400, 360 + list.length * 240) + 'px';
     /* 右上角工具条：放大 / 分享 / 下载（对齐详情页表头按钮） */
     const hd = m.querySelector('.hd');
     if (hd && !hd.querySelector('.cmp-tools')) {
@@ -3308,6 +3352,8 @@ document.addEventListener('mpf:lang', () => {
       btn.disabled = !!sel.disabled;
       btn.setAttribute('aria-expanded', pop.hidden ? 'false' : 'true');
     };
+    /* 2026-11-02（第二十六轮）：允许代码里直接改 select.value 后刷新按钮文案（侧栏点发行人时用） */
+    sel.__mpfselSync = sync;
     const isPerPage = sel.id === 'perPage' || sel.id === 'rkRTop';   /* 2026-11-02：榜单页每页显示同样支持自定义 */
     const build = () => {
       pop.innerHTML = Array.from(sel.options).map((o, i) =>

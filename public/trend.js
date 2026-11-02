@@ -19,7 +19,7 @@ window.TREND = (function () {
   /* 2026-11-02（第二十一轮，用户要求）：去掉「1周」，新增「10年 / 全部」；
      「选择日期」保留并放在区间按钮最后（最右）。 */
   const RANGES = [
-    ['1m', '1个月'],
+    /* 2026-11-02（第二十六轮，用户要求）：删掉「1个月」，选项太多看着乱 */
     ['1y', '1年'],
     ['3y', '3年'],
     ['5y', '5年'],
@@ -728,10 +728,17 @@ window.TREND = (function () {
       /* 2026-11-02（第二十三轮，用户要求）：顶部收成一行 ——
          标题 + 添加指数 / 添加基金 + 区间 + 清空筛选 + 导出/分享；
          两个大下拉（选择指数/选择基金）下线，图例整行删除、改到下方表格「名称」列内。 */
-      const rangesBar = '<div class="tr-ranges" role="group" aria-label="' + esc0( _t('区间')) + '">' +
+      /* 2026-11-02（第二十六轮，用户要求）：日期栏改成浮层，挂在「选择日期」按钮正下方 */
+      const rangesBar = '<div class="tr-rangebox">' +
+        '<div class="tr-ranges" role="group" aria-label="' + esc0( _t('区间')) + '">' +
           RANGES.map(([k, l]) => '<button type="button" class="tr-r' + (S.range === k ? ' on' : '') + '" data-r="' + k + '">' + esc0( _t(l)) + '</button>').join('') +
           '<button type="button" class="tr-r" data-r="custom">' + esc0( _t('选择日期')) + '</button>' +
-        '</div>';
+        '</div>' +
+        '<div class="tr-daterow" hidden>' +
+          '<input type="date" class="tr-d1"><span>~</span><input type="date" class="tr-d2">' +
+          '<button type="button" class="btn sm tr-dgo">' + esc0( _t('确定')) + '</button>' +
+        '</div>' +
+      '</div>';
       const panels = '<div class="tr-panels">' +
           '<div class="tr-panel tr-panel-idx" hidden>' +
             '<div class="tr-p-head"><span>' + esc0( _t('选择指数（可多选）')) + '</span><button type="button" class="tr-p-close" aria-label="' + esc0( _t('关闭')) + '">×</button></div>' +
@@ -768,10 +775,6 @@ window.TREND = (function () {
           '</div>' +
         '</div>' +
         panels +
-        '<div class="tr-daterow" hidden>' +
-          '<input type="date" class="tr-d1"><span>~</span><input type="date" class="tr-d2">' +
-          '<button type="button" class="btn sm tr-dgo">' + esc0( _t('确定')) + '</button>' +
-        '</div>' +
         '<div class="tr-canvas">' +
           '<div class="tr-loading" style="display:none">' + esc0( _t('加载中…')) + '</div>' +
           '<svg class="tr-svg" viewBox="0 0 760 300" preserveAspectRatio="xMidYMid meet" role="img"></svg>' +
@@ -784,8 +787,11 @@ window.TREND = (function () {
           '<span class="tr-note-txt">' + esc0( _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。')) + '</span></div>';
     }
 
-    /* 「清空筛选」：清空全部对比对象（含指数）并重置面板筛选（2026-10-17） */
-    q('.tr-clear').addEventListener('click', () => {
+    /* 「清空筛选」：清空全部对比对象（含指数）并重置面板筛选（2026-10-17）
+       2026-11-02（第二十六轮）：bareHead 模式（详情弹窗/对比弹窗）没有「清空」按钮，
+       这里必须判空 —— 之前直接 addEventListener 抛错，导致两处弹窗的走势图与对比表都不渲染。 */
+    const clearBtn = q('.tr-clear');
+    if (clearBtn) clearBtn.addEventListener('click', () => {
       S.items = [];
       Object.keys(S.data).forEach((k) => { delete S.data[k]; });
       S.filter = null;
@@ -1301,9 +1307,9 @@ window.TREND = (function () {
         /* 2026-11-02（第二十五轮，用户要求）：线型预览是「改样式」的入口（加长到 46px）；
            基金名称改成「打开详情」，不再弹样式面板。 */
         const fId = L.it && L.it.type === 'fund' ? L.it.id : '';
-        const linePrev = '<svg class="tr-lg-line" width="46" height="12" data-style="' + esc0(L.key) + '" ' +
+        const linePrev = '<svg class="tr-lg-line" width="55" height="12" data-style="' + esc0(L.key) + '" ' +
           'title="' + esc0(_t('点线条可改颜色 / 线宽 / 线型')) + '">' +
-          '<line x1="2" y1="6" x2="44" y2="6" stroke="' + L.color + '" stroke-width="' + L.width + '"' +
+          '<line x1="2" y1="6" x2="53" y2="6" stroke="' + L.color + '" stroke-width="' + L.width + '"' +
           (L.dash ? ' stroke-dasharray="' + L.dash + '"' : '') + ' stroke-linecap="round"/></svg>';
         const nameAttr = fId
           ? ' data-openfund="' + esc0(fId) + '" title="' + esc0(_t('查看基金详情')) + '"'
@@ -1312,8 +1318,7 @@ window.TREND = (function () {
           '<td class="n">' + linePrev +
             '<span class="nm"' + nameAttr + '>' + esc0(L.name) + '</span>' +
             '<b class="tr-lg-x" data-toggle="' + esc0(L.key) + '" title="' + esc0(_t('移除')) + '">×</b></td>' +
-          '<td class="r">' + fmtV(first) + '</td>' +
-          '<td class="r">' + fmtV(last) + '</td>' +
+          /* 2026-11-02（第二十六轮，用户要求）：删掉「期初 / 期末」两列 —— 与区间收益重复，留着浪费宽度 */
           '<td class="r">' + fmtV(hi) + '</td>' +
           '<td class="r">' + fmtV(lo) + '</td>' +
           '<td class="r ' + clsOf(ret) + '">' + fmtPct(ret) + lateMark + '</td>' +
@@ -1327,8 +1332,6 @@ window.TREND = (function () {
         '<div class="tr-tbl-scroll"><table class="tr-tbl">' +
           '<thead><tr>' +
             '<th>' + esc0(_t('名称')) + '</th>' +
-            '<th class="r">' + esc0(_t('期初')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间第一个交易日的净值 / 指数点位')) + '">?</span></th>' +
-            '<th class="r">' + esc0(_t('期末')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间最后一个交易日的净值 / 指数点位')) + '">?</span></th>' +
             '<th class="r">' + esc0(_t('区间最高')) + '</th>' +
             '<th class="r">' + esc0(_t('区间最低')) + '</th>' +
             '<th class="r">' + esc0(_t('区间收益')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间收益 = 末值 ÷ 区间起点 − 1（区间起点 = 0%）')) + '">?</span></th>' +

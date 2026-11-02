@@ -334,7 +334,11 @@
   }
   function pickTrustee(t) {
     const sel = document.getElementById('fTrustee');
-    if (sel) sel.value = t;
+    if (sel) {
+      sel.value = t;
+      /* 2026-11-02（第二十六轮）：同步自绘下拉的按钮文案，否则侧栏点了「宏利」但筛选栏还写「全部受托人」 */
+      if (sel.__mpfselSync) sel.__mpfselSync();
+    }
     F.trustee = t;
     S.page = 1;
     render();

@@ -2132,9 +2132,9 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 
 /* ② 左侧分组导航：贴浏览器左边、固定全高（2026-11-02 第二十一轮，用户要求） */
 .db-shell { display: block; }
-body.db-page .wrap { max-width: none; padding-left: 232px; padding-right: 14px; }
+body.db-page .wrap { max-width: none; padding-left: 254px; padding-right: 14px; }
 /* 2026-11-02（第二十五轮，用户要求）：侧边栏加宽（196 → 220），标题加大并居中 */
-.db-side { position: fixed; left: 0; top: 100px; bottom: 0; width: 220px; z-index: 40;
+.db-side { position: fixed; left: 0; top: 100px; bottom: 0; width: 242px; z-index: 40;
   display: flex; flex-direction: column; overflow-y: auto;
   background: #fff; border-right: 1px solid var(--line, #e3ecf4); border-top: 1px solid var(--line, #e3ecf4);
   border-radius: 0; padding: 12px 10px 16px; box-shadow: 2px 0 12px rgba(20, 50, 80, .04); }
@@ -2407,3 +2407,29 @@ body.db-page .wrap { max-width: none; padding-left: 232px; padding-right: 14px; 
 #fundTable tbody tr.is-pinned > td:first-child { box-shadow: inset 3px 0 0 var(--brand, #0866bb); }
 #fundTable tbody tr.qf-divider td { padding: 5px 10px; font-size: 11.5px; color: var(--text-3);
   background: var(--surface-2); border-top: 1px dashed var(--border-strong); border-bottom: 1px dashed var(--border-strong); }
+
+/* ==========================================================
+   2026-11-02（第二十六轮，用户要求）：侧栏升级为全站导航
+   —— 加宽 10%（220 → 242），首页也挂在侧栏下（内容整体右移，页头保持通栏）。
+   ========================================================== */
+body.page-side section.hero,
+body.page-side section.mk,
+body.page-side section.plat,
+body.page-side footer.foot { margin-left: 254px; }
+/* 与 .db-side 的收缩断点保持一致（≤1000 变图标栏） */
+@media (max-width: 1000px) {
+  body.page-side section.hero,
+  body.page-side section.mk,
+  body.page-side section.plat,
+  body.page-side footer.foot { margin-left: 68px; }
+}
+@media (max-width: 760px) {
+  body.page-side section.hero,
+  body.page-side section.mk,
+  body.page-side section.plat,
+  body.page-side footer.foot { margin-left: 0; }
+  body.page-side .db-side { top: 0; position: static; }
+}
+
+/* 2026-11-02（第二十六轮）：侧栏已有「供款计算器」入口，隐藏右下角悬浮按钮，避免重复与遮挡 */
+body.has-sidebar .dca-fab { display: none !important; }
