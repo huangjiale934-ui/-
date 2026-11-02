@@ -201,7 +201,7 @@
     LAST_FUNDS = funds;
     el.innerHTML =
       '<button type="button" class="an-pitem' + (S.trustee === '' ? ' on' : '') + '" data-t="">' +
-        '<span>' + TT('总体') + '</span><b>' + funds.length + '</b></button>' +
+        '<span>' + TT('全部') + '</span><b>' + funds.length + '</b></button>' +
       list.map((t) =>
         '<button type="button" class="an-pitem' + (S.trustee === t ? ' on' : '') + '" data-t="' + escA(t) + '">' +
         '<span>' + esc(t) + '</span><b>' + map[t] + '</b></button>').join('');
@@ -532,7 +532,7 @@
     const list = restRows;
     const t = $('#anListTitle');
     if (t) {
-      t.innerHTML = '<span class="an-lh-k">' + (S.trustee ? esc(S.trustee) : TT('总体')) + '</span> · ' +
+      t.innerHTML = '<span class="an-lh-k">' + (S.trustee ? esc(S.trustee) : TT('全部')) + '</span> · ' +
         TQ('{n} 条基金', { n: '<b>' + listAll.length + '</b>' }) +
         (LV.navDate ? ' · <span class="an-lh-f">' + TQ('估值日：{v}', { v: LV.navDate === 'none' ? TT('无估值日') : LV.navDate }) + '</span>' : '');
     }

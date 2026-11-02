@@ -883,7 +883,8 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 /* ---------- 回到顶部 ---------- */
 /* 2026-10-31（用户要求）：悬停向左展开「回到顶部」文字、移开收起；配色与计算器同款品牌蓝；无首次计时 */
 .to-top {
-  position: fixed; right: 20px; bottom: 24px; z-index: 90;
+  /* 2026-11-02（第二十七轮，用户要求）：上移 + 右移，避免压住底部对比栏 */
+  position: fixed; right: 36px; bottom: 94px; z-index: 90;
   height: 44px; width: 44px; border-radius: 999px;
   border: 1px solid var(--border); background: var(--brand, #0866bb); color: #fff;
   box-shadow: 0 6px 20px rgba(8, 102, 187, 0.30);
@@ -898,7 +899,7 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 .to-top:hover { background: var(--brand-2, #2f7fc1); color: #fff; width: 132px; }
 .to-top:hover .tt-txt { max-width: 72px; opacity: 1; transform: none; margin-left: 6px; }
 .to-top:active { transform: scale(0.94); }
-@media (max-width: 560px) { .to-top { right: 14px; bottom: 16px; height: 40px; width: 40px; } .to-top:hover { width: 118px; } }
+@media (max-width: 560px) { .to-top { right: 16px; bottom: 84px; height: 40px; width: 40px; } .to-top:hover { width: 118px; } }
 
 /* ---------- 页面切换过渡：轻微淡入 / 淡出 ---------- */
 html.fx-ready body { transition: opacity 0.13s ease; }
@@ -1318,7 +1319,8 @@ body.an-detail .foot { display: none; }
 .an-selfcalc { margin-top: 8px; padding-top: 8px; }
 
 /* 2026-10-19：对比表最优值绿色高亮 */
-.cmp-best { background: #e9f7ef !important; color: #17794a !important; font-weight: 700; }
+/* 2026-11-02（第二十七轮，用户要求）：对比表「最优值」底色改为站内蓝色调（原来是绿色） */
+.cmp-best { background: #e8f1fb !important; color: #084e8c !important; font-weight: 700; box-shadow: inset 0 0 0 1px #cfe2f6; }
 
 /* 2026-10-20：详情弹窗改宽（表头五格 + 走势图 + 两栏信息需要版心；此前 660px 导致表头挤压） */
 .modal-box { max-width: 700px; }
@@ -2433,3 +2435,107 @@ body.page-side footer.foot { margin-left: 254px; }
 
 /* 2026-11-02（第二十六轮）：侧栏已有「供款计算器」入口，隐藏右下角悬浮按钮，避免重复与遮挡 */
 body.has-sidebar .dca-fab { display: none !important; }
+
+/* ==========================================================
+   2026-11-02（第二十七轮，用户要求）：顶部栏 + 行情栏合并成一条
+   —— 左：LOGO；中：指数行情（横向可滚）；右：语言切换（缩小）。
+      「数据版本」下移到侧栏底部，与「数据每日自动同步」合成一句。
+      注意：行情栏不再是独立 sticky 条，改为页头（仍是 sticky）的内部块。
+   ========================================================== */
+.hdr-inner { max-width: none; height: 68px; gap: 14px; padding: 0 18px; flex-wrap: nowrap; }
+.logo-img { height: 34px; }
+.logo-txt b { font-size: 14px; }
+.logo-txt span { font-size: 10.5px; }
+.hdr .mkt-ticker {
+  position: static; flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 2px;
+  background: transparent; border: 0; box-shadow: none; padding: 0; margin: 0;
+}
+.hdr .mkt-ticker .tk-track {
+  max-width: none; margin: 0; padding: 0 4px; flex: 1 1 auto; min-width: 0;
+  border-left: 1px solid var(--border, #e6eef7); border-right: 1px solid var(--border, #e6eef7);
+}
+.hdr .tk-card { padding: 4px 11px; gap: 8px; flex: 0 0 auto; }
+.hdr .tk-name { font-size: 11.5px; max-width: 96px; }
+.hdr .tk-last { font-size: 12.5px; }
+.hdr .tk-chg { font-size: 11px; }
+.hdr .tk-spark { width: 40px; height: 14px; }
+/* 合并后 × 变成行情区左侧的普通 flex 项（不再绝对定位，避免脱离页头） */
+.hdr .mkt-ticker .tk-close {
+  position: static; transform: none; flex: none; width: 19px; height: 19px; margin-right: 6px;
+  border-color: #dbe6f0; color: #93a7bb; box-shadow: none;
+}
+/* 语言切换缩小一档，给行情让位 */
+.hdr .lang-sw { flex: none; }
+.hdr .lang-sw button { font-size: 11.5px; padding: 4px 9px; }
+
+/* 侧栏：跟随页头高度；底部「数据版本 + 每日同步」合成一句 */
+/* 页头 + 数据更新提示条（有提示条时侧栏跟着下移，避免标题被盖住） */
+.db-side { top: calc(var(--hdr-h, 68px) + var(--upd-h, 0px)); }
+.db-side-foot { margin-top: auto; padding: 14px 4px 2px; border-top: 1px solid #eef3f9; }
+.db-ver { display: flex; align-items: center; gap: 0; justify-content: center; flex-wrap: wrap;
+  font-size: 11.5px; color: var(--text-3, #8595a8); line-height: 1.7; cursor: help; }
+.db-ver::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #35b37e; margin-right: 6px; flex: none; }
+.db-ver b { color: var(--brand, #0866bb); font-weight: 700; font-variant-numeric: tabular-nums; }
+.db-ver b::before { content: '·'; margin: 0 5px; color: #b9c9d8; font-weight: 400; }
+.db-ver b:empty { display: none; }
+
+/* 口径 ⓘ：照抄首页卡片标题的 i（15px 细描边圆圈） */
+.db-side .ver-info.db-tip {
+  position: static; transform: none; margin: 0 0 0 5px; flex: none;
+  width: 15px; height: 15px; line-height: 13px; font-size: 11px; font-weight: 600;
+  font-family: inherit; color: var(--brand, #0866bb);
+  border: 1px solid var(--brand-line, #cfe2f3); border-radius: 50%; background: #fff;
+  box-shadow: none; cursor: help; display: inline-flex; align-items: center; justify-content: center;
+}
+.db-side .ver-info.db-tip:hover { background: var(--brand-soft, #edf7ff); border-color: var(--brand, #0866bb); color: var(--brand, #0866bb); }
+
+/* 页脚两个折叠箭头缩小 15%（42 → 36） */
+.foot-fold .ff-arrow { font-size: 36px; width: 38px; }
+
+/* 迷你走势线只在超宽屏显示：合并到页头后横向空间紧张，先保证六个指数名 + 数值完整 */
+@media (max-width: 1700px) {
+  .hdr .tk-spark { display: none; }
+}
+@media (max-width: 1250px) {
+  .hdr .tk-card { padding: 4px 9px; gap: 7px; }
+}
+@media (max-width: 980px) {
+  .hdr .tk-name { font-size: 11px; max-width: 84px; }
+  .hdr .lang-sw button { padding: 3px 7px; font-size: 11px; }
+}
+@media (max-width: 760px) {
+  .hdr-inner { height: auto; padding: 8px 12px; flex-wrap: wrap; row-gap: 8px; }
+  .hdr .mkt-ticker { order: 3; flex: 1 1 100%; }
+  .hdr .mkt-ticker .tk-track { border-left: 0; border-right: 0; padding: 0; }
+  .db-side { position: static; width: auto; }
+  body.db-page .wrap { padding-left: 14px; }
+}
+
+/* 2026-11-02（第二十七轮）：行情并入页头后——
+   ① 卡片可等比收缩（min 108px），六项尽量排满一行，不出现半张卡被硬切；
+   ② ≤1150 收起页头公司名文字（LOGO 图已含品牌），把宽度让给行情。 */
+.hdr .tk-card { flex: 1 1 auto; min-width: 108px; }
+.hdr .tk-name { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1150px) {
+  .logo-txt { display: none; }
+  .logo-img { height: 32px; }
+}
+
+/* 2026-11-02：行情卡再紧一档，保证 1280 宽也能完整显示六个指数名 */
+.hdr .tk-card { padding: 3px 8px; gap: 6px; }
+.hdr .tk-name { font-size: 11px; max-width: none; }
+.hdr .tk-last { font-size: 12px; }
+.hdr .tk-chg { font-size: 10.5px; }
+
+/* 2026-11-02（第二十七轮）：手机上的行情条 —— 卡片不再压缩，名字完整、横向滑动 */
+@media (max-width: 760px) {
+  .hdr .tk-card { flex: 0 0 auto; min-width: 0; }
+  .hdr .tk-name { max-width: none; }
+}
+/* 更新提示条里的步骤文案可能含长路径 → 单行省略，避免在手机上撑成 4 行 */
+.upd-bar .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: min(72vw, 780px); }
+@media (max-width: 760px) {
+  /* 手机横条导航：底部「数据每日自动同步」与标题一起收起，避免撑高 */
+  .db-side { align-items: center; }
+  .db-side-foot { display: none; }
+}

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title data-i18n="强积金资料库 · 广州精研数据有限公司">强积金资料库 · 广州精研数据有限公司</title>
 <meta name="description" content="香港强积金（MPF）全市场基金资料库，数据覆盖全市场成分基金，支持关键词搜索、基金种类、受托人、涨跌幅、最大回撤筛选，并可一键切换基金可视化对比。">
-<link rel="stylesheet" href="b.css?p=index&v=20261102n">
+<link rel="stylesheet" href="b.css?p=index&v=20261102o">
 </head>
 <body class="db-page">
 
@@ -17,16 +17,12 @@
       <img class="logo-img" src="img/logo.png" alt="JING YAN 精研">
       <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</span></div>
     </div>
-    <nav class="nav"></nav>
-    <div class="hdr-right">
-      <div class="ver-chip" id="verChip"><span data-i18n="数据版本">数据版本</span><b>—</b></div>
-    </div>
+    <!-- 2026-11-02（第二十七轮，用户要求）：行情栏并入顶部栏，「数据版本」移到侧栏底部 -->
+    <div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><div class="tk-track"><span class="tk-loading">…</span></div></div>
     <div class="lang-sw" id="langSw" role="group" aria-label="语言"><button type="button" data-lang="zh-Hans">简</button><button type="button" data-lang="zh-Hant">繁</button><button type="button" data-lang="en">EN</button></div>
   </div>
 </header>
 
-  <!-- 2026-10-31 四版（用户要求）：行情栏全站可见并固定（内容渲染在 common.js） -->
-  <div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><button type="button" class="tk-close" id="tkClose" title="隐藏行情栏" aria-label="隐藏行情栏"><svg width="8" height="8" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><div class="tk-track"><span class="tk-loading">…</span></div></div>
 
 <div class="wrap">
   <!-- 2026-11-02（第二十轮，用户选定 A04）：左侧分组导航取代顶部三胶囊；
@@ -331,7 +327,7 @@
 <div class="cmp-modal" id="cmpModal">
   <div class="cmp-box">
     <div class="hd">
-      <h3 data-i18n="基金对比">基金对比</h3>
+      <h3 id="cmpTitle" data-i18n="基金对比">基金对比</h3>
       <button class="close-x" onclick="closeCmp()">×</button>
     </div>
     <div class="cmp-trend" id="cmpTrend"></div>
@@ -355,10 +351,10 @@
   </div>
 </div>
 
-<script src="b.js?p=index&v=20261102n"></script>
-<script src="app.js?v=20261102n"></script>
-<script src="rank.js?v=20261102n"></script>
-<script src="analysis.js?v=20261102n"></script>
+<script src="b.js?p=index&v=20261102o"></script>
+<script src="app.js?v=20261102o"></script>
+<script src="rank.js?v=20261102o"></script>
+<script src="analysis.js?v=20261102o"></script>
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg><span class="tt-txt" data-i18n="回到顶部">回到顶部</span></button>
 
 <!-- 板块切换（三板块）：支持 ?rk=<榜单id>、#db/#rank/#cmp 锚点与刷新记忆 -->
@@ -393,7 +389,8 @@
     rkSec.hidden = !isRank;
     anSec.hidden = !isCmp;
     window.__DBTAB = tab;
-    [['dbtDb', !isRank && !isCmp], ['dbtCmp', isCmp], ['dbtRank', isRank]].forEach(function (p) {
+    /* 2026-11-02（第二十七轮）：可视化对比已从侧栏下线 → 进对比页时高亮「基金最新数据」 */
+    [['dbtDb', !isRank], ['dbtRank', isRank]].forEach(function (p) {
       var b = document.getElementById(p[0]);
       if (b) b.classList.toggle('on', p[1]);
     });

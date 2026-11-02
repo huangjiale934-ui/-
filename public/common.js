@@ -183,6 +183,7 @@ function initUpdateBanner() {
     el.classList.remove('show');
     dismissed = Date.now();
     try { sessionStorage.setItem('mpf-updbar-x', String(dismissed)); } catch (e) {}
+    syncUpdH();
   });
   const clamp = () => {
     const h = header ? header.offsetHeight : 62;
@@ -202,8 +203,16 @@ function initUpdateBanner() {
     mEl.textContent = meta || '';
     xEl.style.display = closable ? 'block' : 'none';
     el.style.top = ((header ? header.offsetHeight : 62) || 62) + 'px';
+    syncUpdH();
   }
-  function hide() { el.className = 'upd-bar'; }
+  function hide() { el.className = 'upd-bar'; syncUpdH(); }
+  /* 2026-11-02（第二十七轮）：左侧导航是 fixed 定位，不会被提示条自然推下去 →
+     把提示条高度写进 CSS 变量，让侧栏从提示条下方开始，避免标题被盖住。 */
+  function syncUpdH() {
+    const h = el.classList.contains('show') ? el.offsetHeight : 0;
+    document.documentElement.style.setProperty('--upd-h', h + 'px');
+  }
+  window.addEventListener('resize', syncUpdH);
   /* 静态站（GitHub Pages）没有 /api/status，必须走时间窗口兜底。
      2026-10-28 修：旧代码在拿不到 j 时 `return`，静态站因此永远不显示提示条。 */
   function inWindow() {
@@ -330,6 +339,8 @@ function renderUpdateTime() {
   const el = document.getElementById('dbSide');
   if (!el) return;
   const active = el.getAttribute('data-active') || '';
+  /* 对比板块已从侧栏下线：进对比页时仍高亮「基金最新数据」 */
+  const dbOn = active === 'db' || active === 'cmp';
   const I = {
     home: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
     db: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M9 9v11"/></svg>',
@@ -337,21 +348,21 @@ function renderUpdateTime() {
     rank: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>',
     calc: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/></svg>',
   };
-  const info = '<i class="ver-info" role="button" tabindex="0" data-ver="1" title="' + TT('数据口径说明') + '" aria-label="' + TT('数据口径说明') + '">i</i>';
+  /* 口径说明的 ⓘ：照抄首页卡片标题上的 i 按钮（.h3-tip 同款：15px 细描边圆圈 + 11.5px 数字） */
+  const info = '<i class="ver-info db-tip" role="button" tabindex="0" data-ver="1" title="' + TT('数据口径说明') + '" aria-label="' + TT('数据口径说明') + '">ⓘ</i>';
   el.innerHTML =
     '<div class="db-side-grp"><span>' + TT('强积金数据分析平台') + '</span></div>' +
     '<a class="db-nav' + (active === 'home' ? ' on' : '') + '" id="navHome" href="home.html">' + I.home +
       '<span>' + TT('首页') + '</span></a>' +
-    '<button type="button" class="db-nav' + (active === 'db' ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
+    '<button type="button" class="db-nav' + (dbOn ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
       '<span>' + TT('基金最新数据') + '</span>' + info + '<i class="db-caret" aria-hidden="true"></i></button>' +
     '<div class="db-sub" id="dbSubCmp"><nav class="an-prov" id="anProv" aria-label="发行人"></nav></div>' +
-    '<button type="button" class="db-nav' + (active === 'cmp' ? ' on' : '') + '" id="dbtCmp" data-dbtab="cmp">' + I.cmp +
-      '<span>' + TT('可视化对比') + '</span></button>' +
-    '<div class="db-side-div" role="separator"></div>' +
     '<button type="button" class="db-nav' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
       '<span>' + TT('MPFA 基金榜单') + '</span>' + info + '</button>' +
     '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span>' + TT('供款计算器') + '</span></button>' +
-    '<div class="db-side-note">' + TT('数据每日自动同步') + '</div>';
+    /* 2026-11-02（第二十七轮，用户要求）：页头「数据版本」下移到这里，与「数据每日自动同步」合成一句 */
+    '<div class="db-side-foot"><div class="db-ver" id="verChip" tabindex="0">' +
+      '<span>' + TT('数据每日自动同步') + '</span><b>—</b></div></div>';
   /* 侧栏存在时隐藏右下角悬浮计算器（同一功能已有侧栏入口） */
   document.body.classList.add('has-sidebar');
   const calc = el.querySelector('#navCalc');
@@ -2046,7 +2057,7 @@ function mountFD(x, alive) {
       /* 2026-10-21：注入 fundMeta，使小窗/详情页的「选择基金」面板与第三页一致（发行人 × 类别两维筛选） */
       const meta = {};
       (DATA.funds || []).forEach((f) => { meta[String(f.id)] = { trustee: f.trustee || '其他', type: f.type || '' }; });
-      TREND.mount(box, [{ type: 'fund', id: x.id }], { hideGoto: true, fundMeta: meta, title: TT('对比基金走势') });
+      TREND.mount(box, [{ type: 'fund', id: x.id }], { hideGoto: true, fundMeta: meta, title: TT('基金走势对比图') });
       /* 2026-10-21：历史有缺口的基金（早期源站只有月度价）→ 图例旁加一个悬浮提示 */
       (function () {
         if (!window.__gapsP) window.__gapsP = fetch('/api/hist-gaps').then((r) => r.json()).catch(() => null);
@@ -2442,8 +2453,16 @@ window.openCmp = function () {
   if (m) {
     /* 宽度随对比数量变化：2 只时收窄（不再固定 1100px 大片留白），最多 6 只时展宽 */
     const box = m.querySelector('.cmp-box');
-    /* 2026-11-02（第二十六轮）：走势图下方统计表改成 8 列后，2 只对比时弹窗略加宽 */
+    /* 2026-11-02（第二十七轮）：3 只以上时对比表改为可横向滚动（首列固定），弹窗不再无限加宽 */
     if (box) box.style.maxWidth = Math.min(1400, 360 + list.length * 240) + 'px';
+    /* 弹窗标题写成「基金对比：A vs B vs C」 */
+    const ttl = m.querySelector('#cmpTitle') || m.querySelector('.hd h3');
+    if (ttl) {
+      const names = list.map((x) => (x.fundBase || x.fund || '')).filter(Boolean);
+      const short = names.map((n) => (n.length > 18 ? n.slice(0, 17) + '…' : n));
+      ttl.textContent = TQ('基金对比：{list}', { list: short.join(' vs ') });
+      ttl.setAttribute('title', names.join(' vs '));
+    }
     /* 右上角工具条：放大 / 分享 / 下载（对齐详情页表头按钮） */
     const hd = m.querySelector('.hd');
     if (hd && !hd.querySelector('.cmp-tools')) {

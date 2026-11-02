@@ -10,8 +10,8 @@
 <!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
 <link rel="preload" as="image" href="img/hero-hk.webp?v=2" media="(min-width: 701px)">
 <link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
-<link rel="stylesheet" href="b.css?p=home&v=20261102n">
-<link rel="stylesheet" href="home.css?v=20261102n">
+<link rel="stylesheet" href="b.css?p=home&v=20261102o">
+<link rel="stylesheet" href="home.css?v=20261102o">
 </head>
 <body class="home page-side">
 
@@ -21,10 +21,8 @@
       <img class="logo-img" src="img/logo.png" alt="JING YAN 精研">
       <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</span></div>
     </div>
-    <nav class="nav"></nav>
-    <div class="hdr-right">
-      <div class="ver-chip" id="verChip"><span data-i18n="数据版本">数据版本</span><b>—</b></div>
-    </div>
+    <!-- 2026-11-02（第二十七轮）：行情栏并入顶部栏 -->
+    <div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><div class="tk-track"><span class="tk-loading">…</span></div></div>
     <div class="lang-sw" id="langSw" role="group" aria-label="语言">
       <button type="button" data-lang="zh-Hans">简</button>
       <button type="button" data-lang="zh-Hant">繁</button>
@@ -32,10 +30,8 @@
     </div>
   </div>
 </header>
-  <!-- 2026-10-31（用户要求）：雅虎财经式行情栏（随页面滚动，不固定）——规模加权 MPF 指数 + 恒指 -->
   <!-- 2026-11-02（第二十六轮）：全站左侧导航（内容由 common.js 渲染） -->
 <aside class="db-side" id="dbSide" data-active="home" aria-label="全站导航"></aside>
-<div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><button type="button" class="tk-close" id="tkClose" title="隐藏行情栏" aria-label="隐藏行情栏"><svg width="8" height="8" viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button><div class="tk-track"><span class="tk-loading">…</span></div></div>
 
 <!-- Hero：先讲市场 -->
 <section class="hero">
@@ -210,8 +206,8 @@
   <span class="tt-txt" data-i18n="回到顶部">回到顶部</span>
 </button>
 
-<script src="b.js?p=home&v=20261102n"></script>
-<script src="home.js?v=20261102n"></script>
+<script src="b.js?p=home&v=20261102o"></script>
+<script src="home.js?v=20261102o"></script>
 <script src="heat.js"></script>
 <script>renderFriends();</script>
 

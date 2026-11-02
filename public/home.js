@@ -831,7 +831,7 @@
     const yearTxt = (yy) => String(yy);
     const monthTxt = (mo) => EN ? (MON[mo - 1] || mo) : mo + TT('月');
     const axisY = H - padB;
-    /* 2026-11-02（第二十五轮，用户要求）：年份不再斜排 —— 正放、居中锚点，单独占月份下面一行 */
+    /* 2026-11-02（第二十七轮，用户要求）：年份与月份同一基线（不再单独占一行），字号比月份大一号 */
     const yearLab = (x, y, txt) =>
       '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="middle" class="pi-yk pi-yk-year">' + txt + '</text>';
     /* 2026-11-02（第十八轮，用户要求）：月份刻度标在「月底」——3 月落在 3/31、6 月落在 6/30，
@@ -854,9 +854,10 @@
     const yStep = Math.max(1, Math.ceil(58 / Math.max(1, plotW / Math.max(1, y1 - y0 + 1))));
     /* 从「最后一年」往前推，保证最新年份一定有标签（否则长区间会停在 2024） */
     for (let yy = y1; yy >= y0; yy -= yStep) {
-      const x = padL + plotW * ((yy * 12 - mi0) / (mi1 - mi0 || 1));
+      let x = padL + plotW * ((yy * 12 - mi0) / (mi1 - mi0 || 1));
       if (x < padL - 2 || x > W - padR - 10) continue;
-      xt += yearLab(x, axisY + 34, yearTxt(yy));
+      x = Math.min(Math.max(x, padL + 16), W - padR - 16);
+      xt += yearLab(x, axisY + 16, yearTxt(yy));
     }
     /* 年份分界小竖线（1 月 1 日）：让「哪里换年」一眼可见 */
     let ytick = '';

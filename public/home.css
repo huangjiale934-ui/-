@@ -1075,7 +1075,7 @@ body { overflow-x: visible; }
 .pi-chart svg { width: 100%; height: auto; display: block; }
 .pi-yk { font-size: 11px; fill: var(--text-3, #8595a8); }
 /* 倾斜年份标签：比月份更醒目 */
-.pi-yk-year { font-size: 11.5px; font-weight: 700; fill: var(--text, #16283e); }
+.pi-yk-year { font-size: 12.5px; font-weight: 700; fill: var(--text, #16283e); }   /* 比月份（11px）大一号 */
 .pi-bubble { position: absolute; transform: translate(-50%, -130%); background: var(--text, #16283e); color: #fff;
   font-size: 12px; padding: 5px 9px; border-radius: 7px; pointer-events: none; white-space: nowrap; z-index: 3; }
 @media (max-width: 1160px) { .pi-cards { grid-template-columns: repeat(3, 1fr); } }

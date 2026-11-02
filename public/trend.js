@@ -271,6 +271,7 @@ window.TREND = (function () {
        ——2026-10-14 修复：此前 × 点击无效的 bug；同时新增「点线条改样式」 */
     /* 2026-11-02（第二十三轮）：图例行删除，×（移除）与「点线条改样式」迁到下方表格的名称列 */
     box.querySelector('.tr-tablewrap').addEventListener('click', (e) => {
+      if (e.target.closest('.tr-csv')) { e.stopPropagation(); exportStatsCsv(); return; }
       const t = e.target.closest('[data-toggle]');
       if (t) { e.stopPropagation(); toggleItem(t.getAttribute('data-toggle')); return; }
       /* 2026-11-02（第二十五轮）：点「基金名称」= 打开基金详情；点左侧线条 = 改样式 */
@@ -350,17 +351,42 @@ window.TREND = (function () {
           const inputs = dr.querySelectorAll('input');
           if (inputs[0] && !inputs[0].value) inputs[0].value = S.customStart || '';
           if (inputs[1] && !inputs[1].value) inputs[1].value = S.customEnd || '';
+          syncDgo();
         }
         return;
       }
       S.range = r;
-      if (r !== 'custom') q('.tr-daterow').hidden = true;
+      if (r !== 'custom') { q('.tr-daterow').hidden = true; if (r !== 'custom') { S.customStart = ''; S.customEnd = ''; } syncDgo(); }
       qa('.tr-r').forEach((x) => x.classList.toggle('on', x === b));
       draw();
     });
+    /* 2026-11-02（第二十七轮，用户要求）：日期浮层 ——
+       ① 点「确定」应用区间后，按钮变成「清空」，再点即恢复默认区间（省一次找按钮）；
+       ② 点页面空白处也能收起浮层（原来只能再点一次「选择日期」）。 */
+    const dgoBtn = q('.tr-dgo');
+    const isCustomApplied = () => S.range === 'custom' && !!S.customStart && !!S.customEnd;
+    function syncDgo() {
+      if (!dgoBtn) return;
+      const on = isCustomApplied();
+      dgoBtn.textContent = on ? _t('清空') : _t('确定');
+      dgoBtn.classList.toggle('tr-dclear', on);
+    }
     q('.tr-daterow').addEventListener('click', (e) => {
       if (!e.target.closest('.tr-dgo')) return;
-      const inputs = q('.tr-daterow').querySelectorAll('input');
+      const dr = q('.tr-daterow');
+      if (isCustomApplied()) {
+        /* 清空：回到默认「1 年」，并收起浮层 */
+        S.customStart = ''; S.customEnd = ''; S.range = '1y';
+        const inputs = dr.querySelectorAll('input');
+        if (inputs[0]) inputs[0].value = '';
+        if (inputs[1]) inputs[1].value = '';
+        qa('.tr-r').forEach((x) => x.classList.toggle('on', x.getAttribute('data-r') === '1y'));
+        dr.hidden = true;
+        syncDgo();
+        draw();
+        return;
+      }
+      const inputs = dr.querySelectorAll('input');
       const a = inputs[0].value, b2 = inputs[1].value;
       if (!a || !b2 || a >= b2) { if (window.mpfToast) mpfToast( _t('请选择有效的起止日期')); return; }
       /* 2026-10-23 修：允许选到未来日期会导致图表永远"数据加载中"、且残留旧提示框 */
@@ -369,7 +395,23 @@ window.TREND = (function () {
       const tip0 = q('.tr-tip'); if (tip0) tip0.hidden = true;
       S.customStart = a; S.customEnd = b2; S.range = 'custom';
       qa('.tr-r').forEach((x) => x.classList.toggle('on', x.getAttribute('data-r') === 'custom'));
+      syncDgo();
+      dr.hidden = true;   /* 应用后收起浮层；下次打开按钮已是「清空」 */
       draw();
+    });
+    /* 点浮层以外的地方收起（图例样式面板、面板下拉同理） */
+    if (!window.__trOutsideBound) window.__trOutsideBound = 1;
+    document.addEventListener('click', function (ev) {
+      if (!box.isConnected) return;
+      const dr = box.querySelector('.tr-daterow');
+      if (!dr || dr.hidden) return;
+      if (ev.target.closest && ev.target.closest('.tr-rangebox')) return;
+      dr.hidden = true;
+    });
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Escape' || !box.isConnected) return;
+      const dr = box.querySelector('.tr-daterow');
+      if (dr && !dr.hidden) dr.hidden = true;
     });
     /* ---- 导出工作簿（HTML/.xls：净值 + 区间涨跌幅 + 区间统计 + 走势图，2026-10-21 重做） ---- */
     const expBtn = q('.tr-exp');
@@ -1118,8 +1160,9 @@ window.TREND = (function () {
           if (x < PL + 2 || x > PR - 4) continue;
           g += '<line x1="' + x.toFixed(1) + '" y1="' + PB + '" x2="' + x.toFixed(1) + '" y2="' + (PB + 5) + '" stroke="#9fbdd9" stroke-width="1.2"/>';
           /* 2026-11-02（第二十五轮，用户要求）：年份正放（不斜排）、居中、单独一行并加粗 */
-          const lx = Math.min(Math.max(x, PL + 14), PR - 14);
-          g += '<text x="' + lx.toFixed(1) + '" y="' + (axisY + 15) + '" text-anchor="middle" class="tr-xlab tr-xlab-year">' + y + '</text>';
+          /* 2026-11-02（第二十七轮，用户要求）：年份上移，与月份同一基线、字号比月份大一号 */
+          const lx = Math.min(Math.max(x, PL + 16), PR - 16);
+          g += '<text x="' + lx.toFixed(1) + '" y="' + (axisY + 1) + '" text-anchor="middle" class="tr-xlab tr-xlab-year">' + y + '</text>';
         }
       })();
       /* 两条线时填充其间色带（参照合作方站） */
@@ -1258,7 +1301,7 @@ window.TREND = (function () {
             '<td class="r date">' + (st.f ? dstr(ts(st.f)) : '—') + '</td>' +
             '<td class="r date">' + (st.t ? dstr(ts(st.t)) : '—') + '</td></tr>';
         }).join('');
-        wrap.innerHTML = '<div class="tr-tbl-scroll"><table class="tr-tbl tr-tbl-all">' + head + '<tbody>' + rows + '</tbody></table></div>' +
+        wrap.innerHTML = csvBar() + '<div class="tr-tbl-scroll"><table class="tr-tbl tr-tbl-all">' + head + '<tbody>' + rows + '</tbody></table></div>' +
           '<div class="tr-allnote">' + esc0( _t('未选择基金：以上为全部基金的区间统计（点「＋」或名称加入对比）。')) + '</div>';
       };
       if (cachedAll) { done(cachedAll); return; }
@@ -1266,6 +1309,38 @@ window.TREND = (function () {
       fetch('/api/allstats', { cache: 'force-cache' }).then((r) => (r.ok ? r.json() : null))
         .then((j) => { cachedAll = j; done(j); })
         .catch(() => { wrap.innerHTML = ''; });
+    }
+
+    /* 2026-11-02（第二十七轮，用户要求）：统计表加「导出 CSV」——只导这张表（8 列），
+       顶部那个「导出」导的是含净值序列的完整工作簿，两者用途不同。 */
+    function csvBar() {
+      return '<div class="tr-tblbar"><button type="button" class="tr-csv" title="' +
+        esc0(_t('把下面这张统计表导出为 CSV（Excel 可直接打开）')) + '">' + esc0(_t('导出 CSV')) + '</button></div>';
+    }
+    function exportStatsCsv() {
+      const tbl = q('.tr-tablewrap .tr-tbl');
+      if (!tbl) return;
+      const cell = (el) => (el ? (el.textContent || '').replace(/\s+/g, ' ').trim() : '');
+      const head = Array.prototype.map.call(tbl.querySelectorAll('thead th'), cell);
+      const lines = [head];
+      Array.prototype.forEach.call(tbl.querySelectorAll('tbody tr'), (tr) => {
+        const tds = tr.querySelectorAll('td');
+        if (!tds.length) return;
+        lines.push(Array.prototype.map.call(tds, (td) => {
+          const nm = td.querySelector('.nm');
+          return nm ? cell(nm) : cell(td);
+        }));
+      });
+      const esc = (v) => (/[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v);
+      const csv = '\ufeff' + lines.map((r) => r.map(esc).join(',')).join('\r\n');
+      const day = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = _t('基金走势区间统计') + '_' + day + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
     }
 
     function renderTable(lines, startTs, endTs) {
@@ -1329,6 +1404,7 @@ window.TREND = (function () {
           '</tr>';
       }).join('');
       wrap.innerHTML =
+        csvBar() +
         '<div class="tr-tbl-scroll"><table class="tr-tbl">' +
           '<thead><tr>' +
             '<th>' + esc0(_t('名称')) + '</th>' +
