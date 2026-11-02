@@ -2132,17 +2132,18 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 
 /* ② 左侧分组导航：贴浏览器左边、固定全高（2026-11-02 第二十一轮，用户要求） */
 .db-shell { display: block; }
-body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; }
-.db-side { position: fixed; left: 0; top: 100px; bottom: 0; width: 196px; z-index: 40;
+body.db-page .wrap { max-width: none; padding-left: 232px; padding-right: 14px; }
+/* 2026-11-02（第二十五轮，用户要求）：侧边栏加宽（196 → 220），标题加大并居中 */
+.db-side { position: fixed; left: 0; top: 100px; bottom: 0; width: 220px; z-index: 40;
   display: flex; flex-direction: column; overflow-y: auto;
   background: #fff; border-right: 1px solid var(--line, #e3ecf4); border-top: 1px solid var(--line, #e3ecf4);
   border-radius: 0; padding: 12px 10px 16px; box-shadow: 2px 0 12px rgba(20, 50, 80, .04); }
 /* 2026-11-02（第二十四轮，用户要求）：侧栏标题加大、改名「强积金资料库」，
    并把全站统一的 ⓘ 口径说明挂到标题右侧（原来在页头「数据版本」旁）。 */
-.db-side-grp { display: flex; align-items: center; gap: 6px;
-  font-size: 14px; color: #35507a; font-weight: 700; letter-spacing: 0; padding: 2px 8px 10px; }
+.db-side-grp { position: relative; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 16px; color: #2c4258; font-weight: 700; letter-spacing: 0; padding: 4px 8px 12px; }
 .db-side-grp > span { white-space: nowrap; }
-.db-side-grp .ver-info { margin-left: auto; }
+.db-side-grp .ver-info { position: absolute; right: 0; top: 50%; transform: translateY(-50%); margin-left: 0; }
 /* 二级菜单折叠箭头（只做视觉，点击区域是整个入口按钮） */
 .db-caret { margin-left: auto; width: 0; height: 0;
   border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #7d94a9;
@@ -2397,3 +2398,12 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
 .ver-pop .vp-d { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex: none; }
 .ver-pop .vp-n { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); color: #8a5a00; }
 @media (max-width: 720px) { .ver-pop { width: 300px; } }
+
+/* ==========================================================
+   2026-11-02（第二十五轮，用户要求）：资料库表格「已选基金」置顶
+   —— 与可视化对比页一致：勾选的基金排在最前，下面用分隔行区分。
+   ========================================================== */
+#fundTable tbody tr.is-pinned > td { background: #f6fbff; }
+#fundTable tbody tr.is-pinned > td:first-child { box-shadow: inset 3px 0 0 var(--brand, #0866bb); }
+#fundTable tbody tr.qf-divider td { padding: 5px 10px; font-size: 11.5px; color: var(--text-3);
+  background: var(--surface-2); border-top: 1px dashed var(--border-strong); border-bottom: 1px dashed var(--border-strong); }

@@ -571,13 +571,28 @@
     const order = visibleOrder();
     renderThead(order);
 
-    const pages = Math.max(1, Math.ceil(total / S.size));
+    /* 2026-11-02（第二十五轮，用户要求）：勾选「对比」或从上方走势图添加的基金，
+       在表格里置顶显示，并用「以上是已选基金」与其余基金分开（照搬可视化对比页的交互）。
+       置顶行不是另起一套数据，而是按当前排序结果原样抽出，名次仍保留真实排名。 */
+    const selIds = (window.CMPX && window.CMPX.ids) ? window.CMPX.ids().map(String) : [];
+    const selSet = {};
+    selIds.forEach((id) => { selSet[id] = 1; });
+    const ranked = ROWS.map((x, i) => ({ x, rk: i + 1 }));
+    const pinned = selIds.length ? ranked.filter((o) => selSet[String(o.x.id)]) : [];
+    const rest = pinned.length ? ranked.filter((o) => !selSet[String(o.x.id)]) : ranked;
+
+    const pages = Math.max(1, Math.ceil(rest.length / S.size));
     if (S.page > pages) S.page = pages;
     const st = (S.page - 1) * S.size;
-    const page = ROWS.slice(st, st + S.size);
+    const page = rest.slice(st, st + S.size);
 
-    $('#tbody').innerHTML = page.length
-      ? page.map((x, i) => rowHtml(x, st + i + 1, order)).join('')
+    const pinnedHtml = pinned.map((o) => rowHtml(o.x, o.rk, order, true)).join('');
+    const pageHtml = page.map((o) => rowHtml(o.x, o.rk, order)).join('');
+    const divider = (pinned.length && page.length)
+      ? '<tr class="qf-divider"><td colspan="' + order.length + '">' + TT('以上是已选基金') + '</td></tr>' : '';
+
+    $('#tbody').innerHTML = (pinned.length || page.length)
+      ? pinnedHtml + divider + pageHtml
       : '<tr><td colspan="' + order.length + '"><div class="empty">' + TT('没有符合条件的基金，请放宽筛选条件') +
         ' <button type="button" class="btn sm" style="margin-left:10px" onclick="window.clearAllFilters && clearAllFilters()">' + TT('一键清除全部筛选') + '</button></div></td></tr>';
 
@@ -595,6 +610,7 @@
       if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
       renderCmpBar();
       syncDbTrend();   /* 2026-11-02：勾选即叠加到上方走势图 */
+      render();        /* 2026-11-02（第二十五轮）：勾选后立即把这个基金置顶到表格最前面 */
     }));
 
     /* 2026-10-23（核验报告）：筛选后明确写「已筛选」，避免把「全市场 451」误读成计数没刷新 */
@@ -727,8 +743,9 @@
     if (typeof window.applyI18n === 'function') window.applyI18n(th);
   }
 
-  function rowHtml(x, rk, order) {
-    return '<tr data-id="' + esc(x.id) + '">' + order.map((k) => (CELL_FNS[k] || function () { return ''; })(x, rk)).join('') + '</tr>';
+  function rowHtml(x, rk, order, pinned) {
+    return '<tr data-id="' + esc(x.id) + '"' + (pinned ? ' class="is-pinned"' : '') + '>' +
+      order.map((k) => (CELL_FNS[k] || function () { return ''; })(x, rk)).join('') + '</tr>';
   }
 
 

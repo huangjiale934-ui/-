@@ -1189,6 +1189,7 @@
   '清空全部对比对象（含指数），重新开始': 'Clear all comparison items (including indices) and start over',
   '收起 / 展开': 'Collapse / expand',
   '单条对比时纵轴为实际数值（净值 / 指数点位）；再加入一条即切换为累计涨跌幅对比。悬停可查看当日数值。': 'With a single line the axis shows actual values (NAV / index level); add a second line to switch to cumulative return. Hover to see daily values.',
+  '以上是已选基金': 'Selected funds above',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -1105,14 +1105,15 @@
    ========================================================== */
 .tr-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
 .tr-titlebtn { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none;
-  padding: 0; font: inherit; font-size: 15px; font-weight: 700; color: var(--text);
+  padding: 0; font: inherit; font-size: 17px; font-weight: 700; color: var(--text);
   cursor: pointer; white-space: nowrap; letter-spacing: .2px; }
 .tr-titlebtn:hover { color: var(--brand); }
 .tr-caret { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
   border-top: 6px solid currentColor; opacity: .5; transition: transform .16s ease; }
 .tr-box.tr-folded .tr-caret { transform: rotate(-90deg); }
 .tr-ctrls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
-.tr-adds { display: flex; align-items: center; gap: 8px; }
+/* 2026-11-02（第二十五轮）：添加组贴在标题右边，不再挤到最右侧 */
+.tr-adds { display: flex; align-items: center; gap: 8px; margin-left: 4px; }
 .tr-adds .tr-sel {
   flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px;
   border: 1px solid #cfe1f2; background: #fff; color: var(--brand);
@@ -1135,9 +1136,9 @@
 .tr-box.tr-folded .tr-note, .tr-box.tr-folded .tr-gotowrap { display: none !important; }
 
 /* 表格：新增 期初/期末/最高/最低/波动率，名称列内置图例 */
-/* 2026-11-02（第二十四轮，用户要求）：统计表字号提到与下方基金列表一致（12 → 15px），行距同步放大 */
+/* 2026-11-02（第二十五轮）：统计表字号再收一号（15 → 14px），仍比原来的 12px 大 */
 .tr-tbl th:nth-child(1), .tr-tbl td:nth-child(1) { width: 22% !important; }
-.tr-tbl th, .tr-tbl td { font-size: 15px; }
+.tr-tbl th, .tr-tbl td { font-size: 14px; }
 .tr-tbl th { padding: 9px 7px; }
 .tr-tbl td { padding: 11px 7px; }
 .tr-tbl td.n { display: flex; align-items: center; gap: 7px; min-width: 150px; }
@@ -1168,13 +1169,12 @@
    （表格按内容宽度撑开，容器统一滚动，避免最后一列被卡片裁掉） */
 .tr-tablewrap { overflow-x: auto; }
 .tr-tablewrap .tr-tbl { width: max-content; min-width: 100%; }
-/* 1366–1499：15px 会顶到卡片边缘，降一档到 14px（仍明显大于原来的 12px） */
-@media (max-width: 1499px) {
-  .tr-tbl th, .tr-tbl td { font-size: 14px; }
-}
 @media (max-width: 1365px) {
   .tr-tbl th, .tr-tbl td { font-size: 12.5px; }
   .tr-tbl th { padding: 8px 4px; }
   .tr-tbl td { padding: 9px 4px; }
   .tr-tbl td.n { min-width: 158px; }
 }
+
+/* 2026-11-02（第二十五轮，用户要求）：走势图横轴年份正放并加粗 */
+.tr-xlab-year { font-size: 11.5px; font-weight: 700; fill: var(--text, #16283e); }

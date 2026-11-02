@@ -604,8 +604,8 @@
     if (!list || !list.length) { el.innerHTML = '<li class="mk-empty">' + TT('暂无数据') + '</li>'; return; }
     el.innerHTML = list
       .map((x, i) => '<li>' +
-        /* 2026-11-02（第二十四轮，用户选定 C17）：「TOP n」小标签取代圆标，前 3 名蓝色递增、4/5 浅蓝 */
-        '<span class="top-tag t' + (i + 1) + '">TOP ' + (i + 1) + '</span>' +
+        /* 2026-11-02（第二十五轮，用户要求）：改回圆形序号 1-5，蓝色由深到浅递减 */
+        '<span class="top-tag t' + (i + 1) + '">' + (i + 1) + '</span>' +
         '<span class="n" title="' + esc(fundFullName(x)) + (x.scheme ? ' · ' + esc(x.scheme) : '') + '">' + esc(fundFullName(x)) + '</span>' +
         '<span class="v ' + (colorVal == null ? '' : (colorVal(x) >= 0 ? 'up' : 'down')) + '">' + fmt(x) + '</span>' +
         '</li>')
@@ -831,8 +831,9 @@
     const yearTxt = (yy) => String(yy);
     const monthTxt = (mo) => EN ? (MON[mo - 1] || mo) : mo + TT('月');
     const axisY = H - padB;
+    /* 2026-11-02（第二十五轮，用户要求）：年份不再斜排 —— 正放、居中锚点，单独占月份下面一行 */
     const yearLab = (x, y, txt) =>
-      '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="end" class="pi-yk pi-yk-year" transform="rotate(-40 ' + x.toFixed(1) + ' ' + y + ')">' + txt + '</text>';
+      '<text x="' + x.toFixed(1) + '" y="' + y + '" text-anchor="middle" class="pi-yk pi-yk-year">' + txt + '</text>';
     /* 2026-11-02（第十八轮，用户要求）：月份刻度标在「月底」——3 月落在 3/31、6 月落在 6/30，
        这样 9 月→年份分界→3 月的间距与 3/6/9 之间完全一致（此前标在月初，导致年份两侧间距不等）；
        12 月并入 1 月 1 日的年份分界，不单独标注。 */
@@ -855,7 +856,7 @@
     for (let yy = y1; yy >= y0; yy -= yStep) {
       const x = padL + plotW * ((yy * 12 - mi0) / (mi1 - mi0 || 1));
       if (x < padL - 2 || x > W - padR - 10) continue;
-      xt += yearLab(Math.max(x + 18, padL + 16), axisY + 18, yearTxt(yy));
+      xt += yearLab(x, axisY + 34, yearTxt(yy));
     }
     /* 年份分界小竖线（1 月 1 日）：让「哪里换年」一眼可见 */
     let ytick = '';

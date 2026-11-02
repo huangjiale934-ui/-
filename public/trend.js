@@ -273,9 +273,17 @@ window.TREND = (function () {
     box.querySelector('.tr-tablewrap').addEventListener('click', (e) => {
       const t = e.target.closest('[data-toggle]');
       if (t) { e.stopPropagation(); toggleItem(t.getAttribute('data-toggle')); return; }
+      /* 2026-11-02（第二十五轮）：点「基金名称」= 打开基金详情；点左侧线条 = 改样式 */
+      const nf = e.target.closest('[data-openfund]');
+      if (nf) { e.stopPropagation(); openFundDetail(nf.getAttribute('data-openfund')); return; }
       const st = e.target.closest('[data-style]');
       if (st) { e.stopPropagation(); openStylePopover(st.getAttribute('data-style')); }
     });
+    function openFundDetail(id) {
+      if (typeof window.openDetail === 'function') window.openDetail(id);
+      else if (typeof window.anOpen === 'function') window.anOpen(id);
+      else location.href = 'index.html?open=' + encodeURIComponent(id) + '#cmp';
+    }
 
     /* ---- 线条样式弹层：颜色 / 线宽 / 线型（2026-10-14） ---- */
     function closeStylePopover() { const p = q('.tr-style'); if (p) p.remove(); }
@@ -741,13 +749,14 @@ window.TREND = (function () {
             /* 2026-11-02（第二十四轮，用户要求）：标题右侧加下拉箭头，点标题即收起/展开整块图表 */
             '<button type="button" class="tr-title tr-titlebtn" aria-expanded="true" title="' + esc0(_t('收起 / 展开')) + '">' +
               '<span>' + esc0(title) + '</span><i class="tr-caret" aria-hidden="true"></i></button>') +
+          /* 2026-11-02（第二十五轮，用户要求）：添加组从最右侧移回标题右边，区间/导出仍靠右 */
+          (o.bareHead ? '' :
+            '<div class="tr-adds">' +
+              '<button type="button" class="tr-sel tr-add" data-panel="idx">＋ ' + esc0(_t('添加指数')) + '<i class="tr-cnt" data-cnt="idx"></i></button>' +
+              '<button type="button" class="tr-sel tr-add" data-panel="fund">＋ ' + esc0(_t('添加基金')) + '<i class="tr-cnt" data-cnt="fund"></i></button>' +
+              '<button type="button" class="tr-tool tr-clear" title="' + esc0( _t('清空全部对比对象（含指数），重新开始')) + '">' + esc0( _t('清空')) + '</button>' +
+            '</div>') +
           '<div class="tr-ctrls">' +
-            (o.bareHead ? '' :
-              '<div class="tr-adds">' +
-                '<button type="button" class="tr-sel tr-add" data-panel="idx">＋ ' + esc0(_t('添加指数')) + '<i class="tr-cnt" data-cnt="idx"></i></button>' +
-                '<button type="button" class="tr-sel tr-add" data-panel="fund">＋ ' + esc0(_t('添加基金')) + '<i class="tr-cnt" data-cnt="fund"></i></button>' +
-                '<button type="button" class="tr-tool tr-clear" title="' + esc0( _t('清空全部对比对象（含指数），重新开始')) + '">' + esc0( _t('清空')) + '</button>' +
-              '</div>') +
             '<div class="tr-toolbar">' +
               rangesBar +
               (o.bareHead ? '' :
@@ -1001,7 +1010,7 @@ window.TREND = (function () {
         const isIdx = it.type === 'index' || it.type === 'tavg';
         const name = itemLabel(it);
         const st = styleOf(it, i);
-        lines.push({ key: keyOf(it), name, color: st.color, width: st.width, dash: st.dash, win: w, isIdx });
+        lines.push({ key: keyOf(it), it, name, color: st.color, width: st.width, dash: st.dash, win: w, isIdx });
       });
       if (!lines.length) {
         const msg = S.items.length ? _t('数据加载中…') : _t('暂无对比对象——请从上方「选择指数 / 选择基金」添加');
@@ -1102,8 +1111,9 @@ window.TREND = (function () {
           const x = X(ms);
           if (x < PL + 2 || x > PR - 4) continue;
           g += '<line x1="' + x.toFixed(1) + '" y1="' + PB + '" x2="' + x.toFixed(1) + '" y2="' + (PB + 5) + '" stroke="#9fbdd9" stroke-width="1.2"/>';
-          const lx = Math.max(x + 18, PL + 16);
-          g += '<text x="' + lx.toFixed(1) + '" y="' + (axisY + 2) + '" text-anchor="end" class="tr-xlab tr-xlab-year" transform="rotate(-40 ' + lx.toFixed(1) + ' ' + (axisY + 2) + ')">' + y + '</text>';
+          /* 2026-11-02（第二十五轮，用户要求）：年份正放（不斜排）、居中、单独一行并加粗 */
+          const lx = Math.min(Math.max(x, PL + 14), PR - 14);
+          g += '<text x="' + lx.toFixed(1) + '" y="' + (axisY + 15) + '" text-anchor="middle" class="tr-xlab tr-xlab-year">' + y + '</text>';
         }
       })();
       /* 两条线时填充其间色带（参照合作方站） */
@@ -1288,12 +1298,19 @@ window.TREND = (function () {
         const nameTip = isTavg
           ? _t('发行人均值指数：该发行人旗下「已接入历史净值」的成员基金按每日等权平均（每日涨跌幅的算术平均逐日链式累计，区间起点 = 1000），不含费用。')
           : _t('点击可改颜色 / 线宽 / 线型');
-        const linePrev = '<svg class="tr-lg-line" width="30" height="10" data-style="' + esc0(L.key) + '">' +
-          '<line x1="1" y1="5" x2="29" y2="5" stroke="' + L.color + '" stroke-width="' + L.width + '"' +
+        /* 2026-11-02（第二十五轮，用户要求）：线型预览是「改样式」的入口（加长到 46px）；
+           基金名称改成「打开详情」，不再弹样式面板。 */
+        const fId = L.it && L.it.type === 'fund' ? L.it.id : '';
+        const linePrev = '<svg class="tr-lg-line" width="46" height="12" data-style="' + esc0(L.key) + '" ' +
+          'title="' + esc0(_t('点线条可改颜色 / 线宽 / 线型')) + '">' +
+          '<line x1="2" y1="6" x2="44" y2="6" stroke="' + L.color + '" stroke-width="' + L.width + '"' +
           (L.dash ? ' stroke-dasharray="' + L.dash + '"' : '') + ' stroke-linecap="round"/></svg>';
+        const nameAttr = fId
+          ? ' data-openfund="' + esc0(fId) + '" title="' + esc0(_t('查看基金详情')) + '"'
+          : ' title="' + esc0(nameTip) + '"';
         return '<tr>' +
           '<td class="n">' + linePrev +
-            '<span class="nm" data-style="' + esc0(L.key) + '" title="' + esc0(nameTip) + '">' + esc0(L.name) + '</span>' +
+            '<span class="nm"' + nameAttr + '>' + esc0(L.name) + '</span>' +
             '<b class="tr-lg-x" data-toggle="' + esc0(L.key) + '" title="' + esc0(_t('移除')) + '">×</b></td>' +
           '<td class="r">' + fmtV(first) + '</td>' +
           '<td class="r">' + fmtV(last) + '</td>' +
