@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>基金对比表 · 3–4 只时的固定首列样式</title>
+<style>
+  :root { --brand:#0866bb; --ink:#16283e; --t2:#3d5470; --t3:#8595a8; --line:#e3ecf4;
+          --soft:#edf7ff; --up:#d93025; --dn:#12996b; --best:#e8f1fb; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#f4f7fb; color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif; }
+  .hd { max-width:1080px; margin:0 auto; padding:34px 20px 8px; }
+  .hd h1 { margin:0 0 8px; font-size:24px; }
+  .hd p { margin:0; color:#5b6f85; font-size:13.5px; line-height:1.8; }
+  .hd b { color:var(--brand); }
+  .list { max-width:1080px; margin:0 auto; padding:16px 20px 70px; display:flex; flex-direction:column; gap:20px; }
+  .cell { background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 4px 18px rgba(20,50,90,.06); }
+  .cap { display:flex; align-items:baseline; gap:9px; padding:11px 14px; border-bottom:1px solid #eef3f9; background:#fbfdff; }
+  .cap b { font-size:13px; color:var(--brand); letter-spacing:.4px; }
+  .cap span { font-size:12.5px; color:#63798f; }
+  .demo { padding:14px 16px 18px; }
+
+  .modal { width:720px; max-width:100%; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; }
+  .mhd { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid #eef3f9; }
+  .mhd h3 { margin:0; font-size:13.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1 1 auto; }
+  .mhd .tools { margin-left:auto; display:flex; gap:6px; }
+  .btn { font-size:11px; border:1px solid #dbe6f0; border-radius:5px; padding:4px 9px; color:var(--t2); background:#fff; white-space:nowrap; flex:none; }
+  .scroll { overflow-x:auto; position:relative; }
+  .scroll::-webkit-scrollbar { height:9px; }
+  .scroll::-webkit-scrollbar-thumb { background:#cfdfee; border-radius:9px; }
+  .scroll::-webkit-scrollbar-track { background:#f4f8fc; }
+  table { border-collapse:separate; border-spacing:0; width:max-content; min-width:100%; font-size:12px; }
+  th, td { padding:8px 12px; border-bottom:1px solid #f2f6fb; white-space:nowrap; text-align:right; }
+  thead th { background:#f7fafd; color:var(--t3); font-weight:600; font-size:11px; border-bottom:1px solid var(--line); }
+  th:first-child, td:first-child { text-align:left; position:sticky; left:0; z-index:3; background:#fff;
+    box-shadow:1px 0 0 var(--line), 6px 0 10px -8px rgba(20,50,90,.35); }
+  thead th:first-child { background:#f7fafd; z-index:4; }
+  td.best { background:var(--best); color:#084e8c; font-weight:700; }
+  td.best:first-child { background:var(--best); }
+  tr:hover td { background:#fafcfe; }
+  tr:hover td:first-child { background:#fafcfe; }
+  .fade { position:absolute; right:0; top:0; bottom:0; width:34px; pointer-events:none;
+    background:linear-gradient(90deg,rgba(255,255,255,0),#fff 72%); }
+  .hint { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--t3); padding:7px 2px 0; }
+  .hint i { font-style:normal; letter-spacing:1px; color:var(--brand); }
+  .fund { display:flex; align-items:center; gap:7px; }
+  .dot { width:14px; height:2px; border-radius:2px; background:var(--brand); }
+  .alt table { font-size:12px; }
+  .alt th:first-child, .alt td:first-child { position:static; box-shadow:none; }
+  .alt thead th { text-align:left; }
+</style>
+</head>
+<body>
+<div class="hd">
+  <h1>基金对比表 · 3–4 只时「可横向滚动 + 固定首列」</h1>
+  <p>四种呈现方式，都是真实宽度（弹窗 720px，模拟小屏）。<b>试着在表格上左右拖动</b>看效果；挑一个编号告诉我（例：「B」）。</p>
+</div>
+<div class="list" id="list"></div>
+
+<script>
+(function () {
+  const FUNDS = [
+    ['宏利MPF康健护理基金', '宏利', '#0866bb'],
+    ['宏利MPF北美股票基金', '宏利', '#12996b'],
+    ['强积金保守基金', '银联信托', '#d08b1f'],
+    ['宏利MPF中华威力基金', '宏利', '#b03a2e']
+  ];
+  const ROWS = [
+    ['发行人（受托人）', ['宏利', '宏利', '银联信托', '宏利'], 0],
+    ['强积金计划', ['宏利环球精选（强积金）计划', '宏利环球精选（强积金）计划', '银联行业计划', '宏利环球精选（强积金）计划'], 0],
+    ['基金种类', ['股票基金', '股票基金', '保守基金', '股票基金'], 0],
+    ['推出日期', ['02-04-2008', '01-11-2000', '01-12-2000', '05-06-1998'], 0],
+    ['基金规模（百万港元）', ['38,743', '42,010', '14,456', '29,983'], 1],
+    ['风险级别', ['4', '4', '2', '5'], 0],
+    ['单位资产净值', ['38.7430', '42.010', '14.456', '29.983'], 0],
+    ['近1年年率化回报', ['+46.47%', '+21.30%', '+2.15%', '+18.44%'], 1],
+    ['近5年年率化回报', ['+12.06%', '+9.83%', '+1.02%', '+7.51%'], 1],
+    ['近10年年率化回报', ['+9.42%', '+8.10%', '—', '+6.33%'], 1],
+    ['基金管理费 % p.a.', ['1.88%', '1.69%', '0.79%', '1.72%'], 2],
+    ['2025 年回报', ['+23.16%', '+15.42%', '+3.10%', '+11.87%'], 1]
+  ];
+  function head(cols) {
+    return '<tr><th>对比项</th>' + FUNDS.slice(0, cols).map((f, i) =>
+      '<th><div class="fund"><span class="dot" style="background:' + f[2] + '"></span>' + f[0] + '</div>' +
+      '<div style="font-weight:400;color:#9aabbd;font-size:10.5px">' + f[1] + '</div></th>').join('') + '</tr>';
+  }
+  function body(cols) {
+    return ROWS.map(([label, vals, mode]) => {
+      const nums = vals.slice(0, cols);
+      let best = -1;
+      if (cols > 1 && mode !== 0) {
+        const parsed = nums.map((v) => (v === '—' ? null : parseFloat(String(v).replace(/[+%,]/g, ''))));
+        const valid = parsed.filter((v) => v != null);
+        const target = mode === 2 ? Math.min.apply(null, valid) : Math.max.apply(null, valid);
+        best = parsed.findIndex((v) => v === target);
+      }
+      return '<tr><td>' + label + '</td>' + nums.map((v, i) =>
+        '<td class="' + (i === best ? 'best' : '') + '">' + v + '</td>').join('') + '</tr>';
+    }).join('');
+  }
+  function table(cols) {
+    return '<table><thead>' + head(cols) + '</thead><tbody>' + body(cols) + '</tbody></table>';
+  }
+  function modal(title, cols, w, nofade) {
+    return '<div class="modal" style="width:' + (w || 720) + 'px">' +
+      '<div class="mhd"><h3>' + title + '</h3><div class="tools"><button class="btn">⤢ 放大</button>' +
+      '<button class="btn">分享</button><button class="btn">下载</button><button class="btn">×</button></div></div>' +
+      '<div class="scroll"><div style="position:relative">' + table(cols) + '</div>' + (nofade ? '' : '<div class="fade"></div>') + '</div>' +
+      '<div class="hint"><i>←→</i> 左右拖动查看其余基金；「对比项」一列固定在左侧</div></div>';
+  }
+  const cells = [
+    ['A', '2 只：不需要滚动（现状，840px 弹窗）', modal('基金对比：宏利MPF康健护理基金 vs 宏利MPF北美股票基金', 2, 840, true)],
+    ['B', '4 只 + 固定首列 + 右侧渐隐（推荐）', modal('基金对比：宏利MPF康健护理基金 vs 宏利MPF北美股票基金 vs 强积金保守基金 vs 宏利MPF中华威力基金', 4, 620)],
+    ['C', '3 只 + 固定首列（中等宽度 760px）', modal('基金对比：宏利MPF康健护理基金 vs 宏利MPF北美股票基金 vs 强积金保守基金', 3, 700)],
+    ['D', '换一种排法：基金做行、指标做列（4 只也不用滚动）', '<div class="modal alt" style="width:840px">' +
+      '<div class="mhd"><h3>基金对比：4 只（转置排法）</h3><div class="tools"><button class="btn">⤢ 放大</button>' +
+      '<button class="btn">×</button></div></div>' +
+      '<div class="scroll"><table style="min-width:100%;width:100%"><thead><tr><th>基金 / 指标</th>' +
+      '<th>近1年</th><th>近5年</th><th>波幅</th><th>规模</th><th>收费</th><th>风险</th></tr></thead><tbody>' +
+      FUNDS.map((f, i) => '<tr><td><div class="fund"><span class="dot" style="background:' + f[2] + '"></span>' +
+        f[0] + '</div><div style="font-size:10.5px;color:#9aabbd">' + f[1] + '</div></td>' +
+        '<td class="' + (i === 0 ? 'best' : '') + '">' + ['+46.47%', '+21.30%', '+2.15%', '+18.44%'][i] + '</td>' +
+        '<td class="' + (i === 0 ? 'best' : '') + '">' + ['+12.06%', '+9.83%', '+1.02%', '+7.51%'][i] + '</td>' +
+        '<td>' + ['14.1%', '15.6%', '1.0%', '17.2%'][i] + '</td>' +
+        '<td>' + ['38,743', '42,010', '14,456', '29,983'][i] + '</td>' +
+        '<td>' + ['1.88%', '1.69%', '0.79%', '1.72%'][i] + '</td>' +
+        '<td>' + ['4', '4', '2', '5'][i] + '</td></tr>').join('') +
+      '</tbody></table></div></div>']
+  ];
+  document.getElementById('list').innerHTML = cells.map(([id, desc, html]) =>
+    '<div class="cell"><div class="cap"><b>' + id + '</b><span>' + desc + '</span></div><div class="demo">' + html + '</div></div>').join('');
+})();
+</script>
+</body>
+</html>

@@ -1936,7 +1936,7 @@ chk('二十七轮·⑬页脚两个折叠箭头缩小 15%（42 → 36）',
 chk('二十七轮·⑭详情弹窗价格与四项并排（5 列一行）',
   /\.modal-bd \.fd-head \{ grid-template-columns: 1\.25fr 1fr 1fr 1fr 1fr; \}/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{ grid-column: auto;/.test(readSrc('analysis.css')));
-chk('二十七轮·设计页（20 套整页 / 20 套详情头 / 对比表 4 种）',
-  /\bdesign-shell\.html\b/.test('design-shell.html') && fs.existsSync(path.join(__dirname, '..', 'design-shell.html')) &&
-  fs.existsSync(path.join(__dirname, '..', 'design-detail.html')) &&
-  fs.existsSync(path.join(__dirname, '..', 'design-cmp.html')));
+chk('二十七轮·设计页（20 套整页 / 20 套详情头 / 对比表 4 种，放在 public/ 可直接访问）',
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-shell.html')) &&
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-detail.html')) &&
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-cmp.html')));
