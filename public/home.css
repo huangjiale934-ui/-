@@ -1133,3 +1133,8 @@ body { overflow-x: visible; }
 
 /* 走势标题与年份标签间距再加大 */
 .mk-panel h3 + #mkYearLine, .mk-panel #mkYearLine { margin-top: 6px; }
+
+/* 2026-11-03：加侧栏后内容区变窄，首页图表网格的 fr 列被 min-content 顶开（1436 下溢出 256px）→
+   允许列收缩，图表内部自带 overflow 处理 */
+.mk-charts > .mk-panel, .mk-charts2 > .mk-panel, .mk-charts > .mk-card { min-width: 0; }
+.mk-charts { min-width: 0; }

@@ -352,6 +352,8 @@ function renderUpdateTime() {
   const info = '<i class="ver-info db-tip" role="button" tabindex="0" data-ver="1" title="' + TT('数据口径说明') + '" aria-label="' + TT('数据口径说明') + '">ⓘ</i>';
   el.innerHTML =
     '<div class="db-side-grp"><span>' + TT('强积金数据分析平台') + '</span></div>' +
+    /* 2026-11-03（第二十八轮，用户要求）：简繁英切换从页头搬进侧栏，页头把宽度让给行情 */
+    '<div class="db-side-lang"></div>' +
     '<a class="db-nav' + (active === 'home' ? ' on' : '') + '" id="navHome" href="home.html">' + I.home +
       '<span>' + TT('首页') + '</span></a>' +
     '<button type="button" class="db-nav' + (dbOn ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
@@ -363,6 +365,10 @@ function renderUpdateTime() {
     /* 2026-11-02（第二十七轮，用户要求）：页头「数据版本」下移到这里，与「数据每日自动同步」合成一句 */
     '<div class="db-side-foot"><div class="db-ver" id="verChip" tabindex="0">' +
       '<span>' + TT('数据每日自动同步') + '</span><b>—</b></div></div>';
+  /* 把页头那颗简繁英搬到侧栏标题下方（保留 #langSw 与 data-lang，i18n.js 的绑定不受影响） */
+  const langBox = el.querySelector('.db-side-lang');
+  const langSw = document.getElementById('langSw');
+  if (langBox && langSw) langBox.appendChild(langSw);
   /* 侧栏存在时隐藏右下角悬浮计算器（同一功能已有侧栏入口） */
   document.body.classList.add('has-sidebar');
   const calc = el.querySelector('#navCalc');
@@ -2033,6 +2039,8 @@ window.openDetail = function (id) {
     if (typeof window.anOpen === 'function') {
       const m = document.querySelector('#modal');
       if (m) m.classList.remove('show');
+      /* 2026-11-03：先切到「可视化对比」板块，否则分析视图渲染在隐藏容器里（点了没反应） */
+      if (typeof window.__dbShowTab === 'function') { try { window.__dbShowTab('cmp'); } catch (e) {} }
       try {
         const u = new URL(location.href);
         if (u.searchParams.has('fund')) { u.searchParams.delete('fund'); history.replaceState(null, '', u); }
@@ -2440,7 +2448,7 @@ window.openCmp = function () {
     if (items.length) {
       const meta2 = {};
       (DATA.funds || []).forEach((f) => { meta2[String(f.id)] = { trustee: f.trustee || '其他', type: f.type || '' }; });
-      TREND.mount(tb, items, { bareHead: true, hideGoto: true, fundMeta: meta2 });
+      TREND.mount(tb, items, { bareHead: true, headAdds: true, hideGoto: true, fundMeta: meta2 });
     }
   }
   body.innerHTML = h;
@@ -2453,8 +2461,8 @@ window.openCmp = function () {
   if (m) {
     /* 宽度随对比数量变化：2 只时收窄（不再固定 1100px 大片留白），最多 6 只时展宽 */
     const box = m.querySelector('.cmp-box');
-    /* 2026-11-02（第二十七轮）：3 只以上时对比表改为可横向滚动（首列固定），弹窗不再无限加宽 */
-    if (box) box.style.maxWidth = Math.min(1400, 360 + list.length * 240) + 'px';
+    /* 2026-11-03（第二十八轮，用户要求）：弹窗整体收窄 —— 4 只 1100、3 只 930、2 只 760 */
+    if (box) box.style.maxWidth = Math.min(1160, 420 + list.length * 170) + 'px';
     /* 弹窗标题写成「基金对比：A vs B vs C」 */
     const ttl = m.querySelector('#cmpTitle') || m.querySelector('.hd h3');
     if (ttl) {

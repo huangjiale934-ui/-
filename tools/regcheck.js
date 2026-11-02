@@ -192,7 +192,7 @@ chk('排名·口径说明在表格下方', rk.indexOf('srcNote') > rk.indexOf('<
 /* 2026-10-28 首屏改版：公司名 h2 随公司介绍块一起移除，主标题改为 hero 内的 h1 双行文案 */
 chk('首页·首屏=公司logo+「香港强积金数据分析平台」（2026-10-31 三版改名）', /hero-brand/.test(home) && /<h1 data-i18n="香港强积金数据分析平台">/.test(home) && home.indexOf('香港强积金市场概览') < 0 && home.indexOf('hero-tag') < 0);
 /* 2026-10-29：公司介绍块（含大量 data-i18n）已删除，属性总数由 80+ 降至 72，阈值相应下调 */
-chk('首页·多语言属性已覆盖', (home.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 38);
+chk('首页·多语言属性已覆盖', (home.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 34);
 chk('资料库·多语言属性已覆盖', (idx.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 20);
 chk('排名·多语言属性已覆盖', (rk.match(/data-i18n(-ph|-title|-parts)?="/g) || []).length > 15);
 
@@ -803,7 +803,7 @@ chk('走势图·统计表含实际值（区间最高/最低/收益/波动率；�
 chk('第四页·数据来源行（官方截至日期 · 净值最新日期 · 已核实/451 动态）', /官方资料截至 <b>\d{4}-\d{2}-\d{2}<\/b> · 单位净值最新 <b>\d{4}-\d{2}-\d{2}<\/b> · 已核实 (44[5-9]|45[01])\/451 条/.test(an));
 chk('第四页·图上方双选择器（选择指数 / 选择基金）+ 面板容器', /data-panel="idx"/.test(an) && /data-panel="fund"/.test(an) && /tr-p-list-idx/.test(an) && /tr-p-list-fund/.test(an));
 chk('第四页·区间按钮（第二十六轮：1年/3年/5年/10年/全部 + 选择日期，去掉 1 个月）', ['1y', '3y', '5y', '10y', 'all', 'custom'].every((r) => new RegExp('data-r="' + r + '"').test(an)) && !/data-r="1m"/.test(an) && !/1w/.test(an) && !/tr-r-all/.test(an) && /tr-daterow/.test(an));
-chk('第四页·区间统计表五列（名称/区间收益/区间最大回撤/起止日期；2026-10-20 删除「最新点位」列）', !/最新点位/.test(an) && /区间收益/.test(an) && /区间最大回撤/.test(an) && /最大回撤起始日期/.test(an) && /最大回撤结束日期/.test(an) && /恒生指数/.test(an));
+chk('第四页·区间统计表（起止日期已合并成「最大回撤区间」一列）', !/最新点位/.test(an) && /区间收益/.test(an) && /区间最大回撤/.test(an) && /最大回撤区间/.test(an) && /恒生指数/.test(an));
 chk('第四页·「查看具体基金分析」按钮 + 返回对比文案', /查看具体基金分析/.test(readSrc('analysis.js')) && (function () {
   try { const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
     return /window\.anOpen/.test(j) && /← 返回对比/.test(j); } catch (e) { return false; }
@@ -982,7 +982,7 @@ chk('下午批·⑤清空筛选 + 全量基金表（未选基金 341 只 + ＋ �
     const as = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'allstats.json'), 'utf8'));
     const w = as.windows && as.windows.y1 ? Object.keys(as.windows.y1).length : 0;
     return t.indexOf('tr-clear') >= 0 && t.indexOf('renderAllFundsTable') >= 0 && t.indexOf('data-addfund') >= 0 &&
-      t.indexOf("(st.f ? dstr(ts(st.f)) : '—')") >= 0 && sv.indexOf("'/api/allstats'") >= 0 && w >= 300;
+      t.indexOf("(st.d < -0.005 && st.f && st.t)") >= 0 && sv.indexOf("'/api/allstats'") >= 0 && w >= 300;
   } catch (e) { return false; }
 })());
 chk('下午批·⑥浮窗跟随光标（贴边翻转，不再固定顶部）', (function () {
@@ -1029,7 +1029,7 @@ chk('下午批·⑤清空筛选 + 全量基金表（未选基金 341 只 + ＋ �
     const as = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'allstats.json'), 'utf8'));
     const w = as.windows && as.windows.y1 ? Object.keys(as.windows.y1).length : 0;
     return t.indexOf('tr-clear') >= 0 && t.indexOf('renderAllFundsTable') >= 0 && t.indexOf('data-addfund') >= 0 &&
-      t.indexOf("(st.f ? dstr(ts(st.f)) : '—')") >= 0 && sv.indexOf("'/api/allstats'") >= 0 && w >= 300;
+      t.indexOf("(st.d < -0.005 && st.f && st.t)") >= 0 && sv.indexOf("'/api/allstats'") >= 0 && w >= 300;
   } catch (e) { return false; }
 })());
 chk('下午批·⑥浮窗跟随光标（贴边翻转，不再固定顶部）', (function () {
@@ -1912,20 +1912,20 @@ chk('二十七轮·③日期浮层：确定后变清空 + 点空白收起',
   /closest\('\.tr-rangebox'\)/.test(readSrc('trend.js')) && /dr\.hidden = true;   \/\* 应用后收起浮层/.test(readSrc('trend.js')));
 chk('二十七轮·④详情弹窗表头与主页一致（一行 + 同一标题 + 加宽）',
   /title: TT\('基金走势对比图'\)/.test(readSrc('common.js')) &&
-  /\.modal-box \{ max-width: 1060px; \}/.test(readSrc('analysis.css')) &&
+  /\.modal-box \{ max-width: 900px; \}/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.tr-head \{ flex-wrap: nowrap; \}/.test(readSrc('analysis.css')));
 chk('二十七轮·⑤⑥对比最优值改蓝色调 + 年份上移到月份同一基线',
   /\.cmp-best \{ background: #e8f1fb !important; color: #084e8c !important/.test(readSrc('style.css')) &&
-  /axisY \+ 1\) \+ '" text-anchor="middle" class="tr-xlab tr-xlab-year"/.test(readSrc('trend.js')) &&
-  /yearLab\(x, axisY \+ 16, yearTxt\(yy\)\)/.test(readSrc('home.js')));
+  /axisY \+ 1\) \+ '" text-anchor="' \+ anc \+ '" class="tr-xlab tr-xlab-year"/.test(readSrc('trend.js')) &&
+  /yearLab\(lx, axisY \+ 16, yearTxt\(yy\), anchor\)/.test(readSrc('home.js')));
 chk('二十七轮·⑦「总体」改名「全部」',
   !/TT\('总体'\)/.test(readSrc('analysis.js')) && /TT\('全部'\)/.test(readSrc('analysis.js')));
 chk('二十七轮·⑧ⓘ 用首页同款小 i（15px 细描边）',
   /\.db-side \.ver-info\.db-tip \{[\s\S]{0,220}width: 15px; height: 15px/.test(readSrc('style.css')) &&
   /class="ver-info db-tip"/.test(readSrc('common.js')));
-chk('二十七轮·⑨统计表「导出 CSV」（只导这张 8 列表）',
-  /function exportStatsCsv/.test(readSrc('trend.js')) && /class="tr-csv"/.test(readSrc('trend.js')) &&
-  /function csvBar/.test(readSrc('trend.js')) && /\.tr-tblbar \{/.test(readSrc('analysis.css')));
+chk('二十八轮·②统计表「导出 CSV」已全面清退',
+  !/exportStatsCsv/.test(readSrc('trend.js')) && !/class="tr-csv"/.test(readSrc('trend.js')) &&
+  !/csvBar/.test(readSrc('trend.js')) && !/\.tr-csv/.test(readSrc('analysis.css')));
 chk('二十七轮·⑩⑪对比弹窗固定首列 + 标题写基金名',
   /position: sticky; left: 0; z-index: 3; background: #fff;/.test(readSrc('analysis.css')) &&
   /id="cmpTitle"/.test(readSrc('index.html')) && /基金对比：\{list\}/.test(readSrc('common.js')));
@@ -1934,9 +1934,47 @@ chk('二十七轮·⑫回顶按钮上移右移（right 36 / bottom 94）',
 chk('二十七轮·⑬页脚两个折叠箭头缩小 15%（42 → 36）',
   /\.foot-fold \.ff-arrow \{ font-size: 36px; width: 38px; \}/.test(readSrc('style.css')));
 chk('二十七轮·⑭详情弹窗价格与四项并排（5 列一行）',
-  /\.modal-bd \.fd-head \{ grid-template-columns: 1\.25fr 1fr 1fr 1fr 1fr; \}/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-head \{ grid-template-columns: 1\.12fr \.96fr \.96fr \.96fr \.96fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{ grid-column: auto;/.test(readSrc('analysis.css')));
 chk('二十七轮·设计页（20 套整页 / 20 套详情头 / 对比表 4 种，放在 public/ 可直接访问）',
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-shell.html')) &&
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-detail.html')) &&
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-cmp.html')));
+
+/* ===== 2026-11-03 第二十八轮（9 条反馈）===== */
+chk('二十八轮·①详情弹窗收窄到 900（不再加宽），表头五块字号压缩',
+  /\.modal-box \{ max-width: 900px; \}/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v \{ font-size: 25px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-cell \{ padding: 9px 11px 11px; \}/.test(readSrc('analysis.css')) &&
+  !/max-width: 1060px/.test(readSrc('analysis.css')));
+chk('二十八轮·②统计表导出 CSV 已删除（含样式与点击分支）',
+  !/csvBar/.test(readSrc('trend.js')) && !/\.tr-tblbar/.test(readSrc('analysis.css')));
+chk('二十八轮·③首页年份与换年竖线分开（左对齐 +8px）',
+  /let lx = xt0 \+ 8, anchor = 'start';/.test(readSrc('home.js')) &&
+  /let lx = x \+ 7, anc = 'start';/.test(readSrc('trend.js')));
+chk('二十八轮·④对比弹窗也有「添加指数 / 添加基金 / 清空」（headAdds）',
+  /headAdds: true/.test(readSrc('common.js')) && /const withAdds = !o\.bareHead \|\| !!o\.headAdds;/.test(readSrc('trend.js')));
+chk('二十八轮·⑤回撤「起始 + 结束」合并为一列（两张统计表都改）',
+  !/最大回撤起始日期/.test(readSrc('trend.js')) && !/最大回撤结束日期/.test(readSrc('trend.js')) &&
+  (readSrc('trend.js').match(/最大回撤区间/g) || []).length >= 2 &&
+  /m\.fromT\) \+ ' → ' \+ dstr\(m\.toT\)/.test(readSrc('trend.js')));
+chk('二十八轮·⑥对比表固定首列只在 ≤900 生效（网页端不滚）',
+  /@media \(max-width: 900px\) \{\s*\.cmp-modal #cmpBody table\.data thead th:first-child/.test(readSrc('analysis.css')) &&
+  /box\.style\.maxWidth = Math\.min\(1160, 420 \+ list\.length \* 170\)/.test(readSrc('common.js')));
+chk('二十八轮·⑧页头 LOGO 去拼音、去副标题，语言移入侧栏',
+  /logo-mark\.png/.test(readSrc('index.html')) && /logo-mark\.png/.test(readSrc('home.html')) &&
+  !/JING YAN 精研/.test(readSrc('index.html')) &&
+  !/香港强积金数据分析平台<\/span>/.test(readSrc('index.html')) &&
+  /class="db-side-lang"/.test(readSrc('common.js')) && /langBox\.appendChild\(langSw\)/.test(readSrc('common.js')) &&
+  /\.logo-img \{ height: 30px; width: auto; \}/.test(readSrc('style.css')));
+chk('二十八轮·⑧行情迷你折线恢复（≥980 显示）',
+  /@media \(max-width: 980px\) \{\s*\.hdr \.tk-spark \{ display: none; \}/.test(readSrc('style.css')) &&
+  !/max-width: 1700px[\s\S]{0,80}tk-spark/.test(readSrc('style.css')));
+chk('二十八轮·⑦⑧两个新设计页在位（10 套详情头 / 20 套页头）',
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-detail2.html')) &&
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-shell2.html')));
+chk('二十八轮·详情弹窗「放大」先切到对比页（修「点了没反应」）',
+  /window\.__dbShowTab = show;/.test(readSrc('index.html')) &&
+  /__dbShowTab\('cmp'\)/.test(readSrc('common.js')));
+chk('二十八轮·首页图表网格允许收缩（消除横向滚动 256px）',
+  /\.mk-charts > \.mk-panel, \.mk-charts2 > \.mk-panel, \.mk-charts > \.mk-card \{ min-width: 0; \}/.test(readSrc('home.css')));

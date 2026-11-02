@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>基金详情页表头 · 第二轮 10 套</title>
+<style>
+  :root { --brand:#0866bb; --ink:#16283e; --t2:#3d5470; --t3:#8595a8; --line:#e3ecf4;
+          --up:#d93025; --dn:#12996b; --soft:#edf7ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#f4f7fb; color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif; }
+  .hd { max-width:1000px; margin:0 auto; padding:34px 20px 8px; }
+  .hd h1 { margin:0 0 8px; font-size:24px; }
+  .hd p { margin:0; color:#5b6f85; font-size:13.5px; line-height:1.8; }
+  .hd b { color:var(--brand); }
+  .list { max-width:1000px; margin:0 auto; padding:16px 20px 70px; display:flex; flex-direction:column; gap:16px; }
+  .cell { background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:0 4px 18px rgba(20,50,90,.06); }
+  .cap { display:flex; align-items:baseline; gap:9px; padding:10px 14px; border-bottom:1px solid #eef3f9; background:#fbfdff; }
+  .cap b { font-size:13px; color:var(--brand); letter-spacing:.4px; }
+  .cap span { font-size:12.5px; color:#63798f; }
+  .demo { padding:14px; }
+  .box { width:880px; }
+
+  /* 共用 */
+  .k { font-size:10.5px; color:var(--t3); line-height:1.5; }
+  .k em { font-style:normal; font-weight:600; color:var(--t2); }
+  .v { font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .big { font-size:26px; font-weight:800; letter-spacing:-.6px; font-variant-numeric:tabular-nums; line-height:1.05; }
+  .s { font-size:10.5px; color:var(--t3); }
+  .st { font-size:11px; letter-spacing:1px; color:#dbe4ee; }
+  .st i { color:#e0a03a; font-style:normal; }
+  .up { color:var(--up); }
+
+  /* E01 参考原样：浅绿价格块 */
+  .e01 { display:grid; grid-template-columns:1.05fr 1fr 1fr 1fr 1fr; border:1px solid #e6efe4; background:#fff; }
+  .e01 > div { padding:9px 12px; border-right:1px solid #eef3f9; }
+  .e01 > div:last-child { border-right:0; }
+  .e01 .p { background:#f1f8ea; border-right:1px solid #e2edda; }
+
+  /* E02 品牌蓝价格块 */
+  .e02 { display:grid; grid-template-columns:1.08fr 1fr 1fr 1fr 1fr; border:1px solid var(--line); background:#fff; }
+  .e02 > div { padding:9px 12px; border-right:1px solid #eef3f9; }
+  .e02 > div:last-child { border-right:0; }
+  .e02 .p { background:#f2f8fe; }
+
+  /* E03 无边框只竖线 */
+  .e03 { display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .e03 > div { padding:10px 14px; border-right:1px solid #eef3f9; }
+  .e03 > div:last-child { border-right:0; }
+
+  /* E04 价格窄 + 右侧均分 */
+  .e04 { display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .e04 .p { flex:0 0 190px; padding:10px 14px; background:#f7fbff; }
+  .e04 .g { flex:1; display:grid; grid-template-columns:repeat(4,1fr); }
+  .e04 .g > div { padding:10px 12px; border-left:1px solid #eef3f9; }
+
+  /* E05 价格 + 52周波幅进度条 */
+  .e05 { display:grid; grid-template-columns:1.15fr 1fr 1fr 1fr 1fr; border:1px solid var(--line); background:#fff; }
+  .e05 > div { padding:9px 12px; border-right:1px solid #eef3f9; }
+  .e05 > div:last-child { border-right:0; }
+  .e05 .bar { height:4px; border-radius:4px; background:#e8f1fb; margin-top:6px; position:relative; }
+  .e05 .bar i { position:absolute; left:62%; top:-2px; width:8px; height:8px; border-radius:50%; background:var(--brand); }
+
+  /* E06 四块顶部色条 */
+  .e06 { display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; border:1px solid var(--line); }
+  .e06 > div { padding:10px 12px 12px; border-right:1px solid #eef3f9; }
+  .e06 > div:last-child { border-right:0; }
+  .e06 .p { background:#fafcff; }
+  .e06 .c { border-top:3px solid var(--c, #cfe1f2); }
+
+  /* E07 星级换成刻度条 */
+  .e07 { display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; border:1px solid var(--line); background:#fff; }
+  .e07 > div { padding:9px 12px; border-right:1px solid #eef3f9; }
+  .e07 > div:last-child { border-right:0; }
+  .e07 .sc { display:flex; gap:3px; margin-top:4px; }
+  .e07 .sc i { height:4px; flex:1; border-radius:2px; background:#e6eef7; display:block; }
+  .e07 .sc i.on { background:#e0a03a; }
+
+  /* E08 价格右对齐 + 四块左对齐 */
+  .e08 { display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; border:1px solid var(--line); }
+  .e08 > div { padding:10px 14px; }
+  .e08 .p { text-align:right; background:#f7fbff; border-right:1px solid var(--line); }
+
+  /* E09 表格化：白底 + 仅底边 */
+  .e09 { display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; border-bottom:1px solid var(--line); }
+  .e09 > div { padding:8px 12px 10px; }
+  .e09 .p { border-right:1px solid var(--line); }
+
+  /* E10 深色价格 + 浅灰四块 */
+  .e10 { display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; gap:8px; }
+  .e10 > div { padding:10px 12px; border-radius:8px; background:#f6f9fc; }
+  .e10 .p { background:linear-gradient(135deg,#0b5ea8,#2f7fc1); color:#fff; }
+  .e10 .p .k, .e10 .p .s { color:#cfe4f7; }
+</style>
+</head>
+<body>
+<div class="hd">
+  <h1>基金详情页表头 · 第二轮 10 套（按你给的参考图改）</h1>
+  <p>每套都是真实 <b>880px</b>（弹窗内宽）。统一规则：价格在左、四块在右、一行放下、字号压小。<b>挑编号告诉我（如「E05」）</b>，或直接说「就用参考图那样（E01）」。</p>
+</div>
+<div class="list" id="list"></div>
+
+<script>
+(function () {
+  const stars = (n) => {
+    let h = '<span class="st">';
+    for (let i = 0; i < 5; i++) h += i < n ? '<i>★</i>' : '☆';
+    return h + '</span>';
+  };
+  const price = (extra) => '<div class="p"><div class="k">价格（HKD）</div><div class="s">截至 2026-10-29</div>' +
+    '<div class="big">38.7430</div>' + (extra || '<div class="s">52周波幅 31.26 – 38.74</div>') + '</div>';
+  const cType = '<div><div class="k">资产类别</div><div class="v">股票基金</div><div class="s">未分类股票基金</div></div>';
+  const cRet = '<div><div class="k">表现（3年回报）</div><div class="v up">+46.47%</div>' + stars(3) + '</div>';
+  const cVol = '<div><div class="k">风险指标（3年波幅）</div><div class="v">13.69%</div>' + stars(4) + '</div>';
+  const cFee = '<div><div class="k">收费（基金开支比率）</div><div class="v">1.88%</div>' + stars(1) + '</div>';
+
+  const E = [];
+  E.push(['E01', '照参考图：浅绿价格块 + 四块白底（最接近你发的图）', '<div class="e01">' + price() + cType + cRet + cVol + cFee + '</div>']);
+  E.push(['E02', '同上，但价格块用站内浅蓝（品牌一致）', '<div class="e02">' + price() + cType + cRet + cVol + cFee + '</div>']);
+  E.push(['E03', '无外框，只用细竖线分隔（最轻，和走势图卡更融）', '<div class="e03">' + price() + cType + cRet + cVol + cFee + '</div>']);
+  E.push(['E04', '价格只占 190px，右侧四块均分（数值更集中）', '<div class="e04">' + price() + '<div class="g">' + cType + cRet + cVol + cFee + '</div></div>']);
+  E.push(['E05', '价格块加「52 周波幅」进度条，一眼看位置', '<div class="e05">' + price('<div class="s">52周波幅 31.26 – 38.74</div><div class="bar"><i></i></div>') + cType + cRet + cVol + cFee + '</div>']);
+  E.push(['E06', '四块顶部加细色条（类别蓝 / 表现红 / 风险蓝 / 收费灰）', '<div class="e06">' + price() +
+    '<div class="c" style="--c:#4f86b8"><div class="k">资产类别</div><div class="v">股票基金</div><div class="s">未分类股票基金</div></div>' +
+    '<div class="c" style="--c:#d93025"><div class="k">表现（3年回报）</div><div class="v up">+46.47%</div>' + stars(3) + '</div>' +
+    '<div class="c" style="--c:#0866bb"><div class="k">风险指标（3年波幅）</div><div class="v">13.69%</div>' + stars(4) + '</div>' +
+    '<div class="c" style="--c:#9fb3c6"><div class="k">收费（基金开支比率）</div><div class="v">1.88%</div>' + stars(1) + '</div></div>']);
+  E.push(['E07', '星级换成 5 格刻度条（更小更整齐）', '<div class="e07">' + price() +
+    '<div><div class="k">资产类别</div><div class="v">股票基金</div><div class="s">未分类股票基金</div></div>' +
+    '<div><div class="k">表现（3年回报）</div><div class="v up">+46.47%</div><div class="sc"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>' +
+    '<div><div class="k">风险指标（3年波幅）</div><div class="v">13.69%</div><div class="sc"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>' +
+    '<div><div class="k">收费（基金开支比率）</div><div class="v">1.88%</div><div class="sc"><i class="on"></i><i></i><i></i><i></i><i></i></div></div></div>']);
+  E.push(['E08', '价格右对齐、四块左对齐（两端平衡）', '<div class="e08">' + price() + cType + cRet + cVol + cFee + '</div>']);
+  E.push(['E09', '表格化：白底 + 只有底部一条线（最省视觉噪音）', '<div class="e09">' + price() + cType + cRet + cVol + cFee + '</div>']);
+  E.push(['E10', '深蓝价格卡 + 四张浅灰小卡（对比最强）', '<div class="e10">' + price() +
+    cType.replace('<div>', '<div>') + cRet + cVol + cFee + '</div>']);
+
+  document.getElementById('list').innerHTML = E.map(([id, desc, html]) =>
+    '<div class="cell"><div class="cap"><b>' + id + '</b><span>' + desc + '</span></div>' +
+    '<div class="demo"><div class="box">' + html + '</div></div></div>').join('');
+})();
+</script>
+</body>
+</html>

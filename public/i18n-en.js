@@ -1195,6 +1195,7 @@
   '导出 CSV': 'Export CSV',
   '把下面这张统计表导出为 CSV（Excel 可直接打开）': 'Export the table below as CSV (opens in Excel)',
   '基金走势区间统计': 'Fund range stats',
+  '最大回撤区间': 'Max drawdown period',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

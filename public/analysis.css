@@ -1216,44 +1216,60 @@
 
 
 /* ==========================================================
-   2026-11-02（第二十七轮，用户要求）
-   ④ 详情弹窗：价格右侧空着一大片 → 把下面四块（资产类别 / 3年回报 / 3年波幅 / 收费）
-      挪到价格右边，一行放下，省掉 2–3 行高度。弹窗同步加宽。
+   2026-11-03（第二十八轮，用户要求）
+   ④ 详情弹窗：价格 + 四块并排一行，但**不再加宽弹窗**——
+      改为把五块与字号一起收小，回到 900px（原 860 略宽一点即可放下）。
    ========================================================== */
-.modal-box { max-width: 1060px; }
-.modal-bd .fd-head { grid-template-columns: 1.25fr 1fr 1fr 1fr 1fr; }
-.modal-bd .fd-price { grid-column: auto; border-right: 1px solid var(--border-strong); border-bottom: 0; padding: 12px 16px 14px; }
-.modal-bd .fd-cell { padding: 12px 14px 14px; }
-.modal-bd .fd-v { font-size: 30px; }
+.modal-box { max-width: 900px; }
+.modal-bd .fd-head { grid-template-columns: 1.12fr .96fr .96fr .96fr .96fr; margin-top: 10px; }
+.modal-bd .fd-price { grid-column: auto; border-right: 1px solid var(--border-strong); border-bottom: 0; padding: 9px 13px 11px; }
+.modal-bd .fd-cell { padding: 9px 11px 11px; }
+.modal-bd .fd-k { font-size: 10.5px; }
+.modal-bd .fd-v { font-size: 25px; letter-spacing: -0.6px; margin-top: 1px; }
+.modal-bd .fd-v2 { font-size: 14.5px; margin-top: 3px; }
+.modal-bd .fd-v2.fd-type { font-size: 13.5px; }
+.modal-bd .fd-s { font-size: 10.5px; margin-top: 1px; }
+.modal-bd .fd-asof { font-size: 10.5px; }
+.modal-bd .fd-range { font-size: 10.5px; margin-top: 2px; }
+.modal-bd .fd-stars { font-size: 11px; margin-top: 3px; letter-spacing: 1px; }
 /* 详情弹窗里的走势图头部一行放得下（与主页面一致，不再换行） */
 .modal-bd .tr-head { flex-wrap: nowrap; }
 .modal-bd .tr-head .tr-toolbar { flex-wrap: nowrap; }
-@media (max-width: 1100px) {
+@media (max-width: 940px) {
   .modal-bd .fd-head { grid-template-columns: 1fr 1fr; }
   .modal-bd .fd-price { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid var(--border-strong); }
   .modal-bd .tr-head { flex-wrap: wrap; }
 }
 
 /* ==========================================================
-   ⑩ 基金对比弹窗：3–4 只时对比表可横向滚动，且「对比项」首列固定
+   ⑩ 基金对比弹窗：仅「窄屏」才需要横向滚动 + 固定首列
+   （2026-11-03 用户反馈：网页端不需要，弹窗收窄后 4 只也放得下）
    ========================================================== */
 .cmp-modal .table-scroll { overflow-x: auto; }
 .cmp-modal #cmpBody table.data { border-collapse: separate; border-spacing: 0; }
-.cmp-modal #cmpBody table.data thead th:first-child,
-.cmp-modal #cmpBody table.data tbody td:first-child {
-  position: sticky; left: 0; z-index: 3; background: #fff;
-  box-shadow: 1px 0 0 var(--border, #e3ecf4);
-}
-.cmp-modal #cmpBody table.data thead th:first-child { background: var(--surface-2, #f7fafd); z-index: 4; }
-.cmp-modal #cmpBody table.data tbody tr:hover td:first-child { background: var(--surface-2, #f7fafd); }
 .cmp-modal #cmpBody table.data thead th, .cmp-modal #cmpBody table.data tbody td { white-space: nowrap; }
+@media (max-width: 900px) {
+  .cmp-modal #cmpBody table.data thead th:first-child,
+  .cmp-modal #cmpBody table.data tbody td:first-child {
+    position: sticky; left: 0; z-index: 3; background: #fff;
+    box-shadow: 1px 0 0 var(--border, #e3ecf4);
+  }
+  .cmp-modal #cmpBody table.data thead th:first-child { background: var(--surface-2, #f7fafd); z-index: 4; }
+  .cmp-modal #cmpBody table.data tbody tr:hover td:first-child { background: var(--surface-2, #f7fafd); }
+}
 
-/* ==========================================================
-   2026-11-02（第二十七轮）：统计表右上角「导出 CSV」
-   ========================================================== */
-.tr-tblbar { display: flex; justify-content: flex-end; margin: 2px 0 6px; }
-.tr-csv { appearance: none; font: inherit; font-size: 11.5px; line-height: 1; cursor: pointer;
-  color: var(--brand, #0866bb); background: #fff; border: 1px solid #d5e5f4; border-radius: 5px;
-  padding: 5px 9px; transition: background .15s, border-color .15s, color .15s; }
-.tr-csv::before { content: '⤓'; margin-right: 4px; font-size: 11px; }
-.tr-csv:hover { background: var(--brand-soft, #edf7ff); border-color: var(--brand, #0866bb); }
+/* 2026-11-03（第二十八轮）：详情弹窗内的走势图头部再收一档，900px 宽也能单行 */
+.modal-bd .tr-ctrls { flex-wrap: nowrap; gap: 8px; }
+.modal-bd .tr-head { gap: 8px; }
+.modal-bd .tr-titlebtn { font-size: 15px; }
+.modal-bd .tr-adds { gap: 6px; }
+.modal-bd .tr-adds .tr-sel, .modal-bd .tr-adds .tr-clear { height: 28px; padding: 0 9px; font-size: 12px; }
+.modal-bd .tr-head .tr-r { padding: 4px 8px; font-size: 11.5px; }
+.modal-bd .tr-head .tr-tool { padding: 4px 8px; font-size: 12px; }
+
+/* 2026-11-03（第二十八轮）：「最大回撤区间」合并成一列后，弹窗内要给日期留足宽度 */
+.modal-bd .tr-tbl th:nth-child(1), .modal-bd .tr-tbl td:nth-child(1) { width: 20% !important; padding-left: 12px; }
+.modal-bd .tr-tbl th:last-child, .modal-bd .tr-tbl td:last-child { width: 21% !important; }
+.cmp-box .tr-tbl th:nth-child(1), .cmp-box .tr-tbl td:nth-child(1) { width: 20% !important; }
+.cmp-box .tr-tbl th:last-child, .cmp-box .tr-tbl td:last-child { width: 21% !important; }
+.modal-bd .tr-tbl td.date, .cmp-box .tr-tbl td.date { white-space: nowrap; }

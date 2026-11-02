@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>页头与侧栏 · 第二轮 20 套</title>
+<style>
+  :root { --brand:#0866bb; --ink:#16283e; --t2:#3d5470; --t3:#8595a8; --line:#e3ecf4; --soft:#edf7ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#f4f7fb; color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif; }
+  .hd { max-width:1364px; margin:0 auto; padding:34px 20px 10px; }
+  .hd h1 { margin:0 0 8px; font-size:24px; letter-spacing:-.3px; }
+  .hd p { margin:0; color:#5b6f85; font-size:13.5px; line-height:1.8; }
+  .hd b { color:var(--brand); }
+  .grid { max-width:1364px; margin:0 auto; padding:18px 20px 60px; display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  .cell { background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:0 6px 22px rgba(20,50,90,.07); }
+  .cap { display:flex; align-items:baseline; gap:8px; padding:11px 14px; border-bottom:1px solid #eef3f9; }
+  .cap b { font-size:13px; color:var(--brand); letter-spacing:.4px; }
+  .cap span { font-size:12.5px; color:#63798f; }
+  .view { position:relative; height:424px; overflow:hidden; background:#f7fafd; }
+  .frame { position:absolute; top:0; left:0; width:1120px; height:752px; transform:scale(.58); transform-origin:top left; background:#fff; }
+  .pg { display:flex; flex-direction:column; height:100%; font-size:14px; }
+
+  /* 页头 */
+  .top { height:64px; display:flex; align-items:center; gap:12px; padding:0 16px; border-bottom:1px solid var(--line); background:#fff; flex-wrap:nowrap; }
+  .lg { display:flex; align-items:center; gap:8px; flex:none; }
+  .lg .mk { width:26px; height:24px; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
+            gap:2px; flex:none; }
+  .lg .mk i { display:block; border-radius:2px; }
+  .lg .mk i:nth-child(1){ background:#b6d96a }
+  .lg .mk i:nth-child(2){ background:#5eb6e8 }
+  .lg .mk i:nth-child(3){ background:#1263a8 }
+  .lg .mk i:nth-child(4){ background:#b6d96a }
+  .lg .mk i:nth-child(5){ display:none }
+  .lg b { font-size:14.5px; letter-spacing:.2px; white-space:nowrap; }
+  .tk { flex:1 1 auto; min-width:0; display:flex; align-items:center; overflow:hidden; gap:0; }
+  .tk .it { display:flex; align-items:center; gap:7px; padding:0 11px; border-right:1px solid #eef3f9; flex:1 1 auto; min-width:0; }
+  .tk .it:last-child { border-right:0; }
+  .tk .nm { font-size:10.5px; color:var(--t2); white-space:nowrap; }
+  .tk .nm2 { display:block; font-size:10px; color:var(--t3); }
+  .tk .num { display:flex; flex-direction:column; align-items:flex-end; line-height:1.2; margin-left:auto; }
+  .tk b { font-size:11px; }
+  .tk s { text-decoration:none; font-size:10px; }
+  .up { color:#d93025; } .dn { color:#12996b; }
+  .spark { width:34px; height:12px; flex:none; }
+  .lang { flex:none; display:flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .lang i { font-style:normal; font-size:10px; padding:3px 7px; color:var(--t2); }
+  .lang i.on { background:var(--brand); color:#fff; }
+
+  .body { flex:1 1 auto; display:flex; min-height:0; }
+  .side { width:186px; flex:none; border-right:1px solid var(--line); padding:10px 9px; display:flex; flex-direction:column; gap:3px; background:#fff; }
+  .sgrp { font-size:15px; font-weight:700; color:#2c4258; padding:0 8px 8px; }
+  .snv { display:flex; align-items:center; gap:7px; padding:7px 9px; border-radius:7px; font-size:12px; color:#3c5268; }
+  .snv.on { background:#e8f1fb; color:var(--brand); font-weight:600; }
+  .snv i { width:11px; height:11px; border:1.5px solid currentColor; border-radius:3px; display:block; }
+  .ssub { margin-left:16px; display:flex; flex-direction:column; gap:1px; }
+  .ssub span { font-size:11px; padding:4px 8px; color:#5b7186; border-radius:5px; display:flex; justify-content:space-between; }
+  .ssub span.on { background:#eef5fd; color:var(--brand); font-weight:600; }
+  .sfoot { margin-top:auto; font-size:10px; color:var(--t3); text-align:center; padding-top:8px; border-top:1px solid #eef3f9; }
+  .slang { display:flex; justify-content:center; margin-bottom:8px; }
+  .slang.top { justify-content:flex-end; margin:0 0 6px; }
+  .main { flex:1 1 auto; min-width:0; padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .card { border:1px solid var(--line); border-radius:10px; background:#fff; padding:12px; }
+  .row { display:flex; align-items:center; gap:8px; }
+  .h { font-size:13px; font-weight:700; }
+  .pill { font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid #cfe1f2; color:var(--brand); }
+  .pill.on { background:var(--brand); color:#fff; }
+  .ch { flex:1 1 auto; height:150px; border-radius:8px; border:1px dashed #cfe0f0; position:relative; overflow:hidden; }
+  .ch svg { position:absolute; inset:0; width:100%; height:100%; }
+  .bars { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .kpi { border:1px solid var(--line); border-radius:8px; padding:9px 10px; }
+  .kpi b { display:block; font-size:15px; }
+  .kpi span { font-size:10px; color:var(--t3); }
+  .tb { border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .tb .th, .tb .tr { display:grid; grid-template-columns:1.7fr .8fr .8fr .8fr; font-size:10px; }
+  .tb .th { color:var(--t3); background:#f7fafd; }
+  .tb .tr { font-size:10.5px; border-top:1px solid #eef3f9; }
+  .tb .th >*, .tb .tr >* { padding:6px 8px; }
+  .note { font-size:10px; color:#8fa3b6; }
+
+  /* 变体 */
+  .v03 .tk .it { border-right:0; }
+  .v03 .tk .it > div { background:#f5f9fe; border-radius:6px; padding:3px 8px; display:flex; gap:7px; align-items:center; }
+  .v04 .top { height:56px; }
+  .v05 .top { height:78px; }
+  .v06 .tk { border-left:1px solid var(--line); margin-left:4px; }
+  .v08 .tk { justify-content:flex-start; }
+  .v08 .tk .it { flex:0 0 auto; }
+  .v09 .hd2 { border-bottom:0; box-shadow:0 1px 0 #eef3f9; }
+  .v10 .side { width:200px; }
+  .v11 .sgrp { font-size:14px; }
+  .v12 .sgrp { font-size:16px; }
+  .v13 .top { background:#0d4f8b; border-bottom-color:#0d4f8b; }
+  .v13 .lg b, .v13 .tk .nm, .v13 .tk b { color:#fff; }
+  .v13 .tk .it { border-right-color:rgba(255,255,255,.16); }
+  .v14 .top { background:linear-gradient(90deg,#f4faff,#eaf4ff 60%,#f8fbfe); }
+  .v15 .side { background:#0d2136; border-right-color:#0d2136; }
+  .v15 .sgrp { color:#fff; } .v15 .snv { color:#b9cde0; } .v15 .snv.on { background:#17456f; color:#fff; }
+  .v15 .ssub span { color:#9db5ca; } .v15 .sfoot { color:#7f97ad; border-top-color:#1d3450; }
+  .v16 .tk .nm { display:none; }
+  .v17 .tk .it:nth-child(n+5) { display:none; }
+  .v18 .hsearch { flex:none; border:1px solid var(--line); border-radius:6px; padding:4px 8px; font-size:10.5px; color:#9aabbd; }
+  .v19 .tk .it { flex:0 0 auto; padding:0 10px; }
+  .v20 .top { height:60px; padding:0 12px; }
+  .v20 .lg b { font-size:13.5px; }
+</style>
+</head>
+<body>
+<div class="hd">
+  <h1>页头 + 侧栏 · 第二轮 20 套（LOGO 去拼音、语言进侧栏、行情加回折线）</h1>
+  <p>每格是真实 1120×752 整页缩放到 58%。<b>挑编号告诉我（如「S11」）</b>，我按它定稿；也可以只说「用第 1 套」。</p>
+</div>
+<div class="grid" id="grid"></div>
+
+<script>
+(function () {
+  const TK = [
+    ['强积金市场指数', '1,823.77', '-0.42%', 'dn'],
+    ['股票积金', '2,172.62', '-0.46%', 'dn'],
+    ['混合积金', '1,717.46', '-0.60%', 'dn'],
+    ['债券积金', '1,048.94', '+0.23%', 'up'],
+    ['恒生指数', '23,393.32', '+0.42%', 'up'],
+    ['上证指数', '3,599.02', '-1.44%', 'dn']
+  ];
+  function spark(up) {
+    const pts = up ? '0,9 6,7 12,8 18,5 24,6 30,3 34,2' : '0,2 6,4 12,3 18,6 24,5 30,8 34,9';
+    return '<svg class="spark" viewBox="0 0 34 12"><polyline points="' + pts + '" fill="none" stroke="' +
+      (up ? '#d93025' : '#12996b') + '" stroke-width="1.4"/></svg>';
+  }
+  function header(v) {
+    const lg = '<div class="lg"><span class="mk"><i></i><i></i><i></i><i></i><i></i></span><b>广州精研数据有限公司</b></div>';
+    const items = TK.map(([n, val, p, c]) => {
+      const nums = '<span class="num"><b>' + val + '</b><s class="' + c + '">' + p + '</s></span>';
+      const inner = (v === 'v16' ? '' : '<span class="nm">' + n + '</span>') + nums + (v === 'v16' ? '' : spark(c === 'up'));
+      if (v === 'v03') return '<div class="it"><div>' + inner + '</div></div>';
+      return '<div class="it">' + inner + '</div>';
+    }).join('');
+    const search = v === 'v18' ? '<span class="hsearch">⌕ 搜索基金</span>' : '';
+    const lang = v === 'v09' ? '' : '';
+    return '<div class="top">' + lg + '<div class="tk">' + items + '</div>' + search + lang + '</div>';
+  }
+  function sidebar(v) {
+    const L = '<div class="slang' + (v === 'v11' ? ' top' : '') + '"><span class="lang"><i class="on">简</i><i>繁</i><i>EN</i></span></div>';
+    const Lbottom = '<div class="slang"><span class="lang"><i class="on">简</i><i>繁</i><i>EN</i></span></div>';
+    let h = '';
+    if (v === 'v11') h += '<div class="sgrp" style="display:flex;align-items:center;justify-content:space-between;gap:4px">' +
+      '<span>强积金数据分析平台</span><span class="lang" style="flex:none"><i class="on">简</i><i>繁</i><i>EN</i></span></div>';
+    else {
+      h += '<div class="sgrp">强积金数据分析平台</div>';
+      if (v === 'v12' || v === 'v10') h += L;
+    }
+    const nav = [
+      ['首页', 1], ['基金最新数据', 1], ['MPFA 基金榜单', 0], ['供款计算器', 0]
+    ].map(([n, on], i) => {
+      if (i === 1) {
+        return '<div class="snv on"><i></i>' + n + ' ⓘ ▾</div><div class="ssub">' +
+          [['全部', 451], ['宏利', 29], ['银联信托', 171], ['友邦信托', 21]].map(([s, c], j) =>
+            '<span class="' + (j === 0 ? 'on' : '') + '">' + s + '<b>' + c + '</b></span>').join('') + '</div>';
+      }
+      return '<div class="snv' + (on ? ' on' : '') + '"><i></i>' + n + ' ⓘ</div>';
+    }).join('');
+    h += nav;
+    if (v === 'v12' || v === 'v10' || v === 'v11') h += '<div style="flex:1"></div>' + (v === 'v11' ? '' : '');
+    h += (v === 'v10' ? Lbottom : '') + '<div class="sfoot">● 数据每日自动同步 · 2026-11-02</div>';
+    return '<div class="side">' + h + '</div>';
+  }
+  function main() {
+    return '<div class="main">' +
+      '<div class="card"><div class="row"><span class="h">基金走势对比图</span><span class="pill">＋ 添加指数</span>' +
+      '<span class="pill">＋ 添加基金 2</span><span class="pill">清空</span>' +
+      '<span style="margin-left:auto" class="row"><span class="pill on">1年</span><span class="pill">3年</span>' +
+      '<span class="pill">5年</span><span class="pill">10年</span><span class="pill">全部</span><span class="pill">选择日期</span></span></div>' +
+      '<div class="ch"><svg viewBox="0 0 640 150" preserveAspectRatio="none"><polyline points="0,96 26,88 52,104 78,74 104,80 130,60 156,72 182,110 208,96 234,120 260,104 286,86 312,92 338,64 364,70 390,48 416,58 442,40 468,52 494,34 520,44 546,26 572,38 598,20 624,28 640,18" fill="none" stroke="#0866bb" stroke-width="2.2"/></svg></div>' +
+      '<div class="note" style="margin-top:8px">点线条可改颜色 / 线宽 / 线型　纵轴为累计涨跌幅…</div></div>' +
+      '<div class="bars"><div class="kpi"><span>成分基金</span><b>451</b></div>' +
+      '<div class="kpi"><span>受托人</span><b>11</b></div>' +
+      '<div class="kpi"><span>市场总规模</span><b>1.68 万亿</b></div>' +
+      '<div class="kpi"><span>近 1 年平均</span><b class="up">+3.58%</b></div></div>' +
+      '<div class="tb"><div class="th"><span>基金名称</span><span>近1年</span><span>日涨跌</span><span>规模</span></div>' +
+      ['宏利MPF康健护理基金', '银联信托增长基金', '友邦强积金优选计划', 'HSBC 恒指基金'].map((n) =>
+        '<div class="tr"><span>' + n + '</span><span class="up">+12.34%</span><span class="dn">-0.42%</span><span>4,535.50</span></div>').join('') +
+      '</div></div>';
+  }
+  const LIST = [
+    ['S01', '本轮已实现：图标 + 公司名｜六指数（带折线）｜语言在侧栏标题下', 'v01'],
+    ['S02', '行情项之间用更淡的分隔线（视觉更静）', 'v02'],
+    ['S03', '每个指数做成浅底胶囊（最软）', 'v03'],
+    ['S04', '页头压到 56px（更薄，内容更多）', 'v04'],
+    ['S05', '页头 78px（更松，折线看得清）', 'v05'],
+    ['S06', 'LOGO 与行情之间加一条竖线分组', 'v06'],
+    ['S07', '公司名右边加「香港强积金」小字（一行内）', 'v07'],
+    ['S08', '行情左对齐不撑满，右侧留白', 'v08'],
+    ['S09', '页头去掉底边线，改用浅阴影', 'v09'],
+    ['S10', '侧栏加宽到 200，语言放底部版本上方', 'v10'],
+    ['S11', '语言放侧栏右上角（与标题同一行）', 'v11'],
+    ['S12', '侧栏标题 14px（更低调）', 'v12'],
+    ['S13', '深蓝页头（行情反白）', 'v13'],
+    ['S14', '页头浅蓝渐层底', 'v14'],
+    ['S15', '深色侧栏 + 白色页头', 'v15'],
+    ['S16', '行情只留数值和折线（名字省略）', 'v16'],
+    ['S17', '只显示前 4 个指数（最省空间）', 'v17'],
+    ['S18', '页头右侧加全局搜索', 'v18'],
+    ['S19', '行情不撑满、按内容宽（右侧余量大）', 'v19'],
+    ['S20', '极简 60px：LOGO 小一号 + 行情紧凑', 'v20']
+  ];
+  document.getElementById('grid').innerHTML = LIST.map(([id, desc, cls]) =>
+    '<div class="cell"><div class="cap"><b>' + id + '</b><span>' + desc + '</span></div>' +
+    '<div class="view"><div class="frame"><div class="pg ' + cls + '">' + header(cls) +
+    '<div class="body">' + sidebar(cls) + main() + '</div></div></div></div></div>').join('');
+})();
+</script>
+</body>
+</html>

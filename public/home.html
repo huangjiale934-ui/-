@@ -10,16 +10,17 @@
 <!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
 <link rel="preload" as="image" href="img/hero-hk.webp?v=2" media="(min-width: 701px)">
 <link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
-<link rel="stylesheet" href="b.css?p=home&v=20261102p">
-<link rel="stylesheet" href="home.css?v=20261102p">
+<link rel="stylesheet" href="b.css?p=home&v=20261103b">
+<link rel="stylesheet" href="home.css?v=20261103b">
 </head>
 <body class="home page-side">
 
 <header class="hdr">
   <div class="hdr-inner">
     <div class="logo">
-      <img class="logo-img" src="img/logo.png" alt="JING YAN 精研">
-      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><span data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</span></div>
+      <!-- 2026-11-03（第二十八轮，用户要求）：LOGO 只留图形（去掉 JING YAN 拼音），公司名左移、删掉副标题 -->
+      <img class="logo-img" src="img/logo-mark.png" alt="精研">
+      <div class="logo-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b></div>
     </div>
     <!-- 2026-11-02（第二十七轮）：行情栏并入顶部栏 -->
     <div class="mkt-ticker" id="mktTicker" aria-label="市场指数行情"><div class="tk-track"><span class="tk-loading">…</span></div></div>
@@ -206,8 +207,8 @@
   <span class="tt-txt" data-i18n="回到顶部">回到顶部</span>
 </button>
 
-<script src="b.js?p=home&v=20261102p"></script>
-<script src="home.js?v=20261102p"></script>
+<script src="b.js?p=home&v=20261103b"></script>
+<script src="home.js?v=20261103b"></script>
 <script src="heat.js"></script>
 <script>renderFriends();</script>
 

@@ -1207,6 +1207,7 @@
   '导出 CSV': '匯出 CSV',
   '把下面这张统计表导出为 CSV（Excel 可直接打开）': '把下面這張統計表匯出為 CSV（Excel 可直接開啟）',
   '基金走势区间统计': '基金走勢區間統計',
+  '最大回撤区间': '最大回撤區間',
 };
   for (var k in H) { if (Object.prototype.hasOwnProperty.call(H, k)) w.HANT[k] = H[k]; }
 })(window);
