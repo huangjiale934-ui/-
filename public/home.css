@@ -354,20 +354,23 @@
 /* 2026-11-02（第十八轮，严格按用户选定样图）：
    行高 52px、无分割线；1=深导航蓝、2=中蓝、3=浅蓝深字（实心 24px 圆标）；
    4/5 不画圆标、只保留序号文字（用户要求补 4/5 序号，但不破坏样图的 1-3 层次）。 */
+/* 2026-11-02（第二十四轮，用户选定 C17）：序号做成「TOP n」小标签，
+   前 3 名蓝色递增（像奖牌但更轻），4/5 浅蓝；行间用极细分割线。 */
 .mk-top li {
-  display: flex; align-items: center; gap: 12px; padding: 14px 0;
-  border-top: 0; font-size: 14px;
+  display: flex; align-items: center; gap: 10px; padding: 11px 0;
+  border-top: 0; border-bottom: 1px solid #f2f6fb; font-size: 14px;
 }
 .mk-top li:first-child { border-top: 0; }
-.mk-top .r {
-  flex: 0 0 24px; height: 24px; line-height: 24px; text-align: center;
-  border-radius: 50%; background: transparent; color: #7b8fa3;
-  font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+.mk-top li:last-child { border-bottom: 0; }
+.mk-top .top-tag {
+  flex: 0 0 46px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 4px; background: #9fb3c6; color: #fff;
+  font-size: 10px; font-weight: 700; letter-spacing: .3px; font-variant-numeric: tabular-nums;
 }
-.mk-top .r.r1 { background: #084e8c; color: #fff; }
-.mk-top .r.r2 { background: #2e7fc0; color: #fff; }
-.mk-top .r.r3 { background: #dbeaf8; color: #0b3a66; }
-.mk-top .r.r0 { background: transparent; color: #3d86c6; }   /* 4/5 不画圆标，数字仍用蓝色调 */
+.mk-top .top-tag.t1 { background: #084e8c; }
+.mk-top .top-tag.t2 { background: #2e7fc0; }
+.mk-top .top-tag.t3 { background: #8fbde3; }
+.mk-top .top-tag.t4, .mk-top .top-tag.t5 { background: #e3edf6; color: #5b7a99; }
 .mk-top .n {
   flex: 1; min-width: 0; color: var(--text); font-size: 14px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -1108,12 +1111,12 @@ body { overflow-x: visible; }
 @keyframes mkFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 /* 2026-10-31 三版（用户反馈）：小标题与列表拉开距离；字号统一为 17px（与「MPF 最新资讯」一致） */
 .mk-top h3 { font-size: 17px; margin: 0 0 14px; }
-.mk-top li { padding: 14px 0; }   /* 2026-11-02：按样图行高 52px */
-.mk-top .n { font-size: 14px; }
-/* 排名徽标：蓝色系 1 深 → 3 浅（与全站风险级别蓝阶一致） */
-.mk-top .r.r1 { background: #084e8c; color: #fff; }
-.mk-top .r.r2 { background: #2e7fc0; color: #fff; }
-.mk-top .r.r3 { background: #dbeaf8; color: #0b3a66; }   /* 样图浅蓝 */
+.mk-top li { padding: 10px 0; }   /* 2026-11-02：C17 紧凑行高 */
+.mk-top .n { font-size: 14.5px; }
+/* 排名标签：蓝色系 1 深 → 3 浅（与全站风险级别蓝阶一致） */
+.mk-top .top-tag.t1 { background: #084e8c; }
+.mk-top .top-tag.t2 { background: #2e7fc0; }
+.mk-top .top-tag.t3 { background: #8fbde3; }
 .mk-top li:hover { background: var(--brand-soft, #edf7ff); transform: translateX(3px); }
 .mk-top li { transition: background .15s, transform .15s; }
 /* 首页模块标题统一为「MPF 最新资讯ⓘ」格式：17px */

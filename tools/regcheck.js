@@ -759,9 +759,9 @@ chk('访问统计·推送与自动化已接入（可在任务总结附数字）'
 /* ---------------- 第四板块·MPF基金可视化对比（2026-10-31 并入资料库 index.html#cmp） ----------------
    原 analysis.html 已改为跳转页；板块 DOM 随 index dump 渲染，故 an = index 快照。 */
 const an = read('index');
-chk('第四板块·两板块切换按钮（基金最新数据 / MPFA 基金榜单；对比页已并入资料库）',
-  /id="dbtDb"/.test(rawIdxHtml) && /id="dbtRank"/.test(rawIdxHtml) &&
-  rawIdxHtml.indexOf('id="dbtCmp"') < 0 && /id="anSec"/.test(rawIdxHtml) && /id="anProv"/.test(rawIdxHtml));
+chk('第四板块·三入口（基金最新数据 / 可视化对比 / MPFA 基金榜单；2026-11-02 对比页恢复）',
+  /id="dbtDb"/.test(rawIdxHtml) && /id="dbtRank"/.test(rawIdxHtml) && /id="dbtCmp"/.test(rawIdxHtml) &&
+  /id="anSec"/.test(rawIdxHtml) && /id="anProv"/.test(rawIdxHtml));
 chk('第四板块·页头不再单列「MPF基金可视化对比」（2026-11-01 用户要求：第三页已并入资料库）',
   !/index\.html#cmp', 'MPF基金可视化对比'/.test(readSrc('common.js')));
 /* ---- 第四页 v3 改版：纯对比页 + 左侧发行人栏（版式参照合作方站） ---- */
@@ -1147,7 +1147,7 @@ chk('深夜批·②清空筛选与工具栏闭合完整（head → panels → da
     const a1 = t.indexOf("'<div class=\"tr-head'");
     const a2 = t.indexOf('panels +', a1);
     const a3 = t.indexOf("'<div class=\"tr-daterow\" hidden>'", a1);
-    return a1 > 0 && a2 > a1 && a3 > a2 && t.indexOf('tr-clear') >= 0 && t.indexOf('tr-tools2') >= 0;
+    return a1 > 0 && a2 > a1 && a3 > a2 && t.indexOf('tr-clear') >= 0 && t.indexOf('tr-adds') >= 0 && t.indexOf('tr-ctrls') >= 0;
   } catch (e) { return false; }
 })());
 chk('2026-10-29·③前十大持仓改横向柱状图（名称+占比，不再列代码/价格）', (function () {
@@ -1203,7 +1203,7 @@ chk('深夜批·②清空筛选与工具栏闭合完整（head → panels → da
     const a1 = t.indexOf("'<div class=\"tr-head'");
     const a2 = t.indexOf('panels +', a1);
     const a3 = t.indexOf("'<div class=\"tr-daterow\" hidden>'", a1);
-    return a1 > 0 && a2 > a1 && a3 > a2 && t.indexOf('tr-clear') >= 0 && t.indexOf('tr-tools2') >= 0;
+    return a1 > 0 && a2 > a1 && a3 > a2 && t.indexOf('tr-clear') >= 0 && t.indexOf('tr-adds') >= 0 && t.indexOf('tr-ctrls') >= 0;
   } catch (e) { return false; }
 })());
 chk('2026-10-29·③前十大持仓改横向柱状图（名称+占比，不再列代码/价格）', (function () {
@@ -1267,7 +1267,7 @@ chk('1017批·③单线真实值模式（raw 绘制 + 轴标签 + note 隐藏）
     /* 2026-11-02：图内「实际值 / 累计涨跌幅」说明文字已按用户要求删除，改为断言 raw/norm 取数逻辑 */
     return t.indexOf('const single = lines.length === 1;') >= 0 &&
       t.indexOf('const P = (L) => (single ? L.win.raw : L.win.norm);') >= 0 &&
-      t.indexOf("noteEl.style.display = single ? 'none' : ''") >= 0;
+      t.indexOf("noteEl.style.display = ''") >= 0 && t.indexOf('单条对比时纵轴为实际数值') >= 0;
   } catch (e) { return false; }
 })());
 chk('1017批·④默认仅恒指（baseChartItems 单项）+ 点发行人仍双线', (function () {
@@ -1638,7 +1638,10 @@ chk('数据扩展·宏利持仓/分布（67 只 holdings + 官方回报 trustee-
 
 /* ===== 2026-10-22 傍晚批：浅色调 / 自算指数 / 排行榜去标题 ===== */
 chk('1022b·排行榜标题已移除', !/mk-rank[\s\S]{0,200}?市场排行榜/.test(home));
-chk('1022c·名次徽标为蓝色族（2026-11-02 按样图：1 深导航蓝 / 2 中蓝 / 3 浅蓝深字 / 4-5 无底色）', /mk-top \.r\.r1 \{ background: #084e8c/.test(css) && /mk-top \.r\.r2 \{ background: #2e7fc0/.test(css) && /mk-top \.r\.r3 \{ background: #dbeaf8/.test(css) && /mk-top \.r\.r0 \{ background: transparent/.test(css) && !/mk-top \.r\.r1 \{ background: #f6e2c4/.test(css));
+chk('1022c·名次徽标为 TOP 标签（2026-11-02 用户选定 C17：1-3 蓝色递增 / 4-5 浅蓝）',
+  /mk-top \.top-tag\.t1 \{ background: #084e8c/.test(css) && /mk-top \.top-tag\.t2 \{ background: #2e7fc0/.test(css) &&
+  /mk-top \.top-tag\.t3 \{ background: #8fbde3/.test(css) && /mk-top \.top-tag\.t4, \.mk-top \.top-tag\.t5 \{ background: #e3edf6/.test(css) &&
+  !/mk-top \.r\.r1 \{ background: #f6e2c4/.test(css));
 chk('1022b·浮窗为浅蓝底（非黑）', (function () { try { const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8'); return /\.mpf-tip \{[\s\S]{0,600}?background: #edf7ff/.test(c) && !/background: rgba\(24, 38, 58/.test(c); } catch (e) { return false; } })());
 chk('1023·品牌蓝与官网一致（#0866bb）', (function () { try { return /--brand: #0866bb/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8')); } catch (e) { return false; } })());
 chk('1022b·MPF 自算指数已生成（7 条）', (function () {
@@ -1740,7 +1743,7 @@ chk('三版·④表现指数纵轴整10刻度（step 10/20 等间隔）', /let s
 chk('三版·⑤横轴年份倾斜标注（1 月位置 rotate -40）', /rotate\(-40 /.test(readSrc('home.js')) && /pi-yk-year \{ font-size: 11\.5px; font-weight: 700/.test(css));
 chk('三版·⑥年度走势线/点/阴影同源（VAL 统一取值）', /const VAL = \(r\) => \(r\.wavg != null \? r\.wavg : r\.avg\);/.test(readSrc('home.js')) && /const areaPts = linePts;/.test(readSrc('home.js')));
 chk('三版·⑦排名徽标蓝色系（表格 medal + 首页榜单 r1-r3）',
-  /linear-gradient\(135deg, #1466ac, #084e8c\)/.test(readSrc('style.css')) && /\.mk-top \.r\.r1 \{ background: #084e8c/.test(css));
+  /linear-gradient\(135deg, #1466ac, #084e8c\)/.test(readSrc('style.css')) && /\.mk-top \.top-tag\.t1 \{ background: #084e8c/.test(css));
 chk('三版·⑧页2筛选两行化（chips/重置按钮删除 + 搜索框并入工具栏行）',
   rawIdxHtml.indexOf('id="chips"') < 0 && rawIdxHtml.indexOf('id="btnReset"') < 0 &&
   rawIdxHtml.indexOf('id="rkRChips"') < 0 && rawIdxHtml.indexOf('id="rkRReset"') < 0 &&
@@ -1767,8 +1770,8 @@ chk('十八轮·②每页显示支持自定义条数',
   /\.mpfsel-pop\.has-custom/.test(readSrc('style.css')));
 chk('十八轮·③投资分布标签 +1 号、引线提前收住',
   /\.alr3-name \{ font-size: 22px/.test(readSrc('analysis.css')) && /const ex = lx \+ \(side === 'left' \? 12 : -12\)/.test(readSrc('common.js')));
-chk('十八轮·④首页榜单卡严格按样图（行高 52 / 徽标 24 / 无分割线）',
-  /\.mk-top li \{\s*display: flex; align-items: center; gap: 12px; padding: 14px 0;/.test(css) && /\.mk-top \.r \{\s*flex: 0 0 24px; height: 24px;/.test(css));
+chk('十八轮·④首页榜单卡（2026-11-02 改 C17：TOP 标签 46px + 行间细分割线）',
+  /\.mk-top \.top-tag \{\s*flex: 0 0 46px; height: 22px;/.test(css) && /\.mk-top li \{[^}]*border-bottom: 1px solid #f2f6fb/.test(css));
 chk('十八轮·⑤恒指/上证取全历史（服务端不再裁到 2015）',
   /恒指\/上证要「发行至今」/.test(readSrc('root:server.js')) && readSrc('root:server.js').indexOf("r[0] >= '2015-01-01'") < 0 && /hist-index-full/.test(readSrc('root:tools/hist-index-full.js')));
 chk('十八轮·⑥横轴月份标月底 + 年份落 1 月 1 日',
@@ -1788,13 +1791,13 @@ chk('二十轮·②榜单页删除「更多筛选」整块',
 chk('二十轮·③榜单表格与基金表同款：分页条 + 来源说明移出卡片',
   /id="rkPager"/.test(rawIdxHtml) && /function renderPager/.test(readSrc('rank.js')) &&
   /#rkTable thead th \{ font-size: 14px/.test(readSrc('style.css')));
-chk('二十轮·④左侧分组导航（基金最新数据 / MPFA 基金榜单 两个入口）',
+chk('二十轮·④左侧分组导航（强积金资料库：基金最新数据 / 可视化对比 / 榜单三个入口）',
   /class="db-shell"/.test(rawIdxHtml) && /class="db-side"/.test(rawIdxHtml) &&
   rawIdxHtml.indexOf('class="db-tabs"') < 0 && /id="dbtDb"/.test(rawIdxHtml) &&
-  /id="dbtRank"/.test(rawIdxHtml) && rawIdxHtml.indexOf('id="dbtCmp"') < 0);
-chk('二十轮·⑤首页榜单卡 1-5 全部写出序号（1-3 圆标、4-5 蓝色数字）',
-  /\(i \+ 1\) \+ '<\/span>'/.test(readSrc('home.js')) &&
-  /\.mk-top \.r\.r0 \{ background: transparent; color: #3d86c6/.test(readSrc('home.css')));
+  /id="dbtRank"/.test(rawIdxHtml) && /id="dbtCmp"/.test(rawIdxHtml) && /强积金资料库/.test(rawIdxHtml));
+chk('二十轮·⑤首页榜单卡 1-5 全部写出序号（2026-11-02：TOP 1-5 标签）',
+  /'<span class="top-tag t' \+ \(i \+ 1\) \+ '">TOP ' \+ \(i \+ 1\)/.test(readSrc('home.js')) &&
+  /\.mk-top \.top-tag\.t5/.test(readSrc('home.css')));
 
 /* ===== 2026-11-02 第二十一轮（10 条反馈）===== */
 chk('二十一轮·①侧边栏贴左固定 + 对比发行人列表收为二级菜单',
@@ -1820,6 +1823,38 @@ chk('二十一轮·⑤走势图：区间含 10年/全部、高度 +20%、无图�
   /#anCompare \.tr-svg \{ height: 342px/.test(readSrc('analysis.css')) &&
   readSrc('trend.js').indexOf("_t('累计涨跌幅（区间起点 = 0%）')") < 0 &&
   readSrc('trend.js').indexOf('基金净值取自各发行人官网（每交易日）') < 0);
-chk('二十三轮·①行情栏关闭按钮在「强积金市场指数」左侧（left:17px / 22px）',
-  /\.tk-close \{ position: absolute; left: 17px;[\s\S]{0,240}width: 22px; height: 22px/.test(readSrc('style.css')) &&
+chk('二十四轮·②行情栏关闭按钮左移 25px（距首卡 5px，仍在指数左侧）',
+  /\.tk-close \{ position: absolute; left: 25px;[\s\S]{0,240}width: 22px; height: 22px/.test(readSrc('style.css')) &&
   /强积金市场指数/.test(readSrc('common.js')));
+
+/* ===== 2026-11-02 第二十四轮（10 条反馈）===== */
+chk('二十四轮·①发行人列表紧跟「基金最新数据」+ 三入口 + 可收起',
+  (function () {
+    const a = rawIdxHtml.indexOf('id="dbtDb"');
+    const b = rawIdxHtml.indexOf('id="dbSubCmp"');
+    const c = rawIdxHtml.indexOf('id="dbtCmp"');
+    const d = rawIdxHtml.indexOf('id="dbtRank"');
+    return a > 0 && b > a && c > b && d > c;
+  })() &&
+  /subOpen = !subOpen/.test(rawIdxHtml) && /b\.classList\.toggle\('collapsed', !subOpen\)/.test(rawIdxHtml) &&
+  /\.db-side-grp \{ display: flex;[\s\S]{0,120}font-size: 14px/.test(readSrc('style.css')) &&
+  /强积金资料库/.test(rawIdxHtml) && /\.db-side-div \{/.test(readSrc('style.css')));
+chk('二十四轮·③走势图头部：标题右侧箭头收起 + 清空并入添加组 + 实线按钮',
+  /class="tr-title tr-titlebtn"/.test(readSrc('trend.js')) && /class="tr-caret"/.test(readSrc('trend.js')) &&
+  /class="tr-tool tr-clear"[\s\S]{0,120}_t\('清空'\)/.test(readSrc('trend.js')) &&
+  /\.tr-adds \.tr-sel \{[^}]*border: 1px solid #cfe1f2/.test(readSrc('analysis.css')) &&
+  /\.tr-box\.tr-folded \.tr-canvas/.test(readSrc('analysis.css')) &&
+  !/setupDbTrendFold/.test(readSrc('app.js')));
+chk('二十四轮·⑤⑥⑦走势图加高 30% + 统计表字号与列表一致 + 预设按钮等宽',
+  /\.db-trendcard \.tr-svg \{ height: 350px/.test(readSrc('style.css')) &&
+  /\.tr-tbl th, \.tr-tbl td \{ font-size: 15px; \}/.test(readSrc('analysis.css')) &&
+  /\.cp-btns\.cp-presets \{ display: grid; grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/.test(readSrc('style.css')));
+chk('二十四轮·⑧ⓘ 挂在侧栏标题（首页仍在页头）',
+  /const grp = document\.querySelector\('\.db-side-grp'\)/.test(readSrc('common.js')) &&
+  /if \(grp\) grp\.appendChild\(btn\);/.test(readSrc('common.js')) &&
+  /\.db-side-grp \.ver-info \{ margin-left: auto; \}/.test(readSrc('style.css')));
+chk('二十四轮·⑨说明行不再因单条对比而隐藏（改为换文案）',
+  /noteEl\.style\.display = ''/.test(readSrc('trend.js')) && /单条对比时纵轴为实际数值/.test(readSrc('trend.js')));
+chk('二十四轮·⑩首页榜单卡 TOP 标签（C17）',
+  /class="top-tag t' \+ \(i \+ 1\)/.test(readSrc('home.js')) &&
+  /\.mk-top \.top-tag \{[\s\S]{0,120}flex: 0 0 46px/.test(readSrc('home.css')));

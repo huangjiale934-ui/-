@@ -1183,6 +1183,12 @@
   '风险视角': 'Risk view',
   '全部列': 'All columns',
   '1年': '1Y',
+  /* 2026-11-02（第二十四轮） */
+  '强积金资料库': 'MPF Library',
+  '清空': 'Clear',
+  '清空全部对比对象（含指数），重新开始': 'Clear all comparison items (including indices) and start over',
+  '收起 / 展开': 'Collapse / expand',
+  '单条对比时纵轴为实际数值（净值 / 指数点位）；再加入一条即切换为累计涨跌幅对比。悬停可查看当日数值。': 'With a single line the axis shows actual values (NAV / index level); add a second line to switch to cumulative return. Hover to see daily values.',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

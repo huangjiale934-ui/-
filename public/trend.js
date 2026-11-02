@@ -183,6 +183,25 @@ window.TREND = (function () {
     const q = (s) => box.querySelector(s);
     const qa = (s) => Array.from(box.querySelectorAll(s));
 
+    /* 2026-11-02（第二十四轮，用户要求）：标题右侧箭头 = 收起 / 展开整块图表。
+       传了 opts.foldKey 的实例（基金最新数据页）会把状态记在 localStorage。 */
+    (function initFold() {
+      const btn = q('.tr-titlebtn');
+      if (!btn) return;
+      const KEY = opts.foldKey || '';
+      const apply = (f) => {
+        box.classList.toggle('tr-folded', f);
+        btn.setAttribute('aria-expanded', f ? 'false' : 'true');
+        if (KEY) { try { localStorage.setItem(KEY, f ? '1' : '0'); } catch (e) {} }
+        /* 收起时容器宽度为 0，展开后必须重绘一次 */
+        if (!f) setTimeout(() => { try { draw(); } catch (e) {} }, 30);
+      };
+      let folded = false;
+      try { folded = !!KEY && localStorage.getItem(KEY) === '1'; } catch (e) {}
+      btn.addEventListener('click', () => apply(!box.classList.contains('tr-folded')));
+      if (folded) apply(true);
+    })();
+
     function keyOf(it) { return it.type === 'index' ? 'i:' + it.key : (it.type === 'tavg' ? 't:' + it.key : 'f:' + it.id); }
 
     /* ---- 线条样式（颜色 / 线宽 / 线型）：默认取 DEF_STYLES，可被用户自定义覆盖 ---- */
@@ -719,21 +738,24 @@ window.TREND = (function () {
       return '' +
         '<div class="tr-head' + (o.bareHead ? ' tr-head-slim' : '') + '">' +
           (o.bareHead ? '' :
-            '<div class="tr-title">' + esc0(title) + '</div>' +
-            '<div class="tr-adds">' +
-              '<button type="button" class="tr-sel tr-add" data-panel="idx">＋ ' + esc0(_t('添加指数')) + '<i class="tr-cnt" data-cnt="idx"></i></button>' +
-              '<button type="button" class="tr-sel tr-add" data-panel="fund">＋ ' + esc0(_t('添加基金')) + '<i class="tr-cnt" data-cnt="fund"></i></button>' +
-            '</div>') +
-          '<div class="tr-toolbar">' +
-            rangesBar +
-            '<div class="tr-tools2">' +
-              '<button type="button" class="tr-tool tr-clear" title="' + esc0( _t('清空所有已选基金并重置筛选（保留指数）')) + '">' + esc0( _t('清空筛选')) + '</button>' +
-            '</div>' +
+            /* 2026-11-02（第二十四轮，用户要求）：标题右侧加下拉箭头，点标题即收起/展开整块图表 */
+            '<button type="button" class="tr-title tr-titlebtn" aria-expanded="true" title="' + esc0(_t('收起 / 展开')) + '">' +
+              '<span>' + esc0(title) + '</span><i class="tr-caret" aria-hidden="true"></i></button>') +
+          '<div class="tr-ctrls">' +
             (o.bareHead ? '' :
-              '<div class="tr-tools">' +
-                '<button type="button" class="tr-tool tr-exp" title="' + esc0(_t('导出当前走势数据（CSV）')) + '">' + esc0(_t('导出')) + '</button>' +
-                '<button type="button" class="tr-tool tr-share" title="' + esc0(_t('复制包含当前对比组合的分享链接')) + '">' + esc0(_t('分享')) + '</button>' +
+              '<div class="tr-adds">' +
+                '<button type="button" class="tr-sel tr-add" data-panel="idx">＋ ' + esc0(_t('添加指数')) + '<i class="tr-cnt" data-cnt="idx"></i></button>' +
+                '<button type="button" class="tr-sel tr-add" data-panel="fund">＋ ' + esc0(_t('添加基金')) + '<i class="tr-cnt" data-cnt="fund"></i></button>' +
+                '<button type="button" class="tr-tool tr-clear" title="' + esc0( _t('清空全部对比对象（含指数），重新开始')) + '">' + esc0( _t('清空')) + '</button>' +
               '</div>') +
+            '<div class="tr-toolbar">' +
+              rangesBar +
+              (o.bareHead ? '' :
+                '<div class="tr-tools">' +
+                  '<button type="button" class="tr-tool tr-exp" title="' + esc0(_t('导出当前走势数据（CSV）')) + '">' + esc0(_t('导出')) + '</button>' +
+                  '<button type="button" class="tr-tool tr-share" title="' + esc0(_t('复制包含当前对比组合的分享链接')) + '">' + esc0(_t('分享')) + '</button>' +
+                '</div>') +
+            '</div>' +
           '</div>' +
         '</div>' +
         panels +
@@ -990,8 +1012,18 @@ window.TREND = (function () {
       /* 2026-10-17：单线模式直接画实际值（净值 / 指数点位）；多线仍归一化 1000 */
       const single = lines.length === 1;
       const P = (L) => (single ? L.win.raw : L.win.norm);
+      /* 2026-11-02（第二十四轮，用户反馈）：提示语不能整行消失 ——
+         单条时纵轴是实际数值，改文案说明；两条以上才讲「累计涨跌幅」。 */
       const noteEl = q('.tr-note');
-      if (noteEl) noteEl.style.display = single ? 'none' : '';
+      if (noteEl) {
+        noteEl.style.display = '';
+        const txtEl = q('.tr-note-txt');
+        if (txtEl) {
+          txtEl.textContent = single
+            ? _t('单条对比时纵轴为实际数值（净值 / 指数点位）；再加入一条即切换为累计涨跌幅对比。悬停可查看当日数值。')
+            : _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。');
+        }
+      }
       let ymin = Infinity, ymax = -Infinity;
       lines.forEach((L) => P(L).forEach(([, v]) => { if (v < ymin) ymin = v; if (v > ymax) ymax = v; }));
       if (!(ymax > ymin)) ymax = ymin + 10;

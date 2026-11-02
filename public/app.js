@@ -1,5 +1,8 @@
 /* 板块一：强积金资料库 */
 (function () {
+  /* 2026-11-02（第二十四轮）：侧边栏发行人列表由本页统一接管（对比页共用同一筛选），
+     先置标记，避免 analysis.js 抢先绑一份重复的点击处理。 */
+  window.__provHandledByApp = true;
   const S = { key: 'size', dir: 'desc', page: 1, size: 10 };
   /* 2026-11-01（6.0）：三态排序的「取消」必须永远回页面默认（规模降序）。
      不能把 makeSorter 绑定时的 state 当默认——表头每次重绘都会重绑，
@@ -173,6 +176,8 @@
       DBTREND = window.TREND.mount(box, dbTrendItems(), {
         /* 2026-11-02（第二十三轮）：标题与工具条由走势图自己渲染（基金走势对比图 + 添加指数/添加基金 + 区间） */
         hideGoto: true,
+        /* 2026-11-02（第二十四轮）：收起改由标题右侧箭头负责（走势图模块内实现），状态记在本页 */
+        foldKey: DBFOLD_KEY,
         fundMeta: meta,
         onSelChange: function () {
           if (DBSYNC) return;
@@ -187,36 +192,8 @@
       DBSYNC = true;
       try { DBTREND.setItems(dbTrendItems()); } finally { DBSYNC = false; }
     }
-    /* 折叠按钮：注入走势图头部（每次重挂都要补，因为 box.innerHTML 会重建） */
-    setupDbTrendFold(card, box);
+    /* 2026-11-02（第二十四轮）：收起按钮取消，改由标题右侧箭头控制（走势图模块内置） */
     try { window.dispatchEvent(new Event('resize')); } catch (e) {}
-  }
-  /* 2026-11-02（第二十三轮）：收起/展开按钮放进走势图顶部那一行右侧；
-     折叠时只留标题与「添加指数/添加基金」，其余（区间/图/表/说明）全部隐藏。 */
-  function setupDbTrendFold(card, box) {
-    const head = box.querySelector('.tr-head');
-    if (!head) return;
-    let fold = head.querySelector('.tr-fold');
-    if (!fold) {
-      fold = document.createElement('button');
-      fold.type = 'button';
-      fold.className = 'tr-tool tr-fold';
-      fold.addEventListener('click', () => {
-        const f = !card.classList.contains('folded');
-        applyDbTrendFold(card, fold, f);
-        try { localStorage.setItem(DBFOLD_KEY, f ? '1' : '0'); } catch (e) {}
-        if (!f) { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }
-      });
-      /* 放进工具组（导出/分享 同一行），避免成为 head 的孤立子项被挤到第二行 */
-      (head.querySelector('.tr-tools') || head).appendChild(fold);
-    }
-    let folded = false;
-    try { folded = localStorage.getItem(DBFOLD_KEY) === '1'; } catch (e) {}
-    applyDbTrendFold(card, fold, folded);
-  }
-  function applyDbTrendFold(card, btn, folded) {
-    card.classList.toggle('folded', folded);
-    if (btn) btn.textContent = folded ? TT('展开') : TT('收起');
   }
   window.__dbTrendMount = initDbTrend;
   function syncDbTrend() {
@@ -346,16 +323,23 @@
     const nav = document.getElementById('anProv');
     if (!nav || nav.__appBound) return;
     nav.__appBound = 1;
+    /* 2026-11-02（第二十四轮）：列表由本页统一接管（对比页也共用这一个筛选），
+       analysis.js 里的旧绑定看到这个标记就不再重复处理。 */
+    window.__provHandledByApp = true;
     nav.addEventListener('click', (e) => {
       const b = e.target && e.target.closest ? e.target.closest('.an-pitem') : null;
       if (!b) return;
-      const t = b.getAttribute('data-t') || '';
-      const sel = document.getElementById('fTrustee');
-      if (sel) sel.value = t;
-      F.trustee = t;
-      S.page = 1;
-      render();
+      pickTrustee(b.getAttribute('data-t') || '');
     });
+  }
+  function pickTrustee(t) {
+    const sel = document.getElementById('fTrustee');
+    if (sel) sel.value = t;
+    F.trustee = t;
+    S.page = 1;
+    render();
+    /* 两个板块共用一个发行人筛选：切到可视化对比时数字要一致 */
+    if (typeof window.__anSetTrustee === 'function') { try { window.__anSetTrustee(t); } catch (e) {} }
   }
   function syncTrusteeMenu() {
     const nav = document.getElementById('anProv');
@@ -364,6 +348,8 @@
       b.classList.toggle('on', (b.getAttribute('data-t') || '') === (F.trustee || ''));
     });
   }
+  window.syncTrusteeMenu = syncTrusteeMenu;
+  window.__getDbTrustee = function () { return F.trustee || ''; };
 
   /** 导出当前筛选结果（全部行，非仅当前页，CSV；Excel 直接打开） */
   function exportIdx() {
@@ -515,7 +501,11 @@
     }, 200));
     $('#fType').addEventListener('change', () => { F.type = $('#fType').value; F.sub = ''; fillSub(); S.page = 1; render(); });
     $('#fSub').addEventListener('change', () => { F.sub = $('#fSub').value; S.page = 1; render(); });
-    $('#fTrustee').addEventListener('change', () => { F.trustee = $('#fTrustee').value; S.page = 1; render(); });
+    $('#fTrustee').addEventListener('change', () => {
+      F.trustee = $('#fTrustee').value; S.page = 1; render();
+      /* 2026-11-02：下拉与左侧发行人列表保持同步（两个板块共用） */
+      if (typeof window.__anSetTrustee === 'function') { try { window.__anSetTrustee(F.trustee); } catch (e) {} }
+    });
     /* 2026-10-31（用户要求）：第二行筛选（涨跌幅/回撤/管理费）与「重置条件」按钮已删除；重置走空态「一键清除」 */
     const bReset = $('#btnReset');
     if (bReset) bReset.addEventListener('click', resetAll);

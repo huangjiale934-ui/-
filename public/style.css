@@ -2031,8 +2031,8 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 2026-11-02（第二十三轮，用户更正）：关闭按钮保持在「强积金市场指数」左侧，
    只从贴边 8px 往右挪一点（8→17px），并加大到 22px、白底描边更明显。
    注意：绝不能改 .mkt-ticker 的 position（sticky 吸顶会失效）。 */
-.mkt-ticker .tk-track { padding-left: 52px; padding-right: 14px; }
-.tk-close { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); z-index: 2;
+.mkt-ticker .tk-track { padding-left: 45px; padding-right: 14px; }
+.tk-close { position: absolute; left: 25px; top: 50%; transform: translateY(-50%); z-index: 2;
   display: inline-flex; align-items: center; justify-content: center;
   width: 22px; height: 22px; padding: 0; border-radius: 50%; cursor: pointer;
   border: 1px solid #cfe1f2; background: #fff; color: #6f8399;
@@ -2137,7 +2137,20 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
   display: flex; flex-direction: column; overflow-y: auto;
   background: #fff; border-right: 1px solid var(--line, #e3ecf4); border-top: 1px solid var(--line, #e3ecf4);
   border-radius: 0; padding: 12px 10px 16px; box-shadow: 2px 0 12px rgba(20, 50, 80, .04); }
-.db-side-grp { font-size: 11px; color: #8aa0b4; font-weight: 700; letter-spacing: .03em; padding: 4px 10px 8px; }
+/* 2026-11-02（第二十四轮，用户要求）：侧栏标题加大、改名「强积金资料库」，
+   并把全站统一的 ⓘ 口径说明挂到标题右侧（原来在页头「数据版本」旁）。 */
+.db-side-grp { display: flex; align-items: center; gap: 6px;
+  font-size: 14px; color: #35507a; font-weight: 700; letter-spacing: 0; padding: 2px 8px 10px; }
+.db-side-grp > span { white-space: nowrap; }
+.db-side-grp .ver-info { margin-left: auto; }
+/* 二级菜单折叠箭头（只做视觉，点击区域是整个入口按钮） */
+.db-caret { margin-left: auto; width: 0; height: 0;
+  border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #7d94a9;
+  transition: transform .16s ease; opacity: .85; }
+.db-nav.collapsed .db-caret { transform: rotate(-90deg); }
+.db-nav.on .db-caret { border-top-color: var(--brand, #0866bb); }
+/* 分组分隔线：基金榜单与上面两个入口分开 */
+.db-side-div { height: 1px; background: #e9f0f8; margin: 12px 10px 10px; }
 .db-nav { display: flex; align-items: center; gap: 9px; width: 100%; height: 40px; padding: 0 10px;
   border: 0; border-radius: 8px; background: none; font: inherit; font-size: 14px; font-weight: 500;
   color: #2c4258; cursor: pointer; text-align: left; white-space: nowrap; transition: background-color .15s, color .15s; }
@@ -2160,6 +2173,7 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
   .db-side { width: 54px; padding: 10px 6px; transition: width .16s ease, box-shadow .16s ease; }
   .db-side:hover { width: 196px; box-shadow: 0 10px 28px rgba(16, 40, 70, .16); }
   .db-side-grp, .db-side-note { display: none; }
+  .db-caret { display: none; }   /* 图标栏模式下不显示二级菜单箭头（列表本身也收起了） */
   .db-nav { justify-content: center; padding: 0; }
   .db-nav span { display: none; }
   .db-side:hover .db-nav { justify-content: flex-start; padding: 0 10px; }
@@ -2173,6 +2187,7 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
     border-radius: 10px; border: 1px solid var(--line, #e3ecf4); padding: 6px; margin-bottom: 10px; }
   .db-nav { width: auto; flex: 0 0 auto; padding: 0 10px; height: 36px; }
   .db-nav span { display: inline; }
+  .db-caret { display: none; }
   .db-sub { display: none; }
 }
 
@@ -2314,16 +2329,10 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
    —— 把「可视化对比」的核心功能搬进来，勾选表格「对比」即叠加。
    ========================================================== */
 .db-trendcard { margin-bottom: 14px; }
-.db-trendcard .db-trendbox { padding: 12px 14px 12px; }
-.db-trendcard .tr-svg { height: 268px; }
-/* 收起后只留顶部一行（标题 + 添加指数/添加基金 + 展开） */
-.db-trendcard.folded #dbTrendBox .tr-toolbar,
-.db-trendcard.folded #dbTrendBox .tr-panels,
-.db-trendcard.folded #dbTrendBox .tr-daterow,
-.db-trendcard.folded #dbTrendBox .tr-canvas,
-.db-trendcard.folded #dbTrendBox .tr-tablewrap,
-.db-trendcard.folded #dbTrendBox .tr-note { display: none; }
-@media (max-width: 900px) { .db-trendcard .tr-svg { height: 240px; } }
+.db-trendcard .db-trendbox { padding: 12px 14px 14px; }
+/* 2026-11-02（第二十四轮，用户要求）：走势图上下加高 30%（268 → 350） */
+.db-trendcard .tr-svg { height: 350px; }
+@media (max-width: 900px) { .db-trendcard .tr-svg { height: 280px; } }
 
 /* ==========================================================
    2026-11-02（第二十二轮）：两表「基金名称」列同宽 + 断点收窄
@@ -2367,10 +2376,13 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
 }
 
 /* 2026-11-02（第二十三轮）：列设置的 4 个预设按钮（默认 / 收益视角 / 风险视角 / 全部列） */
-.cp-btns.cp-presets { flex-wrap: wrap; gap: 6px; }
-.cp-btns.cp-presets .cp-b { flex: 0 0 auto; }
+/* 2026-11-02（第二十四轮，用户要求）：四个预设按钮统一大小、铺满整行（原来是各自动宽度、右侧留空） */
+.cp-btns.cp-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
+.cp-btns.cp-presets .cp-b { flex: none; width: 100%; padding: 5px 2px; text-align: center; white-space: nowrap; }
 .cp-btns .cp-b.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
 .rk-colpop .cp-btns { flex-wrap: wrap; }
+.rk-colpop .cp-btns.cp-presets { display: grid; flex-wrap: nowrap; }
+.rk-colpop .cp-btns.cp-presets .cp-b { padding: 5px 2px; }
 
 /* 2026-11-02（第二十三轮）：页头「数据版本」右侧的 ⓘ 口径说明 */
 .ver-info { width: 18px; height: 18px; margin-left: 6px; padding: 0; border-radius: 50%;

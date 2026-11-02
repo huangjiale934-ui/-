@@ -327,8 +327,12 @@ function renderUpdateTime() {
    这里给一个唯一入口，讲清「快 2–6 周」与「含费含息」的差别，并提醒不可相减。 */
 (function initVerInfo() {
   function build() {
+    /* 2026-11-02（第二十四轮，用户要求）：ⓘ 挂到侧栏标题「强积金资料库」右侧；
+       没有侧栏的页面（首页）仍留在页头「数据版本」后面。 */
+    if (document.getElementById('verInfo')) return;
+    const grp = document.querySelector('.db-side-grp');
     const chip = document.getElementById('verChip');
-    if (!chip || document.getElementById('verInfo')) return;
+    if (!grp && !chip) return;
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.id = 'verInfo';
@@ -336,7 +340,8 @@ function renderUpdateTime() {
     btn.textContent = 'i';
     btn.setAttribute('aria-label', TT('数据口径说明'));
     btn.setAttribute('title', TT('数据口径说明'));
-    chip.parentNode.insertBefore(btn, chip.nextSibling);
+    if (grp) grp.appendChild(btn);
+    else chip.parentNode.insertBefore(btn, chip.nextSibling);
 
     const pop = document.createElement('div');
     pop.className = 'ver-pop';

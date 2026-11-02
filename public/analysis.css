@@ -232,8 +232,6 @@
 .tr-chip-x { cursor: pointer; color: var(--text-3); font-weight: 700; padding: 0 2px; }
 .tr-chip-x:hover { color: var(--down); }
 .tr-chip-err { opacity: .55; }
-.tr-add { border: 1px dashed var(--border-strong); background: none; color: var(--brand); border-radius: 999px; font-size: 12px; padding: 4px 12px; cursor: pointer; }
-.tr-add:hover { background: var(--brand-soft); }
 .tr-canvas { position: relative; }
 .tr-svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
 .tr-grid { stroke: var(--border); stroke-width: 1; }
@@ -1101,30 +1099,47 @@
   background: #fff8e6; border: 1px solid #f2d38a; border-radius: 999px; padding: 2px 8px; cursor: help; }
 
 /* ==========================================================
-   2026-11-02（第二十三轮，用户要求）：走势图顶部收成一行 + 图例并入表格
-   —— 标题「基金走势对比图」+ 添加指数 / 添加基金 + 区间 + 清空筛选 + 导出；
-      独立图例行删除，× 与「点线条改样式」跟着名称进表格。
+   2026-11-02（第二十四轮，用户要求）：走势图顶部
+   —— 标题右侧加箭头（点击收起整块图表）；「添加指数 / 添加基金 / 清空」
+      改成站内实线按钮（不用虚线框）并整组靠右；「收起」按钮删除。
    ========================================================== */
-.tr-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
-.tr-head .tr-title { font-size: 15px; font-weight: 700; white-space: nowrap; letter-spacing: .2px; }
+.tr-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.tr-titlebtn { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none;
+  padding: 0; font: inherit; font-size: 15px; font-weight: 700; color: var(--text);
+  cursor: pointer; white-space: nowrap; letter-spacing: .2px; }
+.tr-titlebtn:hover { color: var(--brand); }
+.tr-caret { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 6px solid currentColor; opacity: .5; transition: transform .16s ease; }
+.tr-box.tr-folded .tr-caret { transform: rotate(-90deg); }
+.tr-ctrls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
 .tr-adds { display: flex; align-items: center; gap: 8px; }
 .tr-adds .tr-sel {
   flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px;
-  border: 1px dashed #bcd9f0; background: #fff; color: var(--brand);
-  border-radius: 4px; padding: 5px 11px; font: inherit; font-size: 12.5px; cursor: pointer;
-  transition: background .15s, border-color .15s;
+  border: 1px solid #cfe1f2; background: #fff; color: var(--brand);
+  border-radius: 5px; padding: 5px 11px; font: inherit; font-size: 12.5px; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(20, 50, 90, .04);
+  transition: background .15s, border-color .15s, box-shadow .15s;
 }
-.tr-adds .tr-sel:hover { background: var(--brand-soft); border-style: solid; border-color: var(--brand); }
+.tr-adds .tr-sel:hover { background: var(--brand-soft); border-color: var(--brand); box-shadow: 0 1px 4px rgba(8,102,187,.14); }
 .tr-adds .tr-cnt { background: var(--brand); }
-.tr-head .tr-toolbar { margin: 0 0 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.tr-head-slim .tr-toolbar { margin-left: 0; width: 100%; justify-content: flex-start; }
-.tr-head .tr-tools2, .tr-head .tr-tools { display: flex; align-items: center; gap: 6px; }
+/* 与「添加指数 / 添加基金」同高同圆角，三个按钮看起来是一组 */
+.tr-adds .tr-clear { border: 1px solid #cfe1f2; color: var(--text-2); border-radius: 5px; height: 30px; padding: 0 11px; font-size: 12.5px; }
+.tr-adds .tr-sel { height: 30px; padding: 0 11px; }
+.tr-adds .tr-clear:hover { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); }
+.tr-head .tr-toolbar { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tr-head-slim .tr-toolbar { width: 100%; justify-content: flex-start; }
+.tr-head .tr-tools { display: flex; align-items: center; gap: 6px; }
+/* 收起后只留标题那一行 */
+.tr-box.tr-folded .tr-toolbar, .tr-box.tr-folded .tr-panels, .tr-box.tr-folded .tr-daterow,
+.tr-box.tr-folded .tr-canvas, .tr-box.tr-folded .tr-tablewrap,
+.tr-box.tr-folded .tr-note, .tr-box.tr-folded .tr-gotowrap { display: none !important; }
 
 /* 表格：新增 期初/期末/最高/最低/波动率，名称列内置图例 */
-.tr-tbl th:nth-child(1), .tr-tbl td:nth-child(1) { width: 24% !important; }
-.tr-tbl th, .tr-tbl td { font-size: 12px; }
-.tr-tbl th { padding: 7px 6px; }
-.tr-tbl td { padding: 8px 6px; }
+/* 2026-11-02（第二十四轮，用户要求）：统计表字号提到与下方基金列表一致（12 → 15px），行距同步放大 */
+.tr-tbl th:nth-child(1), .tr-tbl td:nth-child(1) { width: 22% !important; }
+.tr-tbl th, .tr-tbl td { font-size: 15px; }
+.tr-tbl th { padding: 9px 7px; }
+.tr-tbl td { padding: 11px 7px; }
 .tr-tbl td.n { display: flex; align-items: center; gap: 7px; min-width: 150px; }
 .tr-tbl .tr-lg-line { flex: none; cursor: pointer; }
 .tr-tbl .nm { font-weight: 600; cursor: pointer; }
@@ -1138,12 +1153,24 @@
 .tr-note .tr-note-tip { color: var(--text-3); white-space: nowrap; }
 .tr-note .tr-note-txt { color: var(--text-3); }
 
-/* 2026-11-02（第二十三轮）：窄屏时走势图顶部再收一档，保证「收起」不被挤到第二行 */
+/* 2026-11-02：窄屏时走势图顶部再收一档，保证整行不换行 */
 @media (max-width: 1320px) {
-  .tr-head { gap: 6px; }
-  .tr-head .tr-title { font-size: 14px; }
+  .tr-head { gap: 8px; }
+  .tr-titlebtn { font-size: 14px; }
+  .tr-ctrls { gap: 8px; }
   .tr-adds { gap: 6px; }
   .tr-adds .tr-sel { padding: 4px 8px; font-size: 12px; }
   .tr-head .tr-ranges .tr-r { padding: 4px 7px; font-size: 11.5px; }
   .tr-head .tr-tool { padding: 4px 8px; font-size: 12px; }
+}
+
+/* 2026-11-02（第二十四轮）：统计表放大后，窄屏收一档 + 容器允许横向滚动兜底
+   （表格按内容宽度撑开，容器统一滚动，避免最后一列被卡片裁掉） */
+.tr-tablewrap { overflow-x: auto; }
+.tr-tablewrap .tr-tbl { width: max-content; min-width: 100%; }
+@media (max-width: 1439px) {
+  .tr-tbl th, .tr-tbl td { font-size: 12.5px; }
+  .tr-tbl th { padding: 8px 4px; }
+  .tr-tbl td { padding: 9px 4px; }
+  .tr-tbl td.n { min-width: 158px; }
 }

@@ -208,25 +208,50 @@
     if (!el.__bound) {
       el.__bound = 1;
       el.addEventListener('click', (e) => {
+        /* 2026-11-02（第二十四轮）：列表挂在侧边栏、两个板块共用 —— 由 app.js 统一接管点击
+           （它会同时更新本页的 S.trustee），这里不再重复处理 */
+        if (window.__provHandledByApp) return;
         const btn = e.target.closest ? e.target.closest('.an-pitem') : null;
         if (!btn) return;
-        S.trustee = btn.getAttribute('data-t') || '';
-        QF = null;
-        Array.prototype.forEach.call(el.querySelectorAll('.an-pitem'), (b) => b.classList.toggle('on', b === btn));
-        if (TREND_MAIN) {
-          if (TREND_MAIN.setFilter) TREND_MAIN.setFilter(filterOf());
-          /* 2026-10-21：切换发行人不再清空已选基金（用户要求保留），仅在一条基金都没选时补恒指 */
-          const curItems = TREND_MAIN.getItems ? TREND_MAIN.getItems() : [];
-          const hasFund = curItems.some((it) => it.type === 'fund');
-          if (!hasFund && TREND_MAIN.setItems) TREND_MAIN.setItems([{ type: 'index', key: 'HSI' }]);
-        }
-        renderFundList();
-        renderSrcNoteTop();
-        /* 2026-11-02：发行人菜单已并入「基金最新数据」，点它只是筛表格，
-           不再弹「日度历史仅 1 年」的提示（那个提示属于对比页的旧交互）。 */
+        applyTrustee(btn.getAttribute('data-t') || '');
       });
     }
   }
+  /* 切换发行人：列表 + 走势图筛选 + 高亮 */
+  function applyTrustee(t) {
+    const el = $('#anProv');
+    S.trustee = t;
+    QF = null;
+    if (el) {
+      Array.prototype.forEach.call(el.querySelectorAll('.an-pitem'), (b) => {
+        b.classList.toggle('on', (b.getAttribute('data-t') || '') === t);
+      });
+    }
+    if (TREND_MAIN) {
+      if (TREND_MAIN.setFilter) TREND_MAIN.setFilter(filterOf());
+      /* 2026-10-21：切换发行人不再清空已选基金（用户要求保留），仅在一条基金都没选时补恒指 */
+      const curItems = TREND_MAIN.getItems ? TREND_MAIN.getItems() : [];
+      const hasFund = curItems.some((it) => it.type === 'fund');
+      if (!hasFund && TREND_MAIN.setItems) TREND_MAIN.setItems([{ type: 'index', key: 'HSI' }]);
+    }
+    renderFundList();
+    renderSrcNoteTop();
+  }
+  /* 供 app.js / 板块切换调用 */
+  window.__anSetTrustee = function (t) { if (DATA.count) applyTrustee(t || ''); };
+  window.__anSyncProv = function () {
+    if (!DATA.count) return;
+    const t = (typeof window.__getDbTrustee === 'function') ? (window.__getDbTrustee() || '') : S.trustee;
+    if (t !== S.trustee) applyTrustee(t);
+    else {
+      const el = $('#anProv');
+      if (el) {
+        Array.prototype.forEach.call(el.querySelectorAll('.an-pitem'), (b) => {
+          b.classList.toggle('on', (b.getAttribute('data-t') || '') === t);
+        });
+      }
+    }
+  };
 
   /* ---------- 基金列表（该发行人全部基金，与资料库同口径） ----------
      2026-11-02（第二十二轮，用户要求）：改成「完全照抄基金最新数据表格」——
