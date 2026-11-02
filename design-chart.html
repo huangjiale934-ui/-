@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>走势图改版 · 20 套方案（真尺寸）</title>
+<style>
+  :root{
+    --brand:#0866bb; --brand-2:#2f7fc1; --brand-soft:#eef4fd; --brand-line:#d3e2f0;
+    --text:#16283e; --text-2:#3d5470; --text-3:#8595a8; --border:#e3ecf4; --border-2:#d3e2f0;
+    --up:#c0392b; --down:#1a7a55; --surface:#fff; --surface-2:#f7fbff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#eef2f7;color:var(--text);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1160px;margin:0 auto;padding:28px 16px 80px}
+  .hd{background:#fff;border-top:3px solid var(--brand);padding:22px 26px;border-radius:4px;margin-bottom:22px}
+  .hd h1{margin:0 0 6px;font-size:22px}
+  .hd p{margin:0;color:var(--text-2);font-size:13.5px}
+  .hd .kbd{display:inline-block;background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand-line);
+    border-radius:4px;padding:1px 7px;font-size:12px;margin:0 2px}
+  .sec-title{margin:30px 0 10px;font-size:15px;font-weight:800;color:var(--text-2);letter-spacing:.3px}
+  .item{background:#fff;border:1px solid var(--border-2);border-radius:4px;margin-bottom:26px;overflow:hidden}
+  .item-hd{display:flex;align-items:baseline;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+  .item-hd b{font-size:14px;color:var(--brand);letter-spacing:.5px}
+  .item-hd span{font-size:12.5px;color:var(--text-3)}
+  .canvas{padding:18px}
+  .mock{width:1040px;max-width:none;border:1px solid var(--border-2);border-radius:4px;background:#fff;overflow:hidden}
+  .scroll{overflow-x:auto}
+  /* --- 通用控件 --- */
+  .t{font-size:15px;font-weight:700;color:var(--text)}
+  .tip{font-size:11.5px;color:var(--text-3)}
+  .btn{border:1px solid #bcd9f0;background:#fff;color:var(--brand);border-radius:3px;font-size:12.5px;padding:5px 12px;cursor:pointer;white-space:nowrap}
+  .btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.ghost{border-color:var(--border-2);color:var(--text-2);background:#fff}
+  .sel{border:1px solid var(--border-2);background:#fff;border-radius:3px;height:34px;display:flex;align-items:center;
+    justify-content:space-between;padding:0 12px;font-size:12.5px;color:var(--text-2);gap:10px;min-width:0}
+  .sel em{font-style:normal;color:var(--text-3);font-size:10px}
+  .ranges{display:flex;align-items:center;gap:4px;background:#f2f6fb;border:1px solid var(--border);border-radius:3px;padding:3px}
+  .ranges i{font-style:normal;font-size:12px;color:var(--text-2);padding:4px 10px;border-radius:2px;white-space:nowrap}
+  .ranges i.on{background:var(--brand);color:#fff;font-weight:600}
+  .chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);background:#fff;
+    border:1px solid var(--border-2);border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .chip b{width:10px;height:3px;border-radius:2px;display:inline-block}
+  .chip u{text-decoration:none;color:var(--text-3);margin-left:2px}
+  .chip.add{border-style:dashed;color:var(--brand);border-color:#bcd9f0}
+  .legend{display:flex;align-items:center;gap:16px;font-size:12px;color:var(--text-2);padding:6px 2px 0}
+  .legend s{text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .legend s b{width:14px;height:3px;border-radius:2px;display:inline-block}
+  .stats{display:flex;gap:26px;font-size:12px;color:var(--text-3);padding:8px 2px 0;border-top:1px dashed var(--border);margin-top:8px}
+  .stats b{display:block;font-size:13px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+  .stats b.up{color:var(--up)} .stats b.dn{color:var(--down)}
+  .side-l{border-right:1px solid var(--border);padding:12px;width:190px;flex:none;background:var(--surface-2)}
+  .side-l .li{font-size:12.5px;color:var(--text-2);padding:6px 8px;border-radius:3px;display:flex;justify-content:space-between}
+  .side-l .li.on{background:#e8f2fc;color:var(--brand);font-weight:600}
+  .side-r{border-left:1px solid var(--border);padding:14px;width:250px;flex:none}
+  .iconbar{width:52px;flex:none;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0;background:var(--surface-2)}
+  .iconbar b{width:30px;height:30px;border-radius:4px;border:1px solid var(--border-2);background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-2);font-weight:500}
+  .iconbar b.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .tabs2{display:flex;gap:2px;border-bottom:1px solid var(--border)}
+  .tabs2 i{font-style:normal;font-size:12.5px;color:var(--text-2);padding:9px 14px;cursor:pointer}
+  .tabs2 i.on{color:var(--brand);font-weight:700;box-shadow:inset 0 -2px 0 var(--brand)}
+  .br{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-3)}
+  .br b{color:var(--brand);font-weight:600}
+  .hoverbar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.94);border:1px solid var(--border-2);
+    border-radius:4px;padding:6px 10px;box-shadow:0 6px 18px rgba(20,40,80,.12)}
+  .seg{display:inline-flex;border:1px solid var(--border-2);border-radius:999px;overflow:hidden;background:#fff}
+  .seg i{font-style:normal;font-size:12px;color:var(--text-2);padding:5px 14px}
+  .seg i.on{background:var(--brand);color:#fff;font-weight:600}
+  .scr{height:6px;background:#e9f1f9;border-radius:3px;position:relative;margin:10px 2px 0}
+  .scr i{position:absolute;left:14%;width:56%;top:0;bottom:0;background:#bcd9f0;border-radius:3px}
+  .scr i::before,.scr i::after{content:'';position:absolute;top:-3px;width:8px;height:12px;background:#fff;border:1px solid #8fb8da;border-radius:2px}
+  .scr i::before{left:-4px} .scr i::after{right:-4px}
+  .note{font-size:11px;color:var(--text-3);padding:8px 2px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mini{border:1px solid var(--border);border-radius:3px;padding:6px}
+  .mini .mt{font-size:11.5px;color:var(--text-2);display:flex;justify-content:space-between}
+  .vline{position:absolute;left:52%;top:0;bottom:0;border-left:1px dashed #b9c9d9}
+  .cross{position:absolute;left:52%;top:10%;width:1px;height:70%;background:#9fb6cc}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>基金走势图 · 20 套功能分区方案</h1>
+    <p>全部按 <span class="kbd">真尺寸 1040 × 约 380px</span> 渲染（与线上图表卡同宽），配色沿用现有品牌蓝／涨红跌绿，只重排「功能区」：标题、标的、区间、样式、导出、统计。<br>
+       重点看第 <b>C01</b>（两个大下拉合成「+ 添加标的」）、<b>C03</b>（左侧标的栏）、<b>C09/C10</b>（统计与回撤副图）四套——它们直接影响「能不能砍掉可视化对比页」。</p>
+  </div>
+  <div id="list"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="fillA" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#0866bb" stop-opacity=".18"/><stop offset="100%" stop-color="#0866bb" stop-opacity="0"/>
+  </linearGradient>
+</defs></svg>
+
+<script>
+/* ---------------- 数据：两条近似真实的净值序列（确定性，不用随机） ---------------- */
+const N = 240;
+function series(seed, drift, amp) {
+  const a = [];
+  let v = 100;
+  for (let i = 0; i < N; i++) {
+    v += drift + Math.sin((i + seed) / 7) * amp + Math.sin((i + seed) / 23) * amp * 1.6;
+    a.push(v);
+  }
+  return a;
+}
+const S1 = series(3, 0.06, 0.55);      // 恒生指数（归一化）
+const S2 = series(11, 0.10, 0.75);     // 基金 A
+const S3 = series(29, 0.04, 0.5);      // 基金 B
+
+/* 折线路径 */
+function pathOf(arr, x0, y0, w, h, min, max) {
+  let d = '';
+  arr.forEach((v, i) => {
+    const x = x0 + (w * i) / (arr.length - 1);
+    const y = y0 + h - ((v - min) / (max - min)) * h;
+    d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+  });
+  return d;
+}
+/* 主图：网格 + 双线 + 刻度 + 十字线 */
+function plot(opt) {
+  opt = opt || {};
+  const W = opt.w || 1000, H = opt.h || 250, PL = 48, PR = 16, PT = 12, PB = 26;
+  const min = 60, max = 190;
+  const all = [].concat(S1, S2, opt.single ? [] : (opt.three ? S3 : []));
+  const x0 = PL, y0 = PT, w = W - PL - PR, h = H - PT - PB;
+  let g = '';
+  for (let i = 0; i <= 4; i++) {
+    const y = y0 + (h * i) / 4;
+    const val = max - ((max - min) * i) / 4;
+    g += `<line x1="${x0}" y1="${y.toFixed(1)}" x2="${x0 + w}" y2="${y.toFixed(1)}" stroke="#eef2f7"/>`;
+    g += `<text x="${x0 - 8}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="10.5" fill="#8595a8">${val.toFixed(0)}</text>`;
+  }
+  ['11月', '1月', '3月', '5月', '7月', '9月'].forEach((m, i) => {
+    const x = x0 + (w * (i + 0.5)) / 6;
+    g += `<text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="#8595a8">${m}</text>`;
+  });
+  g += `<path d="${pathOf(S2, x0, y0, w, h, min, max)}" fill="none" stroke="#2f7fc1" stroke-width="1.6" opacity=".95"/>`;
+  if (opt.three) g += `<path d="${pathOf(S3, x0, y0, w, h, min, max)}" fill="none" stroke="#7aa7c7" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+  g += `<path d="${pathOf(S1, x0, y0, w, h, min, max)}" fill="none" stroke="#0866bb" stroke-width="2"/>`;
+  if (opt.area) {
+    const d = pathOf(S2, x0, y0, w, h, min, max);
+    g += `<path d="${d}L${x0 + w} ${y0 + h}L${x0} ${y0 + h}Z" fill="url(#fillA)" stroke="none"/>`;
+  }
+  if (opt.cross) {
+    const cx = x0 + w * 0.52;
+    g += `<line x1="${cx.toFixed(1)}" y1="${y0}" x2="${cx.toFixed(1)}" y2="${y0 + h}" stroke="#9fb6cc" stroke-dasharray="3 3"/>`;
+    g += `<circle cx="${cx.toFixed(1)}" cy="${(y0 + h * 0.42).toFixed(1)}" r="3.5" fill="#0866bb"/>`;
+    g += `<circle cx="${cx.toFixed(1)}" cy="${(y0 + h * 0.55).toFixed(1)}" r="3.5" fill="#2f7fc1"/>`;
+    g += `<g><rect x="${(cx + 10).toFixed(1)}" y="${(y0 + 26)}" width="168" height="56" rx="4" fill="#fff" stroke="#d3e2f0"/>` +
+      `<text x="${(cx + 22).toFixed(1)}" y="${(y0 + 44)}" font-size="11" fill="#8595a8">2026-02-23</text>` +
+      `<text x="${(cx + 22).toFixed(1)}" y="${(y0 + 62)}" font-size="11.5" fill="#16283e">恒生指数</text>` +
+      `<text x="${(cx + 148).toFixed(1)}" y="${(y0 + 62)}" font-size="11.5" fill="#c0392b" text-anchor="end">+3.04%</text>` +
+      `<text x="${(cx + 22).toFixed(1)}" y="${(y0 + 76)}" font-size="11.5" fill="#16283e">宏利 MPF 康健护理</text>` +
+      `<text x="${(cx + 148).toFixed(1)}" y="${(y0 + 76)}" font-size="11.5" fill="#1a7a55" text-anchor="end">-1.21%</text></g>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">${g}</svg>`;
+}
+/* 回撤副图 */
+function ddPlot(h) {
+  const W = 1000, H = h || 64, PL = 48, PR = 16;
+  const w = W - PL - PR;
+  let g = '';
+  for (let i = 0; i < 60; i++) {
+    const bh = 6 + Math.abs(Math.sin(i / 4.3)) * (H - 18);
+    const x = PL + (w * i) / 60;
+    g += `<rect x="${x.toFixed(1)}" y="${(H - 8 - bh).toFixed(1)}" width="${(w / 60 - 2).toFixed(1)}" height="${bh.toFixed(1)}" fill="#a9cdec" opacity=".85"/>`;
+  }
+  g += `<text x="${PL - 8}" y="14" text-anchor="end" font-size="10" fill="#8595a8">0%</text>`;
+  g += `<text x="${PL - 8}" y="${H - 10}" text-anchor="end" font-size="10" fill="#8595a8">-45%</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" style="display:block">${g}</svg>`;
+}
+const legend = (opts) => {
+  const l = [`<s><b style="background:#0866bb"></b>恒生指数</s>`, `<s><b style="background:#2f7fc1"></b>宏利 MPF 康健护理基金</s>`];
+  if (opts && opts.three) l.push(`<s><b style="background:#7aa7c7"></b>宏利 MPF 北美股票基金</s>`);
+  return `<div class="legend">${l.join('')}${opts && opts.hint ? '<span style="margin-left:auto;color:#8595a8">点线条可改颜色 / 线宽 / 线型</span>' : ''}</div>`;
+};
+const stats = () => `<div class="stats">
+  <span>区间收益<b class="up">+12.86%</b></span>
+  <span>区间最大回撤<b class="dn">-18.94%</b></span>
+  <span>最大回撤起始日<b>2026-01-29</b></span>
+  <span>最大回撤结束日<b>2026-06-26</b></span>
+  <span style="margin-left:auto">数据截至<b>2026-10-29</b></span>
+</div>`;
+const ranges = (cls) => `<div class="ranges ${cls || ''}"><i>1个月</i><i>1年</i><i class="on">3年</i><i>5年</i><i>10年</i><i>全部</i><i>选择日期</i></div>`;
+
+/* ---------------- 20 套方案 ---------------- */
+const V = [];
+function add(id, name, desc, html) { V.push({ id, name, desc, html }); }
+
+/* C01 单行工具栏：两个大下拉 → 一个「+ 添加标的」按钮（省一行） */
+add('C01', '单行工具栏 + 添加标的', '最推荐：标题、标的、区间、导出全在一行；两个大下拉合成一个「+ 添加标的」，纵向省下 52px。', `
+<div style="padding:12px 14px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="t">基金走势对比</span>
+    <div class="chips" style="margin-left:6px">
+      <span class="chip"><b style="background:#0866bb"></b>恒生指数<u>×</u></span>
+      <span class="chip"><b style="background:#2f7fc1"></b>宏利 MPF 康健护理<u>×</u></span>
+      <span class="chip add">+ 添加标的</span>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      ${ranges()}
+      <button class="btn ghost">导出</button><button class="btn ghost">分享</button>
+    </div>
+  </div>
+</div>
+<div style="padding:0 10px">${plot({ area: true })}${legend({ hint: true })}${stats()}</div>`);
+
+/* C02 极简：只有图 + 悬浮添加按钮 */
+add('C02', '悬浮添加（无工具栏）', '标题与「+」浮在图上，整个卡片只剩图与一行统计；适合放在首页/表格上方做「看一眼」。', `
+<div style="position:relative;padding:0">
+  <div style="position:absolute;left:16px;top:12px;z-index:2;display:flex;gap:8px;align-items:center">
+    <span class="t">基金走势对比</span>
+    <span class="chip add" style="background:#fff">+ 添加标的</span>
+  </div>
+  <div style="position:absolute;right:16px;top:12px;z-index:2">${ranges()}</div>
+  <div style="padding:46px 8px 4px">${plot({ area: true })}</div>
+  <div style="padding:0 18px 10px">${stats()}</div>
+</div>`);
+
+/* C03 左侧标的栏 */
+add('C03', '左侧标的面板', '标的改成左侧竖排（可勾选），顶部只留区间；最接近「专业终端」的排法。', `
+<div style="display:flex">
+  <div class="side-l">
+    <div style="font-size:11px;color:#8595a8;padding:0 8px 6px">已选标的</div>
+    <div class="li on"><span>恒生指数</span><span>—</span></div>
+    <div class="li on"><span>宏利康健护理</span><span>+23%</span></div>
+    <div class="li"><span>宏利北美股票</span><span>+4%</span></div>
+    <div class="li"><span>+ 添加标的</span><span></span></div>
+    <div style="border-top:1px solid #e3ecf4;margin:8px 0;padding-top:8px;font-size:11px;color:#8595a8;padding-left:8px">快捷区间</div>
+    <div class="li">近 1 年</div><div class="li">近 3 年</div><div class="li">近 5 年</div>
+  </div>
+  <div style="flex:1;min-width:0;padding:10px 8px 8px">${plot({ h: 250 })}${legend({ hint: true })}${stats()}</div>
+</div>`);
+
+/* C04 顶部 chips + 右上分段 */
+add('C04', '标的 chips + 分段区间', '已选标的做成可关闭的 chips（一行），区间用分段控件放右上；宽度不够时 chips 自动换行。', `
+<div style="padding:10px 14px 0;display:flex;align-items:center;gap:10px">
+  <div class="chips">
+    <span class="chip"><b style="background:#0866bb"></b>恒生指数<u>×</u></span>
+    <span class="chip"><b style="background:#2f7fc1"></b>宏利 MPF 康健护理<u>×</u></span>
+    <span class="chip add">+ 添加</span>
+  </div>
+  <div class="seg" style="margin-left:auto"><i>1年</i><i class="on">3年</i><i>5年</i><i>10年</i></div>
+</div>
+<div style="padding:4px 10px 0">${plot()}</div>
+<div style="padding:0 14px 10px">${legend()}<div class="note">说明：区间切换不改变已选标的；线条颜色可在图例上点选。</div></div>`);
+
+/* C05 底部控制台 */
+add('C05', '底部控制台', '图在上、控件在下（像交易软件的指标栏）；视线先看图，再操作。', `
+<div style="padding:12px 14px 0"><span class="t">基金走势对比</span><span class="tip" style="margin-left:8px">恒生指数 vs 宏利康健护理</span></div>
+<div style="padding:2px 10px 0">${plot()}</div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 14px 12px;border-top:1px solid #eef2f7;margin-top:6px">
+  ${ranges()}<span class="chip add" style="margin-left:4px">+ 添加标的</span>
+  <span style="margin-left:auto;display:flex;gap:8px"><button class="btn ghost">线型</button><button class="btn ghost">导出</button></span>
+</div>`);
+
+/* C06 居中分段 */
+add('C06', '居中分段 + 极简标题', '区间居中做成大分段（最常用的 4 档），标题与导出退到两端。', `
+<div style="padding:12px 16px 4px;display:flex;align-items:center">
+  <span class="t">走势对比</span>
+  <div class="seg" style="margin:0 auto"><i>1个月</i><i>1年</i><i class="on">3年</i><i>5年</i><i>全部</i></div>
+  <button class="btn ghost">导出</button>
+</div>
+<div style="padding:0 10px">${plot({ area: true })}${legend({ hint: true })}</div>`);
+
+/* C07 右侧抽屉 */
+add('C07', '右侧设置抽屉', '图占满，右上「⚙ 设置」点开右侧抽屉：标的、区间、线型都在里面；默认状态最干净。', `
+<div style="display:flex">
+  <div style="flex:1;min-width:0;padding:10px 8px 8px">
+    <div style="display:flex;align-items:center;padding:0 6px 6px"><span class="t">基金走势对比</span>
+      <span class="chip add" style="margin-left:10px">+ 添加标的</span>
+      <button class="btn ghost" style="margin-left:auto">⚙ 设置</button></div>
+    ${plot({ h: 250 })}${stats()}
+  </div>
+  <div class="side-r">
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">显示设置</div>
+    <div class="sel" style="margin-bottom:8px"><span>已选 2 个标的</span><em>▼</em></div>
+    ${ranges()}
+    <div style="margin-top:12px;font-size:12px;color:#3d5470">线条</div>
+    <div class="legend" style="flex-direction:column;align-items:flex-start;gap:8px;padding-top:8px">
+      <s><b style="background:#0866bb"></b>恒生指数 · 2px 实线</s>
+      <s><b style="background:#2f7fc1"></b>康健护理 · 1.6px 实线</s>
+    </div>
+  </div>
+</div>`);
+
+/* C08 双行紧凑 */
+add('C08', '双行紧凑（省纵向）', '第一行标的 chips，第二行区间 + 更多；比现在的三行矮 30px 左右。', `
+<div style="padding:10px 14px 6px">
+  <div style="display:flex;align-items:center;gap:8px">
+    <span class="chips">
+      <span class="chip"><b style="background:#0866bb"></b>恒生指数<u>×</u></span>
+      <span class="chip"><b style="background:#2f7fc1"></b>宏利 MPF 康健护理<u>×</u></span>
+      <span class="chip add">+ 添加标的</span>
+    </span>
+    <span style="margin-left:auto" class="tip">数据截至 2026-10-29</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+    ${ranges()}<span style="margin-left:auto" class="tip">点线条可改颜色 / 线宽 / 线型</span>
+  </div>
+</div>
+<div style="padding:0 10px">${plot({ h: 236 })}${stats()}</div>`);
+
+/* C09 图 + 右栏统计 */
+add('C09', '右侧统计栏', '把「区间收益 / 回撤 / 起止日」从图下搬到右栏，图更宽；统计一眼可见。', `
+<div style="display:flex">
+  <div style="flex:1;min-width:0;padding:10px 6px 8px 10px">
+    <div style="display:flex;align-items:center;padding:0 4px 6px"><span class="t">基金走势对比</span>
+      <span class="chip add" style="margin-left:10px">+ 添加标的</span></div>
+    ${plot({ h: 252 })}
+    ${legend()}
+  </div>
+  <div style="width:214px;flex:none;border-left:1px solid #e3ecf4;padding:14px">
+    <div style="font-size:11px;color:#8595a8">区间（近 3 年）</div>
+    <div style="font-size:22px;font-weight:700;color:#c0392b;font-variant-numeric:tabular-nums">+12.86%</div>
+    <div style="height:1px;background:#eef2f7;margin:12px 0"></div>
+    <div style="font-size:11px;color:#8595a8">最大回撤</div>
+    <div style="font-size:18px;font-weight:700;color:#1a7a55">-18.94%</div>
+    <div class="tip" style="margin-top:6px">2026-01-29 → 2026-06-26</div>
+    <div style="height:1px;background:#eef2f7;margin:12px 0"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <span class="chip">1年</span><span class="chip" style="background:#0866bb;color:#fff;border-color:#0866bb">3年</span>
+      <span class="chip">5年</span><span class="chip">10年</span><span class="chip">全部</span>
+    </div>
+  </div>
+</div>`);
+
+/* C10 主图 + 回撤副图 */
+add('C10', '主图 + 回撤副图', '同一时间轴叠一条回撤柱带；「对比」最常问的两个问题（赚多少、跌多深）一屏看完。', `
+<div style="padding:10px 14px 0;display:flex;align-items:center">
+  <span class="t">基金走势对比</span>
+  <span class="chip add" style="margin-left:10px">+ 添加标的</span>
+  <span style="margin-left:auto">${ranges()}</span>
+</div>
+<div style="padding:2px 10px 0">${plot({ h: 210 })}</div>
+<div style="display:flex;align-items:center;padding:0 20px 0 58px;font-size:11px;color:#8595a8">回撤（%）</div>
+<div style="padding:0 10px">${ddPlot(58)}${legend()}</div>
+<div style="padding:0 14px 10px">${stats()}</div>`);
+
+/* C11 底部时间滑杆 */
+add('C11', '时间滑杆', '区间不再是按钮，而是一条可拖拽的时间滑杆；图上方只留标题。', `
+<div style="padding:10px 14px 0;display:flex;align-items:center">
+  <span class="t">基金走势对比</span>
+  <span class="tip" style="margin-left:10px">2023-11 → 2026-10</span>
+  <span class="chip add" style="margin-left:auto">+ 添加标的</span>
+</div>
+<div style="padding:2px 10px 0">${plot({ h: 236 })}</div>
+<div style="padding:0 12px">
+  <div class="scr"><i></i></div>
+  <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#8595a8;padding:4px 2px 0"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span></div>
+  ${legend()}
+</div>`);
+
+/* C12 沉浸式 */
+add('C12', '沉浸式（控件浮在图上）', '图占满整张卡，控件以半透明浮层压在图上；适合做「大图模式」。', `
+<div style="position:relative">
+  <div style="padding:6px 6px 0">${plot({ h: 320, area: true, cross: true })}</div>
+  <div class="hoverbar" style="position:absolute;left:14px;top:12px">
+    <span style="font-weight:700;font-size:13px">基金走势对比</span>
+    <span class="chip add">+ 添加</span>
+  </div>
+  <div class="hoverbar" style="position:absolute;right:14px;top:12px">${ranges()}</div>
+  <div class="hoverbar" style="position:absolute;left:14px;bottom:14px">${legend()}</div>
+</div>`);
+
+/* C13 小倍图矩阵 */
+add('C13', '小倍图矩阵', '每个标的一张小图并排（small multiples），不看归一化也能比较形态；适合 3–4 只。', `
+<div style="padding:12px 14px">
+  <div style="display:flex;align-items:center;margin-bottom:8px"><span class="t">基金走势对比</span>
+    <span class="chip add" style="margin-left:10px">+ 添加标的</span><span style="margin-left:auto">${ranges()}</span></div>
+  <div class="grid2">
+    <div class="mini"><div class="mt"><span>恒生指数</span><span style="color:#c0392b">+8.2%</span></div>${plot({ h: 118, single: true, w: 480 })}</div>
+    <div class="mini"><div class="mt"><span>宏利 MPF 康健护理基金</span><span style="color:#c0392b">+23.3%</span></div>${plot({ h: 118, w: 480 })}</div>
+    <div class="mini"><div class="mt"><span>宏利 MPF 北美股票基金</span><span style="color:#1a7a55">-4.7%</span></div>${plot({ h: 118, three: true, w: 480 })}</div>
+    <div class="mini"><div class="mt"><span>宏利 MPF 中华威力基金</span><span style="color:#c0392b">+10.6%</span></div>${plot({ h: 118, three: true, w: 480 })}</div>
+  </div>
+</div>`);
+
+/* C14 主图 + 缩略总览 */
+add('C14', '主图 + 缩略总览', '上方是选中区间，下方一条全历史缩略图（可拖蓝框）；区间选择更直观。', `
+<div style="padding:10px 14px 0;display:flex;align-items:center"><span class="t">基金走势对比</span>
+  <span class="chip add" style="margin-left:10px">+ 添加标的</span>
+  <div style="margin-left:auto;display:flex;gap:8px"><button class="btn ghost">导出</button></div></div>
+<div style="padding:2px 10px 0">${plot({ h: 220 })}</div>
+<div style="padding:0 18px 0 58px;opacity:.55">${plot({ h: 56 })}</div>
+<div style="padding:0 10px">${legend()}</div>`);
+
+/* C15 左侧图标栏 */
+add('C15', '左侧图标工具条', '把「添加 / 区间 / 线型 / 导出」收成一条竖向图标栏，图区最大化。', `
+<div style="display:flex">
+  <div class="iconbar"><b class="on">＋</b><b>⏱</b><b>✎</b><b>⤓</b><b>?</b></div>
+  <div style="flex:1;min-width:0;padding:10px 10px 8px">
+    <div style="display:flex;align-items:center;padding:0 2px 4px"><span class="t">基金走势对比</span>
+      <span class="tip" style="margin-left:auto">勾选左侧 ＋ 添加标的</span></div>
+    ${plot({ h: 250, area: true })}${legend({ hint: true })}${stats()}
+  </div>
+</div>`);
+
+/* C16 顶部 tabs */
+add('C16', '顶部页签（走势/回撤/分布/相关性）', '一张卡里四个视图，减少页面里散落的图表；默认停在「走势」。', `
+<div class="tabs2" style="padding:0 8px"><i class="on">走势</i><i>回撤</i><i>资产分布</i><i>相关性</i>
+  <span style="margin-left:auto;display:flex;align-items:center;gap:8px;padding:5px 8px">${ranges()}</span></div>
+<div style="padding:4px 10px 0">${plot({ h: 232 })}${legend({ hint: true })}</div>
+<div style="padding:0 14px 10px">${stats()}</div>`);
+
+/* C17 极简卡 */
+add('C17', '极简卡（信息最小化）', '只保留「标题 + 图 + 一句话」；所有控件 hover 才出现，适合放在表格上方随手看。', `
+<div style="padding:12px 14px 4px"><span class="t">基金走势对比</span>
+  <span class="tip" style="margin-left:10px">恒生指数 · 近 3 年</span></div>
+<div style="padding:0 8px">${plot({ h: 210, area: true })}</div>
+<div style="padding:0 16px 12px" class="tip">数据取自发行人官网，每日自动同步；勾选表格「对比」可叠加基金。</div>`);
+
+/* C18 图标化工具条 */
+add('C18', '图标化工具栏', '文字按钮全部换成图标（＋ 添加、⌛ 区间、✎ 线型、⤓ 导出），标题与图例同一行。', `
+<div style="padding:10px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #eef2f7">
+  <span class="t">走势对比</span>
+  <span class="legend" style="padding:0">${legend().replace(/^<div class="legend">|<\/div>$/g, '')}</span>
+  <span style="margin-left:auto;display:flex;gap:6px">
+    <button class="btn pri">＋ 添加</button><button class="btn ghost">⌛</button><button class="btn ghost">✎</button><button class="btn ghost">⤓</button>
+  </span>
+</div>
+<div style="padding:6px 10px 0">${plot({ h: 244 })}</div>
+<div style="padding:0 14px 10px">${stats()}</div>`);
+
+/* C19 面包屑标的 */
+add('C19', '面包屑标的 + 右侧区间', '已选标的以面包屑串起来（像文件路径），点击某一段可单独看；右侧保留区间。', `
+<div style="padding:12px 14px 6px;display:flex;align-items:center;gap:10px">
+  <div class="br">对比：<b>恒生指数</b> ＋ <b>宏利 MPF 康健护理</b> <span style="color:#0866bb">+ 添加标的</span></div>
+  <div style="margin-left:auto">${ranges()}</div>
+</div>
+<div style="padding:0 10px">${plot({ h: 240 })}${legend()}</div>
+<div style="padding:0 14px 10px">${stats()}</div>`);
+
+/* C20 双列：图 + 控件 */
+add('C20', '左图右控件（2:1）', '图占 2/3，右侧 1/3 放「标的列表 + 区间 + 线型」；比抽屉更直观，适合鼠标操作。', `
+<div style="display:flex">
+  <div style="flex:2;min-width:0;padding:10px 8px 8px 10px">
+    <div style="display:flex;align-items:center;padding:0 4px 4px"><span class="t">基金走势对比</span>
+      <span class="tip" style="margin-left:auto">2026-10-29</span></div>
+    ${plot({ h: 236, w: 660 })}${legend()}
+  </div>
+  <div style="flex:1;min-width:0;border-left:1px solid #e3ecf4;padding:12px">
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px">标的</div>
+    <div class="li on" style="font-size:12.5px;padding:5px 0;color:#0866bb;font-weight:600">● 恒生指数</div>
+    <div class="li on" style="font-size:12.5px;padding:5px 0;color:#0866bb;font-weight:600">● 宏利康健护理</div>
+    <div style="font-size:12.5px;padding:5px 0;color:#0866bb">+ 添加标的</div>
+    <div style="height:1px;background:#eef2f7;margin:10px 0"></div>
+    ${ranges()}
+    <div style="height:1px;background:#eef2f7;margin:10px 0"></div>
+    <div class="tip">点线条可改颜色 / 线宽 / 线型</div>
+  </div>
+</div>`);
+
+/* ---------------- 渲染 ---------------- */
+document.getElementById('list').innerHTML = V.map((v) => `
+  <div class="item">
+    <div class="item-hd"><b>${v.id}</b><span>${v.name}</span></div>
+    <div class="canvas"><div class="scroll"><div class="mock">${v.html}</div></div>
+      <div class="note" style="padding-top:10px">${v.desc}</div></div>
+  </div>`).join('');
+
+/* 让每个 mock 的「区间」按钮里只有一个 on（避免模板重复时多个高亮） */
+document.querySelectorAll('.mock .ranges').forEach((r) => {
+  const ons = r.querySelectorAll('i.on');
+  if (ons.length > 1) ons.forEach((x, i) => { if (i) x.classList.remove('on'); });
+});
+</script>
+</body>
+</html>

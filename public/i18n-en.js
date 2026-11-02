@@ -1155,6 +1155,12 @@
   '各类基金过去 12 个月年率化净回报': 'Past 12 months annualised net return by fund class',
   '积金局最新公布（按月更新）：数据取自积金局「基金便览」，条形为该类别「過去 12 個月」年率化净回报（已扣除收费及费用）。悬浮任意一行可看该类别内最高／最低的单只基金回报。': 'Latest MPFA release (monthly): bars show each class 12-month annualised net return (net of fees), from MPFA factsheets. Hover a row for the best/worst fund in that class.',
 
+  /* 2026-11-02（第二十二轮）：基金最新数据页顶部走势图 + 对比列表列设置 */
+  '基金走势对比': 'Fund trend comparison',
+  '勾选下方「对比」叠加基金 · 默认对比恒生指数': 'Tick “Compare” below to overlay a fund · HSI is the default baseline',
+  '收起': 'Collapse',
+  '展开': 'Expand',
+  '细类：{s}': 'Sub-category: {s}',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -370,9 +370,9 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 .medal.g3 { background: linear-gradient(135deg, #cfe4f5, #a9cdec); color: #0b3a66; }
 
 .fund-name { font-weight: 550; color: var(--text); }
-.sub-line { font-size: 11px; color: var(--text-3); margin-top: 1px; white-space: nowrap; }
+.sub-line { font-size: 11px; color: var(--text-3); margin-top: 1px; white-space: nowrap; line-height: 1.3; }
 .tag {
-  display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 5px;
+  display: inline-block; font-size: 11px; line-height: 1.55; padding: 1px 8px; border-radius: 5px;
   background: var(--brand-soft); color: var(--brand); border: 1px solid #dbe7f3; white-space: nowrap;
 }
 .tag.g { background: var(--brand-soft); color: var(--brand); border-color: var(--brand-line); }
@@ -1303,7 +1303,7 @@ body.an-detail .foot { display: none; }
 /* 2026-10-26 移除：列显隐改由「渲染顺序数组」控制；保留 .rk-opt 规则会让已放出的列不可见 */
 /* 2026-10-19：列设置升级为逐列勾选 —— 显隐改由 rank.js 注入的 #rkColStyle 规则控制 */
 .rk-cols { position: relative; display: inline-block; }
-.rk-colpop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; background: #fff;
+.rk-colpop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 95; background: #fff;
   padding: 10px 14px; border-radius: 10px; box-shadow: 0 10px 30px rgba(20,40,80,.18); font-size: 13px; white-space: nowrap;
   max-height: 340px; overflow-y: auto; min-width: 210px; }
 .rk-colpop label { display: block; margin: 6px 0; cursor: pointer; color: #33475f; }
@@ -1855,13 +1855,25 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .dbt { padding: 8px 24px; border-radius: 8px; font-size: 14.5px; font-weight: 600; }
 .dbt:hover { color: var(--brand, #0866bb); }
 .dbt.on { background: none; color: var(--brand, #0866bb); box-shadow: none; font-weight: 800; }
-/* ⑫ MPFA 基金榜单表：上下更松、字号加大一号（用 #rkTable tbody 前缀提权，压过 analysis.css 的紧凑规则） */
-#rkTable { font-size: 14.5px; }
-#rkTable tbody td { padding: 12px 9px; }
-#rkTable tbody .fund-name { font-size: 14.5px; line-height: 1.4; }
+/* ⑫ MPFA 基金榜单表：与「基金最新数据」同款密度（2026-11-02 第二十二轮按用户要求改写）
+   —— 用户反馈：行高明显偏高、对比与详情两列挨太近、基金名称列比资料库窄一半。
+   原因有二：① 本表曾把行内边距放到 12px；② 基金名称列被数值列挤到 190px，长名折两行。
+   现在：基金名称列与资料库同宽（222px）→ 不再折行；行内边距回到 9px；表头字号与资料库一致。 */
+#rkTable { font-size: 15px; }
+#rkTable tbody td { padding: 9px 8px; }
+#rkTable tbody .fund-name { font-size: 15px; line-height: 1.45; }
 #rkTable tbody .tag { font-size: 12px; }
-#rkTable tbody .btn-detail { font-size: 12.5px; padding: 5px 12px; }
-#rkTable thead th { font-size: 12.5px; padding: 11px 8px; }
+#rkTable tbody .btn-detail { font-size: 12.5px; padding: 4px 11px; }
+#rkTable thead th { font-size: 14px; padding: 10px 8px; }
+/* 两表「基金名称」列同宽（用户指定：以基金最新数据这一列为准） */
+#fundTable th[data-c="fund"],
+#rkTable th[data-c="fund"] { width: 222px; min-width: 222px; }
+/* 对比 / 详情两列拉开（此前 40 + 78 紧贴） */
+#rkTable th[data-c="cmp"], #rkTable td[data-c="cmp"] { width: 58px; }
+#rkTable th[data-c="ops"], #rkTable td[data-c="ops"] { width: 96px; }
+#rkTable td[data-c="ops"] .btn-detail { margin-left: 14px; }
+/* 自算榜表（无 #rkTable 的 data-c）同样处理：详情按钮与对比勾选框保持间距 */
+#rkTable td[data-l="详情"] .btn-detail { margin-left: 14px; }
 @media (max-width: 720px) { .pg-head { justify-content: flex-start; } .dbt { padding: 8px 12px; font-size: 13px; } }
 
 /* ==========================================================
@@ -1889,7 +1901,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .tk-chg.down { color: #12996b; }
 .tk-chg.flat { color: var(--text-3, #8595a8); }
 .tk-spark { flex: none; opacity: .9; }
-@media (max-width: 1160px) { .tk-spark { display: none; } }
+@media (max-width: 1300px) { .tk-spark { display: none; } }   /* 2026-11-02：窄屏先让位给指数名，避免「积金…」被截断 */
 @media (max-width: 720px) { .tk-card { padding: 8px 10px; gap: 7px; } }
 
 /* ===== 2026-11-01（6.0）：筛选区与表格合并为一张卡（覆盖官网直角卡片的 !important 规则） ===== */
@@ -2016,17 +2028,23 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .mpfsel-pop.has-custom { min-width: 208px; }
 .mpfsel-custom input { flex: 1 1 auto; width: auto; min-width: 0; }
 
-/* 2026-11-02（第十八轮，用户要求）：行情栏左侧关闭按钮（仅当次会话隐藏，刷新后恢复） */
-/* 2026-11-02：只加关闭按钮，绝不能改 .mkt-ticker 的 position（sticky 吸顶会失效，行情栏会脱离标题栏） */
-.mkt-ticker .tk-track { padding-left: 28px; }   /* 2026-11-02：× 加大 20% 并右移，让出 14px */
-.tk-close { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); z-index: 2;
+/* 2026-11-02（第二十二轮，用户要求）：关闭按钮从最左侧挪到行情栏右端——
+   左侧紧贴屏幕边缘、与第一张行情卡挤在一起，用户多次反馈「不明显」；
+   右边本来就有一大片空白（行情卡只有 7 张），放在右端更符合关闭按钮的常规位置。 */
+.mkt-ticker .tk-track { padding-left: 14px; padding-right: 42px; }
+.tk-close { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 2;
   display: inline-flex; align-items: center; justify-content: center;
-  width: 19px; height: 19px; padding: 0; border-radius: 50%; cursor: pointer;
-  border: 1px solid #d6e6f4; background: #fff; color: #8fa3b8;
+  width: 22px; height: 22px; padding: 0; border-radius: 50%; cursor: pointer;
+  border: 1px solid #cfe1f2; background: #fff; color: #6f8399;
+  box-shadow: 0 1px 4px rgba(20, 50, 90, .10);
   transition: color .15s, border-color .15s, background-color .15s; }
-.tk-close:hover { color: var(--brand, #0866bb); border-color: #7fb2de; background: #f2f8fe; }
+.tk-close:hover { color: #fff; border-color: var(--brand, #0866bb); background: var(--brand, #0866bb); }
 .tk-close:focus-visible { outline: 2px solid rgba(8,102,187,.35); outline-offset: 1px; }
-@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 26px; } .tk-close { left: 5px; } }
+/* 宽屏时按钮贴住 1400px 内容区的右缘，不会飘到天边 */
+@media (min-width: 1480px) {
+  .tk-close { right: calc((100vw - 1400px) / 2 + 8px); }
+}
+@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 14px; padding-right: 36px; } .tk-close { right: 8px; } }
 
 /* ==========================================================================
    2026-11-02（第十八轮，用户要求）：排名维度多选面板
@@ -2280,17 +2298,70 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
 .f-row-merged .tb-per label { display: block; height: 18px; line-height: 18px; margin: 0; }
 .f-row-merged .tb-tail .btn { box-sizing: border-box; }
 
-#rkTable thead th[data-c="fund"] { width: 190px; }
+#rkTable thead th[data-c="fund"] { width: 222px; min-width: 222px; }
 
 /* 二级菜单（发行人）：选中改为浅蓝，与全站导航一致 */
 .db-sub .an-pitem.on { background: #e8f2fc; color: var(--brand, #0866bb); font-weight: 600; }
 .db-sub .an-pitem.on b { background: #fff; color: var(--brand, #0866bb); border-color: #d3e5f7; }
 .db-sub .an-pitem b { background: #f2f7fc; color: #7d94a9; border: 1px solid transparent; border-radius: 20px; }
 
-/* 2026-11-02（第二十一轮，用户要求）：行情栏关闭按钮再大 20%、右移一点 */
-.tk-close svg { width: 9px; height: 9px; }
+/* 2026-11-02（第二十二轮）：关闭按钮移到右端后图标再大一档，一眼能看到 */
+.tk-close svg { width: 10px; height: 10px; }
 
 /* 2026-11-02：窄档下拉按钮内边距再收 1px，保证「全部受托人」完整显示 */
 @media (max-width: 1150px) {
   .f-row-merged .f-item .mpfsel-btn { padding-left: 6px; padding-right: 6px; gap: 6px; }
+}
+
+/* ==========================================================
+   2026-11-02（第二十二轮，用户试点）：基金最新数据页顶部的走势图卡
+   —— 把「可视化对比」的核心功能搬进来，勾选表格「对比」即叠加。
+   ========================================================== */
+.db-trendcard { margin-bottom: 14px; }
+.db-trendcard .db-trendbox { padding: 2px 14px 12px; }
+.db-trendcard .tr-svg { height: 268px; }
+.db-trendcard.folded .db-trendbox { display: none; }
+.db-trendcard.folded .an-lh { border-bottom: 0; padding-bottom: 10px; }
+.db-trendcard .an-lh { padding: 12px 16px 8px; }
+@media (max-width: 900px) { .db-trendcard .tr-svg { height: 240px; } }
+
+/* ==========================================================
+   2026-11-02（第二十二轮）：两表「基金名称」列同宽 + 断点收窄
+   用户要求以「基金最新数据」的基金名称列为准；两表列数不同，用同名同值保证视觉一致。
+   窄屏按档收窄，避免 1080–1250 出现横向裁切。
+   ========================================================== */
+#fundTable thead th[data-c="fund"], #rkTable thead th[data-c="fund"] { width: 222px; min-width: 222px; }
+@media (max-width: 1399px) {
+  #fundTable thead th[data-c="fund"], #rkTable thead th[data-c="fund"] { width: 196px; min-width: 196px; }
+}
+@media (max-width: 1250px) {
+  #fundTable thead th[data-c="fund"], #rkTable thead th[data-c="fund"] { width: 178px; min-width: 178px; }
+  #rkTable thead th, #rkTable tbody td { padding-left: 5px; padding-right: 5px; }
+  #rkTable thead th { font-size: 13.5px; }
+  #rkTable tbody td { font-size: 14.5px; }
+  #rkTable tbody .fund-name { font-size: 14.5px; }
+}
+@media (max-width: 1100px) {
+  #fundTable thead th[data-c="fund"], #rkTable thead th[data-c="fund"] { width: 166px; min-width: 166px; }
+  /* 1080 左右：把种类/对比/详情三列的多余宽度收掉，整表刚好贴满不横向裁切 */
+  #rkTable thead th[data-c="type"] { width: 98px !important; }
+  #rkTable thead th[data-c="cmp"] { width: 52px !important; }
+  #rkTable thead th[data-c="ops"] { width: 88px !important; }
+}
+
+/* ==========================================================
+   2026-11-02（第二十二轮）：1151–1419 档位筛选行收窄
+   加左侧栏后内容区少了约 200px，而 ≥1151 档仍按整宽排版 →
+   1200 左右「每页显示 / 列设置 / 导出」被挤出卡片（实测超出 204px）。
+   这一档把五个筛选项按比例收窄，并隐藏「每页显示」小标签（下拉里仍写着条数）。
+   ========================================================== */
+@media (min-width: 1151px) and (max-width: 1419px) {
+  .f-row-merged > .dim-item { flex: 0 0 108px !important; min-width: 108px !important; }
+  .f-row-merged > .f-search { flex: 0 0 124px !important; min-width: 104px !important; max-width: 124px !important; }
+  .f-row-merged > .f-trustee { flex: 0 0 116px !important; min-width: 100px !important; }
+  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 102px !important; min-width: 96px !important; }
+  .f-row-merged .tb-tail { gap: 6px; }
+  .f-row-merged .tb-per-label { display: none; }
+  .f-row-merged .tb-tail .btn { padding: 0 9px; }
+  .f-row-merged .tb-count { font-size: 12px; }
 }

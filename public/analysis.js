@@ -203,7 +203,7 @@
       '<button type="button" class="an-pitem' + (S.trustee === '' ? ' on' : '') + '" data-t="">' +
         '<span>' + TT('总体') + '</span><b>' + funds.length + '</b></button>' +
       list.map((t) =>
-        '<button type="button" class="an-pitem' + (S.trustee === t ? ' on' : '') + '" data-t="' + esc(t) + '">' +
+        '<button type="button" class="an-pitem' + (S.trustee === t ? ' on' : '') + '" data-t="' + escA(t) + '">' +
         '<span>' + esc(t) + '</span><b>' + map[t] + '</b></button>').join('');
     if (!el.__bound) {
       el.__bound = 1;
@@ -227,26 +227,80 @@
     }
   }
 
-  /* ---------- 基金列表（该发行人全部基金，与资料库同口径；表头可排序） ----------
-     默认排序 'partner'：合作发行人（宏利→BCT/银联信托→友邦）优先，组内按规模降序。
-     2026-10-22（用户要求）：表头改三态 —— 第一次按最大（降序）→ 第二次按最小（升序）→ 第三次取消，回到默认名次顺序。 */
+  /* ---------- 基金列表（该发行人全部基金，与资料库同口径） ----------
+     2026-11-02（第二十二轮，用户要求）：改成「完全照抄基金最新数据表格」——
+     保留勾选列、去掉受托人列；默认列与资料库一致；其余列放进右上角「列设置」。
+     表头三态排序：第一次按最大（降序）→ 第二次按最小（升序）→ 第三次取消回默认。 */
+  const LCOLS = [
+    { k: 'sel', lock: 1 },
+    { k: 'fund', n: '基金名称', lock: 1, dir: 'asc', fz: 1 },
+    { k: 'risk', n: '风险级别', dir: 'asc', c: 1 },
+    { k: 'nav', n: '单位资产净值', dir: 'desc' },
+    { k: 'selfD1', n: '日涨跌', dir: 'desc' },
+    { k: 'selfM1', n: '近1个月', dir: 'desc' },
+    { k: 'selfYtd', n: '年初至今', dir: 'desc' },
+    { k: 'selfY1', n: '近1年', dir: 'desc' },
+    { k: 'size', n: '基金规模', dir: 'desc' },
+    /* —— 以下默认隐藏，列设置里可勾选 —— */
+    { k: 'type', n: '基金种类', dir: 'asc', off: 1 },
+    { k: 'selfW1', n: '近1周', dir: 'desc', off: 1 },
+    { k: 'selfY3a', n: '近3年年化', dir: 'desc', off: 1 },
+    { k: 'selfY5a', n: '近5年年化', dir: 'desc', off: 1 },
+    { k: 'selfMdd', n: '近1年最大回撤', dir: 'asc', off: 1 },
+    { k: 'selfMdd5', n: '近5年最大回撤', dir: 'asc', off: 1 },
+    { k: 'vol1', n: '年化波动率', dir: 'asc', off: 1 },
+    { k: 'sharpe1', n: '夏普比率', dir: 'desc', off: 1 },
+    { k: 'excess1', n: '超额收益', dir: 'desc', off: 1 },
+    { k: 'posM12', n: '正收益月份占比', dir: 'desc', off: 1 },
+    { k: 'mgmtFee', n: '基金管理费', dir: 'asc', off: 1 },
+    { k: 'launchTs', n: '推出日期', dir: 'desc', off: 1 },
+    { k: 'navAsOf', n: '更新日期', dir: 'desc', off: 1 },
+  ];
+  const LCOL_K = {};
+  LCOLS.forEach((c) => { LCOL_K[c.k] = c; });
+  const LKEY = 'mpf-cmp-cols-v1';
+  let LSET = null;
+  try { const raw = localStorage.getItem(LKEY); LSET = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { LSET = null; }
+  if (!LSET || !LSET.size) LSET = new Set(LCOLS.filter((c) => !c.off).map((c) => c.k));
+  const lVisible = () => LCOLS.filter((c) => c.lock || LSET.has(c.k));
+
+  /* 默认排序：合作发行人（宏利→銀聯/BCT→友邦）优先，组内按规模降序；点表头可改（三态） */
   const LS_DEFAULT = { key: 'partner', dir: 1 };
   const LS = { key: 'partner', dir: 1 };
   const lsIsDefault = () => LS.key === LS_DEFAULT.key && LS.dir === LS_DEFAULT.dir;
 
+  /* 自算指标：优先取 /api/navperf（本页独立缓存），没有就退回 fund 对象上已挂好的字段 */
+  function selfVal(x, k) {
+    const pf = PERF && PERF.funds ? PERF.funds[String(x.id)] : null;
+    if (pf) {
+      const m = {
+        selfD1: pf.d1, selfW1: pf.w1, selfM1: pf.m1, selfYtd: pf.ytd, selfY1: pf.y1,
+        selfY3a: pf.y3a, selfY5a: pf.y5a,
+        selfMdd: pf.mdd1 != null ? pf.mdd1 : pf.mdd, selfMdd5: pf.mdd5,
+        vol1: pf.vol1, sharpe1: pf.sharpe1, posM12: pf.posM12,
+      };
+      if (k === 'excess1') {
+        const hy = PERF.meta && PERF.meta.hsi ? PERF.meta.hsi.y1 : null;
+        return (pf.y1 != null && hy != null) ? Math.round((pf.y1 - hy) * 100) / 100 : null;
+      }
+      if (m[k] !== undefined) return m[k];
+    }
+    return x[k];
+  }
+
   function listVal(x, k) {
-    const pf = PERF && PERF.funds ? PERF.funds[x.id] : null;
     switch (k) {
+      case 'sel': return 0;
       case 'fund': return String(x.fundBase || x.fund || '');
       case 'partner': return partnerRank(x.trustee);
       case 'nav': return x.nav == null ? null : x.nav;
-      case 'd1': return pf && pf.d1 != null ? pf.d1 : null;
-      case 'ytd': return pf && pf.ytd != null ? pf.ytd : null;
-      case 'ann1': return x.ann1 == null ? null : x.ann1;
       case 'risk': return x.risk == null ? null : x.risk;
       case 'size': return x.size == null ? null : x.size;
+      case 'type': return String(x.type || '');
+      case 'mgmtFee': return x.mgmtFee == null ? null : x.mgmtFee;
+      case 'launchTs': return String(x.launch || '');
       case 'navAsOf': return String(x.navAsOf || '');
-      default: return 0;
+      default: return selfVal(x, k);
     }
   }
   function sortList(arr) {
@@ -256,7 +310,7 @@
         return (partnerRank(a.trustee) - partnerRank(b.trustee)) || ((b.size || 0) - (a.size || 0));
       }
       const va = listVal(a, k), vb = listVal(b, k);
-      /* A3：空值（— / 不适用）无论升降序一律排最后 */
+      /* 空值（— / 不适用）无论升降序一律排最后 */
       const ea = va == null || va === '', eb = vb == null || vb === '';
       if (ea && eb) return 0;
       if (ea) return 1;
@@ -265,15 +319,49 @@
       return (va - vb) * dir;
     });
   }
-  /* B2（2026-10-21）：列表表头挂口径提示（不改文字，悬停/点击可见） */
+  /* 表头口径提示（悬停/点击可见；不改列名） */
   const COL_TIPS = {
-    '单位净值': '取自发行人官网当日公布的每单位资产净值（NAV），估值日见「更新日期」列；指数显示的是点位。',
-    '日涨跌幅': '自算口径：最新净值 ÷ 上一交易日净值 − 1，基于发行人官网逐日净值，不含分红再投资与费用调整。',
+    '单位资产净值': '取自发行人官网当日公布的每单位资产净值（NAV），估值日见数值下方小字；指数显示的是点位。',
+    '日涨跌': '自算口径：最新净值 ÷ 上一交易日净值 − 1，基于发行人官网逐日净值，不含分红再投资与费用调整。',
     '年初至今': '自算口径：上一年最后一个净值点至最新净值日的累计涨幅（净价，不含分红再投资）。',
-    '近1年年率化': '积金局口径：近 1 年年率化回报（含费用、含分红再投资），资料截至积金局公布日；与右侧自算口径不可直接比较。',
+    '近1年': '自算口径：最近一个净值日往前推一年的累计涨幅（净价，不含分红再投资与费用调整）。',
     '风险级别': '积金局按基金过去三年波幅与组合评定的 1–7 级，非第三方评级。',
-    '基金规模（亿港元）': '积金局「基金规模」字段，按单位类别统计（百万港元换算为亿）。',
+    '基金规模': '积金局「基金规模」字段，按单位类别统计（百万港元）。',
   };
+
+  /* 表头模板：文案与「基金最新数据」逐字一致（便于 i18n 复用同一批词条） */
+  const LTH = {
+    sel: '<th class="fselcol" data-c="sel"></th>',
+    fund: '<th data-c="fund" data-lsk="fund" data-i18n-parts class="sortable fz">基金名称 <span class="arrow">↕</span></th>',
+    risk: '<th data-c="risk" data-lsk="risk" data-i18n-parts class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
+    nav: '<th data-c="nav" data-lsk="nav" data-i18n-parts class="sortable r">单位资产净值 <span class="arrow">↕</span></th>',
+    selfD1: '<th data-c="selfD1" data-lsk="selfD1" data-i18n-parts class="sortable r">日涨跌 <span class="arrow">↕</span></th>',
+    selfM1: '<th data-c="selfM1" data-lsk="selfM1" data-i18n-parts class="sortable r">近1个月 <span class="arrow">↕</span></th>',
+    selfYtd: '<th data-c="selfYtd" data-lsk="selfYtd" data-i18n-parts class="sortable r">年初至今 <span class="arrow">↕</span></th>',
+    selfY1: '<th data-c="selfY1" data-lsk="selfY1" data-i18n-parts class="sortable r">近1年 <span class="arrow">↕</span></th>',
+    size: '<th data-c="size" data-lsk="size" data-i18n-parts class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
+    type: '<th data-c="type" data-lsk="type" data-i18n-parts class="sortable">基金种类 <span class="arrow">↕</span></th>',
+    selfW1: '<th data-c="selfW1" data-lsk="selfW1" data-i18n-parts class="sortable r">近1周 <span class="arrow">↕</span></th>',
+    selfY3a: '<th data-c="selfY3a" data-lsk="selfY3a" data-i18n-parts class="sortable r">近3年<br><small>年化</small> <span class="arrow">↕</span></th>',
+    selfY5a: '<th data-c="selfY5a" data-lsk="selfY5a" data-i18n-parts class="sortable r">近5年<br><small>年化</small> <span class="arrow">↕</span></th>',
+    selfMdd: '<th data-c="selfMdd" data-lsk="selfMdd" data-i18n-parts class="sortable r">近1年<br><small>最大回撤</small> <span class="arrow">↕</span></th>',
+    selfMdd5: '<th data-c="selfMdd5" data-lsk="selfMdd5" data-i18n-parts class="sortable r">近5年<br><small>最大回撤</small> <span class="arrow">↕</span></th>',
+    vol1: '<th data-c="vol1" data-lsk="vol1" data-i18n-parts class="sortable r">年化波动率<br><small>近1年</small> <span class="arrow">↕</span></th>',
+    sharpe1: '<th data-c="sharpe1" data-lsk="sharpe1" data-i18n-parts class="sortable r">夏普比率<br><small>近1年</small> <span class="arrow">↕</span></th>',
+    excess1: '<th data-c="excess1" data-lsk="excess1" data-i18n-parts class="sortable r">超额收益<br><small>对恒指·近1年</small> <span class="arrow">↕</span></th>',
+    posM12: '<th data-c="posM12" data-lsk="posM12" data-i18n-parts class="sortable r">正收益<br><small>月份占比</small> <span class="arrow">↕</span></th>',
+    mgmtFee: '<th data-c="mgmtFee" data-lsk="mgmtFee" data-i18n-parts class="sortable r">基金管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    launchTs: '<th data-c="launchTs" data-lsk="launchTs" data-i18n-parts class="sortable">推出日期 <span class="arrow">↕</span></th>',
+    navAsOf: '<th data-c="navAsOf" data-lsk="navAsOf" data-i18n-parts class="sortable c">更新日期 <span class="arrow">↕</span></th>',
+  };
+  function renderThead2() {
+    const th = document.getElementById('anThead');
+    if (!th) return;
+    th.innerHTML = lVisible().map((c) => LTH[c.k] || '').join('');
+    if (typeof window.applyI18n === 'function') window.applyI18n(th);
+    bindListSort();
+    syncListArrows();
+  }
   function syncListArrows() {
     const th = document.getElementById('anThead');
     if (!th) return;
@@ -285,7 +373,7 @@
       c.setAttribute('aria-sort', on ? (LS.dir > 0 ? 'ascending' : 'descending') : 'none');
     });
   }
-  (function bindListSort() {
+  function bindListSort() {
     const th = document.getElementById('anThead');
     if (!th || th.__bound) return;
     th.__bound = 1;
@@ -293,11 +381,50 @@
       const cell = e.target.closest ? e.target.closest('th[data-lsk]') : null;
       if (!cell) return;
       const k = cell.getAttribute('data-lsk');
-      if (LS.key !== k) { LS.key = k; LS.dir = -1; }          // ① 按最大（降序）
-      else if (LS.dir === -1) { LS.dir = 1; }                  // ② 按最小（升序）
-      else { LS.key = LS_DEFAULT.key; LS.dir = LS_DEFAULT.dir; } // ③ 取消，回默认名次
+      const d0 = (LCOL_K[k] && LCOL_K[k].dir === 'asc') ? 1 : -1;
+      if (LS.key !== k) { LS.key = k; LS.dir = d0; }
+      else if (LS.dir === d0) { LS.dir = -d0; }
+      else { LS.key = LS_DEFAULT.key; LS.dir = LS_DEFAULT.dir; }
       syncListArrows();
       renderFundList();
+    });
+  }
+
+  /* 列设置：与榜单页同一套弹层结构与样式（#anColBtn → #anColPop） */
+  (function initListCols() {
+    const btn = document.getElementById('anColBtn');
+    const pop = document.getElementById('anColPop');
+    const box = document.getElementById('anColChecks');
+    if (!btn || !pop || !box) return;
+    function buildList() {
+      box.innerHTML = LCOLS.filter((c) => !c.lock).map((c) =>
+        '<label><input type="checkbox" value="' + c.k + '"' + (LSET.has(c.k) ? ' checked' : '') + '>' + TT(c.n) + '</label>').join('');
+      box.querySelectorAll('input').forEach((cb) => cb.addEventListener('change', () => {
+        if (cb.checked) LSET.add(cb.value); else LSET.delete(cb.value);
+        try { localStorage.setItem(LKEY, JSON.stringify([...LSET])); } catch (e) {}
+        renderThead2();
+        renderFundList();
+      }));
+    }
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (pop.hidden) buildList();
+      pop.hidden = !pop.hidden;
+    });
+    document.addEventListener('click', (e) => {
+      if (!pop.hidden && !(e.target.closest && e.target.closest('#anColWrap'))) pop.hidden = true;
+    });
+    const all = document.getElementById('anColAll');
+    if (all) all.addEventListener('click', () => {
+      LSET = new Set(LCOLS.filter((c) => !c.lock).map((c) => c.k));
+      try { localStorage.setItem(LKEY, JSON.stringify([...LSET])); } catch (e) {}
+      buildList(); renderThead2(); renderFundList();
+    });
+    const slim = document.getElementById('anColSlim');
+    if (slim) slim.addEventListener('click', () => {
+      LSET = new Set(LCOLS.filter((c) => !c.off).map((c) => c.k));
+      try { localStorage.setItem(LKEY, JSON.stringify([...LSET])); } catch (e) {}
+      buildList(); renderThead2(); renderFundList();
     });
   })();
 
@@ -362,6 +489,8 @@
   function renderFundList() {
     const tb = $('#anTbody2');
     if (!tb || !DATA.count) return;
+    /* 表头与表体同源：列设置/语言切换后重建表头（列定义只有一份） */
+    renderThead2();
     /* 2026-10-15：走势图已勾选基金时，列表只显示所选（未选则维持按发行人筛选的全量） */
     const selFunds = (TREND_MAIN && TREND_MAIN.getItems ? TREND_MAIN.getItems() : []).filter((it) => it.type === 'fund');
     let base = (DATA.funds || []).filter((x) => !S.trustee || x.trustee === S.trustee);
@@ -381,7 +510,12 @@
         TQ('{n} 条基金', { n: '<b>' + listAll.length + '</b>' }) +
         (LV.navDate ? ' · <span class="an-lh-f">' + TQ('估值日：{v}', { v: LV.navDate === 'none' ? TT('无估值日') : LV.navDate }) + '</span>' : '');
     }
-    /* 勾选的指数 → 列表行（最新点位 / 日涨跌 / YTD） */
+    /* 勾选的指数 → 列表行（最新点位 / 日涨跌 / YTD / 近1年） */
+    const cols = lVisible();
+    /* 2026-11-02：表格是固定布局（保证勾选/名称两列宽度精确），勾选很多列时用 min-width 撑开并允许横向滚动，
+       否则其余列会被压到 40px 左右、数字被裁。 */
+    const tblEl = document.getElementById('anTable');
+    if (tblEl) tblEl.style.minWidth = (34 + 222 + Math.max(0, cols.length - 2) * 92) + 'px';
     let IDXROWS = '';
     if (IDXDATA) {
       const idxItems = (TREND_MAIN && TREND_MAIN.getItems ? TREND_MAIN.getItems() : []).filter((it) => it.type === 'index');
@@ -405,44 +539,44 @@
         let y1i = -1;
         for (let q = 0; q < s.length; q++) { if (s[q][0] <= cut1y) y1i = q; else break; }
         const y1 = y1i >= 0 ? (last[1] / s[y1i][1] - 1) * 100 : null;
-        return '<tr class="idx-row">' +
-          '<td class="fselcell"></td>' +
-          '<td class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(m.name || it.key) + '<span class="tag unit">指数</span></div></td>' +
-          '<td class="r num" data-l="' + TT('单位净值') + '"><span class="idx-pt" data-tip="' + esc(TT('指数显示的是点位（收市指数），不是单位净值')) + '">' + nf(last[1], 2) + '<em>' + TT('点位') + '</em></span></td>' +
-          '<td class="r num" data-l="' + TT('日涨跌幅') + '">' + (chg == null ? '—' : '<span class="' + cls(chg) + '">' + pct(chg) + '</span>') + '</td>' +
-          '<td class="r num" data-l="' + TT('年初至今') + '">' + (ytd == null ? '—' : '<span class="' + cls(ytd) + '">' + pct(ytd) + '</span>') + '</td>' +
-          '<td class="r num" data-l="' + TT('近1年年率化') + '">' + (y1 == null ? '—' : '<span class="' + cls(y1) + '">' + pct(y1) + '</span>') + '</td>' +
-          '<td class="c" data-l="' + TT('风险级别') + '">—</td>' +
-          '<td class="r num" data-l="' + TT('基金规模（亿港元）') + '">—</td>' +
-          '<td class="c num an-upd" data-l="' + TT('更新日期') + '">' + esc(last[0]) + '</td>' +
-          '</tr>';
+        return '<tr class="idx-row">' + cols.map((c) => {
+          switch (c.k) {
+            case 'sel': return '<td class="fselcell" data-c="sel"></td>';
+            case 'fund': return '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(m.name || it.key) + '<span class="tag unit">' + TT('指数') + '</span></div></td>';
+            case 'nav': return '<td data-c="nav" class="r num" data-l="' + TT('单位资产净值') + '"><span class="idx-pt" data-tip="' + esc(TT('指数显示的是点位（收市指数），不是单位净值')) + '">' + nf(last[1], 2) + '<em>' + TT('点位') + '</em></span><div class="nav-d">' + esc(last[0].slice(5).replace('-', '/')) + '</div></td>';
+            case 'selfD1': return '<td data-c="selfD1" class="r num" data-l="' + TT('日涨跌') + '">' + (chg == null ? '—' : '<span class="' + cls(chg) + '">' + pct(chg) + '</span>') + '</td>';
+            case 'selfYtd': return '<td data-c="selfYtd" class="r num" data-l="' + TT('年初至今') + '">' + (ytd == null ? '—' : '<span class="' + cls(ytd) + '">' + pct(ytd) + '</span>') + '</td>';
+            case 'selfY1': return '<td data-c="selfY1" class="r num" data-l="' + TT('近1年') + '">' + (y1 == null ? '—' : '<span class="' + cls(y1) + '">' + pct(y1) + '</span>') + '</td>';
+            case 'navAsOf': return '<td data-c="navAsOf" class="c num an-upd" data-l="' + TT('更新日期') + '">' + esc(last[0]) + '</td>';
+            default: return '<td data-c="' + c.k + '" class="' + (c.c ? 'c' : 'r num') + '" data-l="' + TT(c.n || '') + '">—</td>';
+          }
+        }).join('') + '</tr>';
       }).join('');
     }
     const rowsHtml = [];
+    const span = cols.length;
     if (IDXROWS) rowsHtml.push(IDXROWS);   /* 勾选的指数也显示（2026-10-17） */
     if (selRows.length) rowsHtml.push(selRows.map(rowHtml2).join(''));
-    if ((selRows.length || IDXROWS) && restRows.length) rowsHtml.push('<tr class="qf-divider"><td colspan="9">' + (IDXROWS ? TT('以上是指数与已选基金') : TT('以上是已选基金')) + '</td></tr>');
+    if ((selRows.length || IDXROWS) && restRows.length) rowsHtml.push('<tr class="qf-divider"><td colspan="' + span + '">' + (IDXROWS ? TT('以上是指数与已选基金') : TT('以上是已选基金')) + '</td></tr>');
     if (restRows.length) rowsHtml.push(restRows.map(rowHtml2).join(''));
     tb.innerHTML = rowsHtml.length
       ? rowsHtml.join('')
-      : '<tr><td colspan="9"><div class="empty">' + TT('没有符合条件的基金') +
+      : '<tr><td colspan="' + span + '"><div class="empty">' + TT('没有符合条件的基金') +
         (LV.navDate ? ' <button type="button" class="btn sm" style="margin-left:10px" onclick="window.anClearFilters && anClearFilters()">' + TT('一键清除筛选') + '</button>' : '') +
         '</div></td></tr>';
-    /* B2：给表头挂口径提示（不改文字）；C2：aria-sort */
+    /* 表头口径提示（不改文字）；aria-sort 由 syncListArrows 统一处理 */
     const thead = document.getElementById('anThead');
     if (thead) {
       Array.prototype.forEach.call(thead.querySelectorAll('th'), (c) => {
         const txt = (c.textContent || '').replace(/[↕↑↓\s]/g, '');
         const tip = COL_TIPS[txt] || COL_TIPS[txt.replace(/（.*$/, '')];
         if (tip && !c.getAttribute('data-tip')) { c.setAttribute('data-tip', TT(tip)); c.style.cursor = 'help'; }
-        if (c.hasAttribute('data-lsk')) {
-          const on2 = c.getAttribute('data-lsk') === LS.key && !lsIsDefault();
-          c.setAttribute('aria-sort', on2 ? (LS.dir > 0 ? 'ascending' : 'descending') : 'none');
-          c.setAttribute('tabindex', '0');
-        }
+        if (c.hasAttribute('data-lsk')) c.setAttribute('tabindex', '0');
       });
     }
     syncListArrows();
+    /* 2026-11-02：页脚「估值日分布」跟随当前发行人重算 */
+    if (window.renderNavDistCard && S.trustee) window.renderNavDistCard();
   }
 
   /* C2：键盘操作（Enter / 空格 打开详情；表头 Enter 排序） */
@@ -471,49 +605,95 @@
     }
   })();
 
+  /* 单元格渲染：与「基金最新数据」的 CELL_FNS 一一对应（同 class / 同 data-l / 同悬浮说明） */
+  function lNaTip(k) {
+    const M = {
+      selfD1: '该基金净值不足两个交易日，暂无法计算日涨跌（新基金或源站刚更新）。',
+      selfW1: '该基金净值历史不足 1 周，暂无法计算近1周回报。',
+      selfM1: '该基金净值历史不足 1 个月，暂无法计算近1个月回报。',
+      selfYtd: '该基金在年初（1 月 1 日）尚无净值，暂无法计算年初至今回报。',
+      selfY1: '该基金净值历史不足 1 年，暂无法计算近1年回报。',
+      selfY3a: '该基金成立不足 3 年（或历史净值不足 3 年），暂无法计算近3年年化。',
+      selfY5a: '该基金成立不足 5 年（或历史净值不足 5 年），暂无法计算近5年年化。',
+      selfMdd: '该基金净值历史不足 1 年，暂无法计算近1年最大回撤。',
+      selfMdd5: '该基金净值历史不足 5 年，暂无法计算近5年最大回撤。',
+      vol1: '该基金净值历史不足 1 年，暂无法计算年化波动率。',
+      sharpe1: '该基金净值历史不足 1 年，暂无法计算夏普比率。',
+      excess1: '该基金净值历史不足 1 年，暂无法与恒生指数比较。',
+      posM12: '该基金净值历史不足 12 个月，暂无法统计正收益月份占比。',
+    };
+    return TT(M[k] || '该指标暂无可比数据。');
+  }
+  function cellOf(x, k) {
+    switch (k) {
+      case 'sel': {
+        const canQ = !!(PERF && PERF.funds && PERF.funds[x.id]);   /* 无历史净值的基金不可勾（官方未发布） */
+        return '<td class="fselcell" data-c="sel">' + (canQ
+          ? '<button type="button" class="fsel' + (IN_CHART(String(x.id)) ? ' on' : '') + '" data-qf="' + esc(x.id) + '" title="' + TT('加入对比（再点移出）') + '">' + (IN_CHART(String(x.id)) ? '×' : '') + '</button>'
+          : '') + '</td>';
+      }
+      case 'fund': {
+        const utip = (x.groupSize > 1)
+          ? TQ('该基金共有 {n} 个单位类别；此处显示 {u} 类的净值与回报。', { n: x.groupSize, u: x.unit || '' })
+          : TQ('该基金仅 1 个单位类别（{u} 类）。', { u: x.unit || '' });
+        return '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '">' +
+          '<div class="fund-name" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) +
+          (x.unit ? '<span class="tag unit" data-tip="' + esc(utip) + '" aria-label="' + esc(utip) + '">' + TQ('{u} 类', { u: esc(x.unit) }) + '</span>' : '') +
+          '</div></td>';
+      }
+      case 'risk': return '<td data-c="risk" class="c" data-l="' + TT('风险级别') + '">' + riskTag(x.risk) + '</td>';
+      case 'nav': return '<td data-c="nav" class="r num" data-l="' + TT('单位资产净值') + '">' + navCell(x) + '</td>';
+      case 'size': {
+        const tip = x.size == null ? TT('积金局未公布该基金规模（新基金或官方未披露），故显示 n.a.，并非本站缺少数据。') : '';
+        return '<td data-c="size" class="r num" data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' +
+          (x.size == null ? '<span class="risk-na">n.a.</span>' : nf(x.size, 2)) + '</td>';
+      }
+      case 'type': return '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span>' +
+        '<div class="cell-sub">' + esc(typeLabel(x.subtype || x.type)) + '</div></td>';
+      case 'mgmtFee': {
+        const more = x.feeMore && x.feeMore.mgmtFee;
+        return '<td data-c="mgmtFee" class="r num" data-l="' + TT('基金管理费 %') + '">' + feeText(x.mgmtFee, more) + '</td>';
+      }
+      case 'launchTs': return '<td data-c="launchTs" class="num" data-l="' + TT('推出日期') + '">' + esc(x.launch || '—') + '</td>';
+      case 'navAsOf': return '<td data-c="navAsOf" class="c num an-upd" data-l="' + TT('更新日期') + '">' + (x.navAsOf ? esc(x.navAsOf) : '—') + '</td>';
+      default: {
+        const v = selfVal(x, k);
+        const def = LCOL_K[k] || {};
+        const lab = TT(def.n || k);
+        const tip = v == null ? lNaTip(k) : '';
+        const body = (k === 'sharpe1') ? (v == null ? '—' : Number(v).toFixed(2))
+          : (k === 'posM12') ? (v == null ? '—' : Number(v).toFixed(0) + '%')
+            : pct(v);
+        const c = (k === 'selfMdd' || k === 'selfMdd5') ? 'down' : cls(v);
+        return '<td data-c="' + k + '" class="r num ' + c + '" data-l="' + lab + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + body + '</td>';
+      }
+    }
+  }
+
   function rowHtml2(x) {
-    const selfTip = TT('自算口径：基于发行人官网每日净值（未含分红再投资与费用调整），与积金局「基金回报」期间与算法不同');
-    const pendingTip = TT('历史净值回填后开放（其余受托人陆续接入）');
-    const pf = PERF && PERF.funds ? PERF.funds[x.id] : null;
-    const sizeYi = x.size == null ? null : x.size / 100; // 百万港元 → 亿港元
-    const cell1 = pf && pf.d1 != null
-      ? '<span class="' + cls(pf.d1) + '" data-tip="' + esc(selfTip + '　净值日 ' + (pf.asOf || '')) + '">' + pct(pf.d1) + '</span>'
-      : '<span class="muted" data-tip="' + esc(pendingTip) + '">—</span>';
-    const cellYtd = pf && pf.ytd != null
-      ? '<span class="' + cls(pf.ytd) + '" data-tip="' + esc(selfTip + '　净值日 ' + (pf.asOf || '')) + '">' + pct(pf.ytd) + '</span>'
-      : '<span class="muted" data-tip="' + esc(pendingTip) + '">—</span>';
-    const canQ = !!(PERF && PERF.funds && PERF.funds[x.id]);   /* 无历史净值的基金不可勾（官方未发布） */
-    /* B1（2026-10-21）：估值日超过 7 天 → 行淡化并标注「数据陈旧」 */
-    /* G6（2026-10-22 核查报告）：陈旧判定不再用固定 7 天，改为与「全站最新净值日」比对，
-       差 3 天及以上即标淡（源站有更新就能立刻反映，长假期也不会误报） */
+    const cols = lVisible();
+    /* B1/G6：与全站最新净值日相差 3 天以上 → 行淡化并标注「数据陈旧」（理由悬浮可见） */
     const maxAsOf = (DATA.funds || []).reduce((a, y) => (y.navAsOf && y.navAsOf > a ? y.navAsOf : a), '');
     const staleDays = (x.navAsOf && maxAsOf) ? Math.round((Date.parse(maxAsOf) - Date.parse(x.navAsOf)) / 86400000) : 0;
     const staleAttr = staleDays >= 3 ? ' class="an-stale" data-tip="' + esc(TQ('该基金净值截至 {d}，比全站最新（{m}）落后 {n} 天（源站未公布或抓取失败）', { d: x.navAsOf || '—', m: maxAsOf, n: staleDays })) + '"' : '';
     return '<tr data-id="' + esc(x.id) + '"' + staleAttr + ' tabindex="0" role="button" aria-label="' + esc(TT('查看') + (x.fundBase || x.fund) + TT('的详情')) + '">' +
-      '<td class="fselcell" style="width:1%;padding:0 2px 0 12px">' + (canQ ? '<button type="button" class="fsel' + (IN_CHART(String(x.id)) ? ' on' : '') + '" data-qf="' + esc(x.id) + '" title="' + TT('加入对比（再点移出）') + '">' + (IN_CHART(String(x.id)) ? '×' : '') + '</button>' : '') + '</td>' +
-      '<td class="f-main fz" data-l="' + TT('基金名称') + '">' +
-        '<div class="fund-name">' + esc(x.fundBase || x.fund) + (x.unit ? '<span class="tag unit">' + TQ('{u} 类单位', { u: esc(x.unit) }) + '</span>' : '') + '</div>' +
-      '</td>' +
-      '<td class="r num" data-l="' + TT('单位净值') + '">' + navCell(x, true) + '</td>' +
-      '<td class="r num" data-l="' + TT('日涨跌幅') + '">' + cell1 + '</td>' +
-      '<td class="r num" data-l="' + TT('年初至今') + '">' + cellYtd + '</td>' +
-      '<td class="r num" data-l="' + TT('近1年年率化') + '">' +
-        (x.ann1 == null ? '<span class="muted">—</span>' : '<span class="' + cls(x.ann1) + '">' + pct(x.ann1) + '</span>') + '</td>' +
-      '<td class="c" data-l="' + TT('风险级别') + '">' + riskTag(x.risk) + '</td>' +
-      '<td class="r num" data-l="' + TT('基金规模（亿港元）') + '">' + (sizeYi == null ? '—' : nf(sizeYi, 2)) + '</td>' +
-      '<td class="c num an-upd" data-l="' + TT('更新日期') + '">' + (x.navAsOf ? esc(x.navAsOf) : '—') + '</td>' +
-      '</tr>';
+      cols.map((c) => cellOf(x, c.k)).join('') + '</tr>';
   }
 
   /* 列表行点击 → 弹出基金详情（与资料库页面一致的「小窗」；带悬浮说明的单元格只弹说明） */
   document.addEventListener('click', (e) => {
     const tr = e.target.closest ? e.target.closest('#anTbody2 tr[data-id]') : null;
     if (!tr) return;
-    if (e.target.closest('[data-tip], a, button, input, th')) return;
+    if (e.target.closest('[data-tip], a, button, input, th, .fund-name')) return;
     const id = tr.getAttribute('data-id');
     if (window.openDetail) window.openDetail(id);
     else openAnalysis(id);
   });
+
+  /* 2026-11-02：估值日分布卡片（页脚那条）按「当前发行人」统计 */
+  window.__cmpScopeFunds = function () {
+    return (DATA.funds || []).filter((x) => !S.trustee || x.trustee === S.trustee);
+  };
 
   /** 当前筛选：受托人 → 基金 id 集合（总体 = 不筛选） */
   function filterOf() {

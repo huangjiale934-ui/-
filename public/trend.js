@@ -88,6 +88,10 @@ window.TREND = (function () {
     return s.replace(/[&<>"']/g, (c) =>
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   };
+  /* 2026-11-02：身份属性转义（不做繁转简）——见 common.js escA 的说明 */
+  const _escA = (s) => (typeof window.escA === 'function')
+    ? window.escA(s)
+    : String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   /* 说明：common.js 的 TT/TQ 是顶层 const（脚本作用域共享），**不挂在 window 上**——
      这里必须按名字直接引用；本文件内的包装函数命名为 _t/_tq，避免同名遮蔽递归。 */
   function _t(s) { return (typeof TT === 'function') ? TT(s) : s; }
@@ -901,14 +905,14 @@ window.TREND = (function () {
         const rank = (t) => (ORD ? (ORD.indexOf(t) < 0 ? 99 : ORD.indexOf(t)) : (P0[t] != null ? P0[t] : 9));
         const ts = Object.keys(byT).sort((a, b) => (rank(a) - rank(b)) || byT[b] - byT[a]);
         const tChips = '<button type="button" class="tr-fchip' + (!S.panelTrustee ? ' on' : '') + '" data-trustee="">' + _t('全部发行人') + ' (' + ids.length + ')</button>' +
-          ts.map((t) => '<button type="button" class="tr-fchip' + (S.panelTrustee === t ? ' on' : '') + '" data-trustee="' + esc0(t) + '">' + esc0(t) + ' (' + byT[t] + ')</button>').join('');
+          ts.map((t) => '<button type="button" class="tr-fchip' + (S.panelTrustee === t ? ' on' : '') + '" data-trustee="' + _escA(t) + '">' + esc0(t) + ' (' + byT[t] + ')</button>').join('');
         const sub = S.panelTrustee ? ids.filter((id) => (meta[id] && meta[id].trustee) === S.panelTrustee) : ids;
         const byType = {};
         sub.forEach((id) => { const ty = (meta[id] && meta[id].type) || ''; byType[ty] = (byType[ty] || 0) + 1; });
         if (S.panelType && byType[S.panelType] == null) S.panelType = '';   /* 换发行人后旧类别失效则自动回落（2026-10-15） */
         const tyKeys = Object.keys(byType).sort((a, b) => byType[b] - byType[a]);
         const yChips = '<button type="button" class="tr-fchip' + (!S.panelType ? ' on' : '') + '" data-ftype="">' + _t('全部类别') + ' (' + sub.length + ')</button>' +
-          tyKeys.map((ty) => '<button type="button" class="tr-fchip' + (S.panelType === ty ? ' on' : '') + '" data-ftype="' + esc0(ty) + '">' + esc0(typeof typeLabel === 'function' ? typeLabel(ty) : ty) + ' (' + byType[ty] + ')</button>').join('');
+          tyKeys.map((ty) => '<button type="button" class="tr-fchip' + (S.panelType === ty ? ' on' : '') + '" data-ftype="' + _escA(ty) + '">' + esc0(typeof typeLabel === 'function' ? typeLabel(ty) : ty) + ' (' + byType[ty] + ')</button>').join('');
         const shownIds = S.panelType ? sub.filter((id) => (meta[id] && meta[id].type) === S.panelType) : sub;
         /* 已选置顶分组（方便复查 / 取消） */
         const selIds = ids.filter((id) => S.items.some((it) => it.type === 'fund' && it.id === id));
@@ -920,7 +924,7 @@ window.TREND = (function () {
         if (head) head.textContent = _tq('选择基金 · {t}', { t: (S.panelTrustee || _t('全部发行人')) + (S.panelType ? ' · ' + (typeof typeLabel === 'function' ? typeLabel(S.panelType) : S.panelType) : '') });
         /* 左列发行人 × 顶行类别（2026-10-15 布局）*/
         const tCol = '<button type="button" class="tr-tside' + (!S.panelTrustee ? ' on' : '') + '" data-trustee="">' + _t('全部') + '<em>' + ids.length + '</em></button>' +
-          ts.map((t) => '<button type="button" class="tr-tside' + (S.panelTrustee === t ? ' on' : '') + '" data-trustee="' + esc0(t) + '">' + esc0(t) + '<em>' + byT[t] + '</em></button>').join('');
+          ts.map((t) => '<button type="button" class="tr-tside' + (S.panelTrustee === t ? ' on' : '') + '" data-trustee="' + _escA(t) + '">' + esc0(t) + '<em>' + byT[t] + '</em></button>').join('');
         list.innerHTML = '<div class="tr-p-matrix"><div class="tr-p-left">' + tCol + '</div>' +
           '<div class="tr-p-right"><div class="tr-p-note">' + _tq('已接入历史净值 {n} 只（其余数据接入中；资料库可查全量 451 条）', { n: ids.length }) + '</div>' +
           '<div class="tr-fchips-wrap tr-typebar">' + yChips + '</div>' +

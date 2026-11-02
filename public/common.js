@@ -482,23 +482,36 @@ function navDateDistHTML() {
  * 风险级别图例删除；估值日分布 chips 与「数据统计口径说明」放同一行（#ffNavdist，
  * 仅「基金最新数据」段显示——rank 段由切换脚本控制显隐）；可视化对比页保留原 srcNoteTop。 */
 function renderNavDistCard() {
-  const funds = (DATA.funds || []).filter((x) => x.navStatus === 'verified' && x.nav != null);
+  /* 2026-11-02（第二十二轮，用户要求）：估值日分布必须跟随「当前板块的筛选条件」——
+     以前固定按全市场统计，点「宏利」后仍显示 10/29×364，用户看到的就是「没跟着变」。 */
+  let all = null;
+  const rkOn = (() => { const el = document.getElementById('rkSec'); return el && !el.hidden; })();
+  const dbOn = (() => { const el = document.getElementById('dbSec'); return el && !el.hidden; })();
+  const cmpOn = (() => { const el = document.getElementById('anSec'); return el && !el.hidden; })();
+  try {
+    if (rkOn && typeof window.__rkScopeFunds === 'function') all = window.__rkScopeFunds();
+    else if (dbOn && typeof window.__dbScopeFunds === 'function') all = window.__dbScopeFunds();
+    else if (cmpOn && typeof window.__cmpScopeFunds === 'function') all = window.__cmpScopeFunds();
+  } catch (e) { all = null; }
+  if (!all || !all.length) all = DATA.funds || [];
+  const funds = all.filter((x) => x.navStatus === 'verified' && x.nav != null);
   if (!funds.length) { const f0 = document.getElementById('ffNavdist'); if (f0) f0.innerHTML = ''; return; }
   const map = {};
   funds.forEach((x) => { const k = x.navAsOf || 'none'; map[k] = (map[k] || 0) + 1; });
   const keys = Object.keys(map).filter((k) => k !== 'none').sort().reverse();
   if (map.none) keys.push('none');
-  const clickable = !!document.querySelector('#dbSec:not([hidden]) #fType') || !!document.querySelector('#anTbody2');
+  /* 只有「基金最新数据」（app.js 的 F.navDate）与「可视化对比」（analysis.js 的 LV）支持按估值日筛选；
+     MPFA 榜单页的 chips 仅作展示（点了不会筛，就别做成可点的样子）。 */
+  const clickable = dbOn || (cmpOn && !!document.querySelector('#anTbody2'));
   const onKey = (typeof F !== 'undefined' && F && F.navDate) ? F.navDate : '';
   const chips = '<span class="navdist ff-nav-in">' + TT('估值日分布：') +
-    keys.map((k) => '<b' + (clickable ? ' class="ndk" data-navdate="' + k + '"' : '') +
-      (onKey === k ? ' style="outline:2px solid var(--brand,#0866bb)"' : '') + '>' +
+    keys.map((k) => '<b' + (clickable ? ' class="ndk' + (onKey === k ? ' on' : '') + '" data-navdate="' + k + '"' : '') + '>' +
       (k === 'none' ? TT('无估值日') : k.slice(5).replace('-', '/')) + ' ×' + map[k] + '</b>').join('') +
-    (clickable ? '<i class="ndhint">' + TT('（点击只看该日，再点取消）') + '</i>' : '') + '</span>';
+    (keys.length > 1 && clickable ? '<i class="ndhint">' + TT('（点击只看该日，再点取消）') + '</i>' : '') + '</span>';
   const fn = document.getElementById('ffNavdist');
   if (fn) fn.innerHTML = chips;
-  const elTop = document.getElementById('srcNoteTop');
-  if (elTop && document.getElementById('anTbody2')) elTop.innerHTML = chips;   /* 可视化对比页保留 */
+  /* 可视化对比页的估值日卡片由 analysis.js 的 renderSrcNoteTop 自己维护（按发行人 + 可点击筛选），
+     这里不再覆盖 #srcNoteTop，避免两套状态互相打架。 */
 }
 window.renderNavDistCard = renderNavDistCard;
 
@@ -760,6 +773,14 @@ function esc(s) {
   if (window.__t2sActive && window.t2s) out = window.t2s(out);
   return out;
 }
+/* 2026-11-02（第二十二轮，致命 bug 修复）：属性里的「身份值」不能做繁转简。
+   esc() 会在简体模式下把「銀聯信託」转成「银联信托」，一旦写进 data-t / data-trustee
+   再读回来与数据原文比对就永远不相等 —— 可视化对比点「银联信托」显示 0 条、东亚/中银保诚/
+   友邦/万通/中国人寿同样命中。身份值一律走 escA（只做 HTML 转义，不动字）。 */
+function escA(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+window.escA = escA;
 function riskTag(r) {
   /* 2026-10-29：积金局对成立不足三年（未评级）的基金写 n.a.，本站随之显示 n.a. 并给悬浮说明；
      原先显示「—」会被误读为本站缺数据 */
@@ -2832,7 +2853,7 @@ function initDCABuild() {
     pkTrustees.innerHTML =
       '<button type="button" class="dca-tside' + (pkTrustee === '' ? ' on' : '') + '" data-t="">' +
         TT('全部') + '<em>' + FUNDS.length + '</em></button>' +
-      tKeys.map((t) => '<button type="button" class="dca-tside' + (pkTrustee === t ? ' on' : '') + '" data-t="' + esc(t) + '">' +
+      tKeys.map((t) => '<button type="button" class="dca-tside' + (pkTrustee === t ? ' on' : '') + '" data-t="' + escA(t) + '">' +
         esc(t) + '<em>' + tc[t] + '</em></button>').join('');
 
     /* 顶行：类别 chips（受发行人筛选影响） */

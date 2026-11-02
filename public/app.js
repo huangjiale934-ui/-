@@ -13,7 +13,7 @@
   const $$ = (s) => Array.from(document.querySelectorAll(s));
 
   const SORT_LABEL = {
-    fund: '成分基金名称', trustee: '受托人', typeFull: '基金种类',
+    fund: '基金名称', trustee: '受托人', typeFull: '基金种类',
     size: '基金规模', risk: '风险级别', nav: '单位资产净值',
     ann1: '近1年年率化回报', ann5: '近5年年率化回报', ann10: '近10年年率化回报',
     annLaunch: '推出至今年率化回报', mgmtFee: '基金管理费', launchTs: '推出日期',  /* 渲染时 TT() */
@@ -153,6 +153,65 @@
     });
   }
 
+  /* ===== 2026-11-02（第二十二轮）：表格上方的走势图（可视化对比的核心功能搬到本页） =====
+     交互：勾选表格「对比」→ 该基金叠加到图中；默认恒生指数打底。
+     与对比页的区别：这里不切发行人、不做详细对比表，只做「看一眼走势」。 */
+  let DBTREND = null;
+  let DBSYNC = false;
+  const DBFOLD_KEY = 'mpf-db-trend-fold';
+  function dbTrendItems() {
+    const ids = CMPX.ids().slice(0, 5);
+    return [{ type: 'index', key: 'HSI' }].concat(ids.map((id) => ({ type: 'fund', id: id })));
+  }
+  function initDbTrend() {
+    const box = document.getElementById('dbTrendBox');
+    const card = document.getElementById('dbTrendCard');
+    if (!box || !card || !window.TREND) return;
+    const meta = {};
+    (DATA.funds || []).forEach((x) => { meta[x.id] = { trustee: x.trustee, type: x.type, name: x.fundBase || x.fund }; });
+    if (!DBTREND) {
+      DBTREND = window.TREND.mount(box, dbTrendItems(), {
+        /* 卡片标题由本页的 .an-lh 负责，这里不再重复渲染「标题 + 导出/分享」行 */
+        bareHead: true,
+        hideGoto: true,
+        fundMeta: meta,
+        onSelChange: function () {
+          if (DBSYNC) return;
+          /* 从图里增减基金 → 反向同步表格勾选（保持两处一致） */
+          const ids = (DBTREND.getItems() || []).filter((x) => x.type === 'fund').map((x) => x.id);
+          CMPX.save(ids);
+          renderCmpBar();
+          render();
+        },
+      });
+      /* 折叠状态 */
+      const fold = document.getElementById('dbTrendFold');
+      const apply = (folded) => {
+        card.classList.toggle('folded', folded);
+        if (fold) fold.textContent = folded ? TT('展开') : TT('收起');
+      };
+      let folded = false;
+      try { folded = localStorage.getItem(DBFOLD_KEY) === '1'; } catch (e) {}
+      apply(folded);
+      if (fold) fold.addEventListener('click', () => {
+        const f = !card.classList.contains('folded');
+        apply(f);
+        try { localStorage.setItem(DBFOLD_KEY, f ? '1' : '0'); } catch (e) {}
+        if (!f) { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }
+      });
+    } else if (DBTREND.setItems) {
+      DBSYNC = true;
+      try { DBTREND.setItems(dbTrendItems()); } finally { DBSYNC = false; }
+    }
+    try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+  }
+  window.__dbTrendMount = initDbTrend;
+  function syncDbTrend() {
+    if (!DBTREND || !DBTREND.setItems) return;
+    DBSYNC = true;
+    try { DBTREND.setItems(dbTrendItems()); } finally { DBSYNC = false; }
+  }
+
   function init() {
     mountHeader('db');
     loadData((d) => {
@@ -165,6 +224,7 @@
       window.__onRefresh = () => { buildFilters(); render(); };
       bindSelfTabs();
       render();
+      initDbTrend();
       /* 2026-10-19：本页改为「最新净值口径」列表——补入自算指标（日涨跌/年初至今/近1年/近3年/回撤） */
       if (window.ensurePerf) {
         window.ensurePerf().then((j) => {
@@ -263,7 +323,7 @@
 
   /** 导出当前筛选结果（全部行，非仅当前页，CSV；Excel 直接打开） */
   function exportIdx() {
-    const head = [TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('受托人'), TT('风险级别'),
+    const head = [TT('基金名称'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('受托人'), TT('风险级别'),
       TT('单位资产净值'), TT('净值估值日'), TT('近1年年率化回报'), TT('近5年年率化回报'), TT('近10年年率化回报'),
       TT('推出至今年率化回报'), TQ('基金规模（{u}）', { u: TT('百万港元') }), TT('基金管理费 %'), TT('最近期基金开支比率'), TT('推出日期')];
     const body = ROWS.map((x) => [
@@ -301,7 +361,7 @@
   /* 2026-10-19：列序对齐「基金最新数据」表格（名次 + 自算指标） */
   const COL_DEFS = [
     { i: 1, k: 'rank', n: '名次', lock: true },
-    { i: 3, k: 'fund', n: '成分基金' },
+    { i: 3, k: 'fund', n: '基金名称' },
     { i: 4, k: 'trustee', n: '受托人' },   /* 2026-10-31（用户要求）：列名由「发行人（受托人）」简写 */
     { i: 5, k: 'type', n: '基金种类' },
     { i: 6, k: 'risk', n: '风险级别' },
@@ -438,6 +498,16 @@
     });
   }
 
+  /* 2026-11-02（第二十二轮）：估值日分布要跟随本页筛选（发行人/种类/细类/关键词），
+     但必须忽略「估值日」筛选本身——否则点一个日期后其余标签全变 0。 */
+  window.__dbScopeFunds = function () {
+    const saved = F.navDate;
+    F.navDate = '';
+    let r = [];
+    try { r = filtered(); } finally { F.navDate = saved; }
+    return r;
+  };
+
   function render() {
     if (!DATA || !DATA.funds) return;   /* applyCols 可能在数据加载前触发 */
     /* 2026-11-01（6.0）：兜底补挂自算指标——rank/analysis 板块后加载会整体替换 DATA，
@@ -476,12 +546,15 @@
     $$('#tbody input[data-cmp]').forEach((c) => c.addEventListener('change', () => {
       if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
       renderCmpBar();
+      syncDbTrend();   /* 2026-11-02：勾选即叠加到上方走势图 */
     }));
 
     /* 2026-10-23（核验报告）：筛选后明确写「已筛选」，避免把「全市场 451」误读成计数没刷新 */
     /* 2026-10-31（用户要求）：不再显示（全市场） */
     $('#cntTip').textContent = '';
     renderPager(pages, total);
+    /* 2026-11-02：估值日分布跟随筛选（发行人/种类/细类/关键词） */
+    if (window.renderNavDistCard) window.renderNavDistCard();
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
 
@@ -514,7 +587,7 @@
       const utip = (x.groupSize > 1)
         ? TQ('该基金共有 {n} 个单位类别；此处显示 {u} 类的净值与回报。', { n: x.groupSize, u: x.unit || '' })
         : TQ('该基金仅 1 个单位类别（{u} 类）。', { u: x.unit || '' });
-      return '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(fundDisplayName(x)) +
+      return '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name" style="cursor:pointer" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(fundDisplayName(x)) +
         (x.unit ? '<span class="tag unit" data-tip="' + esc(utip) + '" aria-label="' + esc(utip) + '">' + TQ('{u} 类', { u: esc(x.unit) }) + '</span>' : '') +
         '</div></td>';
     },
@@ -557,7 +630,7 @@
   const TH_HTML = {
     rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
     cmp: '<th data-c="cmp" data-i18n-parts class="c" style="width:52px">对比</th>',
-    fund: '<th data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">成分基金 <span class="arrow">↕</span></th>',
+    fund: '<th data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">基金名称 <span class="arrow">↕</span></th>',
     trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>',
     type: '<th data-c="type" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>',
     risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',

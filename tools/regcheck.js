@@ -95,7 +95,13 @@ chk('友情链接·每个净值来源都有官网地址', (function () {
 chk('友情链接·页面无空 href / 无 undefined 文案', [home, idx, rk].every((h) => h.indexOf('href=""') < 0 && h.indexOf('undefined') < 0));
 
 /* ---------------- 资料库 ---------------- */
-const idxHead = (/<thead>[\s\S]*?<\/thead>/.exec(idx) || [''])[0];
+const idxHead = (function () {
+  /* 2026-11-02：资料库表格上方新增走势图卡（自带一张统计表），页面上第一个 thead 不再是基金表 →
+     这里锁定 id="fundTable" 之后的第一个 thead */
+  const at = idx.indexOf('id="fundTable"');
+  if (at < 0) return '';
+  return (/<thead>[\s\S]*?<\/thead>/.exec(idx.slice(at)) || [''])[0];
+})();
 chk('资料库·无「强积金计划」列', idxHead.indexOf('強積金計劃') < 0 && idxHead.indexOf('强积金计划') < 0);
 chk('资料库·无「近5年最差年度」列', idxHead.indexOf('最差') < 0);
 /* 2026-10-26 起「推出日期」改为列设置中的可选列（默认 14 列不含它），断言改为：
@@ -110,7 +116,10 @@ chk('资料库·推出日期为可选列且操作列在最后', (function () {
 })());
 chk('资料库·默认每页 10 行', /<option[^>]*value="10"[^>]*selected/.test(idx));
 chk('资料库·首屏渲染 10 行', (function () {
-  const tb = (/<tbody[\s\S]*?<\/tbody>/.exec(idx) || [''])[0];
+  /* 2026-11-02：页面上第一个 tbody 已是走势图统计表 → 锁定 id="tbody" */
+  const at = idx.indexOf('<tbody id="tbody"');
+  if (at < 0) return false;
+  const tb = (/<tbody[\s\S]*?<\/tbody>/.exec(idx.slice(at)) || [''])[0];
   return (tb.match(/<tr/g) || []).length === 10;
 })());
 chk('资料库·总条数显示 451', /451/.test(idx));
@@ -762,7 +771,7 @@ chk('第四页·侧栏 + 基金列表联动（已选置顶+分隔线+其余，20
     return j.indexOf('selRows = (DATA.funds || []).filter') >= 0 && j.indexOf('以上是已选基金') >= 0 && j.indexOf('onSelChange: function () { renderFundList(); }') >= 0;
   } catch (e) { return false; }
 })());
-chk('第四页·左侧发行人栏 12 项（2026-10-31：dump 走 t2s 简体）', (an.match(/class="an-pitem/g) || []).length === 12 && /data-t="银联信托"><span>银联信托<\/span><b>\d+<\/b>/.test(an));
+chk('第四页·左侧发行人栏 12 项（2026-11-02：data-t 保留原文，修「银联信托 0 条」）', (an.match(/class="an-pitem/g) || []).length === 12 && /data-t="銀聯信託"><span>银联信托<\/span><b>\d+<\/b>/.test(an));
 chk('第四页·点发行人选默认对比 + 列表（baseChartItems / pickTrusteeTop / renderFundList）', (function () {
   try {
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
@@ -1313,12 +1322,17 @@ chk('第四页·发行人平均指数（trustee-idx ≥3 家 + 接口 + 面板�
 })());
 
 
-chk('第四板块·基金列表（8列含近1年年率化 + 表头排序 + 无计划子行）', (function () {
+chk('第四板块·基金列表（默认 9 列=资料库同款 + 列设置 + 表头三态排序）', (function () {
   try {
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
-    return /data-lsk="ann1"/.test(h) && /data-lsk="size"/.test(h) && (h.match(/data-lsk=/g) || []).length === 8 &&
-      /function sortList/.test(j) && /function syncListArrows/.test(j) && /<small>年率化<\/small>/.test(h) &&
+    /* 2026-11-02：表头由 analysis.js 的 LTH/LCOLS 生成（照抄基金最新数据），
+       默认列：勾选/基金名称/风险级别/单位资产净值/日涨跌/近1个月/年初至今/近1年/基金规模 */
+    const def = ['fund', 'risk', 'nav', 'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'size'];
+    return /id="anColBtn"/.test(h) && /id="anThead"/.test(h) && /id="anTbody2"/.test(h) &&
+      /const LCOLS = \[/.test(j) && def.every((k) => new RegExp("k: '" + k + "'").test(j)) &&
+      /function sortList/.test(j) && /function syncListArrows/.test(j) && /const LTH = \{/.test(j) &&
+      /LS\.dir === d0/.test(j) &&   /* 三态排序 */
       !/class="sub-line">' \+ esc\(x\.scheme\)/.test(j);
   } catch (e) { return false; }
 })());
@@ -1507,7 +1521,7 @@ chk('左侧栏加宽加长（232px + 字号调大）与列表视觉优化', (fun
   try {
     const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     return /\.an-side \{ width: 232px/.test(css) && /\.an-pitem \{ font-size: 13\.5px/.test(css) &&
-      /\.an-listcard \.an-table \{ font-size: 13px/.test(css) && /min-height: calc\(100vh - 190px\)/.test(css);
+      /\.an-listcard \.an-table \{ font-size: 15\.5px/.test(css) && /min-height: calc\(100vh - 190px\)/.test(css);
   } catch (e) { return false; }
 })());
 
@@ -1565,7 +1579,7 @@ chk('左侧栏加宽加长（232px + 字号调大）与列表视觉优化', (fun
   try {
     const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     return /\.an-side \{ width: 232px/.test(css) && /\.an-pitem \{ font-size: 13\.5px/.test(css) &&
-      /\.an-listcard \.an-table \{ font-size: 13px/.test(css) && /min-height: calc\(100vh - 190px\)/.test(css);
+      /\.an-listcard \.an-table \{ font-size: 15\.5px/.test(css) && /min-height: calc\(100vh - 190px\)/.test(css);
   } catch (e) { return false; }
 })());
 
@@ -1798,5 +1812,5 @@ chk('二十一轮·⑤走势图：区间含 10年/全部、高度 +20%、无图�
   /#anCompare \.tr-svg \{ height: 342px/.test(readSrc('analysis.css')) &&
   readSrc('trend.js').indexOf("_t('累计涨跌幅（区间起点 = 0%）')") < 0 &&
   readSrc('trend.js').indexOf('基金净值取自各发行人官网（每交易日）') < 0);
-chk('二十一轮·⑥行情栏关闭按钮放大 20% 并右移',
-  /\.tk-close \{ position: absolute; left: 8px;[\s\S]{0,220}width: 19px; height: 19px/.test(readSrc('style.css')));
+chk('二十二轮·①行情栏关闭按钮移到右端（22px + 白底描边）',
+  /\.tk-close \{ position: absolute; right: 12px;[\s\S]{0,240}width: 22px; height: 22px/.test(readSrc('style.css')));

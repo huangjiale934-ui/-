@@ -164,7 +164,7 @@
   ];
   const selfHead = () =>
     '<th data-i18n-parts class="c" style="width:56px">' + TT('名次') + '</th>' +
-    '<th data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">' + TT('成分基金') + ' <span class="arrow">↕</span></th>' +
+    '<th data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">' + TT('基金名称') + ' <span class="arrow">↕</span></th>' +
     '<th data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">' + TT('受托人') + ' <span class="arrow">↕</span></th>' +
     '<th data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">' + TT('基金种类') + ' <span class="arrow">↕</span></th>' +
     '<th data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">' + TT('风险') + ' <span class="arrow">↕</span></th>' +
@@ -351,8 +351,9 @@
     if (re) re.addEventListener('click', exportCurrent);
   }
 
-  function pool() {
-    const b = cur();
+  /* 2026-11-02（第二十二轮）：本页筛选后的基础集合（不含榜单指标过滤）。
+     估值日分布卡片用它统计，点「宏利」后就不会再显示全市场的 364 条。 */
+  function baseFiltered() {
     let arr = DATA.funds.filter((x) => {
       if (S.type && x.type !== S.type) return false;
       if (S.sub && x.subtype !== S.sub) return false;
@@ -370,6 +371,13 @@
       const hit = (x) => [x.fund, x.fundBase, x.scheme, x.trustee].some((v) => v && String(v).toLowerCase().indexOf(k) >= 0);
       arr = arr.filter(hit);
     }
+    return arr;
+  }
+  window.__rkScopeFunds = baseFiltered;
+
+  function pool() {
+    const b = cur();
+    let arr = baseFiltered();
     if (b.id === 'calYear') {
       // 注入该年历年回报为顶层字段，便于排序与展示
       return arr
@@ -490,11 +498,12 @@
      thead 与 tbody 由同一个可见列顺序数组生成；维度联动=改数组而非移动 DOM。 */
   const CELL_FUND = {
     rank: (x, medal, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' + medal + '</td>',
-    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(fundFullName(x)) + '</div></td>',   /* 2026-10-31 四版：名称下的对比横线一并删除（用户不需要） */
+    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(fundFullName(x)) + '</div></td>',   /* 2026-10-31 四版：名称下的对比横线一并删除（用户不需要） */
     scheme: (x) => '<td data-c="scheme" data-l="' + TT('计划名称') + '" class="fz"><div>' + esc(x.scheme || '—') + '</div>' +
       (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
     trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(trusteeDisplay(x.trustee)) + '</span></td>',
-    type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>',
+    /* 2026-11-02：细类不再占第二行（会让整行高出一大截）——收进悬浮说明，行高与资料库一致 */
+    type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g"' + (x.subtype ? ' data-tip="' + esc(TQ('细类：{s}', { s: typeLabel(x.subtype) })) + '"' : '') + '>' + esc(typeLabel(x.type)) + '</span></td>',
     risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
     ann1: (x) => '<td data-c="ann1" data-l="' + TT('近1年年率化') + '" class="r num ' + cls(x.ann1) + '">' + pct(x.ann1) + '</td>',
     ann5: (x) => '<td data-c="ann5" data-l="' + TT('近5年年率化') + '" class="r num ' + cls(x.ann5) + '">' + pct(x.ann5) + '</td>',
@@ -523,7 +532,7 @@
   }
   const TH_FUND = {
     rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
-    fund: '<th data-c="fund" data-i18n-parts class="f-main fz">成分基金</th>',
+    fund: '<th data-c="fund" data-i18n-parts class="f-main fz">基金名称</th>',
     scheme: '<th data-c="scheme" data-i18n-parts>计划名称</th>',
     trustee: '<th data-c="trustee" data-i18n-parts>受托人</th>',
     type: '<th data-c="type" data-i18n-parts>基金种类</th>',
@@ -626,11 +635,11 @@
         (b.self
           ? /* 自算榜行：固定前段（与 selfHead 对齐） */
             '<td class="c" data-l="' + TT('名次') + '">' + medal + '</td>' +
-            '<td class="f-main fz" data-l="' + TT('成分基金') + '"><div class="fund-name">' + esc(fundFullName(x)) + '</div>' +
+            '<td class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(fundFullName(x)) + '</div>' +
               (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') +
               barHTML(b, x, ranked) + '</td>' +
             '<td data-l="' + TT('受托人') + '"><span class="tag">' + esc(trusteeDisplay(x.trustee)) + '</span></td>' +
-            '<td data-l="' + TT('基金种类') + '"><span class="tag g">' + esc(typeLabel(x.type)) + '</span><div class="sub-line">' + esc(typeLabel(x.subtype)) + '</div></td>' +
+            '<td data-l="' + TT('基金种类') + '"><span class="tag g"' + (x.subtype ? ' data-tip="' + esc(TQ('细类：{s}', { s: typeLabel(x.subtype) })) + '"' : '') + '>' + esc(typeLabel(x.type)) + '</span></td>' +
             '<td data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>' +
             '<td data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '" class="r num">' + nf(x.size, 2) + '</td>' +
             SELF_COLS.map(([k, n]) =>
@@ -668,6 +677,8 @@
        高亮只跟随用户手动点选的列（S.sortKey），默认序仅体现在行顺序上 */
     syncHeader(S.sortKey, S.sortKey ? S.sortDir : null);
     renderPager(pages, total);
+    /* 2026-11-02：估值日分布跟随本页筛选条件 */
+    if (window.renderNavDistCard) window.renderNavDistCard();
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
 
@@ -749,7 +760,7 @@
     const list = sortRows(pool(), S.sortKey || b.metric || null, S.sortDir || b.dir || 'desc');
     if (b.self) {
       /* 自算榜导出：只输出官网净值口径的指标，不含积金局字段 */
-      const sHead = [TT('名次'), TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('计划'), TT('受托人'), TT('净值估值日')]
+      const sHead = [TT('名次'), TT('基金名称'), TT('单位类别'), TT('基金种类'), TT('计划'), TT('受托人'), TT('净值估值日')]
         .concat(SELF_COLS.map(([, n]) => TT(n)))
         .concat([TQ('基金规模（{u}）', { u: TT('百万港元') })]);
       const sBody = list.map((x, i) => [
@@ -763,7 +774,7 @@
         'MPF排名_' + TT(b.name) + '_' + TT('数据截至') + '_' + d + '.csv');
       return;
     }
-    const head = [TT('名次'), TT('成分基金'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('受托人'), TT('风险级别'),
+    const head = [TT('名次'), TT('基金名称'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('受托人'), TT('风险级别'),
       TT('单位资产净值'), TT('净值估值日'), TT('近1年年率化回报'), TT('近5年年率化回报'), TT('近10年年率化回报'),
       TT('推出至今年率化回报'), TQ('基金规模（{u}）', { u: TT('百万港元') }), TT('基金管理费 % p.a.'), TT('最近期基金开支比率'), TT('推出日期')];
     const body = list.map((x, i) => [
@@ -907,12 +918,12 @@
     const tbl = document.querySelector('#rkTable');
     const box = document.querySelector('#rkColChecks');
     if (!btn || !pop || !tbl || !box) return;
-    const KEY = 'mpf-rk-cols-v6';   /* 2026-10-31：计划名称列 + 种类默认隐藏，重置老用户列设置 */   /* 2026-10-26 升版：新增抗跌/总开支/新锐列，需对老用户重置隐藏集 */
+    const KEY = 'mpf-rk-cols-v7';   /* 2026-11-02：基金种类列改为默认显示，重置老用户列设置 */
 
     /* 列定义：k=列键、n=显示名、lock=必显 */
     const FUND = [
       /* 2026-10-26（用户要求）：基金规模列移到回报组之后（原管理费位置），管理费移出默认显示 */
-      ['rank', '名次', 1], ['fund', '成分基金', 1], ['scheme', '计划名称', 0], ['trustee', '受托人', 0],
+      ['rank', '名次', 1], ['fund', '基金名称', 1], ['scheme', '计划名称', 0], ['trustee', '受托人', 0],
       ['type', '基金种类', 0], ['risk', '风险级别', 0],
       ['ann1', '近1年年率化', 0], ['ann5', '近5年年率化', 0], ['ann10', '近10年年率化', 0],
       ['annLaunch', '推出至今年率化', 0], ['size', '基金规模', 0], ['mgmtFee', '管理费', 0],
@@ -933,7 +944,7 @@
       ['mgmtFee', '平均管理费', 0], ['navRate', '净值核实率', 0], ['ops', '详情', 1],
     ];
     const SELF = [
-      ['rank', '名次', 1], ['fund', '成分基金', 1], ['trustee', '受托人', 0], ['type', '基金种类', 0],
+      ['rank', '名次', 1], ['fund', '基金名称', 1], ['trustee', '受托人', 0], ['type', '基金种类', 0],
       ['risk', '风险级别', 0], ['size', '基金规模', 0],
       ['selfD1', '日涨跌', 0], ['selfW1', '近1周', 0], ['selfM1', '近1月', 0], ['selfYtd', '年初至今', 0],
       ['selfY1', '近1年', 0], ['selfY3a', '近3年年化', 0], ['selfY5a', '近5年年化', 0],
@@ -941,9 +952,9 @@
       ['cmp', '对比', 1], ['ops', '详情', 1],
     ];
     const MODES = { fund: FUND, agg: AGG, self: SELF };
-    /* 2026-10-31（用户要求）：基金种类默认不显示 */
+    /* 2026-11-02（用户要求）：基金种类列默认显示（与「基金最新数据」一致）；受托人保持显示 */
     const DEFAULT_OFF = ['cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee', 'worstYear', 'fer', 'launchTs',
-      'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025', 'type', 'scheme'];
+      'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025', 'scheme'];
     const SLIM_OFF = ['trustee', 'type', 'scheme', 'risk', 'size', 'ann5', 'ann10', 'annLaunch', 'mgmtFee',
       'worstYear', 'fer', 'launchTs',
       'cum1', 'cum5', 'cum10', 'cumLaunch', 'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025',

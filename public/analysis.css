@@ -111,6 +111,8 @@
 .an-summary b { color: var(--brand); }
 
 .an-tablecard { overflow: hidden; }
+/* 2026-11-02：对比列表卡片右上角要弹出「列设置」，不能被圆角裁切 */
+.an-listcard { overflow: visible; }
 .an-table td.f-main { text-align: left; }
 .an-table td.f-main .fund-name {
   font-size: 13px;
@@ -412,11 +414,11 @@
 
 /* 2026-10-14：第四页基金列表（该发行人全部基金，复用 .an-table 卡片样式） */
 .an-listcard { margin-top: 12px; }
-.an-lh { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 12px 15px 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.an-lh { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 15px 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .an-lh-t { font-size: 14px; font-weight: 700; }
 .an-lh-k { color: var(--brand); }
 .an-lh-t b { color: var(--brand); }
-.an-lh-r { font-size: 11.5px; color: var(--text-3); }
+.an-lh-r { font-size: 12.5px; color: var(--text-3); display: flex; align-items: center; gap: 12px; }
 .an-tablecard .table-scroll { max-height: 560px; }
 @media (max-width: 720px) { .an-tablecard .table-scroll { max-height: none; } }
 
@@ -506,21 +508,23 @@
 .an-side-note { margin-top: auto; }
 @media (max-width: 900px) { .an-side { width: 100%; flex: none; min-height: 0; } }
 
-/* 2026-10-14：走势图下方基金列表视觉优化（字号调大 / 数字居中加粗 / 压缩空白） */
-.an-listcard .an-table { font-size: 13px; }
-.an-listcard .an-table th { font-size: 12.5px; padding: 11px 8px; }
-.an-listcard .an-table td { padding: 11px 8px; }
-.an-listcard .an-table td.f-main .fund-name { font-weight: 650; font-size: 13.5px; }
+/* 2026-11-02（第二十二轮，用户要求）：可视化对比的基金列表「完全照抄基金最新数据」——
+   字号 / 行高 / 单元格内边距 / 名称列宽全部与 #fundTable 对齐；列宽不再用 nth-child 百分比。 */
+.an-listcard .an-table { font-size: 15.5px; }
+.an-listcard .an-table th { font-size: 14px; padding: 10px 8px; }
+.an-listcard .an-table td { padding: 9px 8px; }
+.an-listcard .an-table td.f-main .fund-name { font-weight: 550; font-size: 15.5px; }
 .an-listcard .an-table td.r, .an-listcard .an-table td.c { text-align: center; }
-.an-listcard .an-table td.num { font-weight: 650; font-variant-numeric: tabular-nums; }
+.an-listcard .an-table td.num { font-weight: 550; font-variant-numeric: tabular-nums; }
 .an-listcard .an-table td.an-upd { font-weight: 500; color: var(--text-2); }
-/* 名称列宽约束，数字列紧凑居中（减少大片空白） */
-.an-listcard .an-table th:nth-child(1) { width: 30%; min-width: 220px; }
-.an-listcard .an-table th:nth-child(2) { width: 12%; }
-.an-listcard .an-table th:nth-child(3), .an-listcard .an-table th:nth-child(4), .an-listcard .an-table th:nth-child(5) { width: 11%; }
-.an-listcard .an-table th:nth-child(6) { width: 8%; }
-.an-listcard .an-table th:nth-child(7) { width: 9%; }
-.an-listcard .an-table th:nth-child(8) { width: 8%; }
+.an-listcard .an-table th[data-c="fund"] { width: 222px; min-width: 222px; }
+.an-listcard .an-table th[data-c="sel"] { width: 1%; min-width: 1%; }
+/* 2026-11-02：列宽用固定布局精确控制——auto 布局下空表头（勾选列）会吃掉 200+px；
+   固定布局下只锁「勾选 / 基金名称」两列，其余列平分剩余宽度。 */
+#anTable { table-layout: fixed; }
+#anTable th[data-c="sel"], #anTable td[data-c="sel"] { width: 34px; }
+#anTable th[data-c="fund"], #anTable td[data-c="fund"] { width: 222px; }
+.an-listcard .an-table td.f-main { white-space: normal; min-width: 0; }
 
 /* 走势图工具条（导出 / 分享，2026-10-14） */
 .tr-tools { display: flex; gap: 8px; }
