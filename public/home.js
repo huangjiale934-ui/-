@@ -593,8 +593,10 @@
       .then((j) => (j.items || []).map((x) => ({ ...x, sY1: x.y1, sY5a: x.y5a })))
       .catch(() => []);
     Promise.all([get('y1'), get('y5a')]).then(([t1, t5]) => {
-      renderTop('#mkTop1', t1, (x) => pctv(x.sY1), (x) => x.sY1);
-      renderTop('#mkTop4', t5, (x) => pctv(x.sY5a), (x) => x.sY5a);
+      /* 2026-11-02（第二十七轮）：接口超时/为空时不要清掉已经渲染好的积金局榜单
+         （线上首屏偶发「近 1 年回报领先 = 暂无数据」就是这个：自算接口慢一步就把列表清空） */
+      if (t1 && t1.length) renderTop('#mkTop1', t1, (x) => pctv(x.sY1), (x) => x.sY1);
+      if (t5 && t5.length) renderTop('#mkTop4', t5, (x) => pctv(x.sY5a), (x) => x.sY5a);
     }).catch(() => {});
   }
 
