@@ -205,7 +205,8 @@ window.TREND = (function () {
 
     /* ---- 选择面板（指数 / 基金） ---- */
     function closePanels() { qa('.tr-panel').forEach((p) => { p.hidden = true; }); qa('.tr-sel').forEach((b) => b.classList.remove('on')); }
-    box.querySelector('.tr-selects').addEventListener('click', (e) => {
+    /* 2026-11-02：两个大下拉已改为「＋ 添加指数 / ＋ 添加基金」按钮，委托容器改到顶部整行 */
+    box.querySelector('.tr-head').addEventListener('click', (e) => {
       const b = e.target.closest('.tr-sel');
       if (!b) return;
       const name = b.getAttribute('data-panel');
@@ -249,7 +250,8 @@ window.TREND = (function () {
     });
     /* 图例（含「×」移除）委托：图例不在 .tr-panels 内，须单独绑定
        ——2026-10-14 修复：此前 × 点击无效的 bug；同时新增「点线条改样式」 */
-    box.querySelector('.tr-legend').addEventListener('click', (e) => {
+    /* 2026-11-02（第二十三轮）：图例行删除，×（移除）与「点线条改样式」迁到下方表格的名称列 */
+    box.querySelector('.tr-tablewrap').addEventListener('click', (e) => {
       const t = e.target.closest('[data-toggle]');
       if (t) { e.stopPropagation(); toggleItem(t.getAttribute('data-toggle')); return; }
       const st = e.target.closest('[data-style]');
@@ -281,7 +283,7 @@ window.TREND = (function () {
       box.appendChild(p);
       /* 定位：贴在该图例芯片下方（按实测像素） */
       let chip = null;
-      box.querySelectorAll('.tr-legend [data-style]').forEach((el2) => { if (!chip && el2.getAttribute('data-style') === k) chip = el2; });
+      box.querySelectorAll('.tr-tablewrap [data-style]').forEach((el2) => { if (!chip && el2.getAttribute('data-style') === k) chip = el2; });
       if (chip) {
         const rb = chip.getBoundingClientRect();
         const bb = box.getBoundingClientRect();
@@ -694,22 +696,16 @@ window.TREND = (function () {
 
     /* ---- 结构 ---- */
     function shell(o) {
-      const title = o.title ||  _t('在线对比 MPF 基金与大盘指数');
+      const title = o.title ||  _t('基金走势对比图');
       const hasFund = (o.items || initItems || []).some((it) => it.type === 'fund');
-      return '' +
-        /* 2026-10-20：bareHead = 不渲染「标题 + 导出/分享」整行（详情页已有「对比基金走势」小标题） */
-        (o.bareHead ? '' :
-          '<div class="tr-head"><div class="tr-title">' + esc0(title) + '</div>' +
-            '<div class="tr-tools">' +
-              '<button type="button" class="tr-tool tr-exp" title="' + esc0(_t('导出当前走势数据（CSV）')) + '">' + esc0(_t('导出')) + '</button>' +
-              '<button type="button" class="tr-tool tr-share" title="' + esc0(_t('复制包含当前对比组合的分享链接')) + '">' + esc0(_t('分享')) + '</button>' +
-            '</div>' +
-          '</div>') +
-        '<div class="tr-selects">' +
-          '<button type="button" class="tr-sel" data-panel="idx"><span>' + esc0( _t('选择指数')) + '</span><i class="tr-cnt" data-cnt="idx"></i><em>▼</em></button>' +
-          '<button type="button" class="tr-sel" data-panel="fund"><span>' + esc0( _t('选择基金')) + '</span><i class="tr-cnt" data-cnt="fund"></i><em>▼</em></button>' +
-        '</div>' +
-        '<div class="tr-panels">' +
+      /* 2026-11-02（第二十三轮，用户要求）：顶部收成一行 ——
+         标题 + 添加指数 / 添加基金 + 区间 + 清空筛选 + 导出/分享；
+         两个大下拉（选择指数/选择基金）下线，图例整行删除、改到下方表格「名称」列内。 */
+      const rangesBar = '<div class="tr-ranges" role="group" aria-label="' + esc0( _t('区间')) + '">' +
+          RANGES.map(([k, l]) => '<button type="button" class="tr-r' + (S.range === k ? ' on' : '') + '" data-r="' + k + '">' + esc0( _t(l)) + '</button>').join('') +
+          '<button type="button" class="tr-r" data-r="custom">' + esc0( _t('选择日期')) + '</button>' +
+        '</div>';
+      const panels = '<div class="tr-panels">' +
           '<div class="tr-panel tr-panel-idx" hidden>' +
             '<div class="tr-p-head"><span>' + esc0( _t('选择指数（可多选）')) + '</span><button type="button" class="tr-p-close" aria-label="' + esc0( _t('关闭')) + '">×</button></div>' +
             '<div class="tr-p-list tr-p-list-idx"></div>' +
@@ -719,21 +715,32 @@ window.TREND = (function () {
             '<input class="tr-p-search" type="search" placeholder="' + esc0( _t('搜索基金名称 / 计划 / 受托人')) + '">' +
             '<div class="tr-p-list tr-p-list-fund"></div>' +
           '</div>' +
-        '</div>' +
-        '<div class="tr-toolbar">' +
-          '<div class="tr-ranges" role="group" aria-label="' + esc0( _t('区间')) + '">' +
-            RANGES.map(([k, l]) => '<button type="button" class="tr-r' + (S.range === k ? ' on' : '') + '" data-r="' + k + '">' + esc0( _t(l)) + '</button>').join('') +
-            '<button type="button" class="tr-r" data-r="custom">' + esc0( _t('选择日期')) + '</button>' +
+        '</div>';
+      return '' +
+        '<div class="tr-head' + (o.bareHead ? ' tr-head-slim' : '') + '">' +
+          (o.bareHead ? '' :
+            '<div class="tr-title">' + esc0(title) + '</div>' +
+            '<div class="tr-adds">' +
+              '<button type="button" class="tr-sel tr-add" data-panel="idx">＋ ' + esc0(_t('添加指数')) + '<i class="tr-cnt" data-cnt="idx"></i></button>' +
+              '<button type="button" class="tr-sel tr-add" data-panel="fund">＋ ' + esc0(_t('添加基金')) + '<i class="tr-cnt" data-cnt="fund"></i></button>' +
+            '</div>') +
+          '<div class="tr-toolbar">' +
+            rangesBar +
+            '<div class="tr-tools2">' +
+              '<button type="button" class="tr-tool tr-clear" title="' + esc0( _t('清空所有已选基金并重置筛选（保留指数）')) + '">' + esc0( _t('清空筛选')) + '</button>' +
+            '</div>' +
+            (o.bareHead ? '' :
+              '<div class="tr-tools">' +
+                '<button type="button" class="tr-tool tr-exp" title="' + esc0(_t('导出当前走势数据（CSV）')) + '">' + esc0(_t('导出')) + '</button>' +
+                '<button type="button" class="tr-tool tr-share" title="' + esc0(_t('复制包含当前对比组合的分享链接')) + '">' + esc0(_t('分享')) + '</button>' +
+              '</div>') +
           '</div>' +
-          '<div class="tr-tools2">' +
-            '<button type="button" class="tr-tool tr-clear" title="' + esc0( _t('清空所有已选基金并重置筛选（保留指数）')) + '">' + esc0( _t('清空筛选')) + '</button>' +
-          '</div>' +
         '</div>' +
+        panels +
         '<div class="tr-daterow" hidden>' +
           '<input type="date" class="tr-d1"><span>~</span><input type="date" class="tr-d2">' +
           '<button type="button" class="btn sm tr-dgo">' + esc0( _t('确定')) + '</button>' +
         '</div>' +
-        '<div class="tr-legend"></div>' +
         '<div class="tr-canvas">' +
           '<div class="tr-loading" style="display:none">' + esc0( _t('加载中…')) + '</div>' +
           '<svg class="tr-svg" viewBox="0 0 760 300" preserveAspectRatio="xMidYMid meet" role="img"></svg>' +
@@ -742,7 +749,8 @@ window.TREND = (function () {
         '<div class="tr-tablewrap"></div>' +
         (o.hideGoto ? '' :
           '<div class="tr-gotowrap"><button type="button" class="btn tr-goto"' + (hasFund ? '' : ' style="display:none"') + '>' + esc0( _t('查看具体基金分析')) + '</button></div>') +
-        '<div class="tr-note">' + esc0( _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。')) + '</div>';
+        '<div class="tr-note"><span class="tr-note-tip">' + esc0( _t('点线条可改颜色 / 线宽 / 线型')) + '</span>' +
+          '<span class="tr-note-txt">' + esc0( _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。')) + '</span></div>';
     }
 
     /* 「清空筛选」：清空全部对比对象（含指数）并重置面板筛选（2026-10-17） */
@@ -763,35 +771,10 @@ window.TREND = (function () {
     /* 「全部取消」按钮已改在 .tr-panels 委托内处理（该处 stopPropagation 会拦截 box 级监听） */
 
 
+    /* 2026-11-02（第二十三轮）：图例已并入下方表格「名称」列 ——
+       本函数只负责同步「已选数量」，不再渲染独立图例行。 */
     function renderLegend() {
-      const el = q('.tr-legend');
-      const parts = S.items.map((it, i) => {
-        const k = keyOf(it);
-        const d = S.data[k];
-        const bad = d && d.err;
-        const name = itemLabel(it);
-        const st = styleOf(it, i);
-        const pending = !d;
-        /* 「发行人平均」等条目附计算口径说明（悬浮可见） */
-        let tip = _t('点击可改颜色 / 线宽 / 线型');
-        if (it.type === 'tavg') tip = _t('发行人均值指数：该发行人旗下「已接入历史净值」的成员基金按每日等权平均（每日涨跌幅的算术平均逐日链式累计，区间起点 = 1000），不含费用。') + '\n' + tip;
-        /* 2026-10-22：自算的 MPF 市场指数——图例悬浮显示计算口径（自绘浅蓝浮窗） */
-        let selfTip = '';
-        if (it.type === 'index' && cachedIdx && cachedIdx.items && cachedIdx.items[it.key] && cachedIdx.items[it.key].tip) {
-          selfTip = _t(cachedIdx.items[it.key].tip);
-        }
-        /* 图例线 = 实际线型预览（颜色 / 粗细 / 虚实一致） */
-        const linePrev = '<svg class="tr-lg-line" width="32" height="10" data-style="' + esc0(k) + '">' +
-          '<line x1="1" y1="5" x2="31" y2="5" stroke="' + st.color + '" stroke-width="' + st.width + '"' +
-          (st.dash ? ' stroke-dasharray="' + st.dash + '"' : '') + ' stroke-linecap="round"/></svg>';
-        return '<span class="tr-lg' + (bad ? ' tr-lg-err' : '') + (pending ? ' tr-lg-load' : '') + '" style="--c:' + st.color + '"' +
-          (selfTip ? ' data-tip="' + esc0(selfTip) + '"' : ' title="' + esc0(tip) + '"') + '>' +
-          linePrev +
-          '<span class="tr-lg-n" data-style="' + esc0(k) + '">' + esc0(name) + '</span>' +
-          '<b class="tr-lg-x" data-toggle="' + esc0(k) + '" title="' + esc0(_t('移除')) + '">×</b></span>';
-      }).join('');
-      el.innerHTML = (parts || '<span class="tr-lg-empty">' + esc0(_t('请在上方选择指数或基金开始对比')) + '</span>') +
-        (S.items.length ? '<span class="tr-lg-tip">' + esc0(_t('点线条可改颜色 / 线宽 / 线型')) + '</span>' : '');
+      syncSelButtons();
     }
     function syncSelButtons() {
       const ni = S.items.filter((it) => it.type === 'index').length;
@@ -1239,30 +1222,54 @@ window.TREND = (function () {
 
     function renderTable(lines, startTs, endTs) {
       const wrap = q('.tr-tablewrap');
-      const years = (endTs - startTs) / (365.25 * 86400000);
-      /* 2026-10-15：未选基金时不再在此处渲染全量表（避免表格跳变）；全量由页面下方资料库列表承担 */
       /* 2026-10-15：主对比页表格只列基金（指数行不混入基金列表；弹窗内保留对比指数走势的双行） */
       if (q('.tr-gotowrap') && lines.some((L) => !L.isIdx)) lines = lines.filter((L) => !L.isIdx);
-      const rows = lines.map((L) => {
-        const last = L.win.norm[L.win.norm.length - 1][1];
-        const ret = last;   /* norm = 累计涨跌幅 % */
+      const rows = lines.map((L, i) => {
+        const raw = L.win.raw || [];
+        const first = raw.length ? raw[0][1] : null;
+        const last = raw.length ? raw[raw.length - 1][1] : null;
+        let hi = null, lo = null;
+        raw.forEach((pt) => { const v = pt[1]; if (hi == null || v > hi) hi = v; if (lo == null || v < lo) lo = v; });
+        /* 年化波动率：日收益率标准差 × √252（与资料库自算口径一致：净价、未含费用） */
+        let vol = null;
+        if (raw.length > 3) {
+          const rs = [];
+          for (let j = 1; j < raw.length; j++) {
+            const a0 = raw[j - 1][1], a1 = raw[j][1];
+            if (a0 > 0) rs.push(a1 / a0 - 1);
+          }
+          if (rs.length > 2) {
+            const mean = rs.reduce((a, b) => a + b, 0) / rs.length;
+            const varr = rs.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (rs.length - 1);
+            vol = Math.sqrt(varr) * Math.sqrt(252) * 100;
+          }
+        }
+        const ret = L.win.norm[L.win.norm.length - 1][1];   /* norm = 累计涨跌幅 % */
         const m = mddOf(L.win);
-        const rawLast = L.win.raw[L.win.raw.length - 1][1];
-        /* 实际值一并给出（基金=净值 + HKD；指数=点位）——避免纵轴指数化后「对不上」的疑惑 */
-        const rawTip = L.isIdx
-          ? '<span class="tr-raw">(' + nf0(rawLast, 2) + ')</span>'
-          : '<span class="tr-raw">(' + fmtRaw(rawLast) + ' HKD)</span>';
-        /* 数据起点晚于所选区间起点时标注（该行收益实际按首日起算） */
-        const firstT = ts(L.win.raw[0][0]);
+        const firstT = ts(raw[0][0]);
         const late = firstT > startTs + 7 * 86400000;
         const lateMark = late ? '<span class="tr-late" data-tip="' +
-          esc0( _tq('该标的的历史数据自 {d} 起，区间收益与回撤按首日起算', { d: L.win.raw[0][0] })) + '">*</span>' : '';
+          esc0(_tq('该标的的历史数据自 {d} 起，区间收益与回撤按首日起算', { d: raw[0][0] })) + '">*</span>' : '';
+        const fmtV = (v) => (v == null ? '—' : (L.isIdx ? nf0(v, 2) : fmtRaw(v)));
+        /* 发行人均值条目的计算口径：悬浮名称可见（原图例上的说明，随图例一起搬进表格） */
+        const isTavg = String(L.key).indexOf('t:') === 0;
+        const nameTip = isTavg
+          ? _t('发行人均值指数：该发行人旗下「已接入历史净值」的成员基金按每日等权平均（每日涨跌幅的算术平均逐日链式累计，区间起点 = 1000），不含费用。')
+          : _t('点击可改颜色 / 线宽 / 线型');
+        const linePrev = '<svg class="tr-lg-line" width="30" height="10" data-style="' + esc0(L.key) + '">' +
+          '<line x1="1" y1="5" x2="29" y2="5" stroke="' + L.color + '" stroke-width="' + L.width + '"' +
+          (L.dash ? ' stroke-dasharray="' + L.dash + '"' : '') + ' stroke-linecap="round"/></svg>';
         return '<tr>' +
-          '<td class="n"><i style="background:' + L.color + '"></i><span class="nm">' + esc0(L.name) + '</span></td>' +
-          /* 2026-10-20：按需求删除「最新点位」列（避免横向滚动） */
+          '<td class="n">' + linePrev +
+            '<span class="nm" data-style="' + esc0(L.key) + '" title="' + esc0(nameTip) + '">' + esc0(L.name) + '</span>' +
+            '<b class="tr-lg-x" data-toggle="' + esc0(L.key) + '" title="' + esc0(_t('移除')) + '">×</b></td>' +
+          '<td class="r">' + fmtV(first) + '</td>' +
+          '<td class="r">' + fmtV(last) + '</td>' +
+          '<td class="r">' + fmtV(hi) + '</td>' +
+          '<td class="r">' + fmtV(lo) + '</td>' +
           '<td class="r ' + clsOf(ret) + '">' + fmtPct(ret) + lateMark + '</td>' +
+          '<td class="r">' + (vol == null ? '—' : vol.toFixed(1) + '%') + '</td>' +
           '<td class="r down">' + (m.mdd < -0.005 ? fmtPct(m.mdd) : '0.00%') + lateMark + '</td>' +
-          /* 2026-10-24 修 F29：无回撤时 fromT/toT=0，dstr(0) 显示 1970-01-01 → 输出 — */
           '<td class="r date">' + (m.mdd < -0.005 ? dstr(m.fromT) : '—') + '</td>' +
           '<td class="r date">' + (m.mdd < -0.005 ? dstr(m.toT) : '—') + '</td>' +
           '</tr>';
@@ -1270,14 +1277,19 @@ window.TREND = (function () {
       wrap.innerHTML =
         '<div class="tr-tbl-scroll"><table class="tr-tbl">' +
           '<thead><tr>' +
-            '<th>' + esc0( _t('名称')) + '</th>' +
-            '<th class="r">' + esc0( _t('区间收益')) + ' <span class="tr-q" data-tip="' + esc0( _t('区间收益 = 末值 ÷ 区间起点 − 1（区间起点 = 0%）')) + '">?</span></th>' +
-            '<th class="r">' + esc0( _t('区间最大回撤')) + ' <span class="tr-q" data-tip="' + esc0( _t('区间最大回撤 = 运行峰值法，取区间内峰值到谷值的最大跌幅')) + '">?</span></th>' +
-            '<th class="r">' + esc0( _t('最大回撤起始日期')) + '</th>' +
-            '<th class="r">' + esc0( _t('最大回撤结束日期')) + '</th>' +
+            '<th>' + esc0(_t('名称')) + '</th>' +
+            '<th class="r">' + esc0(_t('期初')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间第一个交易日的净值 / 指数点位')) + '">?</span></th>' +
+            '<th class="r">' + esc0(_t('期末')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间最后一个交易日的净值 / 指数点位')) + '">?</span></th>' +
+            '<th class="r">' + esc0(_t('区间最高')) + '</th>' +
+            '<th class="r">' + esc0(_t('区间最低')) + '</th>' +
+            '<th class="r">' + esc0(_t('区间收益')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间收益 = 末值 ÷ 区间起点 − 1（区间起点 = 0%）')) + '">?</span></th>' +
+            '<th class="r">' + esc0(_t('年化波动率')) + ' <span class="tr-q" data-tip="' + esc0(_t('日收益率标准差 × √252，净价口径、未含费用')) + '">?</span></th>' +
+            '<th class="r">' + esc0(_t('区间最大回撤')) + ' <span class="tr-q" data-tip="' + esc0(_t('区间最大回撤 = 运行峰值法，取区间内峰值到谷值的最大跌幅')) + '">?</span></th>' +
+            '<th class="r">' + esc0(_t('最大回撤起始日期')) + '</th>' +
+            '<th class="r">' + esc0(_t('最大回撤结束日期')) + '</th>' +
           '</tr></thead><tbody>' + rows + '</tbody>' +
         '</table></div>';
-      void years;
+      void endTs;
     }
 
     /* ---- 初始化 ---- */

@@ -322,6 +322,61 @@ function renderUpdateTime() {
 /* ---------- 「数据版本」徽标（页头）：来源与日期一眼可查 ----------
  * 徽标本身体积小：显示数据同步日期；悬浮（移动端点击）按行展开各来源与最新日期，
  * 回应「数据来源与日期要充分说明」。/api/status 到货后补上指数行情与回填进度。 */
+/* ===== 2026-11-02（第二十三轮）：页头「数据版本」右侧的 ⓘ 统一口径说明 =====
+   用户反馈：两套口径（自算 / 积金局）散落在各页，容易混着看。
+   这里给一个唯一入口，讲清「快 2–6 周」与「含费含息」的差别，并提醒不可相减。 */
+(function initVerInfo() {
+  function build() {
+    const chip = document.getElementById('verChip');
+    if (!chip || document.getElementById('verInfo')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'verInfo';
+    btn.className = 'ver-info';
+    btn.textContent = 'i';
+    btn.setAttribute('aria-label', TT('数据口径说明'));
+    btn.setAttribute('title', TT('数据口径说明'));
+    chip.parentNode.insertBefore(btn, chip.nextSibling);
+
+    const pop = document.createElement('div');
+    pop.className = 'ver-pop';
+    pop.id = 'verPop';
+    pop.hidden = true;
+    pop.innerHTML =
+      '<b class="vp-t">' + TT('两种口径，请勿混用') + '</b>' +
+      '<div class="vp-r"><i class="vp-d" style="background:#0866bb"></i><span>' +
+        TT('自算（发行人官网，每日）：比积金局快 2–6 周；净价，不含分红再投资与费用。') + '</span></div>' +
+      '<div class="vp-r"><i class="vp-d" style="background:#8fb8da"></i><span>' +
+        TT('积金局（月度）：含费用、含分红再投资，滞后约 1–2 个月。') + '</span></div>' +
+      '<div class="vp-n">' + TT('两者期间与算法不同，不可直接相减。') + '</div>';
+    document.body.appendChild(pop);
+
+    function close() { pop.hidden = true; btn.classList.remove('on'); }
+    function open() {
+      pop.hidden = false;
+      btn.classList.add('on');
+      const r = btn.getBoundingClientRect();
+      const w = pop.offsetWidth || 320;
+      let left = r.left + r.width / 2 - w / 2;
+      left = Math.max(10, Math.min(left, window.innerWidth - w - 10));
+      pop.style.left = Math.round(left) + 'px';
+      pop.style.top = Math.round(r.bottom + 8) + 'px';
+    }
+    btn.addEventListener('click', (e) => { e.stopPropagation(); pop.hidden ? open() : close(); });
+    document.addEventListener('click', (e) => {
+      if (!pop.hidden && !(e.target.closest && (e.target.closest('#verPop') || e.target.closest('#verInfo')))) close();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    document.addEventListener('mpf:lang', () => {
+      btn.setAttribute('aria-label', TT('数据口径说明'));
+      const t = pop.querySelector('.vp-t');
+      if (t) t.textContent = TT('两种口径，请勿混用');
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
+})();
+
 function fillVerChip(st) {
   const chip = document.getElementById('verChip');
   if (!chip || !st) return;
@@ -3113,7 +3168,7 @@ document.addEventListener('mpf:lang', () => {
  * 其他页点卡片回首页对应指数走势。 */
 (function () {
   var NAMES = {
-    MPFAVG: '积金市场指数', MPF_STOCK: '股票积金', MPF_MIX: '混合积金',
+    MPFAVG: '强积金市场指数', MPF_STOCK: '股票积金', MPF_MIX: '混合积金',
     MPF_BOND: '债券积金', HSI: '恒生指数', SSE: '上证指数',
   };
   var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];

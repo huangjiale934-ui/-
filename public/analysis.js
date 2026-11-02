@@ -222,7 +222,8 @@
         }
         renderFundList();
         renderSrcNoteTop();
-        maybeWarnIncomplete(S.trustee);
+        /* 2026-11-02：发行人菜单已并入「基金最新数据」，点它只是筛表格，
+           不再弹「日度历史仅 1 年」的提示（那个提示属于对比页的旧交互）。 */
       });
     }
   }
@@ -575,8 +576,10 @@
       });
     }
     syncListArrows();
-    /* 2026-11-02：页脚「估值日分布」跟随当前发行人重算 */
-    if (window.renderNavDistCard && S.trustee) window.renderNavDistCard();
+    /* 2026-11-02：页脚「估值日分布」跟随当前发行人重算。
+       注意：切回「总体」时 S.trustee 为空串，这里不能再加 `&& S.trustee` 守卫，
+       否则数字会停留在上一个发行人的统计上（用户反馈的「总体只剩一丁点」就是这个）。 */
+    if (window.renderNavDistCard) window.renderNavDistCard();
   }
 
   /* C2：键盘操作（Enter / 空格 打开详情；表头 Enter 排序） */

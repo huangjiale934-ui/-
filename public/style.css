@@ -2028,11 +2028,11 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .mpfsel-pop.has-custom { min-width: 208px; }
 .mpfsel-custom input { flex: 1 1 auto; width: auto; min-width: 0; }
 
-/* 2026-11-02（第二十二轮，用户要求）：关闭按钮从最左侧挪到行情栏右端——
-   左侧紧贴屏幕边缘、与第一张行情卡挤在一起，用户多次反馈「不明显」；
-   右边本来就有一大片空白（行情卡只有 7 张），放在右端更符合关闭按钮的常规位置。 */
-.mkt-ticker .tk-track { padding-left: 14px; padding-right: 42px; }
-.tk-close { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 2;
+/* 2026-11-02（第二十三轮，用户更正）：关闭按钮保持在「强积金市场指数」左侧，
+   只从贴边 8px 往右挪一点（8→17px），并加大到 22px、白底描边更明显。
+   注意：绝不能改 .mkt-ticker 的 position（sticky 吸顶会失效）。 */
+.mkt-ticker .tk-track { padding-left: 52px; padding-right: 14px; }
+.tk-close { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); z-index: 2;
   display: inline-flex; align-items: center; justify-content: center;
   width: 22px; height: 22px; padding: 0; border-radius: 50%; cursor: pointer;
   border: 1px solid #cfe1f2; background: #fff; color: #6f8399;
@@ -2040,11 +2040,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
   transition: color .15s, border-color .15s, background-color .15s; }
 .tk-close:hover { color: #fff; border-color: var(--brand, #0866bb); background: var(--brand, #0866bb); }
 .tk-close:focus-visible { outline: 2px solid rgba(8,102,187,.35); outline-offset: 1px; }
-/* 宽屏时按钮贴住 1400px 内容区的右缘，不会飘到天边 */
-@media (min-width: 1480px) {
-  .tk-close { right: calc((100vw - 1400px) / 2 + 8px); }
-}
-@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 14px; padding-right: 36px; } .tk-close { right: 8px; } }
+@media (max-width: 720px) { .mkt-ticker .tk-track { padding-left: 46px; } .tk-close { left: 12px; } }
 
 /* ==========================================================================
    2026-11-02（第十八轮，用户要求）：排名维度多选面板
@@ -2318,11 +2314,15 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
    —— 把「可视化对比」的核心功能搬进来，勾选表格「对比」即叠加。
    ========================================================== */
 .db-trendcard { margin-bottom: 14px; }
-.db-trendcard .db-trendbox { padding: 2px 14px 12px; }
+.db-trendcard .db-trendbox { padding: 12px 14px 12px; }
 .db-trendcard .tr-svg { height: 268px; }
-.db-trendcard.folded .db-trendbox { display: none; }
-.db-trendcard.folded .an-lh { border-bottom: 0; padding-bottom: 10px; }
-.db-trendcard .an-lh { padding: 12px 16px 8px; }
+/* 收起后只留顶部一行（标题 + 添加指数/添加基金 + 展开） */
+.db-trendcard.folded #dbTrendBox .tr-toolbar,
+.db-trendcard.folded #dbTrendBox .tr-panels,
+.db-trendcard.folded #dbTrendBox .tr-daterow,
+.db-trendcard.folded #dbTrendBox .tr-canvas,
+.db-trendcard.folded #dbTrendBox .tr-tablewrap,
+.db-trendcard.folded #dbTrendBox .tr-note { display: none; }
 @media (max-width: 900px) { .db-trendcard .tr-svg { height: 240px; } }
 
 /* ==========================================================
@@ -2365,3 +2365,23 @@ body.db-page .wrap { max-width: none; padding-left: 208px; padding-right: 14px; 
   .f-row-merged .tb-tail .btn { padding: 0 9px; }
   .f-row-merged .tb-count { font-size: 12px; }
 }
+
+/* 2026-11-02（第二十三轮）：列设置的 4 个预设按钮（默认 / 收益视角 / 风险视角 / 全部列） */
+.cp-btns.cp-presets { flex-wrap: wrap; gap: 6px; }
+.cp-btns.cp-presets .cp-b { flex: 0 0 auto; }
+.cp-btns .cp-b.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600; }
+.rk-colpop .cp-btns { flex-wrap: wrap; }
+
+/* 2026-11-02（第二十三轮）：页头「数据版本」右侧的 ⓘ 口径说明 */
+.ver-info { width: 18px; height: 18px; margin-left: 6px; padding: 0; border-radius: 50%;
+  border: 1px solid #b9cfe4; background: #fff; color: #4f6b86; font: 600 11px/1 Georgia, serif;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
+.ver-info:hover, .ver-info.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.ver-pop { position: fixed; z-index: 300; width: 340px; max-width: calc(100vw - 24px);
+  background: #fff; border: 1px solid var(--border-strong); border-radius: 6px;
+  box-shadow: 0 14px 40px rgba(20, 40, 80, .18); padding: 12px 14px; font-size: 12.5px; line-height: 1.7; color: var(--text-2); }
+.ver-pop .vp-t { display: block; color: var(--text); font-size: 13px; margin-bottom: 6px; }
+.ver-pop .vp-r { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0; }
+.ver-pop .vp-d { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex: none; }
+.ver-pop .vp-n { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); color: #8a5a00; }
+@media (max-width: 720px) { .ver-pop { width: 300px; } }

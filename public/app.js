@@ -171,8 +171,7 @@
     (DATA.funds || []).forEach((x) => { meta[x.id] = { trustee: x.trustee, type: x.type, name: x.fundBase || x.fund }; });
     if (!DBTREND) {
       DBTREND = window.TREND.mount(box, dbTrendItems(), {
-        /* 卡片标题由本页的 .an-lh 负责，这里不再重复渲染「标题 + 导出/分享」行 */
-        bareHead: true,
+        /* 2026-11-02（第二十三轮）：标题与工具条由走势图自己渲染（基金走势对比图 + 添加指数/添加基金 + 区间） */
         hideGoto: true,
         fundMeta: meta,
         onSelChange: function () {
@@ -184,26 +183,40 @@
           render();
         },
       });
-      /* 折叠状态 */
-      const fold = document.getElementById('dbTrendFold');
-      const apply = (folded) => {
-        card.classList.toggle('folded', folded);
-        if (fold) fold.textContent = folded ? TT('展开') : TT('收起');
-      };
-      let folded = false;
-      try { folded = localStorage.getItem(DBFOLD_KEY) === '1'; } catch (e) {}
-      apply(folded);
-      if (fold) fold.addEventListener('click', () => {
-        const f = !card.classList.contains('folded');
-        apply(f);
-        try { localStorage.setItem(DBFOLD_KEY, f ? '1' : '0'); } catch (e) {}
-        if (!f) { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }
-      });
     } else if (DBTREND.setItems) {
       DBSYNC = true;
       try { DBTREND.setItems(dbTrendItems()); } finally { DBSYNC = false; }
     }
+    /* 折叠按钮：注入走势图头部（每次重挂都要补，因为 box.innerHTML 会重建） */
+    setupDbTrendFold(card, box);
     try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+  }
+  /* 2026-11-02（第二十三轮）：收起/展开按钮放进走势图顶部那一行右侧；
+     折叠时只留标题与「添加指数/添加基金」，其余（区间/图/表/说明）全部隐藏。 */
+  function setupDbTrendFold(card, box) {
+    const head = box.querySelector('.tr-head');
+    if (!head) return;
+    let fold = head.querySelector('.tr-fold');
+    if (!fold) {
+      fold = document.createElement('button');
+      fold.type = 'button';
+      fold.className = 'tr-tool tr-fold';
+      fold.addEventListener('click', () => {
+        const f = !card.classList.contains('folded');
+        applyDbTrendFold(card, fold, f);
+        try { localStorage.setItem(DBFOLD_KEY, f ? '1' : '0'); } catch (e) {}
+        if (!f) { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }
+      });
+      /* 放进工具组（导出/分享 同一行），避免成为 head 的孤立子项被挤到第二行 */
+      (head.querySelector('.tr-tools') || head).appendChild(fold);
+    }
+    let folded = false;
+    try { folded = localStorage.getItem(DBFOLD_KEY) === '1'; } catch (e) {}
+    applyDbTrendFold(card, fold, folded);
+  }
+  function applyDbTrendFold(card, btn, folded) {
+    card.classList.toggle('folded', folded);
+    if (btn) btn.textContent = folded ? TT('展开') : TT('收起');
   }
   window.__dbTrendMount = initDbTrend;
   function syncDbTrend() {
@@ -236,13 +249,18 @@
         }).catch(() => {});
       }
       bindNavDateDist();
+      bindTrusteeMenu();
       /* 2026-11-01（6.0）：空闲时预取持仓（约 0.5MB），详情弹窗打开即用，不再等 3 秒 */
       setTimeout(() => { if (window.ensureHoldings) window.ensureHoldings(null).catch(() => {}); }, 2500);
     });
     // 语言切换后重绘整表（表头 data-l 标签、详情按钮、净值悬浮说明等）
     /* 2026-11-01（6.0）：下拉 option 是 JS 生成的，必须在语言切换时一并重建，
        否则繁/英模式下仍停留上一语言的文案（曾出现繁体页下拉全是简体）。 */
-    document.addEventListener('mpf:lang', () => { if (DATA.count) { buildFilters(); render(); } });
+    document.addEventListener('mpf:lang', () => {
+      if (DATA.count) { buildFilters(); render(); }
+      /* 2026-11-02：走势图顶部与统计表的文案是挂载时生成的，语言切换后整体重挂一次 */
+      try { DBTREND = null; initDbTrend(); } catch (e) {}
+    });
   }
 
   /* 2026-10-24（领导要求）：列表下方的「净值估值日」卡片 → 点击筛选（供 common.js 的卡片调用） */
@@ -318,6 +336,32 @@
       if (window.__DIMSEL && window.__DIMSEL[0]) window.__DIMSEL[0].d = S.dir;
       $('#mSortDir').textContent = S.dir === 'asc' ? TT('升序 ↑') : TT('降序 ↓');
       render();
+    });
+  }
+
+  /* ===== 2026-11-02（第二十三轮）：侧边栏「发行人」二级菜单 = 受托人筛选 =====
+     菜单节点由 analysis.js 的 buildSide() 渲染（沿用其计数与分组顺序），
+     这里只负责把点击接到本页筛选上，并在筛选变化时回写高亮。 */
+  function bindTrusteeMenu() {
+    const nav = document.getElementById('anProv');
+    if (!nav || nav.__appBound) return;
+    nav.__appBound = 1;
+    nav.addEventListener('click', (e) => {
+      const b = e.target && e.target.closest ? e.target.closest('.an-pitem') : null;
+      if (!b) return;
+      const t = b.getAttribute('data-t') || '';
+      const sel = document.getElementById('fTrustee');
+      if (sel) sel.value = t;
+      F.trustee = t;
+      S.page = 1;
+      render();
+    });
+  }
+  function syncTrusteeMenu() {
+    const nav = document.getElementById('anProv');
+    if (!nav) return;
+    Array.prototype.forEach.call(nav.querySelectorAll('.an-pitem'), (b) => {
+      b.classList.toggle('on', (b.getAttribute('data-t') || '') === (F.trustee || ''));
     });
   }
 
@@ -400,6 +444,16 @@
   let DIM_EXTRA = [];   /* 2026-11-02：维度联动临时放出的列（可多选，不持久化） */
   try { const raw = localStorage.getItem('mpf-cols-v9'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
   if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
+  /* 2026-11-02（第二十三轮，用户要求）：列设置给 3 个视角预设 + 全部列
+     —— 默认（领导指定 12 列）/ 收益视角（回报与超额为主）/ 风险视角（风险与回撤为主） */
+  const COL_PRESETS = {
+    '默认': COL_DEFAULT,
+    '收益视角': ['rank', 'fund', 'trustee', 'nav', 'selfD1', 'selfM1', 'selfYtd', 'selfY1',
+      'selfY3a', 'selfY5a', 'excess1', 'size', 'cmp', 'ops'],
+    '风险视角': ['rank', 'fund', 'trustee', 'risk', 'nav', 'selfMdd', 'selfMdd5', 'vol1', 'vol3',
+      'sharpe1', 'posM12', 'size', 'cmp', 'ops'],
+    '全部列': COL_DEFS.map((c) => c.k),
+  };
   function applyCols(save) {
     if (save !== false) { try { localStorage.setItem('mpf-cols-v9', JSON.stringify([...colSet])); } catch (e) {} }
     /* 2026-10-26 重做：列显隐改为「不渲染」（visibleOrder 过滤），不再用 CSS 隐藏——
@@ -407,11 +461,10 @@
     try { localStorage.removeItem('mpf-cols-v5'); localStorage.removeItem('mpf-cols-v6'); } catch (e) {}
     if (typeof DATA !== 'undefined' && DATA && DATA.funds) render();   /* 列设置变更立即生效 */
     const same = (a) => a.length === colSet.size && a.every((k) => colSet.has(k));
-    const defOn = same(COL_DEFAULT);
-    const bS = document.getElementById('colSlim');
-    if (bS) bS.classList.toggle('on', defOn);
-    const bA = document.getElementById('colAll');
-    if (bA) bA.classList.toggle('on', !defOn && colSet.size === COL_DEFS.length);
+    Object.keys(COL_PRESETS).forEach((name) => {
+      const b = document.querySelector('#colPop .cp-b[data-preset="' + name + '"]');
+      if (b) b.classList.toggle('on', same(COL_PRESETS[name]));
+    });
     const box = document.getElementById('colChecks');
     if (box) box.querySelectorAll('input').forEach((cb) => { cb.checked = colSet.has(cb.value); });
   }
@@ -426,8 +479,10 @@
     const pop = document.createElement('div');
     pop.id = 'colPop'; pop.hidden = true;
     pop.innerHTML = '<div class="cp-t">' + TT('显示列') + '<span class="cp-x" id="colClose">×</span></div>' +
-      '<div class="cp-btns"><button type="button" class="cp-b" id="colSlim">' + TT('默认模式') + '</button>' +
-      '<button type="button" class="cp-b" id="colAll">' + TT('全部列') + '</button></div>' +
+      '<div class="cp-btns cp-presets">' +
+        ['默认', '收益视角', '风险视角', '全部列'].map((n) =>
+          '<button type="button" class="cp-b" data-preset="' + n + '" data-i18n="' + n + '">' + TT(n) + '</button>').join('') +
+      '</div>' +
       '<div class="cp-list" id="colChecks">' + COL_DEFS.map((c) =>
         '<label' + (c.lock ? ' class="cp-lock"' : '') + '><input type="checkbox" value="' + c.k + '"' + (c.lock ? ' disabled checked' : '') + '>' + TT(c.n) + '</label>').join('') + '</div>';
     /* 2026-11-02：工具栏已并入筛选行，弹层挂在工具栏内部，才能贴着「列设置」按钮弹出 */
@@ -435,8 +490,11 @@
     btn.addEventListener('click', (e) => { e.stopPropagation(); pop.hidden = !pop.hidden; applyCols(false); });
     document.getElementById('colClose').addEventListener('click', () => { pop.hidden = true; });
     document.addEventListener('click', (e) => { if (!pop.hidden && !e.target.closest('#colPop') && e.target.id !== 'colBtn') pop.hidden = true; });
-    document.getElementById('colSlim').addEventListener('click', () => { colSet = new Set(COL_DEFAULT); applyCols(); });
-    document.getElementById('colAll').addEventListener('click', () => { colSet = new Set(COL_DEFS.map((c) => c.k)); applyCols(); });
+    pop.querySelectorAll('.cp-b[data-preset]').forEach((b) => b.addEventListener('click', () => {
+      const name = b.getAttribute('data-preset');
+      colSet = new Set(COL_PRESETS[name] || COL_DEFAULT);
+      applyCols();
+    }));
     pop.querySelectorAll('#colChecks input').forEach((cb) => cb.addEventListener('change', () => {
       if (cb.checked) colSet.add(cb.value); else colSet.delete(cb.value);
       applyCols();
@@ -555,6 +613,7 @@
     renderPager(pages, total);
     /* 2026-11-02：估值日分布跟随筛选（发行人/种类/细类/关键词） */
     if (window.renderNavDistCard) window.renderNavDistCard();
+    syncTrusteeMenu();
     if (window.__syncTableScroll) window.__syncTableScroll();
   }
 

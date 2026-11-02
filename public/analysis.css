@@ -1099,3 +1099,51 @@
 /* 2026-10-21：历史缺口悬浮提示（光标移到才显示说明） */
 .gap-flag { display: inline-flex; align-items: center; margin-left: 8px; font-size: 11.5px; color: #b7791f;
   background: #fff8e6; border: 1px solid #f2d38a; border-radius: 999px; padding: 2px 8px; cursor: help; }
+
+/* ==========================================================
+   2026-11-02（第二十三轮，用户要求）：走势图顶部收成一行 + 图例并入表格
+   —— 标题「基金走势对比图」+ 添加指数 / 添加基金 + 区间 + 清空筛选 + 导出；
+      独立图例行删除，× 与「点线条改样式」跟着名称进表格。
+   ========================================================== */
+.tr-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.tr-head .tr-title { font-size: 15px; font-weight: 700; white-space: nowrap; letter-spacing: .2px; }
+.tr-adds { display: flex; align-items: center; gap: 8px; }
+.tr-adds .tr-sel {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px;
+  border: 1px dashed #bcd9f0; background: #fff; color: var(--brand);
+  border-radius: 4px; padding: 5px 11px; font: inherit; font-size: 12.5px; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.tr-adds .tr-sel:hover { background: var(--brand-soft); border-style: solid; border-color: var(--brand); }
+.tr-adds .tr-cnt { background: var(--brand); }
+.tr-head .tr-toolbar { margin: 0 0 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.tr-head-slim .tr-toolbar { margin-left: 0; width: 100%; justify-content: flex-start; }
+.tr-head .tr-tools2, .tr-head .tr-tools { display: flex; align-items: center; gap: 6px; }
+
+/* 表格：新增 期初/期末/最高/最低/波动率，名称列内置图例 */
+.tr-tbl th:nth-child(1), .tr-tbl td:nth-child(1) { width: 24% !important; }
+.tr-tbl th, .tr-tbl td { font-size: 12px; }
+.tr-tbl th { padding: 7px 6px; }
+.tr-tbl td { padding: 8px 6px; }
+.tr-tbl td.n { display: flex; align-items: center; gap: 7px; min-width: 150px; }
+.tr-tbl .tr-lg-line { flex: none; cursor: pointer; }
+.tr-tbl .nm { font-weight: 600; cursor: pointer; }
+.tr-tbl .nm:hover { color: var(--brand); text-decoration: underline; }
+.tr-tbl .tr-lg-x { flex: none; cursor: pointer; color: #a8b8c8; font-weight: 700; font-size: 13px; line-height: 1; padding: 0 2px; }
+.tr-tbl .tr-lg-x:hover { color: #d93025; }
+.tr-tbl td.r, .tr-tbl th.r { white-space: nowrap; }
+
+/* 说明行：左「点线条可改颜色…」右「纵轴为累计涨跌幅…」 */
+.tr-note { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.tr-note .tr-note-tip { color: var(--text-3); white-space: nowrap; }
+.tr-note .tr-note-txt { color: var(--text-3); }
+
+/* 2026-11-02（第二十三轮）：窄屏时走势图顶部再收一档，保证「收起」不被挤到第二行 */
+@media (max-width: 1320px) {
+  .tr-head { gap: 6px; }
+  .tr-head .tr-title { font-size: 14px; }
+  .tr-adds { gap: 6px; }
+  .tr-adds .tr-sel { padding: 4px 8px; font-size: 12px; }
+  .tr-head .tr-ranges .tr-r { padding: 4px 7px; font-size: 11.5px; }
+  .tr-head .tr-tool { padding: 4px 8px; font-size: 12px; }
+}

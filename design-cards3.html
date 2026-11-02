@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>首页榜单卡 · 20 套方案（真尺寸）</title>
+<style>
+  :root{
+    --brand:#0866bb; --brand-2:#2f7fc1; --brand-soft:#eef4fd; --line:#e3ecf4; --line-2:#d3e2f0;
+    --text:#16283e; --text-2:#3d5470; --text-3:#8595a8; --up:#c0392b; --down:#1a7a55;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#eef2f7;color:var(--text);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 16px 80px}
+  .hd{background:#fff;border-top:3px solid var(--brand);padding:22px 26px;border-radius:4px;margin-bottom:22px}
+  .hd h1{margin:0 0 6px;font-size:22px}
+  .hd p{margin:0;color:var(--text-2);font-size:13.5px}
+  .hd .kbd{display:inline-block;background:var(--brand-soft);color:var(--brand);border:1px solid #d3e2f0;border-radius:4px;padding:1px 7px;font-size:12px;margin:0 2px}
+  .grid{display:grid;grid-template-columns:repeat(2,420px);gap:22px;justify-content:center}
+  .cell{width:420px}
+  .cell .lab{display:flex;align-items:baseline;gap:8px;margin:0 2px 8px}
+  .cell .lab b{color:var(--brand);font-size:13.5px;letter-spacing:.4px}
+  .cell .lab span{font-size:12px;color:var(--text-3)}
+  .cell .note{font-size:11.5px;color:var(--text-3);margin:6px 2px 0;line-height:1.6}
+  @media (max-width: 900px){ .grid{grid-template-columns:1fr;justify-content:stretch} .cell{width:100%} }
+
+  /* ---- 通用卡片壳（各方案共用，只换内部排布） ---- */
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px 14px;position:relative;width:420px;box-shadow:0 1px 3px rgba(20,40,80,.05)}
+  .card h3{margin:0 0 2px;font-size:15px}
+  .card .more{position:absolute;top:15px;right:16px;font-size:11.5px;color:var(--brand);text-decoration:none;white-space:nowrap}
+  .card .sub{font-size:11.5px;color:var(--text-3);margin:0 0 10px}
+  .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .v{font-variant-numeric:tabular-nums;font-weight:700}
+  .up{color:var(--up)} .dn{color:var(--down)}
+  ol{list-style:none;margin:0;padding:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>首页榜单卡 · 20 套方案</h1>
+    <p>全部按 <span class="kbd">真尺寸 420 × 约 300px</span> 渲染（与首页四张卡同宽），数据取自线上「近 1 年回报领先」前五名。<br>
+       挑法建议：先看 <b>C09（榜首大卡）</b>、<b>C12（环形进度）</b>、<b>C06（涨跌胶囊）</b> 三种气质，再从同组里挑细节。</p>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+const DATA = [
+  { n: '海通韩国基金 - A类别', v: '+57.10%', t: '股票基金', up: 1 },
+  { n: '海通韩国基金 - T类别', v: '+57.10%', t: '股票基金', up: 1 },
+  { n: '海通亚太基金 - T类别', v: '+28.74%', t: '股票基金', up: 1 },
+  { n: '海通亚太基金 - A类别', v: '+28.68%', t: '股票基金', up: 1 },
+  { n: '我的亚洲股票基金', v: '+25.79%', t: '股票基金', up: 1 },
+];
+const V = [];
+const add = (id, name, note, html) => V.push({ id, name, note, html });
+
+const head = (title, sub) => `<h3>${title}</h3><a class="more" href="#">查看完整榜单 ›</a>` + (sub ? `<p class="sub">${sub}</p>` : '');
+const row = (i, extra = '') => `<li class="x${i}" ${extra}></li>`;   // 占位，具体各方案自己写
+
+/* C01 现版基准 */
+add('C01', '现版（基准）', '1-3 实心圆标、4/5 只留数字，无分割线；行高 52。就是线上现在的样子，作为对照。', `
+<div class="card">
+  ${head('近 1 年回报领先', '全部 MPF 基金 · 年率化')}
+  <ol class="c01">
+    ${DATA.map((d, i) => `<li><span class="r r${i + 1}">${i + 1}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c01 li{display:flex;align-items:center;gap:12px;padding:13px 0;font-size:14px}
+.c01 .r{flex:0 0 24px;height:24px;line-height:24px;text-align:center;border-radius:50%;color:#7b8fa3;font-size:12.5px;font-weight:700}
+.c01 .r1{background:#084e8c;color:#fff}.c01 .r2{background:#2e7fc0;color:#fff}.c01 .r3{background:#dbeaf8;color:#0b3a66}
+.c01 .r4,.c01 .r5{background:transparent;color:#3d86c6}
+.c01 .nm{flex:1;min-width:0}
+.c01 .v{font-size:14.5px}
+</style>`);
+
+/* C02 极简无序号 */
+add('C02', '极简无序号', '去掉序号，名称与数值两端对齐，行间一条极浅分割线；最克制，也最省空间。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c02">
+    ${DATA.map((d) => `<li><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c02 li{display:flex;align-items:center;gap:12px;padding:11px 0;font-size:14px;border-bottom:1px solid #f2f6fa}
+.c02 li:last-child{border-bottom:0}
+.c02 .nm{flex:1;min-width:0;color:var(--text-2)}
+.c02 .v{font-size:14px}
+</style>`);
+
+/* C03 大号细体序号 */
+add('C03', '大号细体序号', '序号用 22px 细体灰色数字，不带圆底；像杂志榜单，层次靠字号而非色块。', `
+<div class="card">
+  ${head('近 1 年回报领先', '2026 · 年度表现')}
+  <ol class="c03">
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c03 li{display:flex;align-items:baseline;gap:14px;padding:9px 0}
+.c03 .r{flex:0 0 26px;font-size:22px;font-weight:300;color:#c3d3e2;text-align:right;font-variant-numeric:tabular-nums}
+.c03 .nm{flex:1;min-width:0;font-size:14px}
+.c03 .v{font-size:15px}
+</style>`);
+
+/* C04 左侧等级竖条 */
+add('C04', '左侧等级竖条', '每行左侧一条 3px 竖条（1 深蓝、2 中蓝、3 浅蓝、4-5 灰），比圆标更安静。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c04">
+    ${DATA.map((d, i) => `<li class="s${i + 1}"><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c04 li{display:flex;align-items:center;gap:10px;padding:11px 0 11px 12px;border-left:3px solid #e6eef6;border-bottom:1px solid #f4f7fb}
+.c04 li:last-child{border-bottom:0}
+.c04 .s1{border-left-color:#084e8c}.c04 .s2{border-left-color:#2e7fc0}.c04 .s3{border-left-color:#8fbde3}
+.c04 .s4{border-left-color:#c9dced}.c04 .s5{border-left-color:#dfe9f2}
+.c04 .nm{flex:1;min-width:0;font-size:14px}
+.c04 .v{font-size:14.5px}
+</style>`);
+
+/* C05 数值底色条 */
+add('C05', '数值底色条', '右侧用一条按数值比例铺开的淡蓝底纹，扫一眼就能看出领先幅度。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c05">
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="bar" style="width:${28 - i * 3.6}%"></span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c05 li{display:flex;align-items:center;gap:10px;padding:10px 0;position:relative;font-size:14px}
+.c05 .r{flex:0 0 18px;color:#9fb3c6;font-size:12px;font-weight:700}
+.c05 .nm{flex:1;min-width:0;position:relative;z-index:1}
+.c05 .bar{position:absolute;right:64px;height:22px;background:linear-gradient(90deg,#eaf3fd,#d7e8fa);border-radius:3px;z-index:0}
+.c05 .v{position:relative;z-index:1;font-size:14.5px;min-width:62px;text-align:right}
+</style>`);
+
+/* C06 涨跌胶囊 */
+add('C06', '涨跌胶囊', '数值做成浅底胶囊（涨红跌绿），远看就能分辨正负；适合混排涨跌的榜单。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c06">
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="pill ${d.up ? 'u' : 'd'}">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c06 li{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:14px;border-bottom:1px dashed #f0f4f9}
+.c06 li:last-child{border-bottom:0}
+.c06 .r{flex:0 0 18px;color:#9fb3c6;font-size:12px;font-weight:700;text-align:center}
+.c06 .nm{flex:1;min-width:0}
+.c06 .pill{font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:999px;font-variant-numeric:tabular-nums}
+.c06 .u{background:#fdeeec;color:#c0392b}.c06 .d{background:#e9f7f0;color:#1a7a55}
+</style>`);
+
+/* C07 双列 5+5 */
+add('C07', '双列 10 只', '一列变两列，同样高度能放 10 只；适合「榜单要长一点」的场景。', `
+<div class="card">
+  ${head('近 1 年回报领先', '全部 MPF 基金 · 前 10')}
+  <div class="c07">
+    ${[0, 1].map((c) => `<ol>${DATA.map((d, i) => {
+      const k = c * 5 + i;
+      return `<li><span class="r">${k + 1}</span><span class="nm">${d.n.replace('海通', '')}</span><span class="v up">${d.v}</span></li>`;
+    }).join('')}</ol>`).join('')}
+  </div>
+</div>
+<style>
+.c07{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.c07 ol:first-child{border-right:1px solid #eff4f9;padding-right:12px}
+.c07 li{display:flex;align-items:center;gap:6px;padding:7px 0;font-size:11.5px}
+.c07 .r{flex:0 0 14px;color:#9fb3c6;font-size:10.5px;font-weight:700}
+.c07 .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c07 .v{font-size:11.5px}
+</style>`);
+
+/* C08 三甲领奖台 */
+add('C08', '三甲领奖台', '前 3 名横排成大数字，4-5 名回到列表；榜单头部更有仪式感。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <div class="c08">
+    ${DATA.slice(0, 3).map((d, i) => `<div class="p p${i + 1}"><span class="r">${i + 1}</span><b>${d.v}</b><span class="nm">${d.n.replace('海通', '')}</span></div>`).join('')}
+  </div>
+  <ol class="c08l">
+    ${DATA.slice(3).map((d, i) => `<li><span class="r">${i + 4}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c08{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px}
+.c08 .p{background:#f6faff;border:1px solid #e2eef9;border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:2px}
+.c08 .p1{background:#eef4fd;border-color:#cfe2f5}
+.c08 .r{font-size:10.5px;color:#7fa6c9;font-weight:700}
+.c08 b{font-size:15px;color:var(--up);font-variant-numeric:tabular-nums}
+.c08 .nm{font-size:10.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c08l li{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px;border-top:1px solid #f2f6fa}
+.c08l .r{flex:0 0 16px;color:#9fb3c6;font-size:11px;font-weight:700}
+.c08l .nm{flex:1;min-width:0}
+.c08l .v{font-size:13px}
+</style>`);
+
+/* C09 榜首大卡 */
+add('C09', '榜首大卡', '第 1 名放大成主角（名称 17px、回报 28px），其余 4 只做小行；视觉重心里最强。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <div class="c09top">
+    <div class="l"><span class="tag">TOP 1</span><b>${DATA[0].n}</b><span class="t">${DATA[0].t} · 年率化</span></div>
+    <div class="v up">${DATA[0].v}</div>
+  </div>
+  <ol class="c09l">
+    ${DATA.slice(1).map((d, i) => `<li><span class="r">${i + 2}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c09top{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(90deg,#eef4fd,#f8fbff);border-radius:10px;padding:12px 14px;margin-bottom:6px}
+.c09top .l{display:flex;flex-direction:column;gap:2px;min-width:0}
+.c09top .tag{align-self:flex-start;font-size:10px;font-weight:700;color:#fff;background:#084e8c;border-radius:3px;padding:1px 6px;margin-bottom:2px}
+.c09top b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c09top .t{font-size:11px;color:var(--text-3)}
+.c09top .v{font-size:26px;letter-spacing:-.5px}
+.c09l li{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;border-top:1px solid #f4f7fb}
+.c09l .r{flex:0 0 16px;color:#9fb3c6;font-size:11px;font-weight:700}
+.c09l .nm{flex:1;min-width:0;color:var(--text-2)}
+.c09l .v{font-size:13.5px}
+</style>`);
+
+/* C10 表格式 */
+add('C10', '表格式', '带表头与斑马纹，像一张小数据表；适合需要复制/对照的场景。', `
+<div class="card" style="padding-top:14px">
+  ${head('近 1 年回报领先')}
+  <table class="c10">
+    <thead><tr><th style="width:38px">名次</th><th>基金名称</th><th style="text-align:right">近 1 年</th></tr></thead>
+    <tbody>${DATA.map((d, i) => `<tr><td class="r">${i + 1}</td><td class="nm">${d.n}</td><td class="v up">${d.v}</td></tr>`).join('')}</tbody>
+  </table>
+</div>
+<style>
+.c10{width:100%;border-collapse:collapse;font-size:12.5px}
+.c10 th{font-size:11px;color:var(--text-3);font-weight:600;text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+.c10 td{padding:7px 6px;border-bottom:1px solid #f4f7fb}
+.c10 tbody tr:nth-child(even){background:#fbfdff}
+.c10 .r{color:#9fb3c6;font-weight:700;font-size:11.5px}
+.c10 .v{text-align:right;font-variant-numeric:tabular-nums}
+</style>`);
+
+/* C11 迷你走势 */
+add('C11', '迷你走势', '每行右侧加 44×16 的迷你折线，能看出「涨得稳不稳」；信息密度最高。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c11">
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span>
+      <svg width="44" height="16" viewBox="0 0 44 16"><path d="${spark(i)}" fill="none" stroke="#c0392b" stroke-width="1.3"/></svg>
+      <span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c11 li{display:flex;align-items:center;gap:9px;padding:9px 0;font-size:13.5px;border-bottom:1px solid #f5f8fb}
+.c11 li:last-child{border-bottom:0}
+.c11 .r{flex:0 0 16px;color:#9fb3c6;font-size:11.5px;font-weight:700}
+.c11 .nm{flex:1;min-width:0}
+.c11 svg{flex:none;opacity:.75}
+.c11 .v{font-size:13.5px;min-width:56px;text-align:right}
+</style>`);
+
+/* C12 环形进度 */
+add('C12', '环形进度', '序号换成小圆环（回报名义进度），既有排名又有一个图形锚点。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c12">
+    ${DATA.map((d, i) => `<li>${ring(57 - i * 7, i + 1)}<span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c12 li{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13.5px}
+.c12 .nm{flex:1;min-width:0}
+.c12 .v{font-size:13.5px}
+</style>`);
+
+/* C13 深色卡 */
+add('C13', '深色卡', '深蓝底 + 白字，数值用亮色；四张卡放在一起会形成视觉锚点，但要注意整页过重。', `
+<div class="card c13">
+  ${head('近 1 年回报领先')}
+  <ol>
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="v">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c13{background:linear-gradient(160deg,#0b3b66,#084e8c);border-color:#0b3b66;color:#fff}
+.c13 h3{color:#fff}
+.c13 .more{color:#bcd9f0}
+.c13 li{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.10)}
+.c13 li:last-child{border-bottom:0}
+.c13 .r{flex:0 0 18px;color:#8fbde3;font-size:11.5px;font-weight:700}
+.c13 .nm{flex:1;min-width:0;color:#eaf3fb}
+.c13 .v{color:#ffd7a8;font-size:14px}
+</style>`);
+
+/* C14 独立小卡 */
+add('C14', '独立小卡', '每只基金一张浅底小卡，间距 6px；触感强，适合移动端。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c14">
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c14 li{display:flex;align-items:center;gap:9px;background:#f7fafd;border:1px solid #edf3f9;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px}
+.c14 li:last-child{margin-bottom:0}
+.c14 .r{flex:0 0 18px;color:#7fa6c9;font-size:11.5px;font-weight:700}
+.c14 .nm{flex:1;min-width:0}
+.c14 .v{font-size:13px}
+</style>`);
+
+/* C15 三栏对齐榜单 */
+add('C15', '三栏对齐榜单', '名次左、名称居中、数值右，严格三栏对齐；最「报表」，适合和右侧图表并排。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c15">
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c15 li{display:grid;grid-template-columns:28px 1fr 72px;align-items:center;padding:10px 0;font-size:13.5px;border-bottom:1px solid #f3f7fb}
+.c15 li:last-child{border-bottom:0}
+.c15 .r{color:#9fb3c6;font-size:11.5px;font-weight:700}
+.c15 .nm{text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c15 .v{text-align:right;font-size:13.5px}
+</style>`);
+
+/* C16 折叠式 */
+add('C16', '折叠式（默认 3 行）', '默认只显示 3 行 + 「展开全部 5 只」；四张卡并排时高度更矮、更整齐。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c16">
+    ${DATA.slice(0, 3).map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+  <button class="c16b">展开全部 5 只 ▾</button>
+</div>
+<style>
+.c16 li{display:flex;align-items:center;gap:10px;padding:11px 0;font-size:13.5px}
+.c16 .r{flex:0 0 18px;color:#9fb3c6;font-size:11.5px;font-weight:700}
+.c16 .nm{flex:1;min-width:0}
+.c16 .v{font-size:13.5px}
+.c16b{width:100%;margin-top:8px;border:1px dashed #d3e2f0;background:#fbfdff;color:var(--brand);border-radius:6px;padding:7px;font:inherit;font-size:12px;cursor:pointer}
+</style>`);
+
+/* C17 TOP 标签 */
+add('C17', 'TOP 标签', '序号做成「TOP 1」小标签，前 3 名用蓝色递增；像奖牌，但比圆标更轻。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c17">
+    ${DATA.map((d, i) => `<li><span class="tag t${i + 1}">TOP ${i + 1}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c17 li{display:flex;align-items:center;gap:9px;padding:9px 0;font-size:13.5px;border-bottom:1px solid #f4f7fb}
+.c17 li:last-child{border-bottom:0}
+.c17 .tag{flex:0 0 44px;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:.3px;border-radius:4px;padding:2px 0;color:#fff;background:#9fb3c6}
+.c17 .t1{background:#084e8c}.c17 .t2{background:#2e7fc0}.c17 .t3{background:#8fbde3}
+.c17 .t4,.c17 .t5{background:#e3edf6;color:#5b7a99}
+.c17 .nm{flex:1;min-width:0}
+.c17 .v{font-size:13.5px}
+</style>`);
+
+/* C18 带类型标签 */
+add('C18', '带类型标签', '名称下方加基金种类小字（股票/混合/债券），信息更完整，但卡片会高一点。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c18">
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="w"><span class="nm">${d.n}</span><span class="t">${d.t}</span></span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c18 li{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.c18 .r{flex:0 0 18px;color:#9fb3c6;font-size:11.5px;font-weight:700}
+.c18 .w{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.35}
+.c18 .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c18 .t{font-size:10.5px;color:var(--text-3)}
+.c18 .v{font-size:13.5px}
+</style>`);
+
+/* C19 数值优先 */
+add('C19', '数值优先（反排）', '数值放大在左、名称在右；第一眼先看回报，适合「榜」而不是「列表」。', `
+<div class="card">
+  ${head('近 1 年回报领先')}
+  <ol class="c19">
+    ${DATA.map((d, i) => `<li><span class="v up">${d.v}</span><span class="nm">${d.n}</span><span class="r">${i + 1}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c19 li{display:flex;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid #f4f7fb}
+.c19 li:last-child{border-bottom:0}
+.c19 .v{flex:0 0 78px;font-size:17px;letter-spacing:-.2px}
+.c19 .nm{flex:1;min-width:0;font-size:13px;color:var(--text-2)}
+.c19 .r{flex:0 0 14px;color:#c3d3e2;font-size:11px;font-weight:700;text-align:right}
+</style>`);
+
+/* C20 无框线条 */
+add('C20', '无框线条', '去掉卡片边框与阴影，只留一条顶部细线；放在浅灰底上最像「杂志榜单」。', `
+<div class="card c20">
+  ${head('近 1 年回报领先')}
+  <ol>
+    ${DATA.map((d, i) => `<li><span class="r">${i + 1}</span><span class="nm">${d.n}</span><span class="v up">${d.v}</span></li>`).join('')}
+  </ol>
+</div>
+<style>
+.c20{border:0;box-shadow:none;border-top:2px solid #084e8c;border-radius:0;padding:14px 4px 6px;background:transparent}
+.c20 h3{font-size:15px}
+.c20 li{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:13.5px;border-bottom:1px solid #e8eef5}
+.c20 li:last-child{border-bottom:0}
+.c20 .r{flex:0 0 18px;color:#9fb3c6;font-size:11.5px;font-weight:700}
+.c20 .nm{flex:1;min-width:0}
+.c20 .v{font-size:13.5px}
+</style>`);
+
+/* 工具 */
+function spark(i) {
+  const seed = i * 7 + 3;
+  let d = 'M0 12';
+  for (let x = 1; x <= 44; x += 4) {
+    const y = 12 - (Math.sin((x + seed) / 5) * 3 + x / 6);
+    d += 'L' + x + ' ' + Math.max(2, Math.min(14, y)).toFixed(1);
+  }
+  return d;
+}
+function ring(pct, i) {
+  const r = 8, c = 2 * Math.PI * r, on = c * Math.min(100, pct) / 100;
+  const col = ['#084e8c', '#2e7fc0', '#8fbde3', '#c9dced', '#dfe9f2'][i - 1];
+  return `<svg width="22" height="22" viewBox="0 0 22 22" style="flex:none">
+    <circle cx="11" cy="11" r="${r}" fill="none" stroke="#eef3f9" stroke-width="3"/>
+    <circle cx="11" cy="11" r="${r}" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round"
+      stroke-dasharray="${on.toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 11 11)"/>
+    <text x="11" y="14.5" text-anchor="middle" font-size="8" fill="#5b7a99" font-weight="700">${i}</text></svg>`;
+}
+
+document.getElementById('grid').innerHTML = V.map((v) => `
+  <div class="cell">
+    <div class="lab"><b>${v.id}</b><span>${v.name}</span></div>
+    ${v.html}
+    <div class="note">${v.note}</div>
+  </div>`).join('');
+</script>
+</body>
+</html>

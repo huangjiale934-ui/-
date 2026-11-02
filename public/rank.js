@@ -961,6 +961,38 @@
       'selfW1', 'selfY3a', 'selfY5a', 'selfMdd5', 'count', 'sizeSum', 'ann5Avg', 'ann10Avg',
       'annLaunchAvg', 'navRate'];
 
+    /* 2026-11-02（第二十三轮，用户要求）：列设置给 3 个视角预设 + 全部列（按当前榜单类型各配一套） */
+    const PRESET_SHOW = {
+      fund: {
+        '收益视角': ['rank', 'fund', 'type', 'ann1', 'ann5', 'ann10', 'annLaunch',
+          'cum1', 'cum5', 'cum10', 'cumLaunch', 'size', 'cmp', 'ops'],
+        '风险视角': ['rank', 'fund', 'type', 'risk', 'mgmtFee', 'fer', 'worstYear', 'size', 'cmp', 'ops'],
+      },
+      self: {
+        '收益视角': ['rank', 'fund', 'type', 'selfD1', 'selfM1', 'selfYtd', 'selfY1',
+          'selfY3a', 'selfY5a', 'size', 'cmp', 'ops'],
+        '风险视角': ['rank', 'fund', 'type', 'risk', 'selfMdd', 'selfMdd5', 'selfW1', 'size', 'cmp', 'ops'],
+      },
+      agg: {
+        '收益视角': ['rank', 'trustee', 'count', 'ann1Avg', 'ann5Avg', 'ann10Avg', 'annLaunchAvg', 'sizeSum', 'ops'],
+        '风险视角': ['rank', 'trustee', 'count', 'sizeSum', 'mgmtFee', 'navRate', 'ops'],
+      },
+    };
+    function presetOff(name) {
+      const mode = curMode();
+      const defs = MODES[mode];
+      const cols = defs.map((c) => c[0]).filter((k) => k !== 'calYear');
+      if (name === '全部列') return [];
+      if (name === '默认') return DEFAULT_OFF.slice();
+      const show = (PRESET_SHOW[mode] || {})[name];
+      if (!show) return DEFAULT_OFF.slice();
+      return cols.filter((k) => {
+        if (show.indexOf(k) >= 0) return false;
+        const d = defs.find((c) => c[0] === k);
+        return !(d && d[2]);   /* lock 列不可隐藏 */
+      });
+    }
+
     let off = null;   /* 隐藏列集合 */
     try { const raw = localStorage.getItem(KEY); off = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { off = null; }
     if (!off) off = new Set(DEFAULT_OFF);
@@ -984,7 +1016,11 @@
         if (order.indexOf(mk) >= 0) {
           order = order.filter((k) => k !== mk);
           const ri = order.indexOf('risk');
-          if (ri >= 0) order.splice(ri + 1, 0, mk);
+          /* 2026-11-02 修：风险级别被隐藏时 ri=-1，原来直接不插回 → 榜单维度列整列消失
+             （「收益视角 / 风险视角」预设会隐藏风险级别，暴露出这个老 bug）；
+             改成插到「基金名称」右侧。 */
+          const at = ri >= 0 ? ri + 1 : (order.indexOf('fund') + 1 || 1);
+          order.splice(at, 0, mk);
         }
       }
       return order;
@@ -1056,26 +1092,25 @@
         (lock || !off.has(k) ? ' checked' : '') + (lock ? ' disabled' : '') + '>' + n + '</label>').join('');
       box.querySelectorAll('input').forEach((cb) => cb.addEventListener('change', () => {
         if (cb.checked) off.delete(cb.value); else off.add(cb.value);
-        applyAndRender();
+        applyAndRender(); syncPresetUI();
       }));
     }
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (pop.hidden) buildList();
+      if (pop.hidden) { buildList(); syncPresetUI(); }
       pop.hidden = !pop.hidden;
     });
-    const bAll = document.querySelector('#rkColAll');
-    if (bAll) bAll.addEventListener('click', () => {
-      MODES[curMode()].forEach(([k]) => off.delete(k));
-      applyAndRender(); buildList();
-    });
-    const bSlim = document.querySelector('#rkColSlim');
-    if (bSlim) bSlim.addEventListener('click', () => {
-      /* 2026-10-27（用户要求）：「精简模式」改「默认模式」——一键回到默认列（只隐藏 DEFAULT_OFF） */
-      off = new Set(DEFAULT_OFF);
-      applyAndRender(); buildList();
-    });
+    pop.querySelectorAll('.cp-b[data-preset]').forEach((b) => b.addEventListener('click', () => {
+      off = new Set(presetOff(b.getAttribute('data-preset')));
+      applyAndRender(); buildList(); syncPresetUI();
+    }));
+    function syncPresetUI() {
+      const cur = [...off].sort().join(',');
+      pop.querySelectorAll('.cp-b[data-preset]').forEach((b) => {
+        b.classList.toggle('on', [...presetOff(b.getAttribute('data-preset'))].sort().join(',') === cur);
+      });
+    }
     document.addEventListener('click', (e) => {
       if (!pop.hidden && !(e.target.closest && e.target.closest('#rkColPop')) && e.target.id !== 'rkColBtn') pop.hidden = true;
     });
