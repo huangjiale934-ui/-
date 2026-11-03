@@ -613,13 +613,20 @@
         '<span class="v ' + (colorVal == null ? '' : (colorVal(x) >= 0 ? 'up' : 'down')) + '">' + fmt(x) + '</span>' +
         '</li>')
       .join('');
-    /* 2026-11-03（第二十九轮，用户要求）：榜单里的基金可点击直接打开详情页。
-       首页没有详情弹窗容器，跳合并页的 ?f=<id> 深链（落地即弹窗）。用赋值式 onxxx 覆盖，
-       反复渲染不会累积监听。 */
+    /* 2026-11-03（第二十九轮）：榜单条目直接在本页弹出基金详情（不跳到资料库）。
+       首页没有基金表，先按需拉 /api/funds + 自算指标，再调 openDetail。
+       用赋值式 onxxx 覆盖，反复渲染不会累积监听。 */
+    let busy = false;
     const go = (li) => {
       const id = li && li.getAttribute('data-fid');
-      if (!id) return;
-      location.href = 'index.html?f=' + encodeURIComponent(id) + '#db';
+      if (!id || busy) return;
+      if (!window.openDetail || !window.ensureFunds) { location.href = 'index.html?f=' + encodeURIComponent(id) + '#db'; return; }
+      busy = true;
+      const fin = () => { busy = false; };
+      (window.ensurePerf ? window.ensurePerf().catch(() => null) : Promise.resolve(null))
+        .then((j) => { if (j) window.__PERF_JSON = j; return window.ensureFunds(); })
+        .then(() => { window.openDetail(id); fin(); })
+        .catch(fin);
     };
     el.onclick = (e) => {
       const li = e.target && e.target.closest ? e.target.closest('li[data-fid]') : null;
@@ -733,7 +740,9 @@
     ['MPFAVG', '强积金市场指数'], ['MPF_STOCK', '股票基金指数'], ['MPF_MIX', '混合资产基金指数'],
     ['MPF_BOND', '债券基金指数'], ['HSI', '恒生指数'], ['SSE', '上证指数'],
   ];
-  const RANGES = [['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['10y', '近 10 年'], ['all', '全部']];
+  /* 2026-11-03（第二十九轮，用户要求）：顶部行情栏的迷你线是「最近 40 个交易日」的日线，
+     与这里默认的「近 5 年」累计走势不是一回事 → 增加「每日」视图（最近 60 个交易日的当日涨跌幅）。 */
+  const RANGES = [['d', '每日'], ['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['10y', '近 10 年'], ['all', '全部']];
   let DB = null, cur = 'MPFAVG', range = '5y';   /* 2026-10-31 二版（用户要求）：默认近 5 年 */
 
   function esc2(s) {
@@ -746,6 +755,7 @@
   function sliceSeries(rows, rg) {
     if (!rows || !rows.length) return [];
     if (rg === 'all') return rows;
+    if (rg === 'd') return rows.slice(-61);   /* 60 个交易日 + 前一日做基准 */
     const days = rg === '1y' ? 365 : rg === '3y' ? 365 * 3 : rg === '5y' ? 365 * 5 : 365 * 10;
     const last = new Date(rows[rows.length - 1][0]).getTime();
     const cutoff = last - days * 86400000;
@@ -756,6 +766,69 @@
     if (!series || series.length < 2) return null;
     const a = series[0][1], b = series[series.length - 1][1];
     return a ? (b / a - 1) * 100 : null;
+  }
+  /* 最新一个交易日的涨跌幅（%） */
+  function dayChg(series) {
+    if (!series || series.length < 2) return null;
+    const a = series[series.length - 2][1], b = series[series.length - 1][1];
+    return a ? (b / a - 1) * 100 : null;
+  }
+
+  /* 2026-11-03：每日涨跌幅柱状图（最近 60 个交易日）。涨红跌绿，零线居中。 */
+  function renderDaily(it, host) {
+    /* 优先用接口附带的日线（最近 120 个交易日）；没有就退回周线（老缓存） */
+    const src = (it.daily && it.daily.length > 5) ? it.daily : it.series;
+    const raw = src.slice(-61);
+    if (raw.length < 3) { host.innerHTML = '<div class="chart-empty">' + esc2(TT('暂无指数数据')) + '</div>'; return; }
+    const rows = [];
+    for (let i = 1; i < raw.length; i++) {
+      const p0 = raw[i - 1][1], p1 = raw[i][1];
+      rows.push([raw[i][0], p0 ? (p1 / p0 - 1) * 100 : 0, p1]);
+    }
+    const W = 1000, H = 524, padL = 58, padR = 16, padT = 22, padB = 90;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const absMax = Math.max(0.5, ...rows.map((r) => Math.abs(r[1])));
+    let step = absMax <= 1 ? 0.5 : absMax <= 2.5 ? 1 : absMax <= 6 ? 2 : 5;
+    const top = Math.ceil(absMax / step) * step;
+    const Y = (v) => padT + plotH / 2 - (v / top) * (plotH / 2);
+    const bw = Math.max(2, (plotW / rows.length) * 0.62);
+    let grid = '', yl = '', bars = '';
+    for (let v = -top; v <= top + 1e-9; v += step) {
+      const y = Y(v).toFixed(1);
+      grid += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="' + (Math.abs(v) < 1e-9 ? '#c9d9e8' : '#eef2f7') + '" stroke-width="1"/>';
+      yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + (v > 0 ? '+' : '') + v.toFixed(step < 1 ? 1 : 0) + '%</text>';
+    }
+    rows.forEach((r, i) => {
+      const x = padL + plotW * (i + 0.5) / rows.length;
+      const y0 = Y(0), y1 = Y(r[1]);
+      const up = r[1] >= 0;
+      bars += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(y0, y1).toFixed(1) + '" width="' + bw.toFixed(1) +
+        '" height="' + Math.max(1, Math.abs(y1 - y0)).toFixed(1) + '" rx="1.5" fill="' + (up ? '#d93025' : '#12996b') + '" opacity="0.85"><title>' +
+        esc2(r[0] + ' · ' + (r[1] >= 0 ? '+' : '') + r[1].toFixed(2) + '%（' + Math.round(r[2]).toLocaleString('en-US') + ' 点）') + '</title></rect>';
+    });
+    /* 横轴分两行：上行日期（每 5 个交易日），下行月份（跨月处，加粗）。
+       两行分开 + 位置太近时丢弃日期标签，避免「08-1」和「8月」叠在一起。 */
+    let xt = '';
+    let lastMon = '';
+    const mpos = [];
+    rows.forEach((r, i) => {
+      const mm = r[0].slice(5, 7);
+      const x = padL + plotW * (i + 0.5) / rows.length;
+      if (mm !== lastMon) {
+        lastMon = mm;
+        mpos.push(x);
+        xt += '<text x="' + x.toFixed(1) + '" y="' + (H - padB + 38) + '" text-anchor="middle" class="pi-yk pi-yk-year">' + Number(mm) + TT('月') + '</text>';
+      }
+    });
+    rows.forEach((r, i) => {
+      if (i % 5) return;
+      const x = padL + plotW * (i + 0.5) / rows.length;
+      if (mpos.some((m) => Math.abs(m - x) < 26)) return;
+      xt += '<text x="' + x.toFixed(1) + '" y="' + (H - padB + 20) + '" text-anchor="middle" class="pi-yk">' + r[0].slice(5) + '</text>';
+    });
+    host.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc2(TT('每日涨跌幅')) + '">' +
+      grid + yl + bars + xt + '</svg>' +
+      '<div class="pi-note">' + esc2(TT('最近 60 个交易日 · 柱高为当日涨跌幅（相对前一交易日），红涨绿跌')) + '</div>';
   }
 
   function renderRanges() {
@@ -774,7 +847,7 @@
       const it = DB.items[k];
       if (!it) return '';
       const s = sliceSeries(it.series, range);
-      const c = cum(s);
+      const c = (range === 'd') ? dayChg(it.series) : cum(s);
       const cls = c == null ? 'flat' : (c >= 0 ? 'up' : 'down');
       return '<button type="button" class="pi-card' + (k === cur ? ' on' : '') + '" data-pi="' + k + '">' +
         '<span class="pi-k">' + esc2(TT(label)) + '</span>' +
@@ -793,6 +866,7 @@
       host.innerHTML = '<div class="chart-empty">' + esc2(TT('暂无指数数据')) + '</div>';
       return;
     }
+    if (range === 'd') { renderDaily(it, host); return; }
     const s = sliceSeries(it.series, range);
     /* 2026-10-31 四版（用户要求）：恒指/上证等外部指数直接画公开点位值（纵轴=指数点），
        不再归一化成基期 100；自算 MPF 指数保持基期 100 口径 */

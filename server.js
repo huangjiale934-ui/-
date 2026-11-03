@@ -638,7 +638,9 @@ const server = http.createServer(async (req, res) => {
             wk[key] = v;
           });
           const wseries = Object.keys(wk).sort().map((x) => [x, wk[x]]);
-          items[k] = { name: it.name, asOf: s2[s2.length - 1][0], series: wseries };
+          /* 2026-11-03（第二十九轮）：首页「每日」视图需要日线（周线聚合后是 60 周，不是 60 个交易日）。
+             只带最近 120 个交易日，约 15KB，静态站也能直接复用。 */
+          items[k] = { name: it.name, asOf: s2[s2.length - 1][0], series: wseries, daily: s2.slice(-120) };
         });
         return sendRaw(req, res, 200, JSON.stringify({ updatedAt: j.updatedAt, items }), MIME['.json'], { cache: 'public, max-age=900' });
       } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }

@@ -111,7 +111,11 @@ step "8.2/9 自算指标重算（hist 追加后）" node navperf.js
 step "8.4/9 历史索引对齐" node tools/hist-index-sync.js
 # 2026-10-24：链路末尾固化验收（不依赖 AI 纪律；核验 U01）
 step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js
-soft_step "9.5/9 缺日检查" node tools/gap-check.js
+# 2026-11-03（第二十九轮）：缺日检查改成「真缺才补」的自动闭环 ——
+# 旧版按 HSI 交易日历判缺，把源站未发布的日期（宏利退休精選 T+2 / AMTD 走 etnet / 新地按季）
+# 全算成缺日，每天报 55–244 只且从不真去补。新版判据 = 净值日 > 历史末点；
+# --fix 会先 merge-nav 追点、再按发行人重抓，幂等，可每天跑。
+soft_step "9.5/9 缺日检查 + 自动补抓" node tools/gap-check.js --fix
 # 2026-10-29（5.0）：链接巡检——友链 href 为空曾导致「点宏利跳回本站」，此前无任何环节检查。
 # 结构问题（空 href / 缺官网地址 / undefined）会让退出码非 0；网络 403 只告警。
 soft_step "9.7/9 链接巡检" node tools/link-audit.js

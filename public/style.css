@@ -2591,7 +2591,9 @@ body.has-sidebar .dca-fab { display: none !important; }
    ========================================================== */
 .db-side-grp { padding: 2px 6px 7px; font-size: 16px; font-weight: 800; color: #14314f; letter-spacing: .2px; }
 .db-side-lang { margin: 0 2px 12px; }
-.db-side-lang .lang-sw { display: inline-flex; gap: 2px; padding: 2px; background: #f1f7fd; border-radius: 9px; }
+.db-side-lang .lang-sw { display: inline-flex; gap: 2px; padding: 2px; background: #f1f7fd; border-radius: 9px;
+  /* 2026-11-03（第二十九轮，用户反馈）：.lang-sw 基础样式带 margin-left:auto，会把胶囊推到右侧 —— 必须复位才能真正居中 */
+  margin-left: 0; }
 .db-side-lang .lang-sw button { font-size: 11.5px; padding: 3px 10px; border-radius: 7px; }
 .db-side-lang .lang-sw button.on { background: var(--brand, #0866bb); color: #fff; }
 @media (max-width: 760px) {

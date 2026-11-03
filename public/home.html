@@ -10,8 +10,8 @@
 <!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
 <link rel="preload" as="image" href="img/hero-hk.webp?v=2" media="(min-width: 701px)">
 <link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
-<link rel="stylesheet" href="b.css?p=home&v=20261103c">
-<link rel="stylesheet" href="home.css?v=20261103c">
+<link rel="stylesheet" href="b.css?p=home&v=20261103d">
+<link rel="stylesheet" href="home.css?v=20261103d">
 </head>
 <body class="home page-side">
 
@@ -202,13 +202,30 @@
   </div>
 </footer>
 
+
+<!-- 2026-11-03（第二十九轮）：首页榜单点击直接弹详情（与资料库同一套弹窗） -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div><h3 id="mTitle"></h3><div class="muted" id="mSub" style="font-size:12px"></div></div>
+      <div class="m-tools">
+        <button type="button" class="btn ghost sm" id="mExpand" data-i18n="放大" data-i18n-title="放大到独立分析页">⤢ 放大</button>
+        <button type="button" class="btn ghost sm" id="mExport" data-i18n="导出" data-i18n-title="导出本基金数据（CSV）">导出</button>
+        <button type="button" class="btn ghost sm" id="mShare" data-i18n="分享" data-i18n-title="复制本基金分享链接">分享</button>
+        <button class="close-x" onclick="closeModal()">×</button>
+      </div>
+    </div>
+    <div class="modal-bd" id="mBody"></div>
+  </div>
+</div>
+
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
   <span class="tt-txt" data-i18n="回到顶部">回到顶部</span>
 </button>
 
-<script src="b.js?p=home&v=20261103c"></script>
-<script src="home.js?v=20261103c"></script>
+<script src="b.js?p=home&v=20261103d"></script>
+<script src="home.js?v=20261103d"></script>
 <script src="heat.js"></script>
 <script>renderFriends();</script>
 

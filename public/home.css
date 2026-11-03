@@ -1150,3 +1150,6 @@ body { overflow-x: visible; }
 .hero-brand .hb-txt b { font-size: 16px; font-weight: 700; color: #12314e; letter-spacing: .3px; }
 .hero-brand .hb-txt em { font-style: normal; font-size: 9px; letter-spacing: 1.15px; color: #8698aa; }
 @media (max-width: 620px) { .hero-brand .hb-txt em { display: none; } }
+
+/* 2026-11-03（第二十九轮）：积金表现指数「每日」视图的说明行 */
+.pi-note { margin-top: 6px; font-size: 11.5px; color: var(--text-3, #8595a8); text-align: center; }

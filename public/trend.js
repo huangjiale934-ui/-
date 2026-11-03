@@ -701,7 +701,18 @@ window.TREND = (function () {
     function itemLabel(it) {
       if (it.type === 'index') return indexName(it.key);
       if (it.type === 'tavg') return tavgName(it.key);
-      return fundLabel(it.id);
+      let nm = fundLabel(it.id);
+      /* 2026-11-03（第二十九轮）：同一计划的 A / T 类单位基金主名相同，
+         图例与统计表会出现两个一模一样的名字 → 重名时前置单位类别（A 类 · xxx）。 */
+      try {
+        const dup = (S.items || []).filter((o) => o.type === 'fund' && fundLabel(o.id) === nm).length;
+        if (dup > 1) {
+          const pf = cachedPerf && cachedPerf.funds && cachedPerf.funds[String(it.id)];
+          const u = pf && pf.unit;
+          if (u) nm = _tq('{u} 类', { u: u }) + ' · ' + nm;
+        }
+      } catch (e) {}
+      return nm;
     }
     function loadItem(it) {
       const k = keyOf(it);
@@ -1040,8 +1051,9 @@ window.TREND = (function () {
       const H = Math.max(220, Math.round(svg.clientHeight || 300));
       svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
       /* 2026-10-19：纵轴刻度移到左边 → 左侧留白给标签，右侧不再留 */
-      /* 2026-11-02：底部留白 26 → 40，给「年份斜排 + 月份」两级横轴留位置 */
-      const PL = 64, PR = W - 12, PT = 24, PB = H - 40;
+      /* 2026-11-02：底部留白 26 → 40，给「年份 + 月份」两级横轴留位置
+         2026-11-03（第二十九轮）：年份改单独一行，底部再让出 16px（40 → 56） */
+      const PL = 64, PR = W - 12, PT = 24, PB = H - 56;
       const win = currentWindow();
       if (!win) {
         /* 2026-10-21：区分「没选」与「选了但该基金无日度净值」，避免用户以为图坏了 */
@@ -1080,7 +1092,7 @@ window.TREND = (function () {
         const txtEl = q('.tr-note-txt');
         if (txtEl) {
           txtEl.textContent = single
-            ? _t('单条对比时纵轴为实际数值（净值 / 指数点位）；再加入一条即切换为累计涨跌幅对比。悬停可查看当日数值。')
+            ? _t('单条对比时纵轴为实际数值（净值 / 指数点位），悬停显示当日净值与当日涨跌幅；再加入一条即切换为相对区间起点的累计涨跌幅对比。')
             : _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。');
         }
       }
@@ -1162,11 +1174,12 @@ window.TREND = (function () {
           const x = X(ms);
           if (x < PL + 2 || x > PR - 4) continue;
           g += '<line x1="' + x.toFixed(1) + '" y1="' + PB + '" x2="' + x.toFixed(1) + '" y2="' + (PB + 5) + '" stroke="#9fbdd9" stroke-width="1.2"/>';
-          /* 2026-11-02（第二十五轮，用户要求）：年份正放（不斜排）、居中、单独一行并加粗 */
-          /* 2026-11-03（用户要求）：年份与换年竖线分开 —— 右移 7px 左对齐，贴边则改左对齐 */
-          let lx = x + 7, anc = 'start';
-          if (lx + 30 > PR) { lx = x - 7; anc = 'end'; }
-          g += '<text x="' + lx.toFixed(1) + '" y="' + (axisY + 1) + '" text-anchor="' + anc + '" class="tr-xlab tr-xlab-year">' + y + '</text>';
+          /* 2026-11-02（第二十五轮）：年份正放（不斜排）、加粗
+             2026-11-03（第二十九轮，用户要求）：撤销左右平移，改为单独一行居中挂在换年竖线下方 */
+          let lx = x, anc = 'middle';
+          if (lx < PL + 16) { lx = PL; anc = 'start'; }
+          else if (lx > PR - 16) { lx = PR; anc = 'end'; }
+          g += '<text x="' + lx.toFixed(1) + '" y="' + (axisY + 16) + '" text-anchor="' + anc + '" class="tr-xlab tr-xlab-year">' + y + '</text>';
         }
       })();
       /* 两条线时填充其间色带（参照合作方站） */
@@ -1214,6 +1227,9 @@ window.TREND = (function () {
         crossline.setAttribute('x1', bx); crossline.setAttribute('x2', bx);
         let rows = '';
         const dots = [];
+        /* 2026-11-03（第二十九轮，用户反馈）：只有 1 条线时显示「当日涨跌幅」，
+           2 条及以上才显示「相对区间起点」的累计涨跌幅 —— 单线看区间涨幅容易误读成当日。 */
+        const solo = lines.length === 1;
         lines.forEach((L) => {
           let p = null, pd = Infinity, raw = null, rd = Infinity, pn = null, nd = Infinity;
           P(L).forEach(([t, v]) => { const d2 = Math.abs(t - best); if (d2 < pd) { pd = d2; p = [t, v]; } });
@@ -1224,7 +1240,14 @@ window.TREND = (function () {
           L.win.norm.forEach(([t, v]) => { const d2 = Math.abs(t - best); if (d2 < nd) { nd = d2; pn = [t, v]; } });
           if (!p) return;
           dots.push('<circle cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(p[1]).toFixed(1) + '" r="3.2" fill="' + L.color + '"/>');
-          const chg = pn ? pn[1] : null;   /* norm 已是累计涨跌幅 %（2026-10-19） */
+          let chg = pn ? pn[1] : null;   /* norm 已是累计涨跌幅 %（2026-10-19） */
+          if (solo) {
+            /* 当日涨跌 = 当日净值 ÷ 前一交易日净值 − 1（用原始序列，避免归一化基准干扰） */
+            const rw = L.win.raw;
+            let bi = -1, bdd = Infinity;
+            rw.forEach(([t], k) => { const d2 = Math.abs(t - best); if (d2 < bdd) { bdd = d2; bi = k; } });
+            if (bi > 0 && rw[bi][1] > 0 && rw[bi - 1][1] > 0) chg = (rw[bi][1] / rw[bi - 1][1] - 1) * 100;
+          }
           rows += '<div class="tr-tip-row"><i style="background:' + L.color + '"></i><span class="n">' + esc0(L.name) + '</span>' +
             '<b class="' + clsOf(chg) + '">' + fmtPct(chg) + '</b>' +
             '<em>' + (raw ? fmtRaw(raw[1]) : '') + '</em></div>';
@@ -1234,7 +1257,13 @@ window.TREND = (function () {
         grp.setAttribute('class', 'tr-dot');
         grp.innerHTML = dots.join('');
         svg.appendChild(grp);
-        tip.innerHTML = '<div class="tr-tip-date">' + dstr(best) + '</div>' + rows;
+        const tipTag = solo
+          ? '<span class="tr-tip-tag">' + _t('当日涨跌幅') + '</span>'
+          : '<span class="tr-tip-tag">' + _t('相对区间涨跌幅') + '</span>';
+        tip.innerHTML = '<div class="tr-tip-date">' + dstr(best) + tipTag + '</div>' + rows +
+          '<div class="tr-tip-note">' + (solo
+            ? _t('数值为当日净值相对前一交易日的涨跌幅')
+            : _t('数值为相对所选区间起点的累计涨跌幅')) + '</div>';
         tip.hidden = false;
         const cr = q('.tr-canvas').getBoundingClientRect();
         const px = ev.clientX - cr.left;

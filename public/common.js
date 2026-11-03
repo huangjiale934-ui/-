@@ -123,6 +123,15 @@ function decorateSelfPerf(funds, perf) {
 }
 window.decorateSelfPerf = decorateSelfPerf;
 
+/* 2026-11-03（第二十九轮）：首页榜单点击要直接弹详情（不跳资料库）。
+   首页不跑 loadData，DATA 为空 → 这里给一个按需加载入口，拿到基金表后再开弹窗。 */
+window.ensureFunds = function () {
+  if (DATA && DATA.funds && DATA.funds.length) return Promise.resolve(DATA);
+  return new Promise(function (res) {
+    try { loadData(function () { res(DATA); }); } catch (e) { res(DATA); }
+  });
+};
+
 async function loadData(onDone, attempt, force) {
   attempt = attempt || 0;
   try {
@@ -359,10 +368,10 @@ function renderUpdateTime() {
     '<a class="db-nav' + (active === 'home' ? ' on' : '') + '" id="navHome" href="home.html">' + I.home +
       '<span data-i18n="首页">' + TT('首页') + '</span></a>' +
     '<button type="button" class="db-nav' + (dbOn ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
-      '<span data-i18n="基金最新数据">' + TT('基金最新数据') + '</span>' + info + '<i class="db-caret" aria-hidden="true"></i></button>' +
+      '<span data-i18n="基金最新数据">' + TT('基金最新数据') + '</span>' + '<i class="db-caret" aria-hidden="true"></i></button>' +
     '<div class="db-sub" id="dbSubCmp"><nav class="an-prov" id="anProv" aria-label="发行人"></nav></div>' +
     '<button type="button" class="db-nav' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
-      '<span data-i18n="MPFA 基金榜单">' + TT('MPFA 基金榜单') + '</span>' + info + '</button>' +
+      '<span data-i18n="积金局每月榜单">' + TT('积金局每月榜单') + '</span>' + info + '</button>' +
     '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span data-i18n="供款计算器">' + TT('供款计算器') + '</span></button>' +
     /* 2026-11-02（第二十七轮，用户要求）：页头「数据版本」下移到这里，与「数据每日自动同步」合成一句 */
     '<div class="db-side-foot"><div class="db-ver" id="verChip" tabindex="0">' +
@@ -393,13 +402,15 @@ function renderUpdateTime() {
 (function initVerInfo() {
   const anchors = Array.prototype.slice.call(document.querySelectorAll('.db-side .ver-info'));
   if (!anchors.length) return;
+  /* 2026-11-03（第二十九轮，用户要求）：说明重写 —— 去掉以积金局为参照的时间差表述，
+     只讲两套数据各自是什么、怎么用、为什么不能混。 */
   const POP_HTML =
-    '<b class="vp-t">' + TT('两种口径，请勿混用') + '</b>' +
+    '<b class="vp-t">' + TT('两套口径，不要混着比') + '</b>' +
     '<div class="vp-r"><i class="vp-d" style="background:#0866bb"></i><span>' +
-      TT('自算（发行人官网，每日）：比积金局快 2–6 周；净价，不含分红再投资与费用。') + '</span></div>' +
+      TT('自算净值（发行人官网 · 每日）：按各发行人官网公布的单位净值直接计算，净值日通常为 T+1；不含分红再投资，也不含费用。') + '</span></div>' +
     '<div class="vp-r"><i class="vp-d" style="background:#8fb8da"></i><span>' +
-      TT('积金局（月度）：含费用、含分红再投资，滞后约 1–2 个月。') + '</span></div>' +
-    '<div class="vp-n">' + TT('两者期间与算法不同，不可直接相减。') + '</div>';
+      TT('积金局口径（每月公布）：已扣除费用、已计入分红再投资，按月公布，通常滞后 1–2 个月。') + '</span></div>' +
+    '<div class="vp-n">' + TT('两者的统计期间与算法都不同，同一只基金、同一段期间的数字不能相减，也不能直接比高低。') + '</div>';
   anchors.forEach(function (anchor, idx) {
     const pop = document.createElement('div');
     pop.className = 'ver-pop';
@@ -424,6 +435,15 @@ function renderUpdateTime() {
       pop.style.left = Math.round(left) + 'px';
       pop.style.top = Math.round(top) + 'px';
     }
+    /* 2026-11-03（第二十九轮，用户要求）：鼠标移到 ⓘ 上就自动显示，不用再点一次。
+       仍保留点击/键盘（触屏与无障碍），鼠标移开 180ms 后收起，移到浮层上则不收。 */
+    var hideTimer = null;
+    function cancelHide() { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } }
+    function scheduleHide() { cancelHide(); hideTimer = setTimeout(close, 180); }
+    anchor.addEventListener('mouseenter', function () { cancelHide(); open(); });
+    anchor.addEventListener('mouseleave', scheduleHide);
+    pop.addEventListener('mouseenter', cancelHide);
+    pop.addEventListener('mouseleave', scheduleHide);
     anchor.addEventListener('click', function (e) { e.stopPropagation(); e.preventDefault(); if (pop.hidden) open(); else close(); });
     anchor.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); if (pop.hidden) open(); else close(); }
@@ -3258,6 +3278,9 @@ document.addEventListener('mpf:lang', () => {
     MPF_BOND: '债券积金', HSI: '恒生指数', SSE: '上证指数',
   };
   var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];
+  /* 2026-11-03（第二十九轮，体检项）：英文全名太长，页头六张卡只能显示「MPF Marke…」。
+     英文模式改用短名，中文/繁体仍用完整中文名。 */
+  var SHORT_EN = { MPFAVG: 'MPF Index', MPF_STOCK: 'Equity', MPF_MIX: 'Mixed', MPF_BOND: 'Bond', HSI: 'HSI', SSE: 'SSE' };
   var LAST = null;   /* 缓存最近一次 /api/ticker 响应，供语言切换重渲染 */
 
   function esc(s) {
@@ -3291,6 +3314,7 @@ document.addEventListener('mpf:lang', () => {
     if (!box || !j || !j.items) return;
     LAST = j;
     var cards = '';
+    var EN = (document.documentElement.lang || '').indexOf('en') === 0;
     ORDER.forEach(function (k) {
       var it = j.items[k];
       if (!it) return;
@@ -3298,7 +3322,7 @@ document.addEventListener('mpf:lang', () => {
       var cls = flat ? 'flat' : (up ? 'up' : 'down');
       var pct = (up ? '+' : '') + it.chg.toFixed(2) + '%';
       cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(it.name + ' · 截至 ' + it.asOf + '；点击查看指数走势') + '">' +
-        '<span class="tk-name">' + TT(NAMES[k] || it.name) + '</span>' +
+        '<span class="tk-name">' + (EN && SHORT_EN[k] ? SHORT_EN[k] : TT(NAMES[k] || it.name)) + '</span>' +
         '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +
         '<b class="tk-chg ' + cls + '">' + pct + '</b></span>' +
         spark(it.spark, up) +

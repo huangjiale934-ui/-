@@ -62,7 +62,26 @@ const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
   if (!LOCAL && (st.status !== 200 || !st.json)) add('critical', '状态接口不可用 HTTP ' + st.status);
   const s = st.json || {};
   if (s.error) add('warn', '抓取错误：' + s.error);
-  if (!LOCAL && s.navLatest && days(s.navLatest, hkToday()) > 3) add('critical', '净值日滞后：' + s.navLatest + '（今天 ' + hkToday() + '）');
+  /* 2026-11-03：改用「交易日差」——基金净值普遍 T+1/T+2 发布，
+     按自然日算会在每个周一早上必报 critical（周五净值 + 周末两天）。 */
+  if (!LOCAL && s.navLatest) {
+    let tlag = null;
+    try {
+      const idxL = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'index.json'), 'utf8'));
+      const ds = (idxL.items.HSI.series || []).map((x) => x[0]);
+      const pos = ds.indexOf(s.navLatest);
+      tlag = pos < 0 ? null : ds.length - 1 - pos;
+    } catch (e) {}
+    if (tlag == null) {
+      if (days(s.navLatest, hkToday()) > 7) add('warn', '净值日滞后：' + s.navLatest + '（今天 ' + hkToday() + '）');
+    } else if (tlag >= 3) {
+      add('critical', '净值日滞后 ' + tlag + ' 个交易日：' + s.navLatest + '（今天 ' + hkToday() + '）');
+    } else if (tlag === 2) {
+      add('warn', '净值日滞后 ' + tlag + ' 个交易日：' + s.navLatest);
+    } else {
+      add('ok', '净值日 ' + s.navLatest + '（距最新交易日 ' + tlag + ' 个交易日，T+1 正常）');
+    }
+  }
   if (LOCAL) add('ok', '--local 模式：已跳过站点可达/净值日滞后/计算器线上抽样');
 
   const funds = await get('/api/funds');
@@ -133,27 +152,25 @@ const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
   if (allocSumNull) add('warn', 'allocSum 为 null ' + allocSumNull + ' 只');
   if (allocSumDiff) add('critical', 'allocSum 与逐项合计不符 ' + allocSumDiff + ' 只');
 
-  /* ② 全源缺日巡检（本地 hist × HSI 日历近 7 交易日；SKIP 只留月频新地；AMTD 渠道固有缺口豁免） */
-  let gapFunds = 0, gapDays = new Set();
+  /* ② 缺日巡检（2026-11-03 改判据）
+     原实现用「HSI 交易日历」判缺：市场开市而基金没该日就算缺 → 把源站尚未发布的日期
+     （宏利退休精選 / AMTD 走 etnet / 新地月频）全算进来，每天报 55–244 只，淹没真问题。
+     现改为：A 真缺 = 净值日 > 历史末点（必须补）；B 源站滞后 ≥2 个交易日（登记，不算故障）。 */
   try {
-    const idxL = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'index.json'), 'utf8'));
-    const hsi = (idxL.items.HSI.series || []).map((x) => x[0]);
-    const recent7 = hsi.slice(-7, -1);
-    const WAIVE = { 'AMTD強積金計劃': ['2026-10-15', '2026-10-16', '2026-10-22'] };
-    fl.forEach((f) => {
-      if (/新地/.test(f.scheme || '')) return;   // 月频豁免
-      const fp = path.join(HISTD, String(f.id) + '.json');
-      if (!fs.existsSync(fp)) return;
-      try {
-        const o = JSON.parse(fs.readFileSync(fp, 'utf8'));
-        const have = new Set((o.series || []).map((x) => x[0]));
-        const waived = WAIVE[f.scheme] || [];
-        const miss = recent7.filter((d) => !have.has(d) && !waived.includes(d));
-        if (miss.length) { gapFunds++; miss.forEach((d) => gapDays.add(d)); }
-      } catch (e) {}
+    const { audit } = require('./hist-gap-audit');
+    const g = audit();
+    if (g.realGap.length) {
+      add('critical', '真缺日 ' + g.realGap.length + ' 只（净值已更新但历史没跟上，跑 tools/merge-nav.js 或 gap-check --fix）');
+      g.realGap.slice(0, 5).forEach((x) => add('warn', '  · ' + x.id + ' ' + x.fund + ' 净值 ' + x.navAsOf + ' > 历史 ' + x.histLast));
+    } else {
+      add('ok', '无真缺日（净值与历史末点全部对齐）');
+    }
+    if (g.ahead.length) add('critical', '历史超前 ' + g.ahead.length + ' 只（历史比净值新，需 merge-nav 对齐）');
+    Object.keys(g.behindByScheme).forEach((k) => {
+      const v = g.behindByScheme[k];
+      add('warn', '源站滞后：' + k + ' ' + v.n + ' 只，最新 ' + [...v.days].join('/') + '（滞后 ' + v.lag + ' 个交易日）');
     });
   } catch (e) { add('warn', '缺日巡检读取失败：' + e.message); }
-  if (gapFunds) add('warn', '近端缺日 ' + gapFunds + ' 只（' + [...gapDays].join(',') + '）');
 
   /* ③ NAV 渠道一致性：navSource 与 hist 实际来源不一致 = 官网渠道被 etnet 回写或官网抓取失败回退 */
   let srcMismatch = 0, srcMissId = '';
@@ -225,7 +242,7 @@ const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
 
   if (LOCAL) {
     add('ok', '--local：跳过页面可达检查（Actions 构建期站点尚未发布）');
-  } else for (const p of ['/', '/index.html', '/analysis.html']) {
+  } else for (const p of ['/', '/index.html', '/home.html']) {
     const r = await get(p);
     if (r.status !== 200) add('critical', '页面打不开 ' + p + ' HTTP ' + r.status);
     else if (r.txt.length < 3000) add('warn', '页面内容异常短 ' + p);

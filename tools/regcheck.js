@@ -1864,9 +1864,11 @@ chk('二十四轮·⑤⑥⑦走势图加高 30% + 统计表字号 + 预设按钮
   /\.db-trendcard \.tr-svg \{ height: 350px/.test(readSrc('style.css')) &&
   /\.tr-tbl th, \.tr-tbl td \{ font-size: 14px; \}/.test(readSrc('analysis.css')) &&
   /\.cp-btns\.cp-presets \{ display: grid; grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/.test(readSrc('style.css')));
-chk('二十四轮·⑧ⓘ 口径说明（2026-11-02 第二十七轮：改首页同款小 i）',
+chk('二十九轮·①口径说明：只保留榜单一个 ⓘ + 悬浮即显示',
   /class="ver-info db-tip"/.test(readSrc('common.js')) && /\.db-side \.ver-info\.db-tip \{/.test(readSrc('style.css')) &&
-  (readSrc('common.js').match(/\+ info \+/g) || []).length >= 2);
+  (readSrc('common.js').match(/\+ info \+/g) || []).length === 1 &&
+  /anchor\.addEventListener\('mouseenter'/.test(readSrc('common.js')) &&
+  !/比积金局快/.test(readSrc('common.js')));
 chk('二十四轮·⑨说明行不再因单条对比而隐藏（改为换文案）',
   /noteEl\.style\.display = ''/.test(readSrc('trend.js')) && /单条对比时纵轴为实际数值/.test(readSrc('trend.js')));
 chk('二十四轮·⑩首页榜单卡序号（第二十五轮：圆框 1-5）',
@@ -1916,7 +1918,7 @@ chk('二十七轮·④详情弹窗表头与主页一致（一行 + 同一标题�
   /\.modal-bd \.tr-head \{ flex-wrap: nowrap; \}/.test(readSrc('analysis.css')));
 chk('二十七轮·⑤⑥对比最优值改蓝色调 + 年份上移到月份同一基线',
   /\.cmp-best \{ background: #e8f1fb !important; color: #084e8c !important/.test(readSrc('style.css')) &&
-  /axisY \+ 1\) \+ '" text-anchor="' \+ anc \+ '" class="tr-xlab tr-xlab-year"/.test(readSrc('trend.js')) &&
+  /axisY \+ 16\) \+ '" text-anchor="' \+ anc \+ '" class="tr-xlab tr-xlab-year"/.test(readSrc('trend.js')) &&
   /yearLab\(lx, axisY \+ 32, yearTxt\(yy\), anchor\)/.test(readSrc('home.js')));
 chk('二十七轮·⑦「总体」改名「全部」',
   !/TT\('总体'\)/.test(readSrc('analysis.js')) && /TT\('全部'\)/.test(readSrc('analysis.js')));
@@ -1983,8 +1985,8 @@ chk('二十九轮·①详情弹窗再收窄 15%（765）+ 表头 E02 浅蓝价�
   /\.modal-box \{ max-width: 765px; \}/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{[^}]*background: #f2f8fe;/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v \{ font-size: 26px;/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v2 \{ font-size: 16px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v \{ font-size: 28px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2 \{ font-size: 17px;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-cell \{ padding: 8px 10px 9px; \}/.test(readSrc('analysis.css')));
 chk('二十九轮·③走势图统计表去问号 + 列头与数值居中',
   !/class="tr-q"/.test(readSrc('trend.js')) &&
@@ -2009,3 +2011,44 @@ chk('二十九轮·⑧资料库支持 ?dim= 深链（落到同一自算维度排
 chk('二十九轮·⑦首屏设计页（20 套真实尺寸）在位',
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-hero.html')) &&
   /1160px; height: 316px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'design-hero.html'), 'utf8')));
+
+/* ===== 2026-11-03 第三十轮（12 条反馈）===== */
+chk('三十轮·②走势图与详情图的年份都改为单独一行居中',
+  /let lx = x, anc = 'middle';/.test(readSrc('trend.js')) &&
+  !/let lx = x \+ 7/.test(readSrc('trend.js')) &&
+  /axisY \+ 16\) \+ '" text-anchor="' \+ anc \+ '" class="tr-xlab tr-xlab-year"/.test(readSrc('trend.js')) &&
+  /let lx = xt0, anchor = 'middle';/.test(readSrc('home.js')));
+chk('三十轮·③单线提示显示当日涨跌幅 + 标签说明',
+  /const solo = lines\.length === 1;/.test(readSrc('trend.js')) &&
+  /当日涨跌幅/.test(readSrc('trend.js')) && /相对区间涨跌幅/.test(readSrc('trend.js')) &&
+  /数值为当日净值相对前一交易日的涨跌幅/.test(readSrc('trend.js')) &&
+  /tr-tip-tag/.test(readSrc('analysis.css')) && /tr-tip-note/.test(readSrc('analysis.css')));
+chk('三十轮·④详情表头价格 28px / 四栏 17px',
+  /\.modal-bd \.fd-v \{ font-size: 28px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2 \{ font-size: 17px;/.test(readSrc('analysis.css')));
+chk('三十轮·⑤侧栏语言胶囊真正居中（复位 margin-left:auto）',
+  /\.db-side-lang \.lang-sw \{[^}]*margin-left: 0;/.test(readSrc('style.css')));
+chk('三十轮·⑥积金表现指数新增「每日」视图（60 个交易日涨跌幅柱）',
+  /\['d', '每日'\]/.test(readSrc('home.js')) && /function renderDaily/.test(readSrc('home.js')) &&
+  /最近 60 个交易日/.test(readSrc('home.js')) &&
+  /daily: s2\.slice\(-120\)/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')));
+chk('三十轮·⑦首页榜单点击直接弹详情（不跳资料库）',
+  /id="modal"/.test(readSrc('home.html')) && /window\.ensureFunds = function/.test(readSrc('common.js')) &&
+  /window\.openDetail\(id\)/.test(readSrc('home.js')) &&
+  /if \(!window\.openDetail \|\| !window\.ensureFunds\)/.test(readSrc('home.js')));   /* 仅降级路径才跳转 */
+chk('三十轮·⑧缺日审计改判据（真缺 = 净值日 > 历史末点）+ 自动补抓',
+  fs.existsSync(path.join(__dirname, '..', 'tools', 'hist-gap-audit.js')) &&
+  /navD > lastD/.test(fs.readFileSync(path.join(__dirname, '..', 'tools', 'hist-gap-audit.js'), 'utf8')) &&
+  /--fix/.test(fs.readFileSync(path.join(__dirname, '..', 'tools', 'gap-check.js'), 'utf8')) &&
+  /gap-check\.js --fix/.test(fs.readFileSync(path.join(__dirname, '..', 'tools', 'daily.sh'), 'utf8')) &&
+  /require\('\.\/hist-gap-audit'\)/.test(readSrc('../tools/health-check.js')));
+chk('三十轮·⑨英文模式行情卡用短名 + 图例同名补单位类别',
+  /SHORT_EN = \{ MPFAVG: 'MPF Index'/.test(readSrc('common.js')) &&
+  /_tq\('\{u\} 类', \{ u: u \}\) \+ ' · ' \+ nm/.test(readSrc('trend.js')));
+chk('三十轮·⑩投资组合分布整体缩小 10%',
+  /\.alr3 \{ margin: 4px auto 2px; width: 90%; \}/.test(readSrc('analysis.css')));
+chk('三十轮·①榜单更名「积金局每月榜单」+ 口径说明重写',
+  /积金局每月榜单/.test(readSrc('common.js')) &&
+  !/MPFA 基金榜单<\/span>/.test(readSrc('common.js')) &&
+  /两套口径，不要混着比/.test(readSrc('common.js')) &&
+  /两套口径，不要混着比/.test(i18nText()));

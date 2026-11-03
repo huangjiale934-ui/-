@@ -1,6 +1,20 @@
 /* 英文字典（2026-10-21 按需加载：切到英文时才下载） */
 (function (w) {
   var E = {
+'每日涨跌幅': 'Daily change',
+'最近 60 个交易日 · 柱高为当日涨跌幅（相对前一交易日），红涨绿跌': 'Last 60 trading days · bar height = daily change vs the previous trading day; red up, green down',
+'当日涨跌幅': 'Daily change',
+'相对区间涨跌幅': 'Change vs period start',
+'数值为当日净值相对前一交易日的涨跌幅': 'Value = NAV change against the previous trading day',
+'数值为相对所选区间起点的累计涨跌幅': 'Value = cumulative change from the start of the selected period',
+'每日': 'Daily',
+
+'积金局每月榜单': 'MPFA Monthly Tables',
+'两套口径，不要混着比': 'Two methodologies: do not mix them',
+'自算净值（发行人官网 · 每日）：按各发行人官网公布的单位净值直接计算，净值日通常为 T+1；不含分红再投资，也不含费用。': 'Self-calculated NAV (trustee websites, daily): computed from the unit NAV each trustee publishes, usually T+1; excludes dividend reinvestment and fees.',
+'积金局口径（每月公布）：已扣除费用、已计入分红再投资，按月公布，通常滞后 1–2 个月。': 'MPFA basis (published monthly): net of fees and inclusive of dividend reinvestment, released monthly and usually lagging 1–2 months.',
+'两者的统计期间与算法都不同，同一只基金、同一段期间的数字不能相减，也不能直接比高低。': 'The periods and formulas differ, so figures for the same fund over the same span must not be subtracted or ranked against each other.',
+
 '点击查看该基金详情': 'Open fund details',
 '广州精研数据有限公司': 'Jingyan Data Co., Ltd. (Guangzhou)',
 '香港强积金数据分析平台': 'Hong Kong MPF Data Analytics Platform',
