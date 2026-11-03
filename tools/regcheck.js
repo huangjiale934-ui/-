@@ -73,7 +73,7 @@ chk('首页·四榜 2×2 各 5 条（2026-10-31：砍总开支/低风险）', ['
   return m && (m[0].match(/<li[\s>]/g) || []).length === 5;
 }) && home.indexOf('id="mkTop3"') < 0 && home.indexOf('id="mkTop6"') < 0);
 chk('首页·免责条在位（disclaimer，2026-10-31 版式）', /class="disclaimer"/.test(home) && /每日自动同步|风险提示与免责声明/.test(home));
-chk('首页·年份标签 11 个（走势 6 + 表现指数区间 5，2026-10-31 加近10年）', (home.match(/class="yr-tab( on)?"/g) || []).length === 11);
+chk('首页·区间标签 12 个（走势 6 + 表现指数区间 6，2026-11-03 加「每日」）', (home.match(/class="yr-tab( on)?"/g) || []).length === 12);
 /* 2026-10-28 用户要求删除整块「公司介绍」（成立时间/愿景/团队/业务版图、六大优势、免费行政服务、合作伙伴、承诺、业务板块）
    → 原 5 条断言随区块下线；2026-10-29 改为反向校验：区块不得再出现 */
 chk('首页·公司介绍区块已按 2026-10-28 要求删除', home.indexOf('class="biz about"') < 0 && home.indexOf('about-grid') < 0 && home.indexOf('IC001045') < 0);
