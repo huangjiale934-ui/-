@@ -2615,3 +2615,11 @@ body.has-sidebar .dca-fab { display: none !important; }
 /* 2026-11-03（第三十一轮）：数据说明里的「源站尚未发布」名单（默认在折叠区内） */
 .note-stale { margin-top: 8px; padding: 8px 11px; background: #fbf7ec; border-left: 3px solid #e8c48a;
   border-radius: 5px; font-size: 12px; line-height: 1.7; color: #7a6033; }
+
+/* 2026-11-03（第三十二轮）：数据说明里的源站滞后名单 —— 一句话 + 每计划一行，计划名可点 */
+.note-stale .ns-h { margin-bottom: 5px; }
+.note-stale .ns-list { margin: 0; padding-left: 16px; }
+.note-stale .ns-list li { line-height: 1.75; }
+.note-stale .ns-link { color: #0b64c4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.note-stale .ns-link:hover { color: #084e8c; }
+.note-stale .ns-list span { color: #8a7350; font-size: 11.5px; margin-left: 4px; }

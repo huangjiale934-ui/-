@@ -1,6 +1,15 @@
 /* 英文字典（2026-10-21 按需加载：切到英文时才下载） */
 (function (w) {
   var E = {
+'筛出该计划的全部基金': 'Show all funds in this scheme',
+'{n} 只 · 更新至 {d}': '{n} funds · as of {d}',
+'以下计划的官网公布时间较晚，本站如实保留其最后可用净值、不做前值填充：': 'These schemes publish later than the site-wide latest date; figures are kept at their last available value with no forward filling:',
+
+'折线为近 {n} 个交易日的走势': 'line shows the last {n} trading days',
+'数据截至 {d}': 'data as of {d}',
+
+'最近一周 · 每日更新': 'Last 7 days · updated daily',
+
 '{s} {n} 只（更新至 {d}）': '{s} · {n} funds (as of {d})',
 '以下计划的最新净值发布日期早于全站最新日（{max}），属发行人或其转载渠道尚未发布，本站如实保留其最后可用净值、不做前值填充：{list}。': 'The following schemes have not yet published NAV for the latest site date ({max}); figures are kept at their last available value with no forward filling: {list}.',
 '点击查看指数走势': 'Click to open the index chart',

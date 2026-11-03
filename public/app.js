@@ -216,6 +216,14 @@
       render();
       /* 2026-11-03（第二十九轮，用户反馈）：首页「查看完整榜单」原指向积金局榜单（口径不同、数字对不上），
          改为跳到资料库并按同一自算维度排序 —— 这里解析 ?dim=selfY1 / selfY5a / size 等深链。 */
+      /* 2026-11-03（第三十二轮）：数据说明里的计划名深链 ?kw=<计划名> */
+      (function applyUrlKw() {
+        try {
+          const q = (new URLSearchParams(location.search)).get('kw') || '';
+          if (!q) return;
+          window.mpfSetKw(q);
+        } catch (e) {}
+      })();
       (function applyUrlDim() {
         try {
           const dk = (new URLSearchParams(location.search)).get('dim') || '';
@@ -251,6 +259,15 @@
       try { DBTREND = null; initDbTrend(); } catch (e) {}
     });
   }
+
+  /* 2026-11-03（第三十二轮）：外部（数据说明里的计划名）点进来 → 直接按计划名筛选 */
+  window.mpfSetKw = function (v) {
+    F.kw = String(v || '');
+    S.page = 1;
+    const i = document.getElementById('kw');
+    if (i) i.value = F.kw;
+    render();
+  };
 
   /* 2026-10-24（领导要求）：列表下方的「净值估值日」卡片 → 点击筛选（供 common.js 的卡片调用） */
   window.mpfSetNavDate = function (v) {

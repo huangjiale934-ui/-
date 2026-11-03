@@ -577,6 +577,17 @@ function renderSrcNote() {
     '</div>' +
     navStatNote() +
     staleNote();
+  /* 2026-11-03（第三十二轮）：计划名点击 → 同页直接筛选（不刷新）；没有 mpfSetKw 时走 href 深链 */
+  Array.prototype.forEach.call(el.querySelectorAll('.ns-link'), function (a) {
+    a.onclick = function (ev) {
+      if (typeof window.mpfSetKw !== 'function') return;
+      ev.preventDefault();
+      window.mpfSetKw(a.getAttribute('data-kw') || '');
+      var box = document.getElementById('srcNote');
+      if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    };
+  });
 }
 
 /* 2026-11-03（第三十一轮，用户要求）：把「源站尚未发布」的计划列出来。
@@ -598,10 +609,14 @@ function staleNote() {
   const list = Object.keys(m).map((k) => ({ s: k, n: m[k].n, d: m[k].d }))
     .sort((a, b) => (a.d < b.d ? 1 : -1));
   if (!list.length) return '';
-  const parts = list.map((o) => TQ('{s} {n} 只（更新至 {d}）', { s: o.s, n: o.n, d: o.d }));
+  /* 2026-11-03（第三十二轮，用户要求）：一句话讲完，每个计划单独一行；计划名可点，点了直接筛出该计划的基金 */
+  const items = list.map((o) =>
+    '<li><a class="ns-link" href="index.html?kw=' + encodeURIComponent(o.s) + '#db" data-kw="' + esc(o.s) + '" title="' +
+    TT('筛出该计划的全部基金') + '">' + esc(o.s) + '</a> <span>' +
+    TQ('{n} 只 · 更新至 {d}', { n: o.n, d: o.d }) + '</span></li>').join('');
   return '<div class="note-stale">' +
-    TQ('以下计划的最新净值发布日期早于全站最新日（{max}），属发行人或其转载渠道尚未发布，本站如实保留其最后可用净值、不做前值填充：{list}。', { max: max, list: parts.join('；') }) +
-    '</div>';
+    '<div class="ns-h">' + TT('以下计划的官网公布时间较晚，本站如实保留其最后可用净值、不做前值填充：') + '</div>' +
+    '<ul class="ns-list">' + items + '</ul></div>';
 }
 
 /** 净值核对情况说明（含「两套数据源日期不同」的口径交代） */
@@ -3349,7 +3364,10 @@ document.addEventListener('mpf:lang', () => {
       var pct = (up ? '+' : '') + it.chg.toFixed(2) + '%';
       /* 2026-11-03（第三十一轮，用户要求）：悬浮提示里写清迷你线的时间维度（近 40 个交易日），
          否则没人知道这条小线是什么周期。 */
-      cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(it.name + ' · ' + TT('近 40 个交易日') + ' · 截至 ' + it.asOf + '；' + TT('点击查看指数走势')) + '">' +
+      /* 2026-11-03（第三十二轮）：提示文案按用户口吻润色 —— 说清这条折线是什么、数据到哪天 */
+      cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(
+        it.name + ' · ' + TQ('折线为近 {n} 个交易日的走势', { n: 40 }) + ' · ' + TQ('数据截至 {d}', { d: it.asOf }) + '；' + TT('点击查看指数走势')
+      ) + '">' +
         '<span class="tk-name">' + (EN && SHORT_EN[k] ? SHORT_EN[k] : TT(NAMES[k] || it.name)) + '</span>' +
         '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +
         '<b class="tk-chg ' + cls + '">' + pct + '</b></span>' +

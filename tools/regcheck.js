@@ -2058,7 +2058,8 @@ chk('三十轮·①榜单更名「积金局每月榜单」+ 口径说明重写',
 /* ===== 2026-11-03 第三十一轮（7 条反馈）===== */
 chk('三十一轮·①首屏换成市场情绪卡（H20）：全蓝深浅 + 近日上涨占比 + 看看是哪些',
   /class="hero-sent"/.test(readSrc('home.html')) && !/class="hero-btns"/.test(readSrc('home.html')) &&
-  /index\.html\?dim=selfD1#db/.test(readSrc('home.html')) &&
+  /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
+  /最近一周 · 每日更新/.test(readSrc('home.html')) &&
   /\.hs-bars i \{ display: block; width: 7px; border-radius: 2px 2px 0 0; background: #cfe2f3; \}/.test(readSrc('home.css')) &&
   /\.hs-bars i\.up \{ background: #0866bb; \}/.test(readSrc('home.css')) &&
   /if \(p === '\/api\/breadth'\)/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
@@ -2077,3 +2078,22 @@ chk('三十一轮·⑤数据说明列出源站滞后名单（折叠区内）',
 chk('三十一轮·⑥前十大持仓两行式设计页在位（真实 729px）',
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-hold.html')) &&
   /width:729px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'design-hold.html'), 'utf8')));
+
+/* ===== 2026-11-03 第三十二轮（6 条反馈）===== */
+chk('三十二轮·③情绪卡口径统一：近一周占比 + 跳「近 1 周」维度',
+  /pct: total \? Math\.round\(\(up \/ total\) \* 100\) : null,/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /if \(!x \|\| x\.w1 == null\) return;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
+  /最近一周 · 每日更新/.test(readSrc('home.html')));
+chk('三十二轮·①源站名单：一句话 + 每计划一行 + 可点击筛基金',
+  /ns-h/.test(readSrc('common.js')) && /ns-list/.test(readSrc('common.js')) &&
+  /class="ns-link" href="index\.html\?kw=/.test(readSrc('common.js')) &&
+  /window\.mpfSetKw = function/.test(readSrc('app.js')) &&
+  /get\('kw'\)/.test(readSrc('app.js')) &&
+  /\.note-stale \.ns-link/.test(readSrc('style.css')));
+chk('三十二轮·②行情悬浮提示写清折线维度与数据日期',
+  /折线为近 \{n\} 个交易日的走势/.test(readSrc('common.js')) &&
+  /数据截至 \{d\}/.test(readSrc('common.js')));
+chk('三十二轮·③37% 迷你图 20 套设计页在位',
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-breadth.html')) &&
+  (fs.readFileSync(path.join(__dirname, '..', 'public', 'design-breadth.html'), 'utf8').match(/const b\d\d = /g) || []).length >= 20);
