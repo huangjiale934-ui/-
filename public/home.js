@@ -428,8 +428,10 @@
         '<span class="bl">' + esc(x.label) + '</span></li>';
     }).join('');
 
-    const liOf = (x, cls) => '<li><span class="nm" title="' + esc(x.fund + ' · ' + x.scheme) + '">' + esc(x.fund) + '</span>' +
-      '<em class="' + cls + '">' + pctv(x.v) + '</em></li>';
+    /* 2026-11-03（第三十三轮）：颜色按数值正负，不按「最好/最差」——
+       2025 年全员正收益时，最差榜若强制绿色会与站内「绿=跌」冲突。 */
+    const liOf = (x) => '<li><span class="nm" title="' + esc(x.fund + ' · ' + x.scheme) + '">' + esc(x.fund) + '</span>' +
+      '<em class="' + (x.v >= 0 ? 'up' : 'down') + '">' + pctv(x.v) + '</em></li>';
 
     return '<div class="yr-grid">' +
       '<div class="yr-blk"><h4>' + TT('各类基金平均回报') + '</h4><ul class="yr-bars">' + tBars + '</ul></div>' +
@@ -437,9 +439,9 @@
       '</div>' +
       '<div class="yr-grid yr-grid-2">' +
       '<div class="yr-blk"><h4>' + TT('当年表现最好') + '</h4><ul class="yr-rank">' +
-        (d.best || []).map((x) => liOf(x, 'up')).join('') + '</ul></div>' +
+        (d.best || []).map(liOf).join('') + '</ul></div>' +
       '<div class="yr-blk"><h4>' + TT('当年表现最差') + '</h4><ul class="yr-rank">' +
-        (d.worst || []).map((x) => liOf(x, 'down')).join('') + '</ul></div>' +
+        (d.worst || []).map(liOf).join('') + '</ul></div>' +
       '</div>';
   }
 
