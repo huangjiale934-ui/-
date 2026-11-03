@@ -575,7 +575,33 @@ function renderSrcNote() {
     TQ('注：官网标注的 {d} 只为「合并单位类别后」的计数，本站按单位类别逐行收录为 {c} 条，两者并无矛盾。',
       { c: DATA.count, d: declared }) +
     '</div>' +
-    navStatNote();
+    navStatNote() +
+    staleNote();
+}
+
+/* 2026-11-03（第三十一轮，用户要求）：把「源站尚未发布」的计划列出来。
+   用户看到某只基金停在 10-29 会以为本站漏抓 —— 这里讲清是发行人还没发，不是我们缺。
+   该区块在页脚 <details> 里，默认折叠。 */
+function staleNote() {
+  const all = (DATA && DATA.funds) || [];
+  let max = '';
+  all.forEach((f) => { if (f.navAsOf && f.navAsOf > max) max = f.navAsOf; });
+  if (!max) return '';
+  const m = {};
+  all.forEach((f) => {
+    if (!f.navAsOf || f.navAsOf >= max) return;
+    const k = f.scheme || f.trustee || '—';
+    if (!m[k]) m[k] = { n: 0, d: f.navAsOf };
+    m[k].n++;
+    if (f.navAsOf < m[k].d) m[k].d = f.navAsOf;
+  });
+  const list = Object.keys(m).map((k) => ({ s: k, n: m[k].n, d: m[k].d }))
+    .sort((a, b) => (a.d < b.d ? 1 : -1));
+  if (!list.length) return '';
+  const parts = list.map((o) => TQ('{s} {n} 只（更新至 {d}）', { s: o.s, n: o.n, d: o.d }));
+  return '<div class="note-stale">' +
+    TQ('以下计划的最新净值发布日期早于全站最新日（{max}），属发行人或其转载渠道尚未发布，本站如实保留其最后可用净值、不做前值填充：{list}。', { max: max, list: parts.join('；') }) +
+    '</div>';
 }
 
 /** 净值核对情况说明（含「两套数据源日期不同」的口径交代） */
@@ -3321,7 +3347,9 @@ document.addEventListener('mpf:lang', () => {
       var up = it.chg > 0, flat = !it.chg;
       var cls = flat ? 'flat' : (up ? 'up' : 'down');
       var pct = (up ? '+' : '') + it.chg.toFixed(2) + '%';
-      cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(it.name + ' · 截至 ' + it.asOf + '；点击查看指数走势') + '">' +
+      /* 2026-11-03（第三十一轮，用户要求）：悬浮提示里写清迷你线的时间维度（近 40 个交易日），
+         否则没人知道这条小线是什么周期。 */
+      cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(it.name + ' · ' + TT('近 40 个交易日') + ' · 截至 ' + it.asOf + '；' + TT('点击查看指数走势')) + '">' +
         '<span class="tk-name">' + (EN && SHORT_EN[k] ? SHORT_EN[k] : TT(NAMES[k] || it.name)) + '</span>' +
         '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +
         '<b class="tk-chg ' + cls + '">' + pct + '</b></span>' +

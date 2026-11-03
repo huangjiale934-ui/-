@@ -1,6 +1,17 @@
 /* 英文字典（2026-10-21 按需加载：切到英文时才下载） */
 (function (w) {
   var E = {
+'{s} {n} 只（更新至 {d}）': '{s} · {n} funds (as of {d})',
+'以下计划的最新净值发布日期早于全站最新日（{max}），属发行人或其转载渠道尚未发布，本站如实保留其最后可用净值、不做前值填充：{list}。': 'The following schemes have not yet published NAV for the latest site date ({max}); figures are kept at their last available value with no forward filling: {list}.',
+'点击查看指数走势': 'Click to open the index chart',
+
+'近日': 'Recently',
+'的基金上涨': 'of funds gained',
+'最近 7 个交易日 · 每日更新': 'last 7 trading days · updated daily',
+'看看是哪些': 'See which ones',
+
+'近 40 个交易日': 'last 40 trading days',
+
 '每日涨跌幅': 'Daily change',
 '最近 60 个交易日 · 柱高为当日涨跌幅（相对前一交易日），红涨绿跌': 'Last 60 trading days · bar height = daily change vs the previous trading day; red up, green down',
 '当日涨跌幅': 'Daily change',

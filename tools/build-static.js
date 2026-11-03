@@ -80,6 +80,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   put('perf-idx.json', await getJson('/api/perf-idx'));
   /* 来源核定表（页脚官方数据来源）·静态站此前一直 404 */
   put('source-pages.json', await getJson('/api/source-pages'));
+  /* 2026-11-03（第三十一轮）：首屏市场情绪卡（近日上涨占比 + 7 日迷你柱） */
+  put('breadth.json', await getJson('/api/breadth'));
 
   /* 3) 逐只 hist（server 响应含 mergeLatestNav 补点，与 Node 版逐字节一致） */
   const perfs = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'nav-perf.json'), 'utf8'));

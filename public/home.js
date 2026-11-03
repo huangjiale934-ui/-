@@ -707,6 +707,26 @@
     });
   }
 
+  /* ---------------- 首屏市场情绪卡（2026-11-03 第三十一轮，用户选定 H20） ----------------
+     数据源 /api/breadth：nav-perf 的 d1 算「近日上涨占比」，MPFAVG 最近 7 个交易日算迷你柱。
+     配色只用站内蓝：涨=深蓝 #0866bb、跌=浅蓝 #a9cbe8（不再用红绿）。 */
+  (function initHeroSent() {
+    const barsBox = document.getElementById('hsBars');
+    const pctEl = document.getElementById('hsPct');
+    if (!barsBox) return;
+    fetch('/api/breadth').then((r) => (r.ok ? r.json() : null)).then((j) => {
+      if (!j) return;
+      const days = j.days || [];
+      const maxAbs = Math.max(0.001, ...days.map((d) => Math.abs(d.chg)));
+      barsBox.innerHTML = days.map((d) => {
+        const h = Math.max(7, Math.round(Math.abs(d.chg) / maxAbs * 28) + 5);
+        const cls = d.chg >= 0 ? 'up' : '';
+        return '<i class="' + cls + '" style="height:' + h + 'px" title="' + d.d + ' · ' + (d.chg >= 0 ? '+' : '') + d.chg + '%"></i>';
+      }).join('');
+      if (pctEl && j.pct != null) pctEl.textContent = j.pct + '%';
+    }).catch(() => {});
+  })();
+
   initHeaderStatus();
 
   load();
@@ -740,9 +760,9 @@
     ['MPFAVG', '强积金市场指数'], ['MPF_STOCK', '股票基金指数'], ['MPF_MIX', '混合资产基金指数'],
     ['MPF_BOND', '债券基金指数'], ['HSI', '恒生指数'], ['SSE', '上证指数'],
   ];
-  /* 2026-11-03（第二十九轮，用户要求）：顶部行情栏的迷你线是「最近 40 个交易日」的日线，
-     与这里默认的「近 5 年」累计走势不是一回事 → 增加「每日」视图（最近 60 个交易日的当日涨跌幅）。 */
-  const RANGES = [['d', '每日'], ['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['10y', '近 10 年'], ['all', '全部']];
+  /* 2026-11-03（第三十一轮，用户要求）：顶部行情栏迷你线 = 最近 40 个交易日，
+     点行情卡要跳到「同一张图」→ 把「每日涨跌幅柱」换成「近 40 日」的走势线，两者完全同形。 */
+  const RANGES = [['40d', '近 40 日'], ['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['10y', '近 10 年'], ['all', '全部']];
   let DB = null, cur = 'MPFAVG', range = '5y';   /* 2026-10-31 二版（用户要求）：默认近 5 年 */
 
   function esc2(s) {
@@ -755,7 +775,7 @@
   function sliceSeries(rows, rg) {
     if (!rows || !rows.length) return [];
     if (rg === 'all') return rows;
-    if (rg === 'd') return rows.slice(-61);   /* 60 个交易日 + 前一日做基准 */
+    if (rg === '40d') return rows.slice(-40);   /* 与顶部行情栏迷你线完全同一批点 */
     const days = rg === '1y' ? 365 : rg === '3y' ? 365 * 3 : rg === '5y' ? 365 * 5 : 365 * 10;
     const last = new Date(rows[rows.length - 1][0]).getTime();
     const cutoff = last - days * 86400000;
@@ -772,63 +792,6 @@
     if (!series || series.length < 2) return null;
     const a = series[series.length - 2][1], b = series[series.length - 1][1];
     return a ? (b / a - 1) * 100 : null;
-  }
-
-  /* 2026-11-03：每日涨跌幅柱状图（最近 60 个交易日）。涨红跌绿，零线居中。 */
-  function renderDaily(it, host) {
-    /* 优先用接口附带的日线（最近 120 个交易日）；没有就退回周线（老缓存） */
-    const src = (it.daily && it.daily.length > 5) ? it.daily : it.series;
-    const raw = src.slice(-61);
-    if (raw.length < 3) { host.innerHTML = '<div class="chart-empty">' + esc2(TT('暂无指数数据')) + '</div>'; return; }
-    const rows = [];
-    for (let i = 1; i < raw.length; i++) {
-      const p0 = raw[i - 1][1], p1 = raw[i][1];
-      rows.push([raw[i][0], p0 ? (p1 / p0 - 1) * 100 : 0, p1]);
-    }
-    const W = 1000, H = 524, padL = 58, padR = 16, padT = 22, padB = 90;
-    const plotW = W - padL - padR, plotH = H - padT - padB;
-    const absMax = Math.max(0.5, ...rows.map((r) => Math.abs(r[1])));
-    let step = absMax <= 1 ? 0.5 : absMax <= 2.5 ? 1 : absMax <= 6 ? 2 : 5;
-    const top = Math.ceil(absMax / step) * step;
-    const Y = (v) => padT + plotH / 2 - (v / top) * (plotH / 2);
-    const bw = Math.max(2, (plotW / rows.length) * 0.62);
-    let grid = '', yl = '', bars = '';
-    for (let v = -top; v <= top + 1e-9; v += step) {
-      const y = Y(v).toFixed(1);
-      grid += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="' + (Math.abs(v) < 1e-9 ? '#c9d9e8' : '#eef2f7') + '" stroke-width="1"/>';
-      yl += '<text x="' + (padL - 8) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end" class="pi-yk">' + (v > 0 ? '+' : '') + v.toFixed(step < 1 ? 1 : 0) + '%</text>';
-    }
-    rows.forEach((r, i) => {
-      const x = padL + plotW * (i + 0.5) / rows.length;
-      const y0 = Y(0), y1 = Y(r[1]);
-      const up = r[1] >= 0;
-      bars += '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(y0, y1).toFixed(1) + '" width="' + bw.toFixed(1) +
-        '" height="' + Math.max(1, Math.abs(y1 - y0)).toFixed(1) + '" rx="1.5" fill="' + (up ? '#d93025' : '#12996b') + '" opacity="0.85"><title>' +
-        esc2(r[0] + ' · ' + (r[1] >= 0 ? '+' : '') + r[1].toFixed(2) + '%（' + Math.round(r[2]).toLocaleString('en-US') + ' 点）') + '</title></rect>';
-    });
-    /* 横轴分两行：上行日期（每 5 个交易日），下行月份（跨月处，加粗）。
-       两行分开 + 位置太近时丢弃日期标签，避免「08-1」和「8月」叠在一起。 */
-    let xt = '';
-    let lastMon = '';
-    const mpos = [];
-    rows.forEach((r, i) => {
-      const mm = r[0].slice(5, 7);
-      const x = padL + plotW * (i + 0.5) / rows.length;
-      if (mm !== lastMon) {
-        lastMon = mm;
-        mpos.push(x);
-        xt += '<text x="' + x.toFixed(1) + '" y="' + (H - padB + 38) + '" text-anchor="middle" class="pi-yk pi-yk-year">' + Number(mm) + TT('月') + '</text>';
-      }
-    });
-    rows.forEach((r, i) => {
-      if (i % 5) return;
-      const x = padL + plotW * (i + 0.5) / rows.length;
-      if (mpos.some((m) => Math.abs(m - x) < 26)) return;
-      xt += '<text x="' + x.toFixed(1) + '" y="' + (H - padB + 20) + '" text-anchor="middle" class="pi-yk">' + r[0].slice(5) + '</text>';
-    });
-    host.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + esc2(TT('每日涨跌幅')) + '">' +
-      grid + yl + bars + xt + '</svg>' +
-      '<div class="pi-note">' + esc2(TT('最近 60 个交易日 · 柱高为当日涨跌幅（相对前一交易日），红涨绿跌')) + '</div>';
   }
 
   function renderRanges() {
@@ -866,11 +829,14 @@
       host.innerHTML = '<div class="chart-empty">' + esc2(TT('暂无指数数据')) + '</div>';
       return;
     }
-    if (range === 'd') { renderDaily(it, host); return; }
-    const s = sliceSeries(it.series, range);
-    /* 2026-10-31 四版（用户要求）：恒指/上证等外部指数直接画公开点位值（纵轴=指数点），
-       不再归一化成基期 100；自算 MPF 指数保持基期 100 口径 */
-    const RAWV = (cur === 'HSI' || cur === 'SSE');
+    /* 「近 40 日」必须用日线（it.daily）；it.series 是按周聚合的 618 个周点，
+       取 40 个就是 9 个月，和顶部迷你线完全对不上。 */
+    const s = (range === '40d' && it.daily && it.daily.length > 5)
+      ? it.daily.slice(-40)
+      : sliceSeries(it.series, range);
+    /* 2026-11-03（第三十一轮，用户反馈）：顶部行情栏显示 1,823.5，这里却画成 100 出头，
+       两处对不上。现在自算指数也直接画真实点位（基期 1000），与行情栏、对比图统一口径。 */
+    const RAWV = true;
     const W = 1000, H = 524, padL = 58, padR = 16, padT = 16, padB = 82;   /* 四版：再加高，给倾斜年份标签留足空间 */
     const base = s[0][1] || 1;
     const pts = RAWV ? s.map((r) => [r[0], r[1]]) : s.map((r) => [r[0], (r[1] / base) * 100]);
@@ -878,15 +844,9 @@
     let mx = Math.max.apply(null, pts.map((p) => p[1]));
     const padv = (mx - mn) * 0.08 || 1; mn -= padv; mx += padv;
     /* 纵轴等间隔整数刻度：自算指数整 10/20；真实点位按量级取 1/2/5 整数步长 */
-    let step = 10;
-    if (RAWV) {
-      const span0 = mx - mn;
-      const mag = Math.pow(10, Math.floor(Math.log10(Math.max(span0 / 8, 1e-9))));
-      step = [1, 2, 5, 10].map((m) => m * mag).find((v) => span0 / v <= 9) || 10 * mag;
-    } else {
-      if ((mx - mn) / step > 11) step = 20;
-      if ((mx - mn) / step > 11) step = 25;
-    }
+    const span0 = mx - mn;
+    const mag = Math.pow(10, Math.floor(Math.log10(Math.max(span0 / 8, 1e-9))));
+    let step = [1, 2, 5, 10].map((m) => m * mag).find((v) => span0 / v <= 9) || 10 * mag;
     /* 2026-11-02（第十八轮）：真实点位指数不会为负；8% 留白把下界压到 0 以下时钳到 0，
        否则恒指长历史图会出现 -5,000 这种无意义刻度 */
     let lo = Math.floor(mn / step) * step;
@@ -931,7 +891,17 @@
     /* 2026-11-02（第十八轮，用户要求）：月份刻度标在「月底」——3 月落在 3/31、6 月落在 6/30，
        这样 9 月→年份分界→3 月的间距与 3/6/9 之间完全一致（此前标在月初，导致年份两侧间距不等）；
        12 月并入 1 月 1 日的年份分界，不单独标注。 */
-    if (monthly || quarter) {
+    /* 近 40 日视图：跨月只有 1–2 个，按月标会挤成一坨 → 改按交易日标日期（MM-DD） */
+    const tiny = pts.length <= 62 && mspan <= 2.6;
+    if (tiny) {
+      const stepI = Math.max(1, Math.ceil(pts.length / 7));
+      for (let i = 0; i < pts.length; i += stepI) {
+        const x = X(i);
+        if (x < padL + 14 || x > W - padR - 14) continue;
+        xt += '<text x="' + x.toFixed(1) + '" y="' + (axisY + 16) + '" text-anchor="middle" class="pi-yk">' + pts[i][0].slice(5) + '</text>';
+      }
+    }
+    if (!tiny && (monthly || quarter)) {
       for (let m = Math.ceil(mi0 - 0.02); m <= Math.floor(mi1 + 0.001); m++) {
         const mo = ((m % 12) + 12) % 12 + 1;
         if (mo === 12) continue;
@@ -945,6 +915,7 @@
     /* 年份标签：单独一行放在月份下方（2026-11-03 用户要求：不再左右平移——那会和相邻月份粘住，
        改为居中挂在「换年竖线」正下方，往下让出一行即可完全分开） */
     const y0 = Math.ceil(mi0 / 12), y1 = Math.floor(mi1 / 12);
+    if (!tiny) {
     /* 长区间（如恒指全部 37 年）按宽度稀疏年份标签，避免 24px 一个挤成一片 */
     const yStep = Math.max(1, Math.ceil(58 / Math.max(1, plotW / Math.max(1, y1 - y0 + 1))));
     /* 从「最后一年」往前推，保证最新年份一定有标签（否则长区间会停在 2024） */
@@ -958,8 +929,9 @@
       xt += yearLab(lx, axisY + 32, yearTxt(yy), anchor);
     }
     /* 年份分界小竖线（1 月 1 日）：让「哪里换年」一眼可见 */
+    }
     let ytick = '';
-    for (let yy = Math.ceil(mi0 / 12); yy <= Math.floor(mi1 / 12); yy++) {
+    if (!tiny) for (let yy = Math.ceil(mi0 / 12); yy <= Math.floor(mi1 / 12); yy++) {
       const x = padL + plotW * ((yy * 12 - mi0) / (mi1 - mi0 || 1));
       if (x < padL + 1 || x > W - padR - 1) continue;
       ytick += '<line x1="' + x.toFixed(1) + '" y1="' + axisY + '" x2="' + x.toFixed(1) + '" y2="' + (axisY + 8) + '" stroke="#7fa8cc" stroke-width="1.8"/>';
@@ -993,7 +965,7 @@
         const gx = X(i).toFixed(1), gy = Y(pts[i][1]).toFixed(1);
         guide.setAttribute('x1', gx); guide.setAttribute('x2', gx); guide.setAttribute('opacity', '1');
         dot.setAttribute('cx', gx); dot.setAttribute('cy', gy); dot.setAttribute('opacity', '1');
-        const dpct = RAWV ? (s[i][1] - base) / base * 100 : pts[i][1] - 100;
+        const dpct = base ? (s[i][1] - base) / base * 100 : 0;
         bub.hidden = false;
         bub.textContent = pts[i][0] + ' · ' + (RAWV ? Math.round(pts[i][1]).toLocaleString('en-US') : pts[i][1].toFixed(1)) + TT(' 点') + '（' + (dpct >= 0 ? '+' : '') + dpct.toFixed(1) + '%）';
         bub.style.left = Math.min(Math.max(X(i) / W * 100, 14), 86) + '%';
@@ -1010,7 +982,9 @@
   /* 2026-10-31 三版（用户要求）：顶部行情栏点击 → 跳转到本栏目并切换到对应指数 */
   window.__piSelect = function (key) {
     if (!DB || !DB.items[key]) return;
-    cur = key; range = '5y';
+    /* 2026-11-03（第三十一轮，用户要求）：从顶部行情栏点进来，落到「近 40 日」——
+       与大图迷你线同一批点、同一形状，不再出现「点进来看到另一张图」。 */
+    cur = key; range = '40d';
     render();
   };
 

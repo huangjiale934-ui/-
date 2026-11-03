@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230f4c81%27/%3E%3C/svg%3E">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>前十大持仓 · 两行式 5 套方案（真实 729px）</title>
+<style>
+  :root { --brand:#0866bb; --ink:#16283e; --t2:#3d5470; --t3:#8595a8; --line:#e3ecf4; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#eef3f9; color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif; }
+  .hd { max-width:1000px; margin:0 auto; padding:34px 20px 8px; }
+  .hd h1 { margin:0 0 10px; font-size:24px; }
+  .hd p { margin:0 0 6px; color:#55708c; font-size:13.5px; line-height:1.8; }
+  .hd b { color:var(--brand); }
+  .list { max-width:1000px; margin:0 auto; padding:14px 20px 70px; display:flex; flex-direction:column; gap:16px; }
+  .cell { background:#fff; border-radius:13px; box-shadow:0 4px 18px rgba(20,50,90,.07); overflow:hidden; }
+  .cap { display:flex; align-items:baseline; gap:10px; padding:11px 15px; border-bottom:1px solid #eef3f9; background:#fbfdff; }
+  .cap b { font-size:13px; color:var(--brand); letter-spacing:.5px; flex:none; }
+  .cap span { font-size:12.5px; color:#63798f; }
+  .demo { padding:14px; }
+  .box { width:729px; }
+
+  /* 公共：模块标题 + 数据来源行 */
+  .sect { display:flex; align-items:center; gap:8px; margin:0 0 10px; font-size:14px; font-weight:700; color:#1b3550; }
+  .sect i { width:3px; height:14px; border-radius:2px; background:var(--brand); display:block; }
+  .sect em { font-style:normal; margin-left:auto; font-weight:400; font-size:11.5px; color:#8ba0b3; }
+  .note { margin-top:10px; font-size:11.5px; color:#8ba0b3; }
+  .sum { display:flex; justify-content:space-between; padding:9px 0 2px; border-top:1px solid var(--line);
+    margin-top:8px; font-size:13px; font-weight:700; color:#1b3550; }
+
+  /* G01 名称+占比同一行，条在下 */
+  .g01 .r { padding:7px 0; }
+  .g01 .top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:5px; }
+  .g01 .nm { font-size:12.5px; color:#26374d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .g01 .vv { font-size:12.5px; font-weight:700; color:#0f4f8c; font-variant-numeric:tabular-nums; flex:none; }
+  .g01 .tr { height:6px; border-radius:4px; background:#eef4fa; overflow:hidden; }
+  .g01 .tr i { display:block; height:100%; border-radius:4px; }
+
+  /* G02 名称在上，占比浮在条尾 */
+  .g02 .r { padding:6px 0 9px; }
+  .g02 .nm { display:block; font-size:12.5px; color:#26374d; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .g02 .line2 { display:flex; align-items:center; gap:10px; }
+  .g02 .tr { flex:1; height:9px; border-radius:5px; background:#eef4fa; }
+  .g02 .tr i { display:block; height:100%; border-radius:5px; }
+  .g02 .vv { flex:0 0 52px; text-align:right; font-size:12px; font-weight:700; color:#0f4f8c; font-variant-numeric:tabular-nums; }
+
+  /* G03 两列网格 */
+  .g03 .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; }
+  .g03 .r { }
+  .g03 .nm { display:flex; justify-content:space-between; gap:8px; font-size:12px; color:#26374d; margin-bottom:4px; }
+  .g03 .nm b { font-weight:700; color:#0f4f8c; flex:none; font-variant-numeric:tabular-nums; }
+  .g03 .nm span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .g03 .tr { height:5px; border-radius:3px; background:#eef4fa; }
+  .g03 .tr i { display:block; height:100%; border-radius:3px; }
+
+  /* G04 表格感：名称左、条中、占比右 */
+  .g04 .r { display:grid; grid-template-columns:172px 1fr 54px; align-items:center; gap:10px; padding:8px 0; border-bottom:1px dashed #edf2f8; }
+  .g04 .r:last-child { border-bottom:0; }
+  .g04 .nm { font-size:12.5px; color:#26374d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .g04 .tr { height:5px; border-radius:3px; background:#eef4fa; }
+  .g04 .tr i { display:block; height:100%; border-radius:3px; }
+  .g04 .vv { text-align:right; font-size:12.5px; font-weight:700; color:#0f4f8c; font-variant-numeric:tabular-nums; }
+
+  /* G05 名称叠在条上 */
+  .g05 .r { margin:6px 0; position:relative; height:26px; border-radius:6px; background:#f2f7fc; overflow:hidden; }
+  .g05 .r i { position:absolute; left:0; top:0; bottom:0; border-radius:6px; }
+  .g05 .nm { position:absolute; left:10px; top:0; bottom:0; display:flex; align-items:center; font-size:12px;
+    color:#12314e; max-width:60%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .g05 .vv { position:absolute; right:10px; top:0; bottom:0; display:flex; align-items:center;
+    font-size:12px; font-weight:700; color:#0f4f8c; background:transparent; font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+<div class="hd">
+  <h1>前十大持仓 · 「名称在上、条在下」5 套（真实 729px）</h1>
+  <p>背景：详情弹窗收到 <b>765px</b> 后，现在「名称在左、条在右」的表格式排法把名称列压得很窄，长基金名频繁省略号。</p>
+  <p>下面 5 套都改成两行结构（名称占满整行宽度），每套按弹窗内实际内容宽 <b>729px</b> 渲染，用的是真实持仓数据（友邦 · 2026-07-31）。</p>
+  <p>挑编号告诉我（如「G03」），或说「G02 的条 + G03 的网格」这种组合。</p>
+</div>
+<div class="list" id="list"></div>
+
+<script>
+(function () {
+  const DATA = [
+    ['台灣積體電路製造股份有限公司', 9.48],
+    ['騰訊控股', 7.84],
+    ['阿里巴巴集團', 5.89],
+    ['匯豐控股', 5.11],
+    ['DELTA ELECTRONICS INC', 2.89],
+    ['建設銀行', 2.89],
+    ['工商銀行', 2.01],
+    ['CONTEMPORARY AMPEREX TECHNOLOGY', 1.96],
+    ['聯發科技股份有限公司', 1.74],
+    ['招商银行', 1.19],
+  ];
+  const MAX = Math.max(...DATA.map(d => d[1]));
+  const SUM = DATA.reduce((a, d) => a + d[1], 0).toFixed(2);
+  const BLUE = (i) => ['#084e8c','#0f5c9e','#1669b0','#2076c0','#2e86c8','#4a9bd4','#6fb0e0','#93c5e8','#b8d9f2','#cfe4f5'][Math.min(i, 9)];
+  const pct = (w) => ((w / MAX) * 100).toFixed(2);
+  const head = (extra) => '<div class="sect"><i></i>前十大持仓<em>' + (extra || '') + '</em></div>';
+
+  const A = [];
+  const add = (id, name, desc, html) => A.push({ id, name, desc, html });
+
+  /* G01 */
+  add('G01', '名称+占比同一行，条在下',
+    '最常规的两行式：第一行左名称右占比，第二行满宽细条。名称可用到整行宽度。',
+    head('截至 2026-07-31') +
+    DATA.map((d, i) => '<div class="r"><div class="top"><span class="nm">' + d[0] + '</span><span class="vv">' + d[1].toFixed(2) + '%</span></div>' +
+      '<div class="tr"><i style="width:' + pct(d[1]) + '%;background:' + BLUE(i) + '"></i></div></div>').join('') +
+    '<div class="sum"><span>前十大合计</span><span>' + SUM + '%</span></div>' +
+    '<div class="note">数据来源：友邦官网「基金便览」；截至 2026-07-31。</div>');
+
+  /* G02 */
+  add('G02', '条加粗，占比压在条尾',
+    '名称单独一行，条加粗到 9px，占比浮在条的右端上方——数字与条长直接对应。',
+    head('截至 2026-07-31') +
+    DATA.map((d, i) => '<div class="r"><span class="nm">' + d[0] + '</span>' +
+      '<div class="line2"><div class="tr"><i style="width:' + pct(d[1]) + '%;background:' + BLUE(i) + '"></i></div>' +
+      '<span class="vv">' + d[1].toFixed(2) + '%</span></div></div>').join('') +
+    '<div class="sum"><span>前十大合计</span><span>' + SUM + '%</span></div>' +
+    '<div class="note">数据来源：友邦官网「基金便览」；截至 2026-07-31。</div>');
+
+  /* G03 */
+  add('G03', '两列网格（10 项只占一半高度）',
+    '改成左右两列，每格「名称 + 占比 / 细条」。条目多时高度直接砍半，也不会挤名称。',
+    head('截至 2026-07-31') +
+    '<div class="grid">' + DATA.map((d, i) => '<div class="r"><div class="nm"><span>' + d[0] + '</span><b>' + d[1].toFixed(2) + '%</b></div>' +
+      '<div class="tr"><i style="width:' + pct(d[1]) + '%;background:' + BLUE(i) + '"></i></div></div>').join('') + '</div>' +
+    '<div class="sum"><span>前十大合计</span><span>' + SUM + '%</span></div>' +
+    '<div class="note">数据来源：友邦官网「基金便览」；截至 2026-07-31。</div>');
+
+  /* G04 */
+  add('G04', '对照：三列对齐（名称仍在左）',
+    '这是现在的排法略放宽的样子——名称列 172px 仍然会省略长名，放进来只为对比。',
+    head('截至 2026-07-31') +
+    DATA.map((d, i) => '<div class="r"><span class="nm">' + d[0] + '</span>' +
+      '<div class="line2"><div class="tr"><i style="width:' + pct(d[1]) + '%;background:' + BLUE(i) + '"></i></div>' +
+      '<span class="vv">' + d[1].toFixed(2) + '%</span></div></div>').join('') +
+    '<div class="sum"><span>前十大合计</span><span>' + SUM + '%</span></div>' +
+    '<div class="note">数据来源：友邦官网「基金便览」；截至 2026-07-31。</div>');
+
+  /* G05 */
+  add('G05', '名称叠在条上（条即行）',
+    '整个行就是一条，名称写在条内左侧、占比在右端——最省高度，长名称也不换行。',
+    head('截至 2026-07-31') +
+    DATA.map((d, i) => '<div class="r"><i style="width:' + Math.max(6, +pct(d[1])) + '%;background:' + BLUE(i) + ';opacity:.26"></i>' +
+      '<span class="nm">' + d[0] + '</span><span class="vv">' + d[1].toFixed(2) + '%</span></div>').join('') +
+    '<div class="sum"><span>前十大合计</span><span>' + SUM + '%</span></div>' +
+    '<div class="note">数据来源：友邦官网「基金便览」；截至 2026-07-31。</div>');
+
+  document.getElementById('list').innerHTML = A.map((x) =>
+    '<section class="cell"><div class="cap"><b>' + x.id + '</b><span>' + x.name + ' —— ' + x.desc + '</span></div>' +
+    '<div class="demo"><div class="box ' + x.id.toLowerCase() + '">' + x.html + '</div></div></section>').join('');
+})();
+</script>
+</body>
+</html>

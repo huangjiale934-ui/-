@@ -474,7 +474,11 @@ window.TREND = (function () {
       S._exporting = true;
       setTimeout(() => { S._exporting = false; }, 2000);
       const win = currentWindow();
-      if (!win) { if (window.mpfToast) mpfToast(_t('暂无可导出的数据')); return; }
+      if (!win) {
+        /* 2026-11-03（第三十一轮，用户报 bug）：点「清空」后图已空，但上一次的悬浮提示还挂在右上角。
+           原因：空态分支直接 return，没有执行后面的 tip.hidden = true。 */
+        if (tip) tip.hidden = true;
+        svg.querySelectorAll('.tr-cross').forEach((n) => { n.style.display = 'none'; }); if (window.mpfToast) mpfToast(_t('暂无可导出的数据')); return; }
       const { startTs, endTs } = win;
       const cols = [];
       S.items.forEach((it, i) => {
@@ -1056,6 +1060,10 @@ window.TREND = (function () {
       const PL = 64, PR = W - 12, PT = 24, PB = H - 56;
       const win = currentWindow();
       if (!win) {
+        /* 2026-11-03（第三十一轮，用户报 bug）：点「清空」后图已空，但上一次的悬浮提示还挂在右上角。
+           原因：空态分支直接 return，没有执行后面的 tip.hidden = true。 */
+        if (tip) tip.hidden = true;
+        svg.querySelectorAll('.tr-cross').forEach((n) => { n.style.display = 'none'; });
         /* 2026-10-21：区分「没选」与「选了但该基金无日度净值」，避免用户以为图坏了 */
         const anyErr = S.items.some((it) => { const d = S.data[keyOf(it)]; return d && d.err; });
         const msg = anyErr ? _t('该基金暂无日度净值数据，无法绘制走势图（利息基金／非单位化基金官方不提供单位净值）') : _t('请在上方选择指数或基金开始对比');
@@ -1257,13 +1265,11 @@ window.TREND = (function () {
         grp.setAttribute('class', 'tr-dot');
         grp.innerHTML = dots.join('');
         svg.appendChild(grp);
+        /* 2026-11-03（第三十一轮，用户要求）：上方标签已说明口径，底部那行文字说明去掉 */
         const tipTag = solo
           ? '<span class="tr-tip-tag">' + _t('当日涨跌幅') + '</span>'
           : '<span class="tr-tip-tag">' + _t('相对区间涨跌幅') + '</span>';
-        tip.innerHTML = '<div class="tr-tip-date">' + dstr(best) + tipTag + '</div>' + rows +
-          '<div class="tr-tip-note">' + (solo
-            ? _t('数值为当日净值相对前一交易日的涨跌幅')
-            : _t('数值为相对所选区间起点的累计涨跌幅')) + '</div>';
+        tip.innerHTML = '<div class="tr-tip-date">' + dstr(best) + tipTag + '</div>' + rows;
         tip.hidden = false;
         const cr = q('.tr-canvas').getBoundingClientRect();
         const px = ev.clientX - cr.left;

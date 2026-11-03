@@ -647,6 +647,32 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  /* 2026-11-03（第三十一轮）：首屏「市场情绪」小卡的数据 ——
+     近日上涨基金占比（nav-perf 的 d1）+ 最近 7 个交易日市场指数涨跌（迷你柱）。 */
+  if (p === '/api/breadth') {
+    try {
+      const perf = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'nav-perf.json'), 'utf8')).funds || {};
+      const idx = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'index.json'), 'utf8'));
+      const mpf = (idx.items && idx.items.MPFAVG && idx.items.MPFAVG.series) || [];
+      const days = [];
+      for (let i = Math.max(1, mpf.length - 7); i < mpf.length; i++) {
+        const a = mpf[i - 1][1], b = mpf[i][1];
+        days.push({ d: mpf[i][0], chg: a ? Math.round((b / a - 1) * 10000) / 100 : 0 });
+      }
+      let up = 0, total = 0, asOf = '';
+      Object.keys(perf).forEach((id) => {
+        const x = perf[id];
+        if (!x || x.d1 == null) return;
+        total++;
+        if (x.d1 > 0) up++;
+        if (x.asOf && x.asOf > asOf) asOf = x.asOf;
+      });
+      return send(res, 200, JSON.stringify({
+        asOf, total, up, pct: total ? Math.round((up / total) * 100) : null, days,
+      }));
+    } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }
+  }
+
   if (p === '/api/ticker') {
     return fs.readFile(path.join(__dirname, 'data', 'index.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '指数数据未生成' }));

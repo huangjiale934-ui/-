@@ -1153,3 +1153,32 @@ body { overflow-x: visible; }
 
 /* 2026-11-03（第二十九轮）：积金表现指数「每日」视图的说明行 */
 .pi-note { margin-top: 6px; font-size: 11.5px; color: var(--text-3, #8595a8); text-align: center; }
+
+/* ==========================================================
+   2026-11-03（第三十一轮，用户选定 H20）
+   首屏「市场情绪」卡：迷你柱 + 近日上涨占比 + 看看是哪些
+   配色只用站内蓝（深浅表示涨跌），不再用红绿。
+   ========================================================== */
+.hero-sent {
+  display: inline-flex; align-items: center; gap: 14px; margin-top: 24px;
+  padding: 11px 14px 11px 16px; max-width: 480px; min-width: 372px; text-decoration: none;
+  background: #fff; border: 1px solid #e0ecf7; border-radius: 11px;
+  box-shadow: 0 6px 16px rgba(20, 70, 120, .07);
+  transition: box-shadow .16s, transform .16s;
+}
+.hero-sent:hover { box-shadow: 0 10px 24px rgba(20, 70, 120, .13); transform: translateY(-1px); text-decoration: none; }
+.hero-sent:focus-visible { outline: 2px solid #0866bb; outline-offset: 2px; }
+.hs-bars { display: flex; align-items: flex-end; gap: 3px; height: 34px; flex: none; }
+.hs-bars i { display: block; width: 7px; border-radius: 2px 2px 0 0; background: #cfe2f3; }   /* 跌：最浅蓝 */
+.hs-bars i.up { background: #0866bb; }
+.hs-tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hs-tx b { font-size: 14px; font-weight: 700; color: #14314f; white-space: nowrap; }
+.hs-tx b i { font-style: normal; color: #0866bb; font-size: 16px; font-variant-numeric: tabular-nums; }
+.hs-tx em { font-style: normal; font-size: 11.5px; color: #8ba0b3; white-space: nowrap; }
+.hs-go { margin-left: auto; flex: none; font-size: 13px; font-weight: 700; color: #0866bb; white-space: nowrap; }
+.hs-go::first-letter { letter-spacing: 0; }
+@media (max-width: 620px) {
+  .hero-sent { max-width: 100%; }
+  .hs-tx b { font-size: 13px; }
+  .hs-go { font-size: 12px; }
+}

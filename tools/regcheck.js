@@ -1750,7 +1750,8 @@ chk('四版·②行情栏全站固定（样式入 style.css、逻辑入 common.j
   /\.mkt-ticker \{ background[^}]*position: sticky/.test(readSrc('style.css')) && /data-tk="' \+ k \+ '"/.test(readSrc('common.js')) && /pinFallback/.test(readSrc('common.js')) && /window\.__piSelect/.test(readSrc('home.js')) && /id="mktTicker"/.test(rawIdxHtml));
 chk('三版·③表现指数含恒指/上证（perf-idx 6 键 + 卡片 6 张）',
   /'MPF_BOND', 'HSI', 'SSE'/.test(readSrc('root:server.js')) && /\['HSI', '恒生指数'\], \['SSE', '上证指数'\]/.test(readSrc('home.js')));
-chk('三版·④表现指数纵轴整10刻度（step 10/20 等间隔）', /let step = 10;/.test(readSrc('home.js')) && /pi-yk-year/.test(readSrc('home.js')));
+chk('三版·④表现指数纵轴等间隔刻度（2026-11-03 起按点位量级取 1/2/5×10^n）',
+  /const mag = Math\.pow\(10, Math\.floor\(Math\.log10/.test(readSrc('home.js')) && /pi-yk-year/.test(readSrc('home.js')));
 chk('三版·⑤横轴年份正放加粗（2026-11-02 第二十七轮：与月份同基线、大一号）',
   readSrc('home.js').indexOf('rotate(-40 ') < 0 && /pi-yk-year \{ font-size: 12\.5px; font-weight: 700/.test(css) &&
   /tr-xlab-year \{ font-size: 12\.5px; font-weight: 700/.test(readSrc('analysis.css')));
@@ -2021,16 +2022,17 @@ chk('三十轮·②走势图与详情图的年份都改为单独一行居中',
 chk('三十轮·③单线提示显示当日涨跌幅 + 标签说明',
   /const solo = lines\.length === 1;/.test(readSrc('trend.js')) &&
   /当日涨跌幅/.test(readSrc('trend.js')) && /相对区间涨跌幅/.test(readSrc('trend.js')) &&
-  /数值为当日净值相对前一交易日的涨跌幅/.test(readSrc('trend.js')) &&
-  /tr-tip-tag/.test(readSrc('analysis.css')) && /tr-tip-note/.test(readSrc('analysis.css')));
+  /tr-tip-tag/.test(readSrc('analysis.css')) &&
+  !/tr-tip-note/.test(readSrc('trend.js')));   /* 第三十一轮：底部说明行已按用户要求去掉 */
 chk('三十轮·④详情表头价格 28px / 四栏 17px',
   /\.modal-bd \.fd-v \{ font-size: 28px;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-v2 \{ font-size: 17px;/.test(readSrc('analysis.css')));
 chk('三十轮·⑤侧栏语言胶囊真正居中（复位 margin-left:auto）',
   /\.db-side-lang \.lang-sw \{[^}]*margin-left: 0;/.test(readSrc('style.css')));
-chk('三十轮·⑥积金表现指数新增「每日」视图（60 个交易日涨跌幅柱）',
-  /\['d', '每日'\]/.test(readSrc('home.js')) && /function renderDaily/.test(readSrc('home.js')) &&
-  /最近 60 个交易日/.test(readSrc('home.js')) &&
+chk('三十一轮·④积金表现指数新增「近 40 日」视图（与顶部迷你线同一批日线点）',
+  /\['40d', '近 40 日'\]/.test(readSrc('home.js')) &&
+  /it\.daily\.slice\(-40\)/.test(readSrc('home.js')) &&
+  /cur = key; range = '40d';/.test(readSrc('home.js')) &&
   /daily: s2\.slice\(-120\)/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')));
 chk('三十轮·⑦首页榜单点击直接弹详情（不跳资料库）',
   /id="modal"/.test(readSrc('home.html')) && /window\.ensureFunds = function/.test(readSrc('common.js')) &&
@@ -2052,3 +2054,26 @@ chk('三十轮·①榜单更名「积金局每月榜单」+ 口径说明重写',
   !/MPFA 基金榜单<\/span>/.test(readSrc('common.js')) &&
   /两套口径，不要混着比/.test(readSrc('common.js')) &&
   /两套口径，不要混着比/.test(i18nText()));
+
+/* ===== 2026-11-03 第三十一轮（7 条反馈）===== */
+chk('三十一轮·①首屏换成市场情绪卡（H20）：全蓝深浅 + 近日上涨占比 + 看看是哪些',
+  /class="hero-sent"/.test(readSrc('home.html')) && !/class="hero-btns"/.test(readSrc('home.html')) &&
+  /index\.html\?dim=selfD1#db/.test(readSrc('home.html')) &&
+  /\.hs-bars i \{ display: block; width: 7px; border-radius: 2px 2px 0 0; background: #cfe2f3; \}/.test(readSrc('home.css')) &&
+  /\.hs-bars i\.up \{ background: #0866bb; \}/.test(readSrc('home.css')) &&
+  /if \(p === '\/api\/breadth'\)/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /breadth\.json/.test(fs.readFileSync(path.join(__dirname, '..', 'tools', 'build-static.js'), 'utf8')));
+chk('三十一轮·③清空后悬浮提示与十字线一并隐藏',
+  /if \(!win\) \{\s*\/\* 2026-11-03（第三十一轮，用户报 bug）/.test(readSrc('trend.js')) &&
+  /if \(tip\) tip\.hidden = true;\s*svg\.querySelectorAll\('\.tr-cross'\)/.test(readSrc('trend.js')));
+chk('三十一轮·④40 日视图与顶部迷你线同形 + 点位口径统一',
+  /const RAWV = true;/.test(readSrc('home.js')) &&
+  /it\.daily\.slice\(-40\)/.test(readSrc('home.js')) &&
+  /const tiny = pts\.length <= 62 && mspan <= 2\.6;/.test(readSrc('home.js')));
+chk('三十一轮·⑤数据说明列出源站滞后名单（折叠区内）',
+  /function staleNote\(\)/.test(readSrc('common.js')) &&
+  /note-stale/.test(readSrc('style.css')) &&
+  /id="foldSpec"/.test(readSrc('index.html')));
+chk('三十一轮·⑥前十大持仓两行式设计页在位（真实 729px）',
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-hold.html')) &&
+  /width:729px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'design-hold.html'), 'utf8')));
