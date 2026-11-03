@@ -68,10 +68,10 @@ chk('首页·走势图 5 个年份', ['2021', '2022', '2023', '2024', '2025']
 chk('首页·走势图 2025 +17.72%（规模加权新值）', /class="line-val up"[^>]*>\+17\.72%/.test(home));
 chk('首页·走势图 2022 -15.55% 为绿（规模加权新值）', /class="line-val down"[^>]*>-15\.55%/.test(home));
 
-chk('首页·四榜 2×2 各 5 条（2026-10-31：砍总开支/低风险）', ['#mkTop1', '#mkTop2', '#mkTop4', '#mkTop5'].every((id) => {
+chk('首页·四榜 2×2 各 5 条（2026-11-03：YTD/1Y/3Y/5Y 四个自算口径）', ['#mkTop1', '#mkTop3', '#mkTop4', '#mkTopYtd'].every((id) => {
   const m = new RegExp('id="' + id.slice(1) + '"[\\s\\S]*?</ol>').exec(home);
   return m && (m[0].match(/<li[\s>]/g) || []).length === 5;
-}) && home.indexOf('id="mkTop3"') < 0 && home.indexOf('id="mkTop6"') < 0);
+}) && home.indexOf('id="mkTop2"') < 0 && home.indexOf('id="mkTop5"') < 0 && home.indexOf('id="mkTopMdd"') < 0);
 chk('首页·免责条在位（disclaimer，2026-10-31 版式）', /class="disclaimer"/.test(home) && /每日自动同步|风险提示与免责声明/.test(home));
 chk('首页·区间标签 12 个（走势 6 + 表现指数区间 6，2026-11-03 加「每日」）', (home.match(/class="yr-tab( on)?"/g) || []).length === 12);
 /* 2026-10-28 用户要求删除整块「公司介绍」（成立时间/愿景/团队/业务版图、六大优势、免费行政服务、合作伙伴、承诺、业务板块）
@@ -309,7 +309,7 @@ chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排
 /* ---- 第八轮：榜单数值 / 图表布局 / 更新时间 ---- */
 (function () {
   // 四个榜单卡片（2026-10-31：砍总开支/低风险）：每一项都必须有数值
-  const ids = [1, 2, 4, 5];
+  const ids = ['1', '3', '4', 'Ytd'];   /* 2026-11-03 第三十三轮：YTD/1Y/3Y/5Y */
   let bad = [];
   ids.forEach((i) => {
     const m = new RegExp('<ol[^>]*id="mkTop' + i + '"[\\s\\S]*?</ol>').exec(home);
@@ -328,8 +328,8 @@ chk('首页·CSS 已含桌面三列布局调优', (function () {
 
 /* ---- 第九轮：榜单跳转链接 / 海通自动抓取 ---- */
 chk('首页·四榜均有「查看完整榜单」链接', (home.match(/class="mk-more"/g) || []).length === 4);
-chk('首页·榜单链接指向同口径榜单（2026-11-03 第二十九轮：自算榜进资料库对应维度）', (function () {
-  const want = { mkTop1: 'dim=selfY1#db', mkTop4: 'dim=selfY5a#db', mkTop5: 'rk=cumLaunch#rank', mkTop2: 'dim=size#db' };
+chk('首页·四榜全部指向资料库同一自算维度（2026-11-03 第三十三轮：积金局两榜下线）', (function () {
+  const want = { mkTop1: 'dim=selfY1#db', mkTop4: 'dim=selfY5a#db', mkTopYtd: 'dim=selfYtd#db', mkTop3: 'dim=selfY3a#db' };
   return Object.keys(want).every((id) => {
     const m = new RegExp('<ol[^>]*id="' + id + '"[\\s\\S]{0,600}?</ol>').exec(home);
     // 链接在 <ol> 之前，取卡片整段判断
@@ -1748,8 +1748,8 @@ chk('三版·①hero 改名+按钮卡与标题对齐（hero-copy fit-content）'
   /<h1 data-i18n="香港强积金数据分析平台">/.test(home) && /\.hero-copy \{ width: fit-content/.test(css) && /\.hero-btns \.cta \{ flex: 1 1 0/.test(css));
 chk('四版·②行情栏全站固定（样式入 style.css、逻辑入 common.js）+ 首页跳转表现指数',
   /\.mkt-ticker \{ background[^}]*position: sticky/.test(readSrc('style.css')) && /data-tk="' \+ k \+ '"/.test(readSrc('common.js')) && /pinFallback/.test(readSrc('common.js')) && /window\.__piSelect/.test(readSrc('home.js')) && /id="mktTicker"/.test(rawIdxHtml));
-chk('三版·③表现指数含恒指/上证（perf-idx 6 键 + 卡片 6 张）',
-  /'MPF_BOND', 'HSI', 'SSE'/.test(readSrc('root:server.js')) && /\['HSI', '恒生指数'\], \['SSE', '上证指数'\]/.test(readSrc('home.js')));
+chk('三版·③表现指数含恒指/标普500（perf-idx 6 键 + 卡片 6 张）',
+  /'MPF_BOND', 'HSI', 'SPX'/.test(readSrc('root:server.js')) && /\['HSI', '恒生指数'\], \['SPX', '标普 500'\]/.test(readSrc('home.js')));
 chk('三版·④表现指数纵轴等间隔刻度（2026-11-03 起按点位量级取 1/2/5×10^n）',
   /const mag = Math\.pow\(10, Math\.floor\(Math\.log10/.test(readSrc('home.js')) && /pi-yk-year/.test(readSrc('home.js')));
 chk('三版·⑤横轴年份正放加粗（2026-11-02 第二十七轮：与月份同基线、大一号）',
@@ -1976,7 +1976,7 @@ chk('二十八轮·⑦⑧两个新设计页在位（10 套详情头 / 20 套页�
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-detail2.html')) &&
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-shell2.html')));
 chk('二十八轮·详情弹窗「放大」先切到对比页（修「点了没反应」）',
-  /window\.__dbShowTab = show;/.test(readSrc('index.html')) &&
+  /window\.__dbShowTab = function \(t\) \{ show\(t, false, false\); \};/.test(readSrc('index.html')) &&
   /__dbShowTab\('cmp'\)/.test(readSrc('common.js')));
 chk('二十八轮·首页图表网格允许收缩（消除横向滚动 256px）',
   /\.mk-charts > \.mk-panel, \.mk-charts2 > \.mk-panel, \.mk-charts > \.mk-card \{ min-width: 0; \}/.test(readSrc('home.css')));
@@ -2049,19 +2049,19 @@ chk('三十轮·⑨英文模式行情卡用短名 + 图例同名补单位类别'
   /_tq\('\{u\} 类', \{ u: u \}\) \+ ' · ' \+ nm/.test(readSrc('trend.js')));
 chk('三十轮·⑩投资组合分布整体缩小 10%',
   /\.alr3 \{ margin: 4px auto 2px; width: 90%; \}/.test(readSrc('analysis.css')));
-chk('三十轮·①榜单更名「积金局每月榜单」+ 口径说明重写',
-  /积金局每月榜单/.test(readSrc('common.js')) &&
+chk('三十轮·①榜单更名（2026-11-03 起「积金局月度数据」，退居侧栏更多区）+ 口径说明重写',
+  /积金局月度数据/.test(readSrc('common.js')) &&
   !/MPFA 基金榜单<\/span>/.test(readSrc('common.js')) &&
   /两套口径，不要混着比/.test(readSrc('common.js')) &&
   /两套口径，不要混着比/.test(i18nText()));
 
 /* ===== 2026-11-03 第三十一轮（7 条反馈）===== */
-chk('三十一轮·①首屏换成市场情绪卡（H20）：全蓝深浅 + 近日上涨占比 + 看看是哪些',
+chk('三十一轮·①首屏市场情绪卡（第三十三轮起改 B02 圆环）',
   /class="hero-sent"/.test(readSrc('home.html')) && !/class="hero-btns"/.test(readSrc('home.html')) &&
   /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
   /最近一周 · 每日更新/.test(readSrc('home.html')) &&
-  /\.hs-bars i \{ display: block; width: 7px; border-radius: 2px 2px 0 0; background: #cfe2f3; \}/.test(readSrc('home.css')) &&
-  /\.hs-bars i\.up \{ background: #0866bb; \}/.test(readSrc('home.css')) &&
+  /class="hs-ring"/.test(readSrc('home.html')) &&
+  /\.hs-ring-fg \{ fill: none; stroke: #0866bb/.test(readSrc('home.css')) &&
   /if \(p === '\/api\/breadth'\)/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /breadth\.json/.test(fs.readFileSync(path.join(__dirname, '..', 'tools', 'build-static.js'), 'utf8')));
 chk('三十一轮·③清空后悬浮提示与十字线一并隐藏',
@@ -2097,3 +2097,38 @@ chk('三十二轮·②行情悬浮提示写清折线维度与数据日期',
 chk('三十二轮·③37% 迷你图 20 套设计页在位',
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-breadth.html')) &&
   (fs.readFileSync(path.join(__dirname, '..', 'public', 'design-breadth.html'), 'utf8').match(/const b\d\d = /g) || []).length >= 20);
+
+/* ===== 2026-11-03 第三十三轮（11 条反馈）===== */
+chk('三十三轮·①行情数字改「近 40 个交易日区间收益」+ 上证换标普 500',
+  /const spark = s2\.slice\(-40\);/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /const base40 = spark\.length > 1 \? spark\[0\]\[1\] : 0;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /const KEYS = \['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SPX'\]/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /SPX: '标普 500'/.test(readSrc('common.js')));
+chk('三十三轮·②首页四榜全自算口径（积金局两榜下线）+ 侧栏「更多数据」次级入口',
+  !/mkTop5|mkTop2/.test(readSrc('home.html')) &&
+  /mkTopYtd/.test(readSrc('home.html')) && /mkTopMdd/.test(readSrc('home.html')) === false &&
+  /class="db-side-more"/.test(readSrc('common.js')) && /更多数据/.test(readSrc('common.js')) &&
+  /积金局月度数据/.test(readSrc('common.js')) && /db-tag/.test(readSrc('style.css')));
+chk('三十三轮·③首屏情绪卡改 B02 圆环（弧长=占比，中心数字）',
+  /class="hs-ring"/.test(readSrc('home.html')) && /id="hsRingArc"/.test(readSrc('home.html')) &&
+  /arc\.style\.strokeDasharray = \(C \* pct \/ 100\)/.test(readSrc('home.js')) &&
+  /\.hs-ring \{ position: relative; display: block; width: 74px/.test(readSrc('home.css')));
+chk('三十三轮·⑤首页「自建强积金数据平台」模块已删除',
+  !/section class="plat"/.test(readSrc('home.html')) && !/plat-grid/.test(readSrc('home.html')));
+chk('三十三轮·⑥友情链接等高对齐 + 受限官网标注',
+  /\.fr-list li > a,\n\.fr-list \.fr-nolink \.fr-t \{ flex: 1 1 auto; display: flex; flex-direction: column; min-height: 100%; \}/.test(readSrc('style.css')) &&
+  /官网可能限制部分网络访问/.test(readSrc('common.js')));
+chk('三十三轮·⑦市场回报年份视图补三块（各类平均 / 分布 / 最好最差）',
+  /yearDetail: yearDetail,/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /function yearDetailHTML/.test(readSrc('home.js')) &&
+  /\.yr-dist \{/.test(readSrc('home.css')) && /\.yr-rank li \{/.test(readSrc('home.css')));
+chk('三十三轮·⑧三个图表 20 套配色方案页在位（真实图表）',
+  fs.existsSync(path.join(__dirname, '..', 'public', 'design-palette.html')) &&
+  (fs.readFileSync(path.join(__dirname, '..', 'public', 'design-palette.html'), 'utf8').match(/id: 'P\d\d'/g) || []).length >= 20);
+chk('三十三轮·⑨数据统计口径说明改写（净值主要来自发行人官网）',
+  /基金资料与单位净值主要取自各计划发行人官网/.test(readSrc('common.js')) &&
+  !/积金局资料截至 <b>\{d\}<\/b>。/.test(readSrc('common.js')));
+chk('三十三轮·⑩板块切换进历史（返回能回到刚看的板块）',
+  /function show\(tab, keepHash, push\)/.test(readSrc('index.html')) &&
+  /if \(push\) history\.pushState\(\{ mpfTab: hash0 \}, '', '#' \+ hash0\)/.test(readSrc('index.html')) &&
+  /show\(tab, false, true\)/.test(readSrc('index.html')));

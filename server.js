@@ -181,6 +181,43 @@ function buildMarketStat(c) {
       };
     });
 
+  /* 2026-11-03（第三十三轮，用户反馈）：首页「市场整体回报走势」选到具体年份时下方大片空白，
+     补三块数据：各类基金当年平均回报 / 回报分布 / 当年最好与最差。全部由 cal 现算，不新增数据源。 */
+  const DIST_EDGES = [-1e9, -20, -10, 0, 10, 20, 1e9];
+  const DIST_LABEL = ['≤-20%', '-20~-10', '-10~0', '0~10', '10~20', '≥20%'];
+  const yearDetail = {};
+  (c.years || []).forEach((y) => {
+    const rows = funds
+      .filter((f) => f.cal && f.cal[y] != null)
+      .map((f) => ({ f: f, v: f.cal[y] }));
+    if (!rows.length) return;
+    const byType = {};
+    rows.forEach((r) => {
+      const k = r.f.type || '其他';
+      (byType[k] = byType[k] || []).push(r.v);
+    });
+    const dist = DIST_LABEL.map((lb, i) => ({
+      label: lb,
+      n: rows.filter((r) => r.v > DIST_EDGES[i] && r.v <= DIST_EDGES[i + 1]).length,
+    }));
+    const seen = {};
+    const uniq = [];
+    rows.slice().sort((a, b) => b.v - a.v).forEach((r) => {
+      const k = (r.f.fundBase || r.f.fund) + '|' + (r.f.scheme || '');
+      if (seen[k]) return;
+      seen[k] = 1;
+      uniq.push({ id: r.f.id, fund: r.f.fundBase || r.f.fund, scheme: r.f.scheme || '', v: rnd(r.v) });
+    });
+    yearDetail[y] = {
+      typeAvg: Object.keys(byType)
+        .map((k) => ({ type: k, n: byType[k].length, avg: rnd(mean(byType[k])) }))
+        .sort((a, b) => b.avg - a.avg),
+      dist: dist,
+      best: uniq.slice(0, 3),
+      worst: uniq.slice(-3).reverse(),
+    };
+  });
+
   /* 榜单卡片用的精简字段。
      注意：新增榜单时必须同时在这里补上对应字段，否则前端拿到 undefined 会显示「—」
      （上一版「近5年回报领先 / 推出至今累积回报 / 低风险优选」三个榜就是这么空掉的）。 */
@@ -239,6 +276,7 @@ function buildMarketStat(c) {
     downCount: withAnn1.filter((f) => f.ann1 < 0).length,
     upBase: withAnn1.length,
     byYear: byYear,
+    yearDetail: yearDetail,
     byType: pack(byType),
     byTrustee: pack(byTrustee),
     byRisk: Object.keys(byRisk).map((k) => byRisk[k]).sort((a, b) => a.risk - b.risk),
@@ -619,7 +657,8 @@ const server = http.createServer(async (req, res) => {
       if (err) return send(res, 404, JSON.stringify({ error: '指数数据未生成' }));
       try {
         const j = JSON.parse(buf.toString('utf8'));
-        const K4 = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];
+        /* 2026-11-03（第三十三轮）：上证 → 标普 500，与顶部行情栏一致 */
+        const K4 = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SPX'];
         const items = {};
         K4.forEach((k) => {
           const it = j.items && j.items[k];
@@ -682,18 +721,26 @@ const server = http.createServer(async (req, res) => {
       if (err) return send(res, 404, JSON.stringify({ error: '指数数据未生成' }));
       try {
         const j = JSON.parse(buf.toString('utf8'));
-        const KEYS = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];   /* 2026-10-31（用户要求）：市场/股/混/债 + 恒指 + 上证，删货币/保证 */
+        /* 2026-11-03（第三十三轮，用户要求）：上证指数 → 标普 500（强积金投向美股较多） */
+        const KEYS = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SPX'];
         const items = {};
         KEYS.forEach((k) => {
           const it = j.items && j.items[k];
           if (!it || !it.series || !it.series.length) return;
           const s2 = it.series;
           const last = s2[s2.length - 1], prev = s2[s2.length - 2] || last;
+          /* 2026-11-03（第三十三轮，用户反馈）：数字必须与迷你线同一口径 ——
+             迷你线画的是近 40 个交易日，数字却用单日涨跌，走势向下却显示红色上涨。
+             现改为「近 40 个交易日区间收益」，与折线形状一致。 */
+          const spark = s2.slice(-40);
+          const base40 = spark.length > 1 ? spark[0][1] : 0;
           items[k] = {
             name: it.name, asOf: it.asOf || last[0],
             last: last[1], prev: prev[1],
-            chg: prev[1] ? Math.round((last[1] / prev[1] - 1) * 10000) / 100 : 0,
-            spark: s2.slice(-40).map((x) => x[1]),
+            chg: base40 ? Math.round((last[1] / base40 - 1) * 10000) / 100 : 0,
+            chg1d: prev[1] ? Math.round((last[1] / prev[1] - 1) * 10000) / 100 : 0,
+            days: spark.length,
+            spark: spark.map((x) => x[1]),
           };
         });
         return sendRaw(req, res, 200, JSON.stringify({ updatedAt: j.updatedAt, items }), MIME['.json'], { cache: 'no-store' });
@@ -922,10 +969,18 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  /* 2026-10-20：首页「自算榜前 5」专用轻量接口（避免为取 5 条下载 508KB 全量基金表） */
+  /* 2026-10-20：首页「自算榜前 5」专用轻量接口（避免为取 5 条下载 508KB 全量基金表）
+     2026-11-03（第三十三轮）：积金局口径的两张首页榜单下线，改为 self-calc 的
+     「年初至今回报」「近 1 年最抗跌（最大回撤最小）」，因此这里改为按指标名取数。 */
   if (p === '/api/top') {
     try {
-      const key = u.searchParams.get('k') === 'y5a' ? 'y5a' : 'y1';
+      const ALLOW = {
+        y1: 'desc', y3a: 'desc', y5a: 'desc', ytd: 'desc', m1: 'desc', w1: 'desc',
+        mdd: 'desc',     /* mdd 是负值，desc = 最接近 0 = 最抗跌 */
+        mdd5: 'desc', vol1: 'asc', sharpe1: 'desc',
+      };
+      const k0 = String(u.searchParams.get('k') || 'y1');
+      const key = ALLOW[k0] ? k0 : 'y1';
       const n = Math.max(1, Math.min(20, parseInt(u.searchParams.get('n') || '5', 10) || 5));
       const now = Date.now();
       if (!global.__topCache || now - global.__topCache.at > 60000) {
@@ -936,15 +991,23 @@ const server = http.createServer(async (req, res) => {
         const rows = [];
         Object.keys(perf).forEach((id) => {
           const p2 = perf[id];
-          if (p2[key] == null) return;
           const f = byId[id];
           if (!f) return;
-          rows.push({ id, fund: f.fund, fundBase: f.fundBase, unit: f.unit || '', scheme: f.scheme, trustee: f.trustee, y1: p2.y1, y5a: p2.y5a, asOf: p2.asOf });
+          rows.push({
+            id, fund: f.fund, fundBase: f.fundBase, unit: f.unit || '', scheme: f.scheme, trustee: f.trustee,
+            y1: p2.y1, y3a: p2.y3a, y5a: p2.y5a, ytd: p2.ytd, m1: p2.m1, w1: p2.w1,
+            mdd: p2.mdd1 != null ? p2.mdd1 : p2.mdd, mdd5: p2.mdd5,
+            vol1: p2.vol1, sharpe1: p2.sharpe1, asOf: p2.asOf,
+          });
         });
         global.__topCache = { at: now, rows };
       }
-      const rows = global.__topCache.rows.slice().sort((a, b) => b[key] - a[key]).slice(0, n);
-      return send(res, 200, JSON.stringify({ key, count: global.__topCache.rows.length, items: rows }));
+      const dir = ALLOW[key];
+      const rows = global.__topCache.rows
+        .filter((r) => r[key] != null)
+        .sort((a, b) => (dir === 'asc' ? a[key] - b[key] : b[key] - a[key]))
+        .slice(0, n);
+      return send(res, 200, JSON.stringify({ key, dir, count: global.__topCache.rows.length, items: rows }));
     } catch (e) {
       return send(res, 500, JSON.stringify({ error: e.message }));
     }

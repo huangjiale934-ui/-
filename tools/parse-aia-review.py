@@ -42,7 +42,14 @@ def main():
         if name not in t:
             print('✗ p%d 未见 %s' % (pg, name))
             continue
-        m = re.search(r'截至\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日', t)
+        # 2026-11-03：页头「截至」是报告期，TOP TEN 区块的「截至」才是持仓日。
+        # 实测 aug-2026 页头 2026-08-31，但持仓区块仍写「截至2026年7月31日」，
+        # 且与 jul-2026 逐字段相同（发行人当月未刷新持仓）→ 取区块日期。
+        j0 = t.upper().find('TOP TEN')
+        m = re.search(r'截至\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日',
+                      t[j0:j0 + 600]) if j0 >= 0 else None
+        if not m:
+            m = re.search(r'截至\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日', t)
         asof = '%s-%02d-%02d' % (m.group(1), int(m.group(2)), int(m.group(3))) if m else None
 
         top = []

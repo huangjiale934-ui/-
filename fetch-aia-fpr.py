@@ -180,7 +180,13 @@ def parse_holdings_page(t):
     import re as _re
     t = _re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", t)   # 保留 \t \n \r（此前误删换行导致整页一行）
     out = {"top10": [], "alloc": [], "asOf": ""}
-    m_date = _re.search(r"截至(\d{4})年(\d{1,2})月(\d{1,2})日", t)
+    # 2026-11-03：页头「截至」是报告期，TOP TEN 区块的「截至」才是持仓日。
+    # 实测 aug-2026 页头 2026-08-31，持仓区块仍为「截至2026年7月31日」且与 jul-2026
+    # 逐字段相同（发行人在该月报告未刷新持仓）→ 优先取区块日期，取不到再退回页头。
+    _i = t.find("TOP TEN HOLDINGS")
+    m_date = _re.search(r"截至(\d{4})年(\d{1,2})月(\d{1,2})日", t[_i:_i + 600]) if _i >= 0 else None
+    if not m_date:
+        m_date = _re.search(r"截至(\d{4})年(\d{1,2})月(\d{1,2})日", t)
     if m_date:
         out["asOf"] = "%04d-%02d-%02d" % (int(m_date.group(1)), int(m_date.group(2)), int(m_date.group(3)))
     # —— 前十大持仓 ——

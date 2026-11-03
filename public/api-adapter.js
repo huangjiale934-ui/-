@@ -177,7 +177,10 @@
       return origFetch(rel);
     }
     if (p === 'top') {
-      const j = await (await origFetch(qs.get('k') === 'y5a' ? 'api/top-y5a.json' : 'api/top-y1.json')).json();
+      /* 2026-11-03（第三十三轮）：首页四榜改成 YTD/1Y/3Y/5Y → 静态站按 k 取对应落盘文件 */
+      const k = qs.get('k') || 'y1';
+      const f = { y1: 'api/top-y1.json', y5a: 'api/top-y5a.json', ytd: 'api/top-ytd.json', y3a: 'api/top-y3a.json' }[k] || 'api/top-y1.json';
+      const j = await (await origFetch(f)).json();
       const n = Math.max(1, Math.min(20, parseInt(qs.get('n') || '5', 10) || 5));
       return jsonResp({ key: j.key, count: j.count, items: (j.items || []).slice(0, n) });
     }

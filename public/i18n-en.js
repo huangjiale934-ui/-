@@ -1,6 +1,29 @@
 /* 英文字典（2026-10-21 按需加载：切到英文时才下载） */
 (function (w) {
   var E = {
+'近 3 年年化回报领先': '3-year annualised leaders',
+
+'各类基金平均回报': 'Average return by fund type',
+'当年回报分布': 'Return distribution that year',
+'当年表现最好': 'Best performers that year',
+'当年表现最差': 'Worst performers that year',
+'历年回报为积金局口径（含费含息）': 'Calendar-year returns follow MPFA basis (net of fees, with dividends reinvested)',
+'官网可能限制部分网络访问': 'official site may block some networks',
+
+'本页收录 <b>{c}</b> 条成分基金 · {u} 家受托人 · {s} 个强积金计划。': 'This page lists <b>{c}</b> fund entries from {u} trustees across {s} MPF schemes.',
+'基金资料与单位净值主要取自各计划发行人官网（净值每日同步，最新至 <b>{n}</b>）；风险级别、基金规模、历年回报等字段沿用积金局公开资料（截至 <b>{d}</b>）。': 'Fund profiles and unit NAVs come mainly from each scheme trustee’s official website (NAVs synced daily, latest <b>{n}</b>); risk level, fund size and calendar-year returns follow MPFA published data (as at <b>{d}</b>).',
+'注：积金局按「合并单位类别」口径统计为 {d} 只，本站按单位类别逐条收录为 {c} 条，两者并不矛盾。': 'Note: the MPFA counts {d} funds with unit classes merged, while this site lists {c} entries by unit class; the two are consistent.',
+
+'基金上涨': 'of funds gained',
+'近一周有 {p}% 的成分基金上涨，查看是哪些': '{p}% of constituent funds gained over the past week — see which ones',
+'更多数据': 'More data',
+'积金局月度数据': 'MPFA monthly data',
+'旧口径': 'Legacy',
+'年初至今回报领先': 'Year-to-date leaders',
+'近 1 年最抗跌': 'Most resilient (1 year)',
+'标普 500': 'S&P 500',
+'同期涨跌 {p}': 'same-period change {p}',
+
 '筛出该计划的全部基金': 'Show all funds in this scheme',
 '{n} 只 · 更新至 {d}': '{n} funds · as of {d}',
 '以下计划的官网公布时间较晚，本站如实保留其最后可用净值、不做前值填充：': 'These schemes publish later than the site-wide latest date; figures are kept at their last available value with no forward filling:',
@@ -444,8 +467,8 @@
 '查看强积金排名 →': 'View MPF Rankings →',
 '专业 · 高效 · 安全 · 省心 —— 期待与您共创大湾区发展新机遇': 'Professional · Efficient · Secure · Hassle-free — let us create new Greater Bay Area opportunities together',
 '风险提示与免责声明：': 'Risk warning and disclaimer: ',
-'本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。':
-'The information on this site is for reference only and constitutes no investment advice or offer. Past performance is not indicative of future results; investment involves risk. MPF data originates from the Hong Kong MPFA. Jingyan Data Co., Ltd. strives for accuracy but gives no warranty as to accuracy, completeness or timeliness.',
+'本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。基金资料与单位净值主要来自各计划发行人官网，风险级别、规模与历年回报参考积金局公开资料；广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。':
+      'This website is for reference only and does not constitute any investment advice or solicitation. Past performance is not indicative of future results; investment involves risk. Fund profiles and unit NAVs come mainly from scheme trustees’ official websites, while risk level, size and calendar-year returns follow MPFA published data. Guangzhou Data Mining Company strives for accuracy but gives no guarantee as to the accuracy, completeness or timeliness of the information.',
 '近 1 年': '1Y',
 '近 5 年': '5Y',
 '近 10 年': '10Y',

@@ -394,7 +394,52 @@
       '<li><i class="mk-dot up"></i>' + TT('上涨') + ' <b class="up">' + num(r.up) + '</b><span>（' + pc(r.up) + '%）</span></li>' +
       '<li><i class="mk-dot down"></i>' + TT('下跌') + ' <b class="down">' + num(r.down) + '</b><span>（' + pc(r.down) + '%）</span></li>' +
       '</ul>' +
-      '<p class="ts-note">' + esc(r.year) + ' · ' + TT('参与统计') + ' ' + num(base) + ' ' + TT('条基金') + '</p>' +
+      /* 2026-11-03（第三十三轮，用户反馈）：原来只到这里，卡片下半截全空 ——
+         补「各类平均 / 回报分布 / 当年最好与最差」三块，把版面填满。 */
+      yearDetailHTML(m, r) +
+      '<p class="ts-note">' + esc(r.year) + ' · ' + TT('参与统计') + ' ' + num(base) + ' ' + TT('条基金') +
+      ' · ' + TT('历年回报为积金局口径（含费含息）') + '</p>' +
+      '</div>';
+  }
+
+  /* 年份视图的补充块：各类平均回报（零线双向条）/ 回报分布（竖柱）/ 最好与最差 */
+  function yearDetailHTML(m, r) {
+    const d = (m.yearDetail || {})[String(r.year)];
+    if (!d) return '';
+
+    const typeAvg = d.typeAvg || [];
+    const maxAbs = Math.max.apply(null, typeAvg.map((x) => Math.abs(x.avg)).concat([1]));
+    const tBars = typeAvg.map((x) => {
+      const half = Math.abs(x.avg) / maxAbs * 50;
+      const left = x.avg >= 0 ? 50 : 50 - half;
+      const col = x.avg >= 0 ? 'var(--up)' : 'var(--down)';
+      return '<li><span class="nm" title="' + esc(x.type) + '">' + esc(axisType(x.type)) + '</span>' +
+        '<span class="trk"><i class="z"></i><i class="fl" style="left:' + left.toFixed(1) + '%;width:' + half.toFixed(1) +
+        '%;background:' + col + '"></i></span>' +
+        '<em class="' + (x.avg >= 0 ? 'up' : 'down') + '">' + pctv(x.avg) + '</em></li>';
+    }).join('');
+
+    const dist = d.dist || [];
+    const dMax = Math.max.apply(null, dist.map((x) => x.n).concat([1]));
+    const dBars = dist.map((x) => {
+      const h = Math.max(3, Math.round(x.n / dMax * 100));
+      const col = x.label.indexOf('-') === 0 || x.label.indexOf('≤') === 0 ? 'var(--down)' : 'var(--up)';
+      return '<li><span class="bv">' + num(x.n) + '</span><i style="height:' + h + '%;background:' + col + '"></i>' +
+        '<span class="bl">' + esc(x.label) + '</span></li>';
+    }).join('');
+
+    const liOf = (x, cls) => '<li><span class="nm" title="' + esc(x.fund + ' · ' + x.scheme) + '">' + esc(x.fund) + '</span>' +
+      '<em class="' + cls + '">' + pctv(x.v) + '</em></li>';
+
+    return '<div class="yr-grid">' +
+      '<div class="yr-blk"><h4>' + TT('各类基金平均回报') + '</h4><ul class="yr-bars">' + tBars + '</ul></div>' +
+      '<div class="yr-blk"><h4>' + TT('当年回报分布') + '</h4><ul class="yr-dist">' + dBars + '</ul></div>' +
+      '</div>' +
+      '<div class="yr-grid yr-grid-2">' +
+      '<div class="yr-blk"><h4>' + TT('当年表现最好') + '</h4><ul class="yr-rank">' +
+        (d.best || []).map((x) => liOf(x, 'up')).join('') + '</ul></div>' +
+      '<div class="yr-blk"><h4>' + TT('当年表现最差') + '</h4><ul class="yr-rank">' +
+        (d.worst || []).map((x) => liOf(x, 'down')).join('') + '</ul></div>' +
       '</div>';
   }
 
@@ -574,15 +619,16 @@
     const topCount = types.slice().sort((a, b) => (b.count || 0) - (a.count || 0))[0];
     const dy = m.byYear && m.byYear.length ? m.byYear[m.byYear.length - 1] : null;
 
+    /* 2026-11-03（第三十三轮，领导要求）：积金局口径的「推出至今累积回报 / 规模领先」下线，
+       四张榜单全部改为「基金最新数据」口径（发行人官网净值自算、每日更新）。 */
     renderTop('#mkTop1', m.topReturn, (x) => pctv(x.ann1), (x) => x.ann1);
     renderTop('#mkTop4', m.topReturn5, (x) => pctv(x.ann5), (x) => x.ann5);
-    renderTop('#mkTop5', m.topCumLaunch, (x) => pctv(x.cumLaunch), (x) => x.cumLaunch);
-    renderTop('#mkTop2', m.topSize, (x) => fmtSize(x.size), null);
     try { renderSelfTop(window.__MPF_FUNDS || (typeof DATA !== 'undefined' ? DATA.funds : null)); } catch (e) {}
   }
 
 
-  /* 2026-10-19：前两张榜单改用「官网净值自算」口径（比积金局月报新 2–6 周） */
+  /* 2026-10-19：前两张榜单改用「官网净值自算」口径（比积金局月报新 2–6 周）
+     2026-11-03（第三十三轮）：四张全部走自算口径，其中「最抗跌」按最大回撤由小到大。 */
   let __selfDone = false;
   function renderSelfTop(funds) {
     if (__selfDone) return;
@@ -592,11 +638,14 @@
       .then((r) => (r.ok ? r.json() : { items: [] }))
       .then((j) => (j.items || []).map((x) => ({ ...x, sY1: x.y1, sY5a: x.y5a })))
       .catch(() => []);
-    Promise.all([get('y1'), get('y5a')]).then(([t1, t5]) => {
+    Promise.all([get('y1'), get('y5a'), get('ytd'), get('y3a')]).then(([t1, t5, tytd, t3]) => {
       /* 2026-11-02（第二十七轮）：接口超时/为空时不要清掉已经渲染好的积金局榜单
          （线上首屏偶发「近 1 年回报领先 = 暂无数据」就是这个：自算接口慢一步就把列表清空） */
       if (t1 && t1.length) renderTop('#mkTop1', t1, (x) => pctv(x.sY1), (x) => x.sY1);
       if (t5 && t5.length) renderTop('#mkTop4', t5, (x) => pctv(x.sY5a), (x) => x.sY5a);
+      /* 年初至今：红色表示正收益 */
+      renderTop('#mkTopYtd', tytd, (x) => pctv(x.ytd), (x) => x.ytd);
+      renderTop('#mkTop3', t3, (x) => pctv(x.y3a), (x) => x.y3a);
     }).catch(() => {});
   }
 
@@ -707,23 +756,21 @@
     });
   }
 
-  /* ---------------- 首屏市场情绪卡（2026-11-03 第三十一轮，用户选定 H20） ----------------
-     数据源 /api/breadth：nav-perf 的 d1 算「近日上涨占比」，MPFAVG 最近 7 个交易日算迷你柱。
-     配色只用站内蓝：涨=深蓝 #0866bb、跌=浅蓝 #a9cbe8（不再用红绿）。 */
+  /* ---------------- 首屏市场情绪卡（2026-11-03 第三十三轮，用户选定 B02 圆环） ----------------
+     数据源 /api/breadth：nav-perf 的 w1（近一周）算上涨占比；圆环弧长 = 占比。
+     配色只用站内蓝（#0866bb），不引入红绿。 */
   (function initHeroSent() {
-    const barsBox = document.getElementById('hsBars');
+    const arc = document.getElementById('hsRingArc');
     const pctEl = document.getElementById('hsPct');
-    if (!barsBox) return;
+    if (!arc) return;
     fetch('/api/breadth').then((r) => (r.ok ? r.json() : null)).then((j) => {
-      if (!j) return;
-      const days = j.days || [];
-      const maxAbs = Math.max(0.001, ...days.map((d) => Math.abs(d.chg)));
-      barsBox.innerHTML = days.map((d) => {
-        const h = Math.max(7, Math.round(Math.abs(d.chg) / maxAbs * 28) + 5);
-        const cls = d.chg >= 0 ? 'up' : '';
-        return '<i class="' + cls + '" style="height:' + h + 'px" title="' + d.d + ' · ' + (d.chg >= 0 ? '+' : '') + d.chg + '%"></i>';
-      }).join('');
-      if (pctEl && j.pct != null) pctEl.textContent = j.pct + '%';
+      if (!j || j.pct == null) return;
+      const pct = Math.max(0, Math.min(100, j.pct));
+      const C = 2 * Math.PI * 30;   /* r=30，与 SVG 的 r 一致 */
+      arc.style.strokeDasharray = (C * pct / 100).toFixed(1) + ' ' + C.toFixed(1);
+      if (pctEl) pctEl.textContent = pct + '%';
+      const card = document.getElementById('heroSent');
+      if (card) card.setAttribute('aria-label', TQ('近一周有 {p}% 的成分基金上涨，查看是哪些', { p: pct }));
     }).catch(() => {});
   })();
 
@@ -758,7 +805,7 @@
 (function () {
   const KEYS = [
     ['MPFAVG', '强积金市场指数'], ['MPF_STOCK', '股票基金指数'], ['MPF_MIX', '混合资产基金指数'],
-    ['MPF_BOND', '债券基金指数'], ['HSI', '恒生指数'], ['SSE', '上证指数'],
+    ['MPF_BOND', '债券基金指数'], ['HSI', '恒生指数'], ['SPX', '标普 500'],
   ];
   /* 2026-11-03（第三十一轮，用户要求）：顶部行情栏迷你线 = 最近 40 个交易日，
      点行情卡要跳到「同一张图」→ 把「每日涨跌幅柱」换成「近 40 日」的走势线，两者完全同形。 */
@@ -771,6 +818,13 @@
     return o;
   }
   function TT(s) { return (typeof window.t === 'function' && window.t(s, s)) || s; }
+
+  /* 2026-11-03（第三十三轮）：卡片与主图必须用同一批点 ——
+     40 日档要用日线（it.daily），否则卡片算的是 40 个周点（约 9 个月）。 */
+  function seriesFor(it, rg) {
+    if (rg === '40d' && it.daily && it.daily.length > 5) return it.daily.slice(-40);
+    return sliceSeries(it.series, rg);
+  }
 
   function sliceSeries(rows, rg) {
     if (!rows || !rows.length) return [];
@@ -809,8 +863,7 @@
     box.innerHTML = KEYS.map(([k, label]) => {
       const it = DB.items[k];
       if (!it) return '';
-      const s = sliceSeries(it.series, range);
-      const c = (range === 'd') ? dayChg(it.series) : cum(s);
+      const c = cum(seriesFor(it, range));
       const cls = c == null ? 'flat' : (c >= 0 ? 'up' : 'down');
       return '<button type="button" class="pi-card' + (k === cur ? ' on' : '') + '" data-pi="' + k + '">' +
         '<span class="pi-k">' + esc2(TT(label)) + '</span>' +
@@ -829,11 +882,7 @@
       host.innerHTML = '<div class="chart-empty">' + esc2(TT('暂无指数数据')) + '</div>';
       return;
     }
-    /* 「近 40 日」必须用日线（it.daily）；it.series 是按周聚合的 618 个周点，
-       取 40 个就是 9 个月，和顶部迷你线完全对不上。 */
-    const s = (range === '40d' && it.daily && it.daily.length > 5)
-      ? it.daily.slice(-40)
-      : sliceSeries(it.series, range);
+    const s = seriesFor(it, range);
     /* 2026-11-03（第三十一轮，用户反馈）：顶部行情栏显示 1,823.5，这里却画成 100 出头，
        两处对不上。现在自算指数也直接画真实点位（基期 1000），与行情栏、对比图统一口径。 */
     const RAWV = true;

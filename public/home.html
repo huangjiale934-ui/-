@@ -10,8 +10,8 @@
 <!-- 主视觉预加载（与 home.css 的 URL 完全一致，避免重复下载；手机/桌面各一） -->
 <link rel="preload" as="image" href="img/hero-hk.webp?v=2" media="(min-width: 701px)">
 <link rel="preload" as="image" href="img/hero-hk-m.webp" media="(max-width: 700px)">
-<link rel="stylesheet" href="b.css?p=home&v=20261103f">
-<link rel="stylesheet" href="home.css?v=20261103f">
+<link rel="stylesheet" href="b.css?p=home&v=20261103g">
+<link rel="stylesheet" href="home.css?v=20261103g">
 </head>
 <body class="home page-side">
 
@@ -40,12 +40,18 @@
     <div class="hero-copy">
       <div class="hero-brand"><img src="img/logo-mark.png" alt="精研"><span class="hb-txt"><b data-i18n="广州精研数据有限公司">广州精研数据有限公司</b><em>Guangzhou Data Mining Company</em></span></div>
       <h1 data-i18n="香港强积金数据分析平台">香港强积金数据分析平台</h1>
-      <!-- 2026-11-03（第三十一轮，用户选定 H20）：原来的两个按钮换成市场情绪卡 ——
-           迷你柱（全蓝深浅）+ 近日上涨占比 + 「看看是哪些」，点击进资料库并按日涨跌排序。 -->
+      <!-- 2026-11-03（第三十三轮，用户选定 B02）：圆环进度 + 中心百分比，
+           比迷你柱更直观；整卡放大一档，与右侧四张指标卡同高。 -->
       <a class="hero-sent" id="heroSent" href="index.html?dim=selfW1#db" aria-label="看看近日上涨的基金是哪些">
-        <span class="hs-bars" id="hsBars" aria-hidden="true"></span>
+        <span class="hs-ring" aria-hidden="true">
+          <svg viewBox="0 0 72 72">
+            <circle class="hs-ring-bg" cx="36" cy="36" r="30"></circle>
+            <circle class="hs-ring-fg" id="hsRingArc" cx="36" cy="36" r="30"></circle>
+          </svg>
+          <i id="hsPct">—</i>
+        </span>
         <span class="hs-tx">
-          <b><span data-i18n="近日">近日</span> <i id="hsPct">—</i> <span data-i18n="的基金上涨">的基金上涨</span></b>
+          <b data-i18n="基金上涨">基金上涨</b>
           <em data-i18n="最近一周 · 每日更新">最近一周 · 每日更新</em>
         </span>
         <span class="hs-go"><span data-i18n="看看是哪些">看看是哪些</span> →</span>
@@ -75,10 +81,10 @@
           <ol class="mk-slot" id="mkTop1"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
         <div class="mk-top"><h3><span data-i18n="近 5 年回报领先">近 5 年回报领先</span><span class="h3-tip" data-tip="按发行人官网净值自算的近 5 年年化回报前 5 名（每日更新）。">ⓘ</span></h3><a class="mk-more" href="index.html?dim=selfY5a#db"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
           <ol class="mk-slot" id="mkTop4"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3><span data-i18n="推出至今累积回报">推出至今累积回报</span><span class="h3-tip" data-tip="自基金推出以来的累积总回报前 5 名（积金局口径，含费含息）。">ⓘ</span></h3><a class="mk-more" href="index.html?rk=cumLaunch#rank"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
-          <ol class="mk-slot" id="mkTop5"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
-        <div class="mk-top"><h3><span data-i18n="规模领先">规模领先</span><span class="h3-tip" data-tip="按积金局公布的基金资产规模（百万港元）前 5 名。">ⓘ</span></h3><a class="mk-more" href="index.html?dim=size#db"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
-          <ol class="mk-slot" id="mkTop2"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+        <div class="mk-top"><h3><span data-i18n="年初至今回报领先">年初至今回报领先</span><span class="h3-tip" data-tip="按发行人官网最新净值自算的年初至今涨幅前 5 名（每日更新，未含分红与费用调整）。">ⓘ</span></h3><a class="mk-more" href="index.html?dim=selfYtd#db"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+          <ol class="mk-slot" id="mkTopYtd"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
+        <div class="mk-top"><h3><span data-i18n="近 3 年年化回报领先">近 3 年年化回报领先</span><span class="h3-tip" data-tip="按发行人官网净值自算的近 3 年年化回报前 5 名（每日更新，未含分红与费用调整）。">ⓘ</span></h3><a class="mk-more" href="index.html?dim=selfY3a#db"><span data-i18n="查看完整榜单">查看完整榜单</span> ›</a>
+          <ol class="mk-slot" id="mkTop3"><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li><li class="sk sk-li"></li></ol></div>
       </div>
     </div>
 
@@ -161,26 +167,7 @@
 
 <!-- 2026-10-28（用户要求）：公司介绍整块下线（成立时间/愿景/团队/优势/免费服务/合作伙伴/承诺/业务板块），其余不变 -->
 
-<!-- 数据平台 -->
-<section class="plat">
-  <div class="wrap plat-grid">
-    <div class="plat-copy">
-      <h2 data-i18n="自建强积金数据平台">自建强积金数据平台</h2>
-      <ul class="plat-list">
-        <li data-i18n="关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选">关键词搜索 · 种类 / 发行人 / 涨跌幅 / 回撤多重筛选</li>
-        <li data-i18n="21 个维度榜单 · 类别冠军 · 勾选对比">21 个维度榜单 · 类别冠军 · 勾选对比</li>
-        <li data-i18n="移动端适配 · 繁体／简体／英文切换 · 数据每日自动同步">移动端适配 · 繁体／简体／英文切换 · 数据每日自动同步</li>
-      </ul>
-      <div class="plat-btns">
-        <a class="btn solid" href="index.html#db" data-i18n="进入基金最新数据 →">进入基金最新数据 →</a>
-        <a class="btn line" href="index.html#cmp" data-i18n="进入基金对比 →">进入基金对比 →</a>
-      </div>
-    </div>
-    <div class="plat-img">
-      <img src="img/bridge.webp" alt="连接内地与香港的数据桥梁" loading="lazy">
-    </div>
-  </div>
-</section>
+<!-- 2026-11-03（第三十三轮，用户要求）：「自建强积金数据平台」整块删除（首页作用已被首屏与榜单覆盖） -->
 
 <footer class="foot home-foot">
   <div class="wrap">
@@ -192,7 +179,7 @@
       </div>
     </div>
     <div class="disclaimer">
-      <b data-i18n="风险提示与免责声明：">风险提示与免责声明：</b><span data-i18n="本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。">本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。强积金资料源自香港积金局，广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。</span>
+      <b data-i18n="风险提示与免责声明：">风险提示与免责声明：</b><span data-i18n="本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。基金资料与单位净值主要来自各计划发行人官网，风险级别、规模与历年回报参考积金局公开资料；广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。">本网页所载资料仅供参考，不构成任何投资建议或要约邀请。基金过往表现并非未来表现的指引，投资涉及风险。基金资料与单位净值主要来自各计划发行人官网，风险级别、规模与历年回报参考积金局公开资料；广州精研数据有限公司力求准确，但不对资料的准确性、完整性及适时性作出任何保证。</span>
     </div>
     <details class="foot-fold" id="foldLinks">
       <summary><span class="ff-a" data-i18n="友情链接 · 官方数据来源">友情链接 · 官方数据来源</span><span class="ff-arrow">▾</span></summary>
@@ -224,8 +211,8 @@
   <span class="tt-txt" data-i18n="回到顶部">回到顶部</span>
 </button>
 
-<script src="b.js?p=home&v=20261103f"></script>
-<script src="home.js?v=20261103f"></script>
+<script src="b.js?p=home&v=20261103g"></script>
+<script src="home.js?v=20261103g"></script>
 <script src="heat.js"></script>
 <script>renderFriends();</script>
 

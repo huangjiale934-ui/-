@@ -2623,3 +2623,41 @@ body.has-sidebar .dca-fab { display: none !important; }
 .note-stale .ns-link { color: #0b64c4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .note-stale .ns-link:hover { color: #084e8c; }
 .note-stale .ns-list span { color: #8a7350; font-size: 11.5px; margin-left: 4px; }
+
+/* ==========================================================
+   2026-11-03（第三十三轮，领导要求）
+   积金局月度数据从主导航下线 → 收进侧栏底部「更多数据」：
+   小号灰字 + 「旧口径」标签，仍可进入（旧数据在风险级别/规模/历年回报里继续用）。
+   ========================================================== */
+.db-side-more { margin-top: auto; padding: 10px 2px 0; }
+.db-more-hd { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; color: #a9b8c7;
+  padding: 0 8px 4px; text-transform: uppercase; }
+.db-nav.db-nav-sub { height: 32px; font-size: 12.5px; font-weight: 500; color: #7d8fa1; gap: 7px; }
+.db-nav.db-nav-sub svg { width: 14px; height: 14px; color: #a8b7c6; }
+.db-nav.db-nav-sub:hover { color: var(--brand, #0866bb); }
+.db-nav.db-nav-sub.on { background: #f2f7fc; color: var(--brand, #0866bb); font-weight: 600; }
+.db-tag { margin-left: auto; flex: none; font-style: normal; font-size: 9.5px; font-weight: 600;
+  color: #9aa9b8; background: #f2f5f9; border-radius: 4px; padding: 1px 5px; letter-spacing: .02em; }
+.db-nav.db-nav-sub .ver-info { margin: 0 0 0 2px; flex: none; }
+/* 图标栏模式：只留图标，标签文字隐藏 */
+@media (max-width: 1000px) {
+  .db-side-more { padding-top: 4px; }
+  .db-more-hd, .db-nav.db-nav-sub .db-tag { display: none; }
+}
+.db-side-more + .db-side-foot { margin-top: 0; }   /* 避免两个 auto 平分空白，把「更多数据」吊在半空 */
+
+/* 2026-11-03（第三十三轮）：口径说明里「数据来源」单独一行，与收录数量分开读 */
+.note-src { margin-top: 6px; color: var(--text-2, #4a5b6e); line-height: 1.75; }
+
+/* ==========================================================
+   2026-11-03（第三十三轮，用户反馈）
+   友情链接：同一行卡片高度不一、文字上下不齐 → 网格项拉满高度，
+   名称在上、日期/条数贴底，整排看起来一条线。
+   ========================================================== */
+.fr-list li { display: flex; }
+.fr-list li > a,
+.fr-list .fr-nolink .fr-t { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 100%; }
+.fr-list a span,
+.fr-list .fr-nolink .fr-t span { margin-top: auto; padding-top: 5px; }
+/* 主三段（积金局等）文字更长，给一点行高，避免两行挤在一起 */
+.fr-list:not(.fr-sm) a { line-height: 1.45; }

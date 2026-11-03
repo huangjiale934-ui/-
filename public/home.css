@@ -1159,26 +1159,67 @@ body { overflow-x: visible; }
    首屏「市场情绪」卡：迷你柱 + 近日上涨占比 + 看看是哪些
    配色只用站内蓝（深浅表示涨跌），不再用红绿。
    ========================================================== */
+/* 2026-11-03（第三十三轮，用户选定 B02 圆环）：
+   左侧圆环（中心百分比）+ 右侧两行文案 + 尾部入口；整卡比上一版放大一档。 */
 .hero-sent {
-  display: inline-flex; align-items: center; gap: 14px; margin-top: 24px;
-  padding: 11px 14px 11px 16px; max-width: 480px; min-width: 372px; text-decoration: none;
-  background: #fff; border: 1px solid #e0ecf7; border-radius: 11px;
-  box-shadow: 0 6px 16px rgba(20, 70, 120, .07);
+  display: inline-flex; align-items: center; gap: 18px; margin-top: 26px;
+  padding: 18px 22px 18px 18px; width: 100%; max-width: 560px; min-width: 470px; text-decoration: none;
+  background: #fff; border: 1px solid #e0ecf7; border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(20, 70, 120, .08);
   transition: box-shadow .16s, transform .16s;
 }
-.hero-sent:hover { box-shadow: 0 10px 24px rgba(20, 70, 120, .13); transform: translateY(-1px); text-decoration: none; }
+.hero-sent:hover { box-shadow: 0 12px 28px rgba(20, 70, 120, .14); transform: translateY(-1px); text-decoration: none; }
 .hero-sent:focus-visible { outline: 2px solid #0866bb; outline-offset: 2px; }
-.hs-bars { display: flex; align-items: flex-end; gap: 3px; height: 34px; flex: none; }
-.hs-bars i { display: block; width: 7px; border-radius: 2px 2px 0 0; background: #cfe2f3; }   /* 跌：最浅蓝 */
-.hs-bars i.up { background: #0866bb; }
-.hs-tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.hs-tx b { font-size: 14px; font-weight: 700; color: #14314f; white-space: nowrap; }
-.hs-tx b i { font-style: normal; color: #0866bb; font-size: 16px; font-variant-numeric: tabular-nums; }
-.hs-tx em { font-style: normal; font-size: 11.5px; color: #8ba0b3; white-space: nowrap; }
-.hs-go { margin-left: auto; flex: none; font-size: 13px; font-weight: 700; color: #0866bb; white-space: nowrap; }
-.hs-go::first-letter { letter-spacing: 0; }
-@media (max-width: 620px) {
-  .hero-sent { max-width: 100%; }
-  .hs-tx b { font-size: 13px; }
-  .hs-go { font-size: 12px; }
+/* 圆环：外圈浅蓝底 + 深蓝弧（stroke-dasharray 由 JS 按百分比设置），中心数字 */
+.hs-ring { position: relative; display: block; width: 74px; height: 74px; flex: none; }
+.hs-ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+.hs-ring-bg { fill: none; stroke: #e6f0fa; stroke-width: 6; }
+.hs-ring-fg { fill: none; stroke: #0866bb; stroke-width: 6; stroke-linecap: round;
+  stroke-dasharray: 0 999; transition: stroke-dasharray .5s ease; }
+.hs-ring i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-style: normal; font-size: 19px; font-weight: 800; color: #0b4f8c; letter-spacing: -.5px;
+  font-variant-numeric: tabular-nums; }
+.hs-tx { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.hs-tx b { font-size: 18px; font-weight: 700; color: #14314f; white-space: nowrap; letter-spacing: .1px; }
+.hs-tx em { font-style: normal; font-size: 12.5px; color: #8ba0b3; white-space: nowrap; }
+.hs-go { margin-left: auto; flex: none; font-size: 14px; font-weight: 700; color: #0866bb; white-space: nowrap; }
+@media (max-width: 720px) {
+  .hero-sent { width: 100%; max-width: 100%; min-width: 0; gap: 14px; padding: 14px; }
+  .hs-ring { width: 56px; height: 56px; }
+  .hs-ring i { font-size: 15px; }
+  .hs-tx b { font-size: 15px; }
+  .hs-go { font-size: 12.5px; }
+}
+
+/* ==========================================================
+   2026-11-03（第三十三轮，用户反馈）
+   「市场整体回报走势」年份视图：补三类数据块，消灭下方大片空白。
+   ========================================================== */
+.yr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.yr-grid-2 { margin-top: 10px; }
+.yr-blk { background: #f8fbfe; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px 11px; min-width: 0; }
+.yr-blk h4 { margin: 0 0 8px; font-size: 11.5px; font-weight: 600; color: var(--text-3); letter-spacing: .02em; }
+.yr-bars { list-style: none; margin: 0; padding: 0; }
+.yr-bars li { display: grid; grid-template-columns: 74px 1fr 54px; align-items: center; gap: 8px; padding: 3px 0; font-size: 12px; }
+.yr-bars .nm { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.yr-bars .trk { position: relative; height: 8px; border-radius: 5px; background: #eaf1f8; }
+.yr-bars .trk .z { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: #cfdded; }
+.yr-bars .trk .fl { position: absolute; top: 0; height: 100%; border-radius: 4px; }
+.yr-bars em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 11.5px; }
+.yr-bars em.up { color: var(--up); }
+.yr-bars em.down { color: var(--down); }
+.yr-dist { list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-end; gap: 6px; height: 92px; }
+.yr-dist li { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 3px; }
+.yr-dist .bv { font-size: 10.5px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.yr-dist i { width: 100%; max-width: 26px; border-radius: 3px 3px 0 0; min-height: 3px; display: block; }
+.yr-dist .bl { font-size: 9.5px; color: var(--text-3); white-space: nowrap; transform: scale(.94); }
+.yr-rank { list-style: none; margin: 0; padding: 0; }
+.yr-rank li { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 5px 0; font-size: 12px; border-top: 1px dashed #e6eef7; }
+.yr-rank li:first-child { border-top: 0; padding-top: 2px; }
+.yr-rank .nm { color: var(--text-2); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.yr-rank em { font-style: normal; flex: none; font-weight: 600; font-variant-numeric: tabular-nums; }
+.yr-rank em.up { color: var(--up); }
+.yr-rank em.down { color: var(--down); }
+@media (max-width: 760px) {
+  .yr-grid { grid-template-columns: 1fr; }
 }

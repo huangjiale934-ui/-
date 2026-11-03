@@ -370,9 +370,15 @@ function renderUpdateTime() {
     '<button type="button" class="db-nav' + (dbOn ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
       '<span data-i18n="基金最新数据">' + TT('基金最新数据') + '</span>' + '<i class="db-caret" aria-hidden="true"></i></button>' +
     '<div class="db-sub" id="dbSubCmp"><nav class="an-prov" id="anProv" aria-label="发行人"></nav></div>' +
-    '<button type="button" class="db-nav' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
-      '<span data-i18n="积金局每月榜单">' + TT('积金局每月榜单') + '</span>' + info + '</button>' +
     '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span data-i18n="供款计算器">' + TT('供款计算器') + '</span></button>' +
+    /* 2026-11-03（第三十三轮，领导要求）：积金局月度数据不再作为主入口（月报滞后、首页已全面改自算口径），
+       但站内风险级别、资产规模、历年回报仍来自积金局 → 收进侧栏底部「更多数据」，做小号次级入口。 */
+    '<div class="db-side-more">' +
+      '<div class="db-more-hd">' + TT('更多数据') + '</div>' +
+      '<button type="button" class="db-nav db-nav-sub' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
+        '<span data-i18n="积金局月度数据">' + TT('积金局月度数据') + '</span>' +
+        '<em class="db-tag">' + TT('旧口径') + '</em>' + info + '</button>' +
+    '</div>' +
     /* 2026-11-02（第二十七轮，用户要求）：页头「数据版本」下移到这里，与「数据每日自动同步」合成一句 */
     '<div class="db-side-foot"><div class="db-ver" id="verChip" tabindex="0">' +
       '<span data-i18n="数据每日自动同步">' + TT('数据每日自动同步') + '</span><b>—</b></div></div>';
@@ -567,12 +573,21 @@ function renderSrcNote() {
   const el = document.querySelector('#srcNote');
   if (!el || !DATA.count) return;
   const declared = DATA.declaredTotal || 382;
+  /* 2026-11-03（第三十三轮，用户反馈）：原文「积金局资料截至 …」已过时 ——
+     净值与基金资料主要来自各发行人官网，积金局只用于风险级别/规模/历年回报。
+     同时把三句长句拆开，读起来更顺。 */
+  let navLatest = '';
+  (DATA.funds || []).forEach((f) => { if (f.navAsOf && f.navAsOf > navLatest) navLatest = f.navAsOf; });
   el.innerHTML =
-    TQ('本页收录 <b>{c}</b> 条成分基金 · {u} 家受托人 · {s} 个强积金计划，积金局资料截至 <b>{d}</b>。',
-      { c: DATA.count, u: DATA.trusteeCount || '—', s: DATA.schemeCount || '—', d: DATA.dataAsOf || '—' }) +
+    TQ('本页收录 <b>{c}</b> 条成分基金 · {u} 家受托人 · {s} 个强积金计划。',
+      { c: DATA.count, u: DATA.trusteeCount || '—', s: DATA.schemeCount || '—' }) +
+    '<div class="note-src">' +
+    TQ('基金资料与单位净值主要取自各计划发行人官网（净值每日同步，最新至 <b>{n}</b>）；风险级别、基金规模、历年回报等字段沿用积金局公开资料（截至 <b>{d}</b>）。',
+      { n: navLatest || '—', d: DATA.dataAsOf || '—' }) +
+    '</div>' +
     /* 2026-10-31（用户要求）：口径差异精简为一句话 */
     '<div class="note-diff">' +
-    TQ('注：官网标注的 {d} 只为「合并单位类别后」的计数，本站按单位类别逐行收录为 {c} 条，两者并无矛盾。',
+    TQ('注：积金局按「合并单位类别」口径统计为 {d} 只，本站按单位类别逐条收录为 {c} 条，两者并不矛盾。',
       { c: DATA.count, d: declared }) +
     '</div>' +
     navStatNote() +
@@ -868,7 +883,11 @@ function renderFriends() {
       const n = (s.n != null ? s.n : s.count);
       const bits = [s.asOf ? TQ('净值截至 {d} · {n} 条', { d: s.asOf, n: n }) : TQ('{n} 条', { n: n })];
       if (s.cadenceNote) bits.push(TT(s.cadenceNote));
-      return [s.label || s.name, srcPage(s), bits.join(' · ')];
+      /* 2026-11-03（第三十三轮，链接核验）：宏利／富達官网对部分网络返回 Access Denied，
+         这里如实标注一句，避免用户以为是本站链接写错。 */
+      const pg = srcPage(s);
+      if (/manulife\.com\.hk|fidelity\.com\.hk/.test(pg)) bits.push(TT('官网可能限制部分网络访问'));
+      return [s.label || s.name, pg, bits.join(' · ')];
     })
     : TRUSTEE_LINKS.map((t) => [t[0], t[1], '']);
   /* 2026-10-29（5.0）：AMTD 的净值走 etnet，不会单独出现在 sources 里，
@@ -3316,12 +3335,13 @@ document.addEventListener('mpf:lang', () => {
 (function () {
   var NAMES = {
     MPFAVG: '强积金市场指数', MPF_STOCK: '股票积金', MPF_MIX: '混合积金',
-    MPF_BOND: '债券积金', HSI: '恒生指数', SSE: '上证指数',
+    MPF_BOND: '债券积金', HSI: '恒生指数', SPX: '标普 500',
   };
-  var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SSE'];
+  /* 2026-11-03（第三十三轮，领导要求）：强积金投向美股较多，上证指数替换为标普 500 */
+  var ORDER = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SPX'];
   /* 2026-11-03（第二十九轮，体检项）：英文全名太长，页头六张卡只能显示「MPF Marke…」。
      英文模式改用短名，中文/繁体仍用完整中文名。 */
-  var SHORT_EN = { MPFAVG: 'MPF Index', MPF_STOCK: 'Equity', MPF_MIX: 'Mixed', MPF_BOND: 'Bond', HSI: 'HSI', SSE: 'SSE' };
+  var SHORT_EN = { MPFAVG: 'MPF Index', MPF_STOCK: 'Equity', MPF_MIX: 'Mixed', MPF_BOND: 'Bond', HSI: 'HSI', SPX: 'S&P 500' };
   var LAST = null;   /* 缓存最近一次 /api/ticker 响应，供语言切换重渲染 */
 
   function esc(s) {
@@ -3365,8 +3385,11 @@ document.addEventListener('mpf:lang', () => {
       /* 2026-11-03（第三十一轮，用户要求）：悬浮提示里写清迷你线的时间维度（近 40 个交易日），
          否则没人知道这条小线是什么周期。 */
       /* 2026-11-03（第三十二轮）：提示文案按用户口吻润色 —— 说清这条折线是什么、数据到哪天 */
+      /* 2026-11-03（第三十三轮）：数字已改区间收益，提示里写明区间与幅度，避免与单日混淆 */
       cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(
-        it.name + ' · ' + TQ('折线为近 {n} 个交易日的走势', { n: 40 }) + ' · ' + TQ('数据截至 {d}', { d: it.asOf }) + '；' + TT('点击查看指数走势')
+        it.name + ' · ' + TQ('折线为近 {n} 个交易日的走势', { n: it.days || 40 }) + ' · ' +
+        TQ('同期涨跌 {p}', { p: (it.chg > 0 ? '+' : '') + Number(it.chg).toFixed(2) + '%' }) + ' · ' +
+        TQ('数据截至 {d}', { d: it.asOf }) + '；' + TT('点击查看指数走势')
       ) + '">' +
         '<span class="tk-name">' + (EN && SHORT_EN[k] ? SHORT_EN[k] : TT(NAMES[k] || it.name)) + '</span>' +
         '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +
