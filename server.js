@@ -976,6 +976,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const ALLOW = {
         y1: 'desc', y3a: 'desc', y5a: 'desc', ytd: 'desc', m1: 'desc', w1: 'desc',
+        size: 'desc',   /* 基金规模（百万港元，积金局月报口径） */
         mdd: 'desc',     /* mdd 是负值，desc = 最接近 0 = 最抗跌 */
         mdd5: 'desc', vol1: 'asc', sharpe1: 'desc',
       };
@@ -997,7 +998,7 @@ const server = http.createServer(async (req, res) => {
             id, fund: f.fund, fundBase: f.fundBase, unit: f.unit || '', scheme: f.scheme, trustee: f.trustee,
             y1: p2.y1, y3a: p2.y3a, y5a: p2.y5a, ytd: p2.ytd, m1: p2.m1, w1: p2.w1,
             mdd: p2.mdd1 != null ? p2.mdd1 : p2.mdd, mdd5: p2.mdd5,
-            vol1: p2.vol1, sharpe1: p2.sharpe1, asOf: p2.asOf,
+            vol1: p2.vol1, sharpe1: p2.sharpe1, asOf: p2.asOf, size: f.size,
           });
         });
         global.__topCache = { at: now, rows };

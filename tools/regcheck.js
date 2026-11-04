@@ -68,10 +68,10 @@ chk('首页·走势图 5 个年份', ['2021', '2022', '2023', '2024', '2025']
 chk('首页·走势图 2025 +17.72%（规模加权新值）', /class="line-val up"[^>]*>\+17\.72%/.test(home));
 chk('首页·走势图 2022 -15.55% 为绿（规模加权新值）', /class="line-val down"[^>]*>-15\.55%/.test(home));
 
-chk('首页·四榜 2×2 各 5 条（2026-11-03：YTD/1Y/3Y/5Y 四个自算口径）', ['#mkTop1', '#mkTop3', '#mkTop4', '#mkTopYtd'].every((id) => {
+chk('首页·四榜 2×2 各 5 条（2026-11-04：1Y/5Y 回报 + 规模 + 波动率）', ['#mkTop1', '#mkTop4', '#mkTopSize', '#mkTopVol'].every((id) => {
   const m = new RegExp('id="' + id.slice(1) + '"[\\s\\S]*?</ol>').exec(home);
   return m && (m[0].match(/<li[\s>]/g) || []).length === 5;
-}) && home.indexOf('id="mkTop2"') < 0 && home.indexOf('id="mkTop5"') < 0 && home.indexOf('id="mkTopMdd"') < 0);
+}) && home.indexOf('id="mkTop2"') < 0 && home.indexOf('id="mkTop5"') < 0 && home.indexOf('id="mkTopYtd"') < 0 && home.indexOf('id="mkTop3"') < 0);
 chk('首页·免责条在位（disclaimer，2026-10-31 版式）', /class="disclaimer"/.test(home) && /每日自动同步|风险提示与免责声明/.test(home));
 chk('首页·区间标签 12 个（走势 6 + 表现指数区间 6，2026-11-03 加「每日」）', (home.match(/class="yr-tab( on)?"/g) || []).length === 12);
 /* 2026-10-28 用户要求删除整块「公司介绍」（成立时间/愿景/团队/业务版图、六大优势、免费行政服务、合作伙伴、承诺、业务板块）
@@ -309,7 +309,7 @@ chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排
 /* ---- 第八轮：榜单数值 / 图表布局 / 更新时间 ---- */
 (function () {
   // 四个榜单卡片（2026-10-31：砍总开支/低风险）：每一项都必须有数值
-  const ids = ['1', '3', '4', 'Ytd'];   /* 2026-11-03 第三十三轮：YTD/1Y/3Y/5Y */
+  const ids = ['1', '4', 'Size', 'Vol'];   /* 2026-11-04 第三十四轮：1Y/5Y/规模/波动率 */
   let bad = [];
   ids.forEach((i) => {
     const m = new RegExp('<ol[^>]*id="mkTop' + i + '"[\\s\\S]*?</ol>').exec(home);
@@ -329,7 +329,7 @@ chk('首页·CSS 已含桌面三列布局调优', (function () {
 /* ---- 第九轮：榜单跳转链接 / 海通自动抓取 ---- */
 chk('首页·四榜均有「查看完整榜单」链接', (home.match(/class="mk-more"/g) || []).length === 4);
 chk('首页·四榜全部指向资料库同一自算维度（2026-11-03 第三十三轮：积金局两榜下线）', (function () {
-  const want = { mkTop1: 'dim=selfY1#db', mkTop4: 'dim=selfY5a#db', mkTopYtd: 'dim=selfYtd#db', mkTop3: 'dim=selfY3a#db' };
+  const want = { mkTop1: 'dim=selfY1#db', mkTop4: 'dim=selfY5a#db', mkTopSize: 'dim=size#db', mkTopVol: 'dim=vol1#db' };
   return Object.keys(want).every((id) => {
     const m = new RegExp('<ol[^>]*id="' + id + '"[\\s\\S]{0,600}?</ol>').exec(home);
     // 链接在 <ol> 之前，取卡片整段判断
@@ -1987,7 +1987,7 @@ chk('二十九轮·①详情弹窗再收窄 15%（765）+ 表头 E02 浅蓝价�
   /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{[^}]*background: #f2f8fe;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-v \{ font-size: 28px;/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v2 \{ font-size: 17px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2 \{ font-size: 18px;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-cell \{ padding: 8px 10px 9px; \}/.test(readSrc('analysis.css')));
 chk('二十九轮·③走势图统计表去问号 + 列头与数值居中',
   !/class="tr-q"/.test(readSrc('trend.js')) &&
@@ -2026,7 +2026,7 @@ chk('三十轮·③单线提示显示当日涨跌幅 + 标签说明',
   !/tr-tip-note/.test(readSrc('trend.js')));   /* 第三十一轮：底部说明行已按用户要求去掉 */
 chk('三十轮·④详情表头价格 28px / 四栏 17px',
   /\.modal-bd \.fd-v \{ font-size: 28px;/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v2 \{ font-size: 17px;/.test(readSrc('analysis.css')));
+  /\.modal-bd \.fd-v2 \{ font-size: 18px;/.test(readSrc('analysis.css')));
 chk('三十轮·⑤侧栏语言胶囊真正居中（复位 margin-left:auto）',
   /\.db-side-lang \.lang-sw \{[^}]*margin-left: 0;/.test(readSrc('style.css')));
 chk('三十一轮·④积金表现指数新增「近 40 日」视图（与顶部迷你线同一批日线点）',
@@ -2104,15 +2104,16 @@ chk('三十三轮·①行情数字改「近 40 个交易日区间收益」+ 上�
   /const base40 = spark\.length > 1 \? spark\[0\]\[1\] : 0;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /const KEYS = \['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SPX'\]/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /SPX: '标普 500'/.test(readSrc('common.js')));
-chk('三十三轮·②首页四榜全自算口径（积金局两榜下线）+ 侧栏「更多数据」次级入口',
+chk('三十三轮·②首页四榜（回报不再挂积金局口径）+ 侧栏「更多数据」次级入口',
   !/mkTop5|mkTop2/.test(readSrc('home.html')) &&
-  /mkTopYtd/.test(readSrc('home.html')) && /mkTopMdd/.test(readSrc('home.html')) === false &&
+  /mkTopSize/.test(readSrc('home.html')) && /mkTopVol/.test(readSrc('home.html')) &&
   /class="db-side-more"/.test(readSrc('common.js')) && /更多数据/.test(readSrc('common.js')) &&
   /积金局月度数据/.test(readSrc('common.js')) && /db-tag/.test(readSrc('style.css')));
 chk('三十三轮·③首屏情绪卡改 B02 圆环（弧长=占比，中心数字）',
   /class="hs-ring"/.test(readSrc('home.html')) && /id="hsRingArc"/.test(readSrc('home.html')) &&
   /arc\.style\.strokeDasharray = \(C \* pct \/ 100\)/.test(readSrc('home.js')) &&
-  /\.hs-ring \{ position: relative; display: block; width: 74px/.test(readSrc('home.css')));
+  /\.hs-ring \{ position: relative; display: block; width: 56px/.test(readSrc('home.css')) &&
+  /max-width: 470px; text-decoration: none;/.test(readSrc('home.css')));
 chk('三十三轮·⑤首页「自建强积金数据平台」模块已删除',
   !/section class="plat"/.test(readSrc('home.html')) && !/plat-grid/.test(readSrc('home.html')));
 chk('三十三轮·⑥友情链接等高对齐 + 受限官网标注',
@@ -2132,3 +2133,29 @@ chk('三十三轮·⑩板块切换进历史（返回能回到刚看的板块）'
   /function show\(tab, keepHash, push\)/.test(readSrc('index.html')) &&
   /if \(push\) history\.pushState\(\{ mpfTab: hash0 \}, '', '#' \+ hash0\)/.test(readSrc('index.html')) &&
   /show\(tab, false, true\)/.test(readSrc('index.html')));
+
+/* ===== 2026-11-04 第三十四轮（8 条反馈）===== */
+chk('三十四轮·①首屏情绪卡与标题同宽并整体缩小',
+  /max-width: 470px; text-decoration: none;/.test(readSrc('home.css')) &&
+  /\.hs-ring \{ position: relative; display: block; width: 56px/.test(readSrc('home.css')) &&
+  /\.hs-tx b \{ font-size: 15\.5px/.test(readSrc('home.css')));
+chk('三十四轮·②行情卡提示改「区间内涨跌幅」且去掉点击尾巴',
+  /区间内涨跌幅 \{p\}/.test(readSrc('common.js')) &&
+  !/同期涨跌 \{p\}/.test(readSrc('common.js')) &&
+  !/点击查看指数走势/.test(readSrc('common.js')));
+chk('三十四轮·③积金表现指数说明重写（基期 1,000 + 相对区间起点口径）',
+  /基期 1,000/.test(readSrc('home.html')) && /相对所选区间起点的涨跌幅/.test(readSrc('home.html')) &&
+  !/基期 100/.test(readSrc('home.html')));
+chk('三十四轮·④年份模块精简（去「规模加权」、去百分点、删最好最差）',
+  !/TT\('年率化回报（规模加权）'\)/.test(readSrc('home.js')) &&
+  !/\+ TT\('个百分点'\)/.test(readSrc('home.js')) &&
+  !/TT\('当年表现最好'\)/.test(readSrc('home.js')) && !/yr-grid-2/.test(readSrc('home.js')));
+chk('三十四轮·⑤首页四榜换成 1Y/5Y 回报 + 规模 + 波动率',
+  /mkTopSize/.test(readSrc('home.html')) && /mkTopVol/.test(readSrc('home.html')) &&
+  /size: f\.size/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /size: 'desc',/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')));
+chk('三十四轮·⑦详情表头右侧四块字号 +1（12.5 / 18 / 17 / 12.5）',
+  /\.modal-bd \.fd-k \{ font-size: 12\.5px/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2 \{ font-size: 18px/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2\.fd-type \{ font-size: 17px/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-s \{ font-size: 12\.5px/.test(readSrc('analysis.css')));

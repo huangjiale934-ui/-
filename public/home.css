@@ -1162,8 +1162,9 @@ body { overflow-x: visible; }
 /* 2026-11-03（第三十三轮，用户选定 B02 圆环）：
    左侧圆环（中心百分比）+ 右侧两行文案 + 尾部入口；整卡比上一版放大一档。 */
 .hero-sent {
-  display: inline-flex; align-items: center; gap: 18px; margin-top: 26px;
-  padding: 18px 22px 18px 18px; width: 100%; max-width: 560px; min-width: 470px; text-decoration: none;
+  /* 2026-11-04（第三十四轮，用户反馈）：整卡与上方标题同宽、高度收掉三成，内部不再留大片空白 */
+  display: inline-flex; align-items: center; gap: 13px; margin-top: 20px;
+  padding: 11px 16px 11px 13px; width: 100%; max-width: 470px; text-decoration: none;
   background: #fff; border: 1px solid #e0ecf7; border-radius: 14px;
   box-shadow: 0 8px 20px rgba(20, 70, 120, .08);
   transition: box-shadow .16s, transform .16s;
@@ -1171,18 +1172,18 @@ body { overflow-x: visible; }
 .hero-sent:hover { box-shadow: 0 12px 28px rgba(20, 70, 120, .14); transform: translateY(-1px); text-decoration: none; }
 .hero-sent:focus-visible { outline: 2px solid #0866bb; outline-offset: 2px; }
 /* 圆环：外圈浅蓝底 + 深蓝弧（stroke-dasharray 由 JS 按百分比设置），中心数字 */
-.hs-ring { position: relative; display: block; width: 74px; height: 74px; flex: none; }
+.hs-ring { position: relative; display: block; width: 56px; height: 56px; flex: none; }
 .hs-ring svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
 .hs-ring-bg { fill: none; stroke: #e6f0fa; stroke-width: 6; }
 .hs-ring-fg { fill: none; stroke: #0866bb; stroke-width: 6; stroke-linecap: round;
   stroke-dasharray: 0 999; transition: stroke-dasharray .5s ease; }
 .hs-ring i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-style: normal; font-size: 19px; font-weight: 800; color: #0b4f8c; letter-spacing: -.5px;
+  font-style: normal; font-size: 15px; font-weight: 800; color: #0b4f8c; letter-spacing: -.4px;
   font-variant-numeric: tabular-nums; }
-.hs-tx { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.hs-tx b { font-size: 18px; font-weight: 700; color: #14314f; white-space: nowrap; letter-spacing: .1px; }
-.hs-tx em { font-style: normal; font-size: 12.5px; color: #8ba0b3; white-space: nowrap; }
-.hs-go { margin-left: auto; flex: none; font-size: 14px; font-weight: 700; color: #0866bb; white-space: nowrap; }
+.hs-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hs-tx b { font-size: 15.5px; font-weight: 700; color: #14314f; white-space: nowrap; letter-spacing: .1px; }
+.hs-tx em { font-style: normal; font-size: 11.5px; color: #8ba0b3; white-space: nowrap; }
+.hs-go { margin-left: auto; flex: none; font-size: 13px; font-weight: 700; color: #0866bb; white-space: nowrap; }
 @media (max-width: 720px) {
   .hero-sent { width: 100%; max-width: 100%; min-width: 0; gap: 14px; padding: 14px; }
   .hs-ring { width: 56px; height: 56px; }

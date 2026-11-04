@@ -3386,10 +3386,11 @@ document.addEventListener('mpf:lang', () => {
          否则没人知道这条小线是什么周期。 */
       /* 2026-11-03（第三十二轮）：提示文案按用户口吻润色 —— 说清这条折线是什么、数据到哪天 */
       /* 2026-11-03（第三十三轮）：数字已改区间收益，提示里写明区间与幅度，避免与单日混淆 */
+      /* 2026-11-04（第三十四轮，用户要求）：说明改成「区间内涨跌幅」，并去掉「点击查看」的尾巴 */
       cards += '<button type="button" class="tk-card" data-tk="' + k + '" data-tip="' + esc(
         it.name + ' · ' + TQ('折线为近 {n} 个交易日的走势', { n: it.days || 40 }) + ' · ' +
-        TQ('同期涨跌 {p}', { p: (it.chg > 0 ? '+' : '') + Number(it.chg).toFixed(2) + '%' }) + ' · ' +
-        TQ('数据截至 {d}', { d: it.asOf }) + '；' + TT('点击查看指数走势')
+        TQ('区间内涨跌幅 {p}', { p: (it.chg > 0 ? '+' : '') + Number(it.chg).toFixed(2) + '%' }) + ' · ' +
+        TQ('数据截至 {d}', { d: it.asOf })
       ) + '">' +
         '<span class="tk-name">' + (EN && SHORT_EN[k] ? SHORT_EN[k] : TT(NAMES[k] || it.name)) + '</span>' +
         '<span class="tk-nums"><b class="tk-last">' + fmt(it.last) + '</b>' +

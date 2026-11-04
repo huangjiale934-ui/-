@@ -378,10 +378,11 @@
     const d = p && p.avg != null ? (r.avg - p.avg) : null;
     return tabs + '<div class="yr-detail">' +
       '<div class="ts-row">' +
-      '<div class="ts-box"><span class="ts-k">' + r.year + ' ' + TT('年率化回报（规模加权）') + '</span>' +
+      '<div class="ts-box"><span class="ts-k">' + r.year + ' ' + TT('年率化回报') + '</span>' +
       '<b class="ts-v ' + sgn(r.wavg != null ? r.wavg : r.avg) + '">' + pctv(r.wavg != null ? r.wavg : r.avg) + '</b>' +
+      /* 2026-11-04（第三十四轮，用户要求）：「提升 9.30 个百分点」改「提升 9.30%」，少占一行 */
       '<span class="ts-s">' + (d == null ? TT('无上一年数据可比') :
-        TT('较') + ' ' + p.year + ' ' + TT('年') + (d >= 0 ? TT('提升') : TT('回落')) + ' ' + Math.abs(d).toFixed(2) + ' ' + TT('个百分点')) + '</span></div>' +
+        TT('较') + ' ' + p.year + ' ' + TT('年') + (d >= 0 ? TT('提升') : TT('回落')) + ' ' + Math.abs(d).toFixed(2) + '%') + '</span></div>' +
       '<div class="ts-box"><span class="ts-k">' + r.year + ' ' + TT('中位数') + '</span>' +
       '<b class="ts-v ' + sgn(r.median) + '">' + pctv(r.median) + '</b>' +
       '<span class="ts-s">' + TT('一半基金高于此值') + '</span></div>' +
@@ -428,20 +429,11 @@
         '<span class="bl">' + esc(x.label) + '</span></li>';
     }).join('');
 
-    /* 2026-11-03（第三十三轮）：颜色按数值正负，不按「最好/最差」——
-       2025 年全员正收益时，最差榜若强制绿色会与站内「绿=跌」冲突。 */
-    const liOf = (x) => '<li><span class="nm" title="' + esc(x.fund + ' · ' + x.scheme) + '">' + esc(x.fund) + '</span>' +
-      '<em class="' + (x.v >= 0 ? 'up' : 'down') + '">' + pctv(x.v) + '</em></li>';
+    /* 2026-11-04（第三十四轮，用户要求）：「当年表现最好 / 最差」两块已删除 */
 
     return '<div class="yr-grid">' +
       '<div class="yr-blk"><h4>' + TT('各类基金平均回报') + '</h4><ul class="yr-bars">' + tBars + '</ul></div>' +
       '<div class="yr-blk"><h4>' + TT('当年回报分布') + '</h4><ul class="yr-dist">' + dBars + '</ul></div>' +
-      '</div>' +
-      '<div class="yr-grid yr-grid-2">' +
-      '<div class="yr-blk"><h4>' + TT('当年表现最好') + '</h4><ul class="yr-rank">' +
-        (d.best || []).map(liOf).join('') + '</ul></div>' +
-      '<div class="yr-blk"><h4>' + TT('当年表现最差') + '</h4><ul class="yr-rank">' +
-        (d.worst || []).map(liOf).join('') + '</ul></div>' +
       '</div>';
   }
 
@@ -640,14 +632,16 @@
       .then((r) => (r.ok ? r.json() : { items: [] }))
       .then((j) => (j.items || []).map((x) => ({ ...x, sY1: x.y1, sY5a: x.y5a })))
       .catch(() => []);
-    Promise.all([get('y1'), get('y5a'), get('ytd'), get('y3a')]).then(([t1, t5, tytd, t3]) => {
+    /* 2026-11-04（第三十四轮，用户要求）：第 3、4 张改为「基金规模」「年化波动率」 */
+    Promise.all([get('y1'), get('y5a'), get('size'), get('vol1')]).then(([t1, t5, tsz, tvol]) => {
       /* 2026-11-02（第二十七轮）：接口超时/为空时不要清掉已经渲染好的积金局榜单
          （线上首屏偶发「近 1 年回报领先 = 暂无数据」就是这个：自算接口慢一步就把列表清空） */
       if (t1 && t1.length) renderTop('#mkTop1', t1, (x) => pctv(x.sY1), (x) => x.sY1);
       if (t5 && t5.length) renderTop('#mkTop4', t5, (x) => pctv(x.sY5a), (x) => x.sY5a);
-      /* 年初至今：红色表示正收益 */
-      renderTop('#mkTopYtd', tytd, (x) => pctv(x.ytd), (x) => x.ytd);
-      renderTop('#mkTop3', t3, (x) => pctv(x.y3a), (x) => x.y3a);
+      /* 规模：不做红绿着色（规模大小无好坏）；波动率同理 */
+      renderTop('#mkTopSize', tsz, (x) => fmtSize(x.size), null);
+      /* 波动率不加正负号（不是涨跌） */
+      renderTop('#mkTopVol', tvol, (x) => (x.vol1 == null ? '—' : Number(x.vol1).toFixed(2) + '%'), null);
     }).catch(() => {});
   }
 

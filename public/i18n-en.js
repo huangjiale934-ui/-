@@ -1,6 +1,10 @@
 /* 英文字典（2026-10-21 按需加载：切到英文时才下载） */
 (function (w) {
   var E = {
+'基金规模领先': 'Largest by fund size',
+'年化波动率最低': 'Lowest volatility',
+'区间内涨跌幅 {p}': 'change over the period {p}',
+
 '近 3 年年化回报领先': '3-year annualised leaders',
 
 '各类基金平均回报': 'Average return by fund type',
