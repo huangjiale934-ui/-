@@ -1233,12 +1233,12 @@
 .modal-bd .fd-cell { padding: 8px 10px 9px; }
 .modal-bd .fd-k { font-size: 12.5px; line-height: 1.45; }   /* 2026-11-04（第三十四轮）：右侧四块整体 +1 号 */
 .modal-bd .fd-v { font-size: 28px; letter-spacing: -0.7px; margin-top: 0; line-height: 1.15; }
-.modal-bd .fd-v2 { font-size: 18px; margin-top: 2px; }
+.modal-bd .fd-v2 { font-size: 19px; margin-top: 2px; }   /* 2026-11-04（第三十五轮，用户圈注）：表现/风险/收费数值再 +1 */
 .modal-bd .fd-v2.fd-type { font-size: 17px; }
 .modal-bd .fd-s { font-size: 12.5px; margin-top: 1px; }
 .modal-bd .fd-asof { font-size: 11.5px; }
 .modal-bd .fd-range { font-size: 11px; margin-top: 1px; }
-.modal-bd .fd-stars { font-size: 13.5px; margin-top: 2px; letter-spacing: 1px; }
+.modal-bd .fd-stars { font-size: 14.5px; margin-top: 3px; letter-spacing: 1px; }
 /* 详情弹窗里的走势图头部一行放得下（与主页面一致，不再换行） */
 .modal-bd .tr-head { flex-wrap: nowrap; }
 .modal-bd .tr-head .tr-toolbar { flex-wrap: nowrap; }

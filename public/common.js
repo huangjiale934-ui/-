@@ -374,10 +374,10 @@ function renderUpdateTime() {
     /* 2026-11-03（第三十三轮，领导要求）：积金局月度数据不再作为主入口（月报滞后、首页已全面改自算口径），
        但站内风险级别、资产规模、历年回报仍来自积金局 → 收进侧栏底部「更多数据」，做小号次级入口。 */
     '<div class="db-side-more">' +
-      '<div class="db-more-hd">' + TT('更多数据') + '</div>' +
+      '<div class="db-more-hd" data-i18n="更多数据">' + TT('更多数据') + '</div>' +
       '<button type="button" class="db-nav db-nav-sub' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
         '<span data-i18n="积金局月度数据">' + TT('积金局月度数据') + '</span>' +
-        '<em class="db-tag">' + TT('旧口径') + '</em>' + info + '</button>' +
+        '<em class="db-tag" data-i18n="旧口径">' + TT('旧口径') + '</em>' + info + '</button>' +
     '</div>' +
     /* 2026-11-02（第二十七轮，用户要求）：页头「数据版本」下移到这里，与「数据每日自动同步」合成一句 */
     '<div class="db-side-foot"><div class="db-ver" id="verChip" tabindex="0">' +
@@ -2801,6 +2801,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.addEventListener('click', (e) => {
     const a = e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+    /* 2026-11-04：表头的说明只在悬停时显示 —— 点表头是排序动作，不该顺带弹浮层 */
+    if (a && a.tagName === 'TH') { hide(); return; }
     if (a) { if (cur === a) hide(); else place(a, true); } else hide();
   });
   document.addEventListener('focusin', (e) => {

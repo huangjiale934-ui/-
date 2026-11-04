@@ -1,6 +1,17 @@
 /* 英文字典（2026-10-21 按需加载：切到英文时才下载） */
 (function (w) {
   var E = {
+'全市场平均': 'Market average',
+'整体平均': 'Overall average',
+
+'较上周 {d} 个百分点': 'vs last week: {d} pp',
+'每日更新': 'Daily',
+'月度更新': 'Monthly',
+'积金局公布的基金风险级别（1–7 级，按过往波幅评定），随积金局披露更新，非本站自算。': 'Risk level (1–7) published by the MPFA, rated by past volatility; refreshed with MPFA disclosures, not calculated by this site.',
+'积金局公布的基金资产规模（百万港元），随积金局月报更新，通常每月一次；未公布时显示 n.a.。': 'Fund size (HK$ million) published by the MPFA, updated with its monthly report (usually once a month); shows n.a. when not published.',
+'积金局披露的基金管理费（% p.a.）。部分基金以区间或「最高」形式公布，表内按原文显示，排序按区间下限。': 'Management fee (% p.a.) disclosed by the MPFA. Some funds publish a range or a "maximum"; the table shows the original wording and sorts by the lower bound.',
+'积金局披露的基金推出日期，不随净值变动。': 'Fund launch date as disclosed by the MPFA; it does not change with NAV updates.',
+
 '基金规模领先': 'Largest by fund size',
 '年化波动率最低': 'Lowest volatility',
 '区间内涨跌幅 {p}': 'change over the period {p}',

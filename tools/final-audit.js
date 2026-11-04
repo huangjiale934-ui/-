@@ -1,0 +1,164 @@
+#!/usr/bin/env node
+/**
+ * 上线前全量数据体检 —— 广州精研数据有限公司 · 香港强积金数据平台
+ * ============================================================
+ * 只读，不改任何数据。逐项检查：
+ *   A 基金表字段 / 净值与历史一致性 / 重复 id
+ *   B 历史序列（日期单调、无重复、末点、异常净值）
+ *   C 自算指标（nav-perf）范围与日期一致性
+ *   D 指数与行情接口（6 个指数、末点、日线长度）
+ *   E 持仓与投资分布（条数、权重、报告期、合计）
+ *   F 积金局月度 / 新闻 / 其他统计文件
+ * 用法：node tools/final-audit.js [--base http://127.0.0.1:4840]
+ */
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..');
+const D = path.join(ROOT, 'data');
+const read = (p, def) => { try { return JSON.parse(fs.readFileSync(path.join(D, p), 'utf8')); } catch (e) { return def; } };
+
+let fail = 0, warn = 0;
+const ok = (t) => console.log('  ok   ' + t);
+const bad = (t) => { fail++; console.log('  FAIL ' + t); };
+const wrn = (t) => { warn++; console.log('  warn ' + t); };
+
+const fundsJ = read('funds.json', { funds: [] });
+const funds = fundsJ.funds || [];
+const ids = new Set(funds.map((f) => String(f.id)));
+
+console.log('== A 基金表 ==');
+console.log('  条数 ' + funds.length + ' · dataAsOf ' + fundsJ.dataAsOf + ' · 声明总数 ' + fundsJ.declaredTotal);
+if (!funds.length) bad('funds.json 为空');
+if (ids.size !== funds.length) bad('存在重复 id：' + (funds.length - ids.size) + ' 条');
+/* navStatus === 'na' 是发行人明确不提供单位价格（保证／非单位化基金），算已知项不算故障 */
+const noNav = funds.filter((f) => f.nav == null || !isFinite(f.nav) || f.nav <= 0);
+const naOk = noNav.filter((f) => f.navStatus === 'na');
+const noNavBad = noNav.filter((f) => f.navStatus !== 'na');
+if (noNavBad.length) bad('净值缺失/非正 ' + noNavBad.length + ' 只：' + noNavBad.slice(0, 5).map((f) => f.id).join(','));
+else ok('净值全部有效（' + (funds.length - naOk.length) + ' 只有净值，' + naOk.length + ' 只官方标注 n.a.）');
+const noAsOf = funds.filter((f) => f.navStatus !== 'na' && !/^\d{4}-\d{2}-\d{2}$/.test(f.navAsOf || ''));
+if (noAsOf.length) bad('净值日期格式异常 ' + noAsOf.length + ' 只');
+const navDates = {};
+funds.forEach((f) => { navDates[f.navAsOf] = (navDates[f.navAsOf] || 0) + 1; });
+const navMax = Object.keys(navDates).sort().pop();
+console.log('  净值日期分布（末 6 档）：' + Object.keys(navDates).sort().slice(-6).map((d) => d + '×' + navDates[d]).join(' · '));
+const lag = funds.filter((f) => f.navAsOf < navMax);
+if (lag.length) wrn('早于全站最新日 ' + navMax + ' 的有 ' + lag.length + ' 条（源站节奏，非漏抓）');
+
+console.log('== B 净值 vs 历史末点 ==');
+let histMissing = 0, tailMismatch = 0, valMismatch = 0, badSeries = 0, emptySeries = 0;
+const histDir = path.join(D, 'hist');
+const histFiles = fs.existsSync(histDir) ? fs.readdirSync(histDir).filter((f) => f.endsWith('.json')) : [];
+const histIds = new Set(histFiles.map((f) => f.replace(/\.json$/, '')));
+funds.forEach((f) => {
+  const id = String(f.id);
+  if (f.navStatus === 'na') return;   /* 官方不提供净值，无历史属预期 */
+  if (!histIds.has(id)) { histMissing++; return; }
+  let s;
+  try { s = JSON.parse(fs.readFileSync(path.join(histDir, id + '.json'), 'utf8')).series || []; } catch (e) { badSeries++; return; }
+  if (!s.length) { emptySeries++; return; }
+  const last = s[s.length - 1];
+  if (last[0] !== f.navAsOf) tailMismatch++;
+  else if (Math.abs(last[1] - f.nav) > 1e-6) valMismatch++;
+  for (let i = 1; i < s.length; i++) {
+    if (!(s[i][0] > s[i - 1][0])) { badSeries++; return; }
+    if (!(s[i][1] > 0)) { badSeries++; return; }
+  }
+});
+if (histMissing) bad('缺少历史文件 ' + histMissing + ' 只');
+else ok('450+ 只全部有历史文件');
+if (emptySeries) bad('历史序列为空 ' + emptySeries + ' 只');
+if (badSeries) bad('历史序列日期非单调/净值非正 ' + badSeries + ' 只');
+if (tailMismatch) bad('历史末点日期 ≠ 基金净值日 ' + tailMismatch + ' 只');
+else ok('历史末点日期与基金净值日全部一致');
+if (valMismatch) bad('末点净值与基金表净值不一致 ' + valMismatch + ' 只');
+else ok('末点净值与基金表净值一致');
+
+console.log('== C 自算指标 nav-perf ==');
+const perf = read('nav-perf.json', { funds: {} });
+const pf = perf.funds || {};
+const pkeys = Object.keys(pf);
+console.log('  条数 ' + pkeys.length + ' · updatedAt ' + new Date(perf.updatedAt || 0).toISOString());
+const fields = ['d1', 'w1', 'm1', 'ytd', 'y1', 'y3a', 'y5a', 'mdd'];
+let missingField = 0, weird = 0, dateDiff = 0, mddPos = 0;
+pkeys.forEach((id) => {
+  const p = pf[id];
+  fields.forEach((k) => { if (p[k] == null) missingField++; });
+  ['d1', 'w1', 'm1', 'ytd', 'y1', 'y3a', 'y5a'].forEach((k) => {
+    if (p[k] != null && (p[k] < -100 || p[k] > 2000)) weird++;
+  });
+  if (p.mdd != null && p.mdd > 0) mddPos++;
+  const f = funds.find((x) => String(x.id) === String(id));
+  if (f && p.asOf && p.asOf !== f.navAsOf) dateDiff++;
+});
+if (pkeys.length < funds.length - 5) bad('nav-perf 覆盖不足：' + pkeys.length + '/' + funds.length);
+else ok('nav-perf 覆盖 ' + pkeys.length + ' 只');
+if (weird) bad('自算指标数值异常（<-100 或 >2000）' + weird + ' 处');
+if (mddPos) bad('最大回撤出现正值 ' + mddPos + ' 处');
+if (dateDiff) wrn('nav-perf asOf 与基金净值日不一致 ' + dateDiff + ' 只');
+
+console.log('== D 指数 ==');
+const idx = read('index.json', { items: {} });
+const want = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SPX'];
+const idxDates = {};
+want.forEach((k) => {
+  const it = (idx.items || {})[k];
+  if (!it || !it.series || !it.series.length) { bad('指数缺失 ' + k); return; }
+  const s = it.series;
+  const base = s[0][1], last = s[s.length - 1][1];
+  idxDates[it.asOf || s[s.length - 1][0]] = (idxDates[it.asOf || s[s.length - 1][0]] || 0) + 1;
+  const chg = ((last / base - 1) * 100).toFixed(0);
+  console.log('  ' + k.padEnd(10) + ' n=' + String(s.length).padStart(5) + '  ' + s[0][0] + ' → ' + s[s.length - 1][0] + '  末值 ' + last.toFixed(1) + '（基期至今 ' + chg + '%）');
+  for (let i = 1; i < s.length; i++) if (!(s[i][0] > s[i - 1][0])) { bad(k + ' 日期非单调 @' + i); break; }
+});
+/* 四个自算 MPF 指数必须同一天；恒指/标普按各自市场交易日更新，允许不同步 */
+const mpfDates = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND'].map((k) => {
+  const it = (idx.items || {})[k];
+  return it ? (it.asOf || it.series[it.series.length - 1][0]) : '';
+});
+if (new Set(mpfDates).size > 1) bad('四个自算 MPF 指数末点日期不一致：' + mpfDates.join('/'));
+else ok('四个自算 MPF 指数末点一致：' + mpfDates[0]);
+console.log('  外部指数末点：恒指 ' + (idx.items.HSI.asOf || '') + ' · 标普 ' + (idx.items.SPX.asOf || '') + '（各自市场交易日）');
+
+console.log('== E 持仓 ==');
+const hold = read('holdings.json', { funds: {} });
+const hf = hold.funds || {};
+const hkeys = Object.keys(hf);
+console.log('  条数 ' + hkeys.length + ' · updatedAt ' + new Date(hold.updatedAt || 0).toISOString());
+const hMonth = {};
+let badWeight = 0, badAlloc = 0, noTop = 0;
+hkeys.forEach((id) => {
+  const h = hf[id];
+  const m = (h.asOf || '—').slice(0, 7);
+  hMonth[m] = (hMonth[m] || 0) + 1;
+  const t = h.top10 || [];
+  if (!t.length) noTop++;
+  t.forEach((x) => { if (!(x.weight >= 0 && x.weight <= 100)) badWeight++; });
+  const a = (h.alloc || []).reduce((s, x) => s + (Number(x.weight) || 0), 0);
+  if (h.alloc && h.alloc.length && (a < 90 || a > 110)) badAlloc++;
+});
+console.log('  报告期分布：' + Object.keys(hMonth).sort().map((m) => m + '×' + hMonth[m]).join(' · '));
+if (badWeight) bad('持仓权重越界 ' + badWeight + ' 条');
+if (badAlloc) wrn('投资分布合计偏离 100% 的有 ' + badAlloc + ' 只');
+if (noTop) wrn('无前十大持仓 ' + noTop + ' 只');
+const hIds = new Set(hkeys);
+const noHold = funds.filter((f) => !hIds.has(String(f.id)));
+if (noHold.length) wrn('基金表中有 ' + noHold.length + ' 只没有持仓记录');
+
+console.log('== F 其他数据文件 ==');
+const news = read('news.json', { items: [] });
+const newsN = (news.items || []).length;
+console.log('  新闻 ' + newsN + ' 条，最新 ' + ((news.items || [])[0] || {}).date);
+if (!newsN) bad('news.json 为空');
+const monthly = read('mpfa-monthly.json', {});
+console.log('  积金局月度：' + monthly.asOf + '（' + (monthly.rows || []).length + ' 类）');
+if (!monthly.asOf) bad('mpfa-monthly.json 缺 asOf');
+const allstats = read('allstats.json', {});
+console.log('  allstats 键：' + Object.keys(allstats).slice(0, 8).join(','));
+const gaps = read('hist-gaps.json', {});
+console.log('  缺口文件：' + (Array.isArray(gaps.gaps) ? gaps.gaps.length : Object.keys(gaps).length) + ' 项');
+
+console.log('\n== 结果 ==');
+console.log(fail ? ('FAIL ' + fail + ' 项 / warn ' + warn + ' 项') : ('全部通过（warn ' + warn + ' 项）'));
+process.exit(fail ? 1 : 0);

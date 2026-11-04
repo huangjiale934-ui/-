@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+# 设计备选页与接口目录不参与检索（设计页仅内部评审用）
+Disallow: /design-
+Disallow: /api/
+Disallow: /zz-

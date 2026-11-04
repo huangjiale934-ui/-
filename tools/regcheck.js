@@ -45,7 +45,7 @@ chk('首页·温度计 SVG 已渲染', /class="thermo-svg"/.test(home));
 chk('首页·温度计 平均/中位数/正回报占比', /近 1 年平均回报<\/span><b[\s\S]{0,200}?近 1 年中位数回报<\/span><b[\s\S]{0,200}?正回报基金占比<\/span><b/.test(home));
 // 已由「温度计涨跌带只」覆盖
 // 已由「温度计涨跌带只」覆盖
-chk('首页·温度计口径为规模加权（2026-10-31）', /规模加权平均/.test(home));
+chk('首页·温度计平均回报口径（2026-11-04 起标签改「全市场平均」）', /全市场平均/.test(home) && !/规模加权平均/.test(home));
 
 chk('首页·环形图 中心 451 只基金', /class="pie-c1"[^>]*>451<\/text>/.test(home));
 chk('首页·环形图图例 3 组（种类分布/受托人份额/资产占比）', (home.match(/<ul class="pie-legend">/g) || []).length === 3);
@@ -320,7 +320,7 @@ chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排
   chk('首页·四榜均显示数值（无空缺）', bad.length === 0, bad.join(' / '));
 })();
 chk('首页·占比图面板已标记 pie-panel', (home.match(/class="mk-panel pie-panel"/g) || []).length === 2);
-chk('首页·基金种类图例名称完整（已随类别三语显示简体）', /货币市场（非保守）/.test(home) && /货币市场（保守）/.test(home));
+chk('首页·基金种类图例名称完整（2026-11-04 起缩为「货币（保守）/货币（非保守）」避免截断）', /货币（非保守）/.test(home) && /货币（保守）/.test(home));
 chk('首页·风险级别图例名称完整', /低至中风险/.test(home) && /最高风险/.test(home));
 chk('首页·CSS 已含桌面三列布局调优', (function () {
   try { return /min-width: 1181px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'home.css'), 'utf8')); } catch (e) { return false; }
@@ -1681,7 +1681,7 @@ chk('1022·资讯与市场回报走势在排行榜之后、温度计之前', (fu
   return a > -1 && b > a && c > b;
 })());
 /* ② 温度计改用自算净值口径，并保留积金局口径对照（两套分开标注） */
-chk('1022·温度计口径（2026-10-31：说明移标题ⓘ）', /规模加权平均/.test(home) && /蓝为涨、绿为跌/.test(home));
+chk('1022·温度计口径（2026-11-04：说明改「按资产规模加权计算」）', /按资产规模加权计算/.test(home) && /蓝为涨、绿为跌/.test(home));
 chk('1022·KPI 成分基金不为 0（unitRows 兜底修复）', !/成分基金<\/div>\s*<div class="mk-v">0 <small>/.test(home));
 /* ③ 资料库：「近1年」为默认列（列隐藏规则里不含第 11 列） */
 chk('1022·资料库默认列含近1年', /data-k="selfY1"[^>]*>近1年/.test(idx) && !/#fundTable tr > \*:nth-child\(11\)/.test(idx));
@@ -1987,7 +1987,7 @@ chk('二十九轮·①详情弹窗再收窄 15%（765）+ 表头 E02 浅蓝价�
   /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{[^}]*background: #f2f8fe;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-v \{ font-size: 28px;/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v2 \{ font-size: 18px;/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2 \{ font-size: 19px;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-cell \{ padding: 8px 10px 9px; \}/.test(readSrc('analysis.css')));
 chk('二十九轮·③走势图统计表去问号 + 列头与数值居中',
   !/class="tr-q"/.test(readSrc('trend.js')) &&
@@ -2024,9 +2024,9 @@ chk('三十轮·③单线提示显示当日涨跌幅 + 标签说明',
   /当日涨跌幅/.test(readSrc('trend.js')) && /相对区间涨跌幅/.test(readSrc('trend.js')) &&
   /tr-tip-tag/.test(readSrc('analysis.css')) &&
   !/tr-tip-note/.test(readSrc('trend.js')));   /* 第三十一轮：底部说明行已按用户要求去掉 */
-chk('三十轮·④详情表头价格 28px / 四栏 17px',
+chk('三十轮·④详情表头价格 28px / 四栏数值（第三十五轮起 19px）',
   /\.modal-bd \.fd-v \{ font-size: 28px;/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v2 \{ font-size: 18px;/.test(readSrc('analysis.css')));
+  /\.modal-bd \.fd-v2 \{ font-size: 19px;/.test(readSrc('analysis.css')));
 chk('三十轮·⑤侧栏语言胶囊真正居中（复位 margin-left:auto）',
   /\.db-side-lang \.lang-sw \{[^}]*margin-left: 0;/.test(readSrc('style.css')));
 chk('三十一轮·④积金表现指数新增「近 40 日」视图（与顶部迷你线同一批日线点）',
@@ -2059,7 +2059,7 @@ chk('三十轮·①榜单更名（2026-11-03 起「积金局月度数据」，�
 chk('三十一轮·①首屏市场情绪卡（第三十三轮起改 B02 圆环）',
   /class="hero-sent"/.test(readSrc('home.html')) && !/class="hero-btns"/.test(readSrc('home.html')) &&
   /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
-  /最近一周 · 每日更新/.test(readSrc('home.html')) &&
+  /id="hsDelta"/.test(readSrc('home.html')) &&
   /class="hs-ring"/.test(readSrc('home.html')) &&
   /\.hs-ring-fg \{ fill: none; stroke: #0866bb/.test(readSrc('home.css')) &&
   /if \(p === '\/api\/breadth'\)/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
@@ -2081,10 +2081,10 @@ chk('三十一轮·⑥前十大持仓两行式设计页在位（真实 729px）'
 
 /* ===== 2026-11-03 第三十二轮（6 条反馈）===== */
 chk('三十二轮·③情绪卡口径统一：近一周占比 + 跳「近 1 周」维度',
-  /pct: total \? Math\.round\(\(up \/ total\) \* 100\) : null,/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
+  /const pct = total \? Math\.round\(\(up \/ total\) \* 100\) : null;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /if \(!x \|\| x\.w1 == null\) return;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
-  /最近一周 · 每日更新/.test(readSrc('home.html')));
+  /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js')));
 chk('三十二轮·①源站名单：一句话 + 每计划一行 + 可点击筛基金',
   /ns-h/.test(readSrc('common.js')) && /ns-list/.test(readSrc('common.js')) &&
   /class="ns-link" href="index\.html\?kw=/.test(readSrc('common.js')) &&
@@ -2154,9 +2154,9 @@ chk('三十四轮·⑤首页四榜换成 1Y/5Y 回报 + 规模 + 波动率',
   /mkTopSize/.test(readSrc('home.html')) && /mkTopVol/.test(readSrc('home.html')) &&
   /size: f\.size/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /size: 'desc',/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')));
-chk('三十四轮·⑦详情表头右侧四块字号 +1（12.5 / 18 / 17 / 12.5）',
+chk('三十四轮·⑦详情表头右侧四块字号 +1（12.5 / 19 / 17 / 12.5）',
   /\.modal-bd \.fd-k \{ font-size: 12\.5px/.test(readSrc('analysis.css')) &&
-  /\.modal-bd \.fd-v2 \{ font-size: 18px/.test(readSrc('analysis.css')) &&
+  /\.modal-bd \.fd-v2 \{ font-size: 19px/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-v2\.fd-type \{ font-size: 17px/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-s \{ font-size: 12\.5px/.test(readSrc('analysis.css')));
 chk('三十四轮·⑨静态站已落盘规模/波动率榜（GitHub 站不 404）',
@@ -2165,3 +2165,33 @@ chk('三十四轮·⑨静态站已落盘规模/波动率榜（GitHub 站不 404�
   /size: 'api\/top-size\.json'/.test(readSrc('api-adapter.js')));
 chk('三十四轮·⑩手机端隐藏旧口径入口（桌面保留）',
   /@media \(max-width: 760px\) \{\s*\.db-side-more \{ display: none; \}/.test(readSrc('style.css')));
+
+/* ===== 2026-11-04 第三十五轮（定稿前微调）===== */
+chk('三十五轮·①积金表现指数说明删掉「下方折线为指数点位…」尾句', (function () {
+  const h = readSrc('home.html');
+  return /基期 1,000/.test(h) && /相对所选区间起点的涨跌幅。"/.test(h) && !/下方折线为指数点位/.test(h);
+})());
+chk('三十五轮·②详情表头表现/风险/收费数值 19px、星级 14.5px', (function () {
+  const c = readSrc('analysis.css');
+  return /\.modal-bd \.fd-v2 \{ font-size: 19px;/.test(c) && /\.modal-bd \.fd-stars \{ font-size: 14\.5px;/.test(c);
+})());
+chk('三十五轮·③榜单卡标更新频率（三张每日 + 规模榜月度）', (function () {
+  const h = readSrc('home.html');
+  return (h.match(/class="mk-tag"/g) || []).length === 3 &&
+    /class="mk-tag mk-tag-m" data-i18n="月度更新"/.test(h) &&
+    /\.mk-tag \{/.test(readSrc('home.css')) && /\.mk-tag-m \{/.test(readSrc('home.css'));
+})());
+chk('三十五轮·③资料库积金局口径列表头有悬浮说明（无 ⓘ 图标）', (function () {
+  const a = readSrc('app.js');
+  return /const TH_TIPS = \{/.test(a) && /risk: '积金局公布的基金风险级别/.test(a) &&
+    /size: '积金局公布的基金资产规模/.test(a) && /mgmtFee: '积金局披露的基金管理费/.test(a) &&
+    /launchTs: '积金局披露的基金推出日期/.test(a) &&
+    /cell\.setAttribute\('data-tip', TT\(TH_TIPS\[k\]\)\)/.test(a) &&
+    /if \(a && a\.tagName === 'TH'\) \{ hide\(\); return; \}/.test(readSrc('common.js'));
+})());
+chk('三十五轮·④首屏卡改「较上周 ±N 个百分点」（接口给 delta）', (function () {
+  const sv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+  return /const pctPrev = breadthPrevPct\(perf\);/.test(sv) && /delta: delta|pct, pctPrev, delta/.test(sv) &&
+    /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js')) &&
+    !/最近一周 · 每日更新/.test(readSrc('home.html'));
+})());

@@ -688,8 +688,47 @@ const server = http.createServer(async (req, res) => {
 
   /* 2026-11-03（第三十一轮）：首屏「市场情绪」小卡的数据 ——
      近日上涨基金占比（nav-perf 的 d1）+ 最近 7 个交易日市场指数涨跌（迷你柱）。 */
+/* 2026-11-04（第三十五轮）：首屏卡要给「较上周」的方向感 ——
+   用同一套 7 日窗口口径，算「再往前一周」（last-14 → last-7）的上涨占比，
+   与本周占比相减即得百分点变化。读 450 份 hist 约 230ms，按 nav-perf 的 mtime 缓存。 */
+function breadthPrevPct(perf) {
+  try {
+    /* 2026-11-04：缓存必须挂在 global 上 —— 这个函数定义在请求回调里，
+       用局部 let 的话每次请求都会新建，等于没缓存（实测每次 220ms 全量重算）。 */
+    const cache = global.__mpfBreadthPrev || (global.__mpfBreadthPrev = { key: '', val: null });
+    const key = String(fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs);
+    if (cache.key === key) return cache.val;
+    const minusDays = (d, n) => { const x = new Date(d); x.setUTCDate(x.getUTCDate() - n); return x.toISOString().slice(0, 10); };
+    const idxAt = (s, d) => { let lo = 0, hi = s.length - 1, ans = -1;
+      while (lo <= hi) { const m = (lo + hi) >> 1; if (s[m][0] <= d) { ans = m; lo = m + 1; } else hi = m - 1; }
+      return ans; };
+    let n = 0, up = 0;
+    Object.keys(perf).forEach((id) => {
+      const x = perf[id];
+      if (!x || x.w1 == null) return;
+      let series;
+      try { series = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'hist', id + '.json'), 'utf8')).series; } catch (e) { return; }
+      if (!series || series.length < 2) return;
+      const last = series[series.length - 1][0];
+      const i7 = idxAt(series, minusDays(last, 7)), i14 = idxAt(series, minusDays(last, 14));
+      if (i7 < 0 || i14 < 0 || !series[i14][1]) return;
+      n++; if (series[i7][1] / series[i14][1] - 1 > 0) up++;
+    });
+    const val = n ? Math.round(up / n * 100) : null;
+    cache.key = key;
+    cache.val = val;
+    return val;
+  } catch (e) { return null; }
+}
+
   if (p === '/api/breadth') {
     try {
+      /* 2026-11-04：整份响应按两份数据的 mtime 缓存（首页每次加载都会取，避免重复解析 1MB 指数文件） */
+      const rk = fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs + ':' +
+                 fs.statSync(path.join(__dirname, 'data', 'index.json')).mtimeMs;
+      const rc = global.__mpfBreadthResp;
+      if (rc && rc.key === rk) return send(res, 200, rc.body);
+
       const perf = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'nav-perf.json'), 'utf8')).funds || {};
       const idx = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'index.json'), 'utf8'));
       const mpf = (idx.items && idx.items.MPFAVG && idx.items.MPFAVG.series) || [];
@@ -709,10 +748,16 @@ const server = http.createServer(async (req, res) => {
         if (x.d1 != null && x.d1 > 0) upDay++;
         if (x.asOf && x.asOf > asOf) asOf = x.asOf;
       });
-      return send(res, 200, JSON.stringify({
-        asOf, total, up, pct: total ? Math.round((up / total) * 100) : null,
+      const pct = total ? Math.round((up / total) * 100) : null;
+      const pctPrev = breadthPrevPct(perf);
+      /* delta 单位为「个百分点」；上周无数据时为 null，前端只显示本周占比 */
+      const delta = (pct != null && pctPrev != null) ? pct - pctPrev : null;
+      const body = JSON.stringify({
+        asOf, total, up, pct, pctPrev, delta,
         pctDay: total ? Math.round((upDay / total) * 100) : null, days,
-      }));
+      });
+      global.__mpfBreadthResp = { key: rk, body };
+      return send(res, 200, body);
     } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }
   }
 

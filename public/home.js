@@ -67,9 +67,11 @@
   /* 图表列名缩写（面板较窄，避免折行） */
   function shortType(n) {
     return String(n)
-      .replace('貨幣市場基金 — 強積金保守基金', '貨幣市場（保守）')
-      .replace('貨幣市場基金 — 不包括強積金保守基金', '貨幣市場（非保守）')
-      .replace('貨幣市場基金 — ', '貨幣市場（');
+      /* 2026-11-04（第三十五轮）：图例只有 ~7 字宽，「貨幣市場（非保守）」会被截成
+         「货币市场（非保…」，两个货币类分不清 → 统一缩为 貨幣（保守）/ 貨幣（非保守） */
+      .replace('貨幣市場基金 — 強積金保守基金', '貨幣（保守）')
+      .replace('貨幣市場基金 — 不包括強積金保守基金', '貨幣（非保守）')
+      .replace('貨幣市場基金 — ', '貨幣（');
   }
   function axisType(n) {
     return String(n)
@@ -218,7 +220,7 @@
     const stats = '<div class="thermo-stats">'
       + '<div class="ts-row">'
       + '<div class="ts-box"><span class="ts-k">' + TT('近 1 年平均回报') + '</span>'
-      + '<b class="ts-v ' + sgn(v) + '">' + pctv(v) + '</b><span class="ts-s">' + TT('全市场规模加权') + '</span></div>'
+      + '<b class="ts-v ' + sgn(v) + '">' + pctv(v) + '</b><span class="ts-s">' + TT('全市场平均') + '</span></div>'
       + '<div class="ts-box"><span class="ts-k">' + TT('近 1 年中位数回报') + '</span>'
       + '<b class="ts-v ' + sgn(med) + '">' + pctv(med) + '</b><span class="ts-s">' + TT('一半基金高于此值') + '</span></div>'
       + '<div class="ts-box"><span class="ts-k">' + TT('正回报基金占比') + '</span>'
@@ -345,13 +347,13 @@
         const c = A > 0 ? C_UP : A < 0 ? C_DOWN : C_FLAT;
         const vy = Y(A) - (A >= 0 ? 9 : -16);
         dots += '<circle cx="' + fx(cx) + '" cy="' + fx(Y(A)) + '" r="4.2" fill="' + c + '" stroke="#fff" stroke-width="1.6">'
-          + '<title>' + r.year + ' ' + TT('规模加权平均') + '：' + pctv(A) + '（' + r.up + ' / ' + r.down + '，' + r.n + '）</title></circle>'
+          + '<title>' + r.year + ' ' + TT('整体平均') + '：' + pctv(A) + '（' + r.up + ' / ' + r.down + '，' + r.n + '）</title></circle>'
           + '<text class="line-val ' + sgn(A) + '" x="' + fx(lx) + '" y="' + fx(vy) + '" text-anchor="middle">' + pctv(A) + '</text>';
       }
     });
 
     return '<div class="chart-head"><ul class="chart-legend">'
-      + '<li><i style="background:' + C_UP + '"></i>' + TT('规模加权平均') + '</li></ul></div>'
+      + '<li><i style="background:' + C_UP + '"></i>' + TT('整体平均') + '</li></ul></div>'
       + '<svg class="chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(TT('市场整体回报走势')) + '">'
       + grid
       + '<path d="' + area + '" fill="#e8f0f9" opacity="0.85"/>'
@@ -758,13 +760,24 @@
   (function initHeroSent() {
     const arc = document.getElementById('hsRingArc');
     const pctEl = document.getElementById('hsPct');
+    const dEl = document.getElementById('hsDelta');
     if (!arc) return;
+    let delta = null;
+    /* 2026-11-04（第三十五轮，用户要求）：第二行改「较上周 ±N 个百分点」，给方向感；
+       语言切换时用同一份 delta 重绘，避免残留上一语言的文案。 */
+    function paintDelta() {
+      if (!dEl) return;
+      if (delta == null) { dEl.textContent = ''; return; }
+      dEl.textContent = TQ('较上周 {d} 个百分点', { d: (delta > 0 ? '+' : '') + delta });
+    }
+    document.addEventListener('mpf:lang', paintDelta);
     fetch('/api/breadth').then((r) => (r.ok ? r.json() : null)).then((j) => {
       if (!j || j.pct == null) return;
       const pct = Math.max(0, Math.min(100, j.pct));
       const C = 2 * Math.PI * 30;   /* r=30，与 SVG 的 r 一致 */
       arc.style.strokeDasharray = (C * pct / 100).toFixed(1) + ' ' + C.toFixed(1);
       if (pctEl) pctEl.textContent = pct + '%';
+      if (j.delta != null) { delta = j.delta; paintDelta(); }
       const card = document.getElementById('heroSent');
       if (card) card.setAttribute('aria-label', TQ('近一周有 {p}% 的成分基金上涨，查看是哪些', { p: pct }));
     }).catch(() => {});

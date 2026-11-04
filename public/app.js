@@ -748,10 +748,19 @@
     excess1: '<th data-c="excess1" data-i18n-parts data-k="excess1" data-defdir="desc" class="sortable r">超额收益<br><small>对恒指·近1年</small> <span class="arrow">↕</span></th>',
     posM12: '<th data-c="posM12" data-i18n-parts data-k="posM12" data-defdir="desc" class="sortable r">正收益<br><small>月份占比</small> <span class="arrow">↕</span></th>',
     size: '<th data-c="size" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
-    mgmtFee: '<th data-c="mgmtFee" data-i18n-parts data-i18n-title="部分基金的费用在官网以区间或「最高」形式公布，表内按原文显示；排序按区间下限" data-k="mgmtFee" data-defdir="asc" class="sortable r">基金管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    mgmtFee: '<th data-c="mgmtFee" data-i18n-parts data-k="mgmtFee" data-defdir="asc" class="sortable r">基金管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
     launchTs: '<th data-c="launchTs" data-i18n-parts data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>',
     ops: '<th data-c="ops" data-i18n-parts class="c">操作</th>',
   };
+  /* 2026-11-04（第三十五轮，用户要求）：来源于积金局月度披露的列，表头加悬浮说明。
+     不加 ⓘ 图标，只在鼠标移到表头时由全局 [data-tip] 浮层显示（触屏点一下也能看到）。 */
+  const TH_TIPS = {
+    risk: '积金局公布的基金风险级别（1–7 级，按过往波幅评定），随积金局披露更新，非本站自算。',
+    size: '积金局公布的基金资产规模（百万港元），随积金局月报更新，通常每月一次；未公布时显示 n.a.。',
+    mgmtFee: '积金局披露的基金管理费（% p.a.）。部分基金以区间或「最高」形式公布，表内按原文显示，排序按区间下限。',
+    launchTs: '积金局披露的基金推出日期，不随净值变动。',
+  };
+
   /* 可见列顺序 = COL_DEFS 顺序 ∩ colSet；维度激活时把维度列插到「风险」列右侧 */
   function visibleOrder() {
     let order = COL_DEFS.map((c) => c.k).filter((k) => {
@@ -774,6 +783,11 @@
     th.innerHTML = order.map((k) => TH_HTML[k] || '').join('');
     /* 2026-11-01（6.0）：表头是重建的，data-i18n 文案需要立即翻译（否则英文模式仍是中文表头） */
     if (typeof window.applyI18n === 'function') window.applyI18n(th);
+    /* 2026-11-04：积金局口径列的悬浮说明（用 TT 现取，语言切换重绘后即同步） */
+    Object.keys(TH_TIPS).forEach((k) => {
+      const cell = th.querySelector('th[data-c="' + k + '"]');
+      if (cell) cell.setAttribute('data-tip', TT(TH_TIPS[k]));
+    });
   }
 
   function rowHtml(x, rk, order, pinned) {
