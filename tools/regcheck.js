@@ -250,8 +250,8 @@ chk('资料库·无估值日问号标记（代码+数据均具备）', (function
   try { const n = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'nav.json'), 'utf8')); nd = n.items.filter((x) => x.nav != null && !x.asOf && !x.na).length; } catch (e) {}
   return /nav-q/.test(cj) && /官网把估值日放在动态脚本中生成/.test(cj) && nd > 0;
 })());
-chk('资料库·footer 来源与免责（src-brief + 折叠，2026-10-31）', /class="src-brief"/.test(idx) && /foot-fold/.test(idx));
-chk('排名·footer 来源与免责（src-brief + 折叠）', /class="src-brief"/.test(rk) && /foot-fold/.test(rk));
+chk('资料库·footer 来源与免责（三行式 snote + 折叠，2026-11-04）', /class="snote"/.test(readSrc('common.js')) && /snote-foot/.test(readSrc('common.js')) && /foot-fold/.test(idx));
+chk('排名·footer 来源与免责（snote + 折叠）', /class="snote"/.test(readSrc('common.js')) && /foot-fold/.test(rk));
 chk('首页·页面标题已加标记', /<title data-i18n="香港强积金市场数据平台/.test(rawH));
 chk('资料库·筛选与工具栏合并一行（2026-11-02：排名维度→搜索→下拉→共筛选出→每页显示→导出，无「筛选条件：无」）',
   /class="f-row f-row-main f-row-merged"/.test(idx) && /id="dimBtn"/.test(idx) && /id="dimPop"/.test(idx) && /class="tb-tail"/.test(idx) &&
@@ -719,15 +719,17 @@ chk('导出·溯源头（csvSourceNote）与榜单 xlsx 化（2026-10-30：主�
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
-    return /function csvSourceNote/.test(c) && /积金局资料截至/.test(c) && /净值估值日区间/.test(c) &&
-      /buildHoldAllocSheet/.test(r) && /MPFXLSX\.build/.test(r) && /csvSourceNote\(\)\.concat/.test(a);
+    /* 2026-11-04：资料库导出升级为 xlsx（数据说明 + 基金数据两表），榜单导出仍是 xlsx */
+    return /function csvSourceNote/.test(c) && /buildCoverSheet = function/.test(c) && /buildHoldAllocSheet/.test(c) &&
+      /MPFXLSX\.build/.test(r) && /window\.MPFXLSX\.build/.test(a) && /buildCoverSheet/.test(a) && /TT\('名次'\)/.test(a);
   } catch (e) { return false; }
 })());
 chk('导出·文件名改为数据截至日（含 TT(\'数据截至\')）', (function () {
   try {
     const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
-    return /TT\('数据截至'\)/.test(r) && /TT\('数据截至'\)/.test(a) && a.indexOf('new Date().toISOString().slice(0, 10) + \'.csv\'') < 0;
+    /* 2026-11-04：文件名改用「净值最新日」，且资料库为 .xlsx */
+    return /TT\('数据截至'\)/.test(r) && /MPF基金最新数据_/.test(a) && a.indexOf('.csv') < 0;
   } catch (e) { return false; }
 })());
 chk('月度板块·「自制度实施以来」行已删（hover 保留，2026-10-15）', (function () {
@@ -764,9 +766,10 @@ chk('访问统计·推送与自动化已接入（可在任务总结附数字）'
 /* ---------------- 第四板块·MPF基金可视化对比（2026-10-31 并入资料库 index.html#cmp） ----------------
    原 analysis.html 已改为跳转页；板块 DOM 随 index dump 渲染，故 an = index 快照。 */
 const an = read('index');
-chk('第四板块·侧栏两入口（基金最新数据 / MPFA 基金榜单；对比页保留但已下线入口）',
-  /id="dbtDb"/.test(readSrc('common.js')) && /id="dbtRank"/.test(readSrc('common.js')) &&
-  !/id="dbtCmp"/.test(readSrc('common.js')) && /id="anSec"/.test(rawIdxHtml) && /id="dbSide"/.test(rawIdxHtml));
+chk('第四板块·侧栏入口（基金最新数据；积金局月报已下沉到页脚口径说明，2026-11-04）',
+  /id="dbtDb"/.test(readSrc('common.js')) && !/id="dbtCmp"/.test(readSrc('common.js')) &&
+  !/class="db-side-more"/.test(readSrc('common.js')) && /class="snote-link" href="#rank"/.test(readSrc('common.js')) &&
+  /id="anSec"/.test(rawIdxHtml) && /id="dbSide"/.test(rawIdxHtml));
 chk('第四板块·页头不再单列「MPF基金可视化对比」（2026-11-01 用户要求：第三页已并入资料库）',
   !/index\.html#cmp', 'MPF基金可视化对比'/.test(readSrc('common.js')));
 /* ---- 第四页 v3 改版：纯对比页 + 左侧发行人栏（版式参照合作方站） ---- */
@@ -914,9 +917,9 @@ chk('深夜·④页脚折叠 + 来源免责合并 + 核对时间入 summary', (f
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     /* 2026-10-31（用户要求）：foot-legal 并入折叠栏（src-brief），来源告警/两套口径段删除；
        2026-10-31 三版：analysis.html 改跳转页，仅校验 index */
-    return i.indexOf('foldSpec') >= 0 && i.indexOf('navCheckAt') >= 0 &&
-      i.indexOf('src-brief') >= 0 && i.indexOf('foot-legal') < 0 && c.indexOf('navCheckAt') >= 0 &&
-      c.indexOf('来源告警') < 0;
+    /* 2026-11-04：来源与免责改写进三行式 snote（src-brief 已删除，避免重复叙述） */
+    return i.indexOf('foldSpec') >= 0 && i.indexOf('navCheckAt') >= 0 && i.indexOf('src-brief') < 0 &&
+      i.indexOf('foot-legal') < 0 && c.indexOf('navCheckAt') >= 0 && c.indexOf('snote-foot') >= 0;
   } catch (e) { return false; }
 })());
 chk('深夜·⑤页头只显示本站更新时间（三处统一）+ 同计划对比入口', (function () {
@@ -1806,10 +1809,10 @@ chk('二十轮·②榜单页删除「更多筛选」整块',
 chk('二十轮·③榜单表格与基金表同款：分页条 + 来源说明移出卡片',
   /id="rkPager"/.test(rawIdxHtml) && /function renderPager/.test(readSrc('rank.js')) &&
   /#rkTable thead th \{ font-size: 14px/.test(readSrc('style.css')));
-chk('二十轮·④左侧全站导航（首页 / 基金最新数据 / MPFA 基金榜单 / 供款计算器）',
+chk('二十轮·④左侧全站导航（首页 / 基金最新数据 / 供款（定投）计算器）',
   /class="db-shell"/.test(rawIdxHtml) && /class="db-side"/.test(rawIdxHtml) &&
   rawIdxHtml.indexOf('class="db-tabs"') < 0 && /id="dbtDb"/.test(readSrc('common.js')) &&
-  /id="dbtRank"/.test(readSrc('common.js')) && !/id="dbtCmp"/.test(readSrc('common.js')) &&
+  !/id="dbtCmp"/.test(readSrc('common.js')) && /供款（定投）计算器/.test(readSrc('common.js')) &&
   /navHome/.test(readSrc('common.js')) && /navCalc/.test(readSrc('common.js')));
 chk('二十轮·⑤首页榜单卡 1-5 全部写出序号（2026-11-02：圆形序号 1-5）',
   /'<span class="top-tag t' \+ \(i \+ 1\) \+ '">' \+ \(i \+ 1\) \+ '<\/span>'/.test(readSrc('home.js')) &&
@@ -1849,8 +1852,7 @@ chk('二十四轮·①发行人列表紧跟「基金最新数据」+ 可收起�
     const j = readSrc('common.js');
     const a = j.indexOf('id="dbtDb"');
     const b = j.indexOf('id="dbSubCmp"');
-    const d = j.indexOf('id="dbtRank"');
-    return a > 0 && b > a && d > b;
+    return a > 0 && b > a;
   })() &&
   /subOpen = !subOpen/.test(rawIdxHtml) && /b\.classList\.toggle\('collapsed', !subOpen\)/.test(rawIdxHtml) &&
   /\.db-side-grp \{ position: relative; display: flex;[\s\S]{0,160}font-size: 16px/.test(readSrc('style.css')) &&
@@ -1865,10 +1867,8 @@ chk('二十四轮·⑤⑥⑦走势图加高 30% + 统计表字号 + 预设按钮
   /\.db-trendcard \.tr-svg \{ height: 350px/.test(readSrc('style.css')) &&
   /\.tr-tbl th, \.tr-tbl td \{ font-size: 14px; \}/.test(readSrc('analysis.css')) &&
   /\.cp-btns\.cp-presets \{ display: grid; grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/.test(readSrc('style.css')));
-chk('二十九轮·①口径说明：只保留榜单一个 ⓘ + 悬浮即显示',
-  /class="ver-info db-tip"/.test(readSrc('common.js')) && /\.db-side \.ver-info\.db-tip \{/.test(readSrc('style.css')) &&
-  (readSrc('common.js').match(/\+ info \+/g) || []).length === 1 &&
-  /anchor\.addEventListener\('mouseenter'/.test(readSrc('common.js')) &&
+chk('二十九轮·①口径说明（2026-11-04：ⓘ 随侧栏入口一并下线，改为页脚三行式说明）',
+  /class="snote"/.test(readSrc('common.js')) && /snote-link/.test(readSrc('style.css')) &&
   !/比积金局快/.test(readSrc('common.js')));
 chk('二十四轮·⑨说明行不再因单条对比而隐藏（改为换文案）',
   /noteEl\.style\.display = ''/.test(readSrc('trend.js')) && /单条对比时纵轴为实际数值/.test(readSrc('trend.js')));
@@ -2085,12 +2085,12 @@ chk('三十二轮·③情绪卡口径统一：近一周占比 + 跳「近 1 周�
   /if \(!x \|\| x\.w1 == null\) return;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
   /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js')));
-chk('三十二轮·①源站名单：一句话 + 每计划一行 + 可点击筛基金',
-  /ns-h/.test(readSrc('common.js')) && /ns-list/.test(readSrc('common.js')) &&
+chk('三十二轮·①源站名单：折叠块 + 每计划一行 + 可点击筛基金',
+  /snote-more/.test(readSrc('common.js')) && /ns-list/.test(readSrc('common.js')) &&
   /class="ns-link" href="index\.html\?kw=/.test(readSrc('common.js')) &&
   /window\.mpfSetKw = function/.test(readSrc('app.js')) &&
   /get\('kw'\)/.test(readSrc('app.js')) &&
-  /\.note-stale \.ns-link/.test(readSrc('style.css')));
+  /\.snote-more \.ns-link/.test(readSrc('style.css')));
 chk('三十二轮·②行情悬浮提示写清折线维度与数据日期',
   /折线为近 \{n\} 个交易日的走势/.test(readSrc('common.js')) &&
   /数据截至 \{d\}/.test(readSrc('common.js')));
@@ -2104,11 +2104,11 @@ chk('三十三轮·①行情数字改「近 40 个交易日区间收益」+ 上�
   /const base40 = spark\.length > 1 \? spark\[0\]\[1\] : 0;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /const KEYS = \['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'HSI', 'SPX'\]/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
   /SPX: '标普 500'/.test(readSrc('common.js')));
-chk('三十三轮·②首页四榜（回报不再挂积金局口径）+ 侧栏「更多数据」次级入口',
+chk('三十三轮·②首页四榜（回报不再挂积金局口径）+ 积金局月报下沉到口径说明',
   !/mkTop5|mkTop2/.test(readSrc('home.html')) &&
   /mkTopSize/.test(readSrc('home.html')) && /mkTopVol/.test(readSrc('home.html')) &&
-  /class="db-side-more"/.test(readSrc('common.js')) && /更多数据/.test(readSrc('common.js')) &&
-  /积金局月度数据/.test(readSrc('common.js')) && /db-tag/.test(readSrc('style.css')));
+  /class="snote-link" href="#rank"/.test(readSrc('common.js')) && /积金局月度数据/.test(readSrc('common.js')) &&
+  /\.snote-link/.test(readSrc('style.css')));
 chk('三十三轮·③首屏情绪卡改 B02 圆环（弧长=占比，中心数字）',
   /class="hs-ring"/.test(readSrc('home.html')) && /id="hsRingArc"/.test(readSrc('home.html')) &&
   /arc\.style\.strokeDasharray = \(C \* pct \/ 100\)/.test(readSrc('home.js')) &&
@@ -2126,8 +2126,9 @@ chk('三十三轮·⑦市场回报年份视图补三块（各类平均 / 分布 
 chk('三十三轮·⑧三个图表 20 套配色方案页在位（真实图表）',
   fs.existsSync(path.join(__dirname, '..', 'public', 'design-palette.html')) &&
   (fs.readFileSync(path.join(__dirname, '..', 'public', 'design-palette.html'), 'utf8').match(/id: 'P\d\d'/g) || []).length >= 20);
-chk('三十三轮·⑨数据统计口径说明改写（净值主要来自发行人官网）',
-  /基金资料与单位净值主要取自各计划发行人官网/.test(readSrc('common.js')) &&
+chk('三十三轮·⑨数据统计口径说明改写（2026-11-04 精简为来源/收录/核对三行）',
+  /单位净值取自 \{u\} 家受托人官网/.test(readSrc('common.js')) &&
+  /本次已逐条核实/.test(readSrc('common.js')) &&
   !/积金局资料截至 <b>\{d\}<\/b>。/.test(readSrc('common.js')));
 chk('三十三轮·⑩板块切换进历史（返回能回到刚看的板块）',
   /function show\(tab, keepHash, push\)/.test(readSrc('index.html')) &&

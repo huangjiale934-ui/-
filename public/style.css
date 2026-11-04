@@ -2667,3 +2667,93 @@ body.has-sidebar .dca-fab { display: none !important; }
 @media (max-width: 760px) {
   .db-side-more { display: none; }
 }
+
+/* ==========================================================
+   2026-11-04（第三十六轮）页脚「数据统计口径说明」重排
+   原来 5 段长文（来源/收录/核对/计划清单/口径差异）读起来像在重复同一件事。
+   现在压缩成「来源 / 收录 / 核对」三行 + 可折叠清单 + 一行入口，
+   信息不减，行数减半；右侧入口通往积金局月度数据（旧口径）。
+   ========================================================== */
+.snote { display: flex; flex-direction: column; gap: 7px; margin-top: 2px; }
+.snote-r { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.7; color: var(--text-2, #4a5b6e); }
+.snote-r > b {
+  flex: 0 0 auto; min-width: 34px; padding: 0 6px; border-radius: 4px;
+  background: var(--brand-soft, #eaf2fb); color: var(--brand, #0866bb);
+  font-size: 11.5px; font-weight: 600; line-height: 19px; text-align: center;
+}
+.snote-r > span { flex: 1 1 auto; }
+.snote-more { margin: 1px 0 0 44px; font-size: 12.5px; color: var(--text-2, #4a5b6e); }
+.snote-more > summary {
+  cursor: pointer; list-style: none; color: #8a6a2f; background: #fbf7ec;
+  border-left: 3px solid #e8c48a; border-radius: 0 6px 6px 0; padding: 5px 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.snote-more > summary::-webkit-details-marker { display: none; }
+.snote-more .snote-caret { margin-left: auto; transition: transform .15s; font-style: normal; }
+.snote-more[open] .snote-caret { transform: rotate(180deg); }
+.snote-more .ns-list { margin: 7px 0 2px; padding-left: 18px; }
+.snote-more .ns-list li { line-height: 1.8; }
+.snote-more .ns-link { color: #0b64c4; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.snote-more .ns-list span { color: #8a7350; font-size: 11.5px; margin-left: 4px; }
+.snote-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  margin-top: 3px; padding-top: 9px; border-top: 1px dashed #dbe6f1;
+  font-size: 12px; color: var(--text-3, #8b9cb0);
+}
+.snote-link { color: var(--brand, #0866bb); font-weight: 600; text-decoration: none; }
+.snote-link:hover { text-decoration: underline; }
+.snote-link em {
+  font-style: normal; font-size: 10.5px; font-weight: 700; letter-spacing: .3px;
+  color: #6b7f96; background: #eef2f7; border-radius: 3px; padding: 1px 4px; margin-left: 2px;
+}
+@media (max-width: 760px) {
+  .snote-more { margin-left: 0; }
+  .snote-r { font-size: 12px; }
+}
+
+/* ==========================================================
+   2026-11-04（第三十六轮）积金局月度数据：官方月报版式
+   目的：站内已有一张「基金最新数据」表，再出现一张长得一样的表会让客户混淆。
+   做法：顶部深蓝报告头（MPFA 徽标 + 资料截至 + 返回入口）+ 报表感表格（细横线、
+   无斑马纹、方角卡片），从视觉上把它标成「另一套口径的官方月报」。
+   ========================================================== */
+.mpfa-band {
+  display: flex; gap: 24px; justify-content: space-between; align-items: flex-end;
+  padding: 20px 24px; margin: 0 0 14px; border-radius: 14px; color: #fff;
+  background: linear-gradient(135deg, #0b2f57 0%, #14507f 58%, #1b6296 100%);
+  box-shadow: 0 10px 22px rgba(9, 45, 82, 0.18);
+}
+.mpfa-band .mb-badge {
+  display: inline-block; background: #fff; color: #0b2f57; font-weight: 800;
+  font-size: 11px; letter-spacing: .6px; padding: 2px 7px; border-radius: 4px;
+}
+.mpfa-band .mb-tag { font-size: 11.5px; opacity: .82; margin-left: 8px; letter-spacing: .4px; }
+.mpfa-band .mb-h { margin: 10px 0 7px; font-size: 22px; font-weight: 700; letter-spacing: .5px; color: #fff; }
+.mpfa-band .mb-p { margin: 0; font-size: 12.5px; line-height: 1.72; color: rgba(255, 255, 255, .84); max-width: 700px; }
+.mpfa-band .mb-side { flex: 0 0 auto; text-align: right; }
+.mpfa-band .mb-k { font-size: 11.5px; opacity: .72; }
+.mpfa-band .mb-v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 2px 0 9px; }
+.mpfa-band .mb-back {
+  display: inline-block; font-size: 12px; color: #fff; opacity: .92; text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .45); padding-bottom: 1px;
+}
+.mpfa-band .mb-back:hover { opacity: 1; border-bottom-color: #fff; }
+
+/* 报表感：直角、细线、无斑马纹 —— 与「基金最新数据」的圆角卡片 + 斑马纹明确区分 */
+#rkSec .card { border-radius: 6px; border: 1px solid #dbe6f1; box-shadow: none; }
+#rkSec table.data th {
+  background: #eef3f8; color: #28425e; border-bottom: 1px solid #cfdbe8; letter-spacing: .2px;
+}
+#rkSec table.data td { border-bottom: 1px dashed #e7eef5; }
+#rkSec table.data tbody tr:nth-child(even) { background: #fff; }
+#rkSec table.data tbody tr:nth-child(even) td.fz { background: #fff; }
+#rkSec table.data tbody tr:hover,
+#rkSec table.data tbody tr:nth-child(even):hover { background: #f4f8fd; }
+#rkSec .scope-note.scope-mpfa {
+  background: #eef4fd; color: #35507a; border-radius: 6px; border-left: 3px solid #14507f;
+}
+@media (max-width: 760px) {
+  .mpfa-band { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 16px; }
+  .mpfa-band .mb-side { text-align: left; }
+  .mpfa-band .mb-h { font-size: 19px; }
+}

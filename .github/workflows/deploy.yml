@@ -129,6 +129,11 @@ jobs:
         if: steps.mode.outputs.light == '0'
         run: node scraper.js || echo "!! 積金局抓取失敗（保留舊 dataAsOf）"
 
+      - name: 近 5 個交易日淨值複核（官網重比對，偏差自動修正）
+        # 2026-11-04：源站偶發錯價（BCT 10-30 曾報高 4.2%）——每日對最近 5 個交易日逐只重抓，
+        # 偏差 >0.2% 自動改正並寫 data/nav-recheck.log；後面的 navperf 會重算受影響的指標。
+        run: python tools/nav-recheck.py --apply || echo "!! 淨值複核失敗（不影響已抓到的最新值）"
+
       - name: 重算指標與校驗
         run: |
           # 2026-10-28：先做 hist 并集合并（快照 ∪ 本次新值），再算指标——

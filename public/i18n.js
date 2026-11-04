@@ -165,6 +165,8 @@ window.TYPE_I18N = {
 '強積金保守基金': { s: '强积金保守基金', e: 'MPF Conservative Fund' },
 '貨幣市場基金（非保守）': { s: '货币市场基金（非保守）', e: 'Money Market Fund (non-conservative)' },
 '貨幣市場（保守）': { s: '货币市场（保守）', e: 'MPF Conservative Fund' },
+'貨幣（保守）': { s: '货币（保守）', e: 'MPF Conservative Fund' },
+'貨幣（非保守）': { s: '货币（非保守）', e: 'Money Market Fund (non-conservative)' },
 '貨幣市場（非保守）': { s: '货币市场（非保守）', e: 'Money Market Fund (non-conservative)' },
 '股票': { s: '股票', e: 'Equity' },
 '混合資產': { s: '混合资产', e: 'Mixed' },

@@ -149,6 +149,20 @@
   </div>
 
   <div id="rkSec" hidden>
+  <!-- 2026-11-04（第三十六轮，用户要求）：积金局月度数据换一套「官方月报」版式，
+       与白底密集的「基金最新数据」表明确区分；入口已下沉到页脚口径说明，这里不再是一级导航。 -->
+  <section class="mpfa-band" id="mpfaBand" aria-label="积金局月度数据">
+    <div class="mb-main">
+      <div class="mb-top"><span class="mb-badge">MPFA</span><span class="mb-tag" data-i18n="官方月度公布 · 旧口径">官方月度公布 · 旧口径</span></div>
+      <h1 class="mb-h" data-i18n="积金局月度数据">积金局月度数据</h1>
+      <p class="mb-p" data-i18n="数据来自积金局「强积金基金平台」的基金资讯表，按月公布。它已扣除费用、计入分红再投资，与首页「基金最新数据」的每日自算净值口径不同，两边数字不可直接相减。">数据来自积金局「强积金基金平台」的基金资讯表，按月公布。它已扣除费用、计入分红再投资，与首页「基金最新数据」的每日自算净值口径不同，两边数字不可直接相减。</p>
+    </div>
+    <div class="mb-side">
+      <div class="mb-k" data-i18n="资料截至">资料截至</div>
+      <div class="mb-v" id="mpfaAsOf">—</div>
+      <a class="mb-back" href="#db" data-i18n="← 返回基金最新数据">← 返回基金最新数据</a>
+    </div>
+  </section>
   <div class="tabs year-tabs" id="rkYearSwitch" style="display:none"></div>
 
   <div class="card filters rk-filters">
@@ -191,7 +205,7 @@
             <option data-i18n-parts  value="9999">全部</option>
           </select>
         </div>
-        <div class="rk-cols" id="rkColBtnWrap"><button type="button" class="btn ghost sm" id="rkColBtn">列设置</button>
+        <div class="rk-cols" id="rkColBtnWrap"><button type="button" class="btn ghost sm" id="rkColBtn" data-i18n="列设置">列设置</button>
           <div class="rk-colpop" id="rkColPop" hidden>
             <div class="cp-btns cp-presets"><button type="button" class="cp-b" data-preset="默认" data-i18n="默认">默认</button><button type="button" class="cp-b" data-preset="收益视角" data-i18n="收益视角">收益视角</button><button type="button" class="cp-b" data-preset="风险视角" data-i18n="风险视角">风险视角</button><button type="button" class="cp-b" data-preset="全部列" data-i18n="全部列">全部列</button></div>
             <div class="cp-list" id="rkColChecks"></div>
@@ -242,7 +256,7 @@
     <div class="loading" id="rkLoading"><div class="spinner"></div><span data-i18n="正在同步最新数据…">正在同步最新数据…</span></div>
     <div class="pager" id="rkPager"></div>
   </div>
-  <p class="scope-note scope-mpfa" id="rkScopeNote" style="margin:10px 2px">本页数据全部来自积金局「强积金基金平台」，目前更新至 <b id="rkScopeDate">—</b>。</p>
+  <p class="scope-note scope-mpfa" id="rkScopeNote" style="margin:10px 2px"><span data-i18n="本页数据全部来自积金局「强积金基金平台」，目前更新至">本页数据全部来自积金局「强积金基金平台」，目前更新至</span> <b id="rkScopeDate">—</b>。</p>
 
   <div class="card" id="rkChampCard" style="margin:14px 0">
     <div class="board-head" style="border-bottom:none">
@@ -301,7 +315,7 @@
         <span class="ff-arrow">▾</span>
       </summary>
       <div class="ff-body">
-      <div class="src-brief" data-i18n="数据来源：积金局「强积金基金平台」公布的基金资讯表；单位资产净值取自各受托人／保荐人官网，每日自动同步。本页资料仅供参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。">数据来源：积金局「强积金基金平台」公布的基金资讯表；单位资产净值取自各受托人／保荐人官网，每日自动同步。本页资料仅供参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。</div>
+      <!-- 2026-11-04：来源与免责已并入下方三行式口径说明（#srcNote），这里不再重复一大段 -->
         <div class="src-note" id="srcNote"></div>
       </div>
     </details>

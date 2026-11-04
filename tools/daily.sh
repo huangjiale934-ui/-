@@ -95,6 +95,11 @@ node tools/holdings-txn.js save
 soft_step "4/9 BCT 便览持仓" "$PY" bct_ffs_auto.py
 soft_step "5/9 资产分布解析" "$PY" alloc_fill.py
 node tools/holdings-txn.js check --restore || echo "!!! 持仓事务：已检测到退化并回滚到抓取前快照"
+# 2026-11-04（第三十六轮，用户要求）：最近 5 个交易日与官网重比对。
+# 源站偶发错价（BCT 10-30 曾把 23.3134 报成 24.2958），只靠人工发现太被动：
+# 这里逐只重抓、偏差 >0.2% 自动改正并写 data/nav-recheck.log，
+# 紧随其后的 navperf 会把修正结果重新算进自算指标。
+soft_step "5.5/9 近5交易日净值复核" "$PY" tools/nav-recheck.py --apply
 step "6/9 重算自算指标" node navperf.js
 step "6.5/9 修正 n.a. 被写成 0 的字段" node tools/fix-nulls.js
 step "6.7/9 自算指数（MPFAVG/五大类，2026-10-31 用户要求每日更新）" node mpfindex.js

@@ -16,6 +16,19 @@ const TQ = (k, map) => {
   return out;
 };
 
+/* ======================= 刷新钩子（2026-11-04，第三十六轮） =======================
+ * 背景：资料库 / 榜单 / 对比三个板块各有自己的重绘入口，以前共用一个 window.__onRefresh，
+ * 谁后赋值谁生效；后赋值者又在初始化时就把「上一个」捕获成局部变量，若此时前者尚未赋值，
+ * 整条链就断了 —— 直接后果是英文名表异步到货后基金表不重绘（切到 EN 后表内仍是中文名）。
+ * 改为注册表：所有钩子按注册顺序全部执行，单个模块异常不影响其余模块。 */
+window.__refreshHooks = window.__refreshHooks || [];
+window.addRefreshHook = function (fn) {
+  if (typeof fn === 'function' && window.__refreshHooks.indexOf(fn) < 0) window.__refreshHooks.push(fn);
+};
+window.__onRefresh = function () {
+  window.__refreshHooks.forEach(function (f) { try { f(); } catch (e) { console.warn('[refresh]', e); } });
+};
+
 /* ======================= 风险级别配色（全站统一） =======================
  * 1 级（最低风险）→ 7 级（最高风险），7 个色相区分明显的固定色，
  * 不再用相邻级别过于接近的渐变，确保小屏与色弱用户也能分辨。
@@ -370,15 +383,10 @@ function renderUpdateTime() {
     '<button type="button" class="db-nav' + (dbOn ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
       '<span data-i18n="基金最新数据">' + TT('基金最新数据') + '</span>' + '<i class="db-caret" aria-hidden="true"></i></button>' +
     '<div class="db-sub" id="dbSubCmp"><nav class="an-prov" id="anProv" aria-label="发行人"></nav></div>' +
-    '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span data-i18n="供款计算器">' + TT('供款计算器') + '</span></button>' +
-    /* 2026-11-03（第三十三轮，领导要求）：积金局月度数据不再作为主入口（月报滞后、首页已全面改自算口径），
-       但站内风险级别、资产规模、历年回报仍来自积金局 → 收进侧栏底部「更多数据」，做小号次级入口。 */
-    '<div class="db-side-more">' +
-      '<div class="db-more-hd" data-i18n="更多数据">' + TT('更多数据') + '</div>' +
-      '<button type="button" class="db-nav db-nav-sub' + (active === 'rank' ? ' on' : '') + '" id="dbtRank" data-dbtab="rank">' + I.rank +
-        '<span data-i18n="积金局月度数据">' + TT('积金局月度数据') + '</span>' +
-        '<em class="db-tag" data-i18n="旧口径">' + TT('旧口径') + '</em>' + info + '</button>' +
-    '</div>' +
+    '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span data-i18n="供款（定投）计算器">' + TT('供款（定投）计算器') + '</span></button>' +
+    /* 2026-11-04（第三十六轮，用户要求）：积金局月度数据从侧栏下线 —— 站内已有「基金最新数据」表，
+       两个表格并列会让客户混淆。入口改到页脚「数据统计口径说明」里（更深的次级入口）。
+       侧栏曾有的「更多数据 / 积金局月度数据 / 旧口径」整块一并移除。 */
     /* 2026-11-02（第二十七轮，用户要求）：页头「数据版本」下移到这里，与「数据每日自动同步」合成一句 */
     '<div class="db-side-foot"><div class="db-ver" id="verChip" tabindex="0">' +
       '<span data-i18n="数据每日自动同步">' + TT('数据每日自动同步') + '</span><b>—</b></div></div>';
@@ -578,20 +586,33 @@ function renderSrcNote() {
      同时把三句长句拆开，读起来更顺。 */
   let navLatest = '';
   (DATA.funds || []).forEach((f) => { if (f.navAsOf && f.navAsOf > navLatest) navLatest = f.navAsOf; });
+  /* 2026-11-04（第三十六轮，用户反馈）：原说明五段长文，读起来像反复说同一件事。
+     改为「来源 / 收录 / 核对」三行 + 一个折叠清单 + 一行入口：
+     信息一条不少（核实率、非单位化基金、口径差异、公布较晚的计划都保留），但不再堆成一段。 */
+  const ns0 = DATA.navStat || {};
+  const naN = ns0.na || 0;
+  const pct1 = ns0.total ? ((ns0.verified / ns0.total) * 100).toFixed(1) : '—';
   el.innerHTML =
-    TQ('本页收录 <b>{c}</b> 条成分基金 · {u} 家受托人 · {s} 个强积金计划。',
-      { c: DATA.count, u: DATA.trusteeCount || '—', s: DATA.schemeCount || '—' }) +
-    '<div class="note-src">' +
-    TQ('基金资料与单位净值主要取自各计划发行人官网（净值每日同步，最新至 <b>{n}</b>）；风险级别、基金规模、历年回报等字段沿用积金局公开资料（截至 <b>{d}</b>）。',
-      { n: navLatest || '—', d: DATA.dataAsOf || '—' }) +
-    '</div>' +
-    /* 2026-10-31（用户要求）：口径差异精简为一句话 */
-    '<div class="note-diff">' +
-    TQ('注：积金局按「合并单位类别」口径统计为 {d} 只，本站按单位类别逐条收录为 {c} 条，两者并不矛盾。',
-      { c: DATA.count, d: declared }) +
-    '</div>' +
-    navStatNote() +
-    staleNote();
+    '<div class="snote">' +
+      '<div class="snote-r"><b>' + TT('来源') + '</b><span>' +
+        TQ('单位净值取自 {u} 家受托人官网，每日同步（最新 {n}）；风险级别、基金规模、历年回报取自积金局（截至 {d}，月更）。',
+          { u: DATA.trusteeCount || '—', n: navLatest || '—', d: DATA.dataAsOf || '—' }) +
+      '</span></div>' +
+      '<div class="snote-r"><b>' + TT('收录') + '</b><span>' +
+        TQ('本页共 {c} 条，按单位类别逐条收录；积金局按「合并单位类别」计 {d} 只，两者口径不同、并不矛盾。',
+          { c: DATA.count, d: declared }) +
+      '</span></div>' +
+      '<div class="snote-r"><b>' + TT('核对') + '</b><span>' +
+        TQ('本次已逐条核实 {v} / {t} 条（{p}%）', { v: ns0.verified != null ? ns0.verified : '—', t: ns0.total || DATA.count, p: pct1 }) +
+        (naN ? TQ('；另有 {n} 条为非单位化基金，官方不提供单位价格，显示「不适用」。', { n: naN }) : '。') +
+        /* 英文句子之间要有空格，否则会出现 …N/A".Blank = … 的粘连 */
+        ((window.getLang && window.getLang() === 'en') ? ' ' : '') +
+        TT('空白＝当日官网未披露净值，本站不插值、不前值填充。') +
+      '</span></div>' +
+      staleNote() +
+      '<div class="snote-foot"><span>' + TT('仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。') + '</span>' +
+        '<a class="snote-link" href="#rank">' + TT('积金局月度数据（旧口径）') + ' <em>MPFA</em> →</a></div>' +
+    '</div>';
   /* 2026-11-03（第三十二轮）：计划名点击 → 同页直接筛选（不刷新）；没有 mpfSetKw 时走 href 深链 */
   Array.prototype.forEach.call(el.querySelectorAll('.ns-link'), function (a) {
     a.onclick = function (ev) {
@@ -625,13 +646,18 @@ function staleNote() {
     .sort((a, b) => (a.d < b.d ? 1 : -1));
   if (!list.length) return '';
   /* 2026-11-03（第三十二轮，用户要求）：一句话讲完，每个计划单独一行；计划名可点，点了直接筛出该计划的基金 */
+  /* 2026-11-04：计划名走 schemeDisplay（英文名表按基金 id 索引，取该计划任意一只即可） */
+  const schemeId = {};
+  (DATA.funds || []).forEach((f) => { const k = f.scheme || f.trustee; if (k && schemeId[k] == null) schemeId[k] = f.id; });
   const items = list.map((o) =>
     '<li><a class="ns-link" href="index.html?kw=' + encodeURIComponent(o.s) + '#db" data-kw="' + esc(o.s) + '" title="' +
-    TT('筛出该计划的全部基金') + '">' + esc(o.s) + '</a> <span>' +
+    TT('筛出该计划的全部基金') + '">' + esc(schemeDisplay({ id: schemeId[o.s], scheme: o.s })) + '</a> <span>' +
     TQ('{n} 只 · 更新至 {d}', { n: o.n, d: o.d }) + '</span></li>').join('');
-  return '<div class="note-stale">' +
-    '<div class="ns-h">' + TT('以下计划的官网公布时间较晚，本站如实保留其最后可用净值、不做前值填充：') + '</div>' +
-    '<ul class="ns-list">' + items + '</ul></div>';
+  /* 2026-11-04：清单收进折叠块，默认不展开——三行说明里不再多一段长列表 */
+  return '<details class="snote-more"><summary>' +
+    TQ('{n} 个计划的官网公布较晚（保留其最后可用净值，不做前值填充）', { n: list.length }) +
+    '<i class="snote-caret">▾</i></summary>' +
+    '<ul class="ns-list">' + items + '</ul></details>';
 }
 
 /** 净值核对情况说明（含「两套数据源日期不同」的口径交代） */
@@ -893,7 +919,7 @@ function renderFriends() {
   /* 2026-10-29（5.0）：AMTD 的净值走 etnet，不会单独出现在 sources 里，
      但友链 4×4 网格正好空一位，补上其官网「每季基金概览」入口。 */
   if (src.length && !src.some((r) => /ooogroup/.test(String(r[1] || '')))) {
-    src.push(['AMTD（尚乘）官网 · 每季基金概览', 'https://www.ooogroup.xyz/locales/hk/mpf-3', '16 条 · 季更']);
+    src.push(['AMTD（尚乘）官网 · 每季基金概览', 'https://www.ooogroup.xyz/locales/hk/mpf-3', TQ('{n} 条 · 季更', { n: 16 })]);
   }
   document.querySelectorAll('.friend-links').forEach((box) => {
     box.innerHTML =
@@ -1751,7 +1777,13 @@ window.buildHoldAllocSheet = async function (entries) {
       rows.push({ cells: [{ v: i + 1, s: 4 }, { v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: a.label || '', s: 4 }, n2(a.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
     });
     if (d.alloc && d.alloc.length) {
-      rows.push({ cells: [{ v: '', s: 4 }, { v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '已披露合计', s: 4 }, n2(d.alloc.reduce((a, x2) => a + (+x2.weight || 0), 0)), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+      /* 2026-11-04：与页面口径一致 —— 先补「其他／未列明」（100 − 已披露合计），再给合计行 */
+      const disc = d.alloc.reduce((a, x2) => a + (+x2.weight || 0), 0);
+      const rest = Math.round((100 - disc) * 100) / 100;
+      if (rest >= 0.5 && rest <= 30) {
+        rows.push({ cells: [{ v: '', s: 4 }, { v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '其他／未列明', s: 4 }, rest, { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
+      }
+      rows.push({ cells: [{ v: '', s: 4 }, { v: nm, s: 4 }, { v: '投资组合分布', s: 4 }, { v: '合计', s: 4 }, n2(Math.min(100, disc + (rest >= 0.5 && rest <= 30 ? rest : 0))), { v: d.asOf || '', s: 4 }, { v: '', s: 4 }] });
     }
     /* 2026-10-30（用户反馈）：多基金时图与下一块挤压难看——块尾 pad 空行，
        保证每块 ≥19 行（图 16 行高 + 3 行缓冲），块与块之间留 1 行空行 */
@@ -1851,9 +1883,20 @@ window.buildRoseSVG = function (d, titleText, opts) {
     head.push({ label: '其他', w: series.slice(11).reduce((a, x) => a + x.w, 0) });
     series = head.sort((a, b) => b.w - a.w);
   }
+  /* 2026-11-04（第三十六轮，用户要求）：发行人便览通常只列「主要类别」，
+     部分基金合计只有 77–88%，环图缺一块、图例对不上总数。
+     这里补一项「其他／未列明」把环闭合；数值 = 100 − 已披露合计，不臆测具体类别。
+     注意：中心仍显示「已披露合计」，不是 100%，避免把推算值混进官方数字。 */
+  const disclosed = series.reduce((a, x) => a + x.w, 0);
+  const restW = Math.round((100 - disclosed) * 100) / 100;
+  const hasRest = restW >= 0.5 && restW <= 30;
+  if (hasRest) {
+    series.push({ label: '其他／未列明', w: restW, ghost: true });
+    series.sort((a, b) => b.w - a.w);
+  }
   const n = series.length;
-  const allocSum = series.reduce((a, x) => a + x.w, 0);
-  const maxW = series.length ? series[0].w : 0;
+  const allocSum = disclosed;                 /* 已披露合计（口径不变） */
+  const maxW = series.filter((x) => !x.ghost).reduce((m, x) => Math.max(m, x.w), 0) || 0;
 
   /* 色阶：深→浅，按数值升序取色（最小最浅、最大最深），n≠8 等分插值 */
   const RAMP = ['#0A3D91', '#0F4FA8', '#1763C0', '#2E7BD1', '#4C8FDA', '#77A8E4', '#A0C1EE', '#C3D7F5'];
@@ -1870,6 +1913,8 @@ window.buildRoseSVG = function (d, titleText, opts) {
     return hexLerp(RAMP[RAMP.length - 1 - k], RAMP[RAMP.length - 2 - k], pos - k);
   }
   series.forEach((sd, j) => { sd.color = rampColor(n - 1 - j, n); });   /* j 为降序序号：j=0 最大 → 最深 */
+  /* 未列明项用中性灰，避免被误读成「第 N 大类别」 */
+  series.filter((x) => x.ghost).forEach((sd) => { sd.color = '#C9D3DE'; });
 
   const W = 1280, H = 1100, CX = 640, CY = 580, R = 345, RIN = 97, LEAD_R = 385;
   const f2 = (v) => Number(v).toFixed(2);
@@ -2043,7 +2088,7 @@ window.allocBlockHTML = function (id) {
     ? '<div class="hl-note hl-warn">合計超過 100%：部分資產同時計入多個類別／含衍生工具或槓桿敞口</div>'
     : '';
   const gapNote = allocSum < 99.5
-    ? '<div class="hl-note hl-warn">' + TQ('上图仅列出该基金便览披露的主要类别，合计 {s}%；未列出的类别（约 {g}%）未在源文件中单列，本站不做推算补齐。', { s: nf(allocSum, 2), g: nf(100 - allocSum, 2) }) + '</div>'
+    ? '<div class="hl-note hl-warn">' + TQ('便览只列出主要类别，已披露合计 {s}%；其余 {g}% 在源文件中未单列，图中以灰色「其他／未列明」表示，本站不对其做类别拆分或数值推算。', { s: nf(allocSum, 2), g: nf(100 - allocSum, 2) }) + '</div>'
     : '';
   return '<div class="an-hold">' + title +
     '<div class="alr3">' + svg + '</div>' +
@@ -2672,6 +2717,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cnt) cnt.textContent = TQ('{n} 条基金', { n: DATA.count });
     renderSrcNote();
   });
+  /* 2026-11-04：英文名表是异步到货的，到货后口径说明里的计划名要再刷一次
+     （mpf:lang 那一刻表还没到，计划名会停在上一种语言） */
+  document.addEventListener('mpf:names', () => { if (DATA.count) renderSrcNote(); });
 });
 
 /* ======================= 回到顶部按钮 ======================= */
@@ -2852,8 +2900,8 @@ function initDCABuild() {
   const fab = document.createElement('button');
   fab.type = 'button';
   fab.className = 'dca-fab';
-  fab.setAttribute('aria-label', TT('供款计算器'));
-  fab.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/></svg><span>' + TT('供款计算器') + '</span>';
+  fab.setAttribute('aria-label', TT('供款（定投）计算器'));
+  fab.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/></svg><span>' + TT('供款（定投）计算器') + '</span>';
   document.body.appendChild(fab);
 
   /* 2026-10-31 二版（用户要求）：10 秒无交互自动缩成圆形图标（沿用配色与计算器图案），
@@ -3574,6 +3622,12 @@ document.addEventListener('mpf:lang', () => {
     IDS.forEach((s) => { const el = document.querySelector(s); if (el) enhance(el); });
   }
   window.__initCustomSelects = initCustomSelects;
+  /* 2026-11-04（第三十六轮）：语言切换后按钮上的当前值要跟着变。
+     applyI18n 改的是 <option> 的文本节点，MutationObserver 只监听 childList，捕不到，
+     所以这里显式兜一次（曾出现英文页「Rows per page」选中的仍是「10 条」）。 */
+  document.addEventListener('mpf:lang', () => {
+    document.querySelectorAll('select.mpfsel-native').forEach((s) => { try { if (s.__mpfselSync) s.__mpfselSync(); } catch (e) {} });
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCustomSelects);
   else initCustomSelects();
 })();
@@ -3637,3 +3691,91 @@ document.addEventListener('mpf:lang', () => {
       .observe(document.documentElement, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTRS });
   } catch (e) {}
 })();
+
+/* ==========================================================
+   2026-11-04（第三十六轮）导出工作簿的「数据说明」封面
+   用户要求：说明文字不要和表格挤在同一张表的前几行 —— 单独一张工作表，
+   并带上公司名、网址与 LOGO；第二个工作表才是数据。
+   ========================================================== */
+window.loadLogoB64 = function () {
+  if (window.__logoB64P) return window.__logoB64P;
+  window.__logoB64P = fetch('img/logo-mark.png')
+    .then((r) => (r.ok ? r.blob() : null))
+    .then((b) => new Promise((res) => {
+      if (!b) return res(null);
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result));
+      fr.onerror = () => res(null);
+      fr.readAsDataURL(b);
+    }))
+    .catch(() => null);
+  return window.__logoB64P;
+};
+
+window.buildCoverSheet = function (o) {
+  const opt = o || {};
+  const NCOL = 6;
+  const L = (n) => { let s = ''; let i = n + 1; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
+  const LAST = L(NCOL - 1);
+  const rows = [];
+  const merges = [];
+  const site = opt.site || (location.origin + location.pathname).replace(/\/[^/]*$/, '/');
+  const company = opt.company || TT('广州精研数据有限公司');
+  const platform = opt.platform || TT('香港强积金数据平台');
+
+  /* 品牌区：A1:B4 = LOGO，C1 起三行公司名 / 平台 / 网址 */
+  rows.push({ h: 30, cells: [{ v: '', s: 0 }, { v: '', s: 0 }, { v: company, s: 12 }] });
+  rows.push({ h: 22, cells: [{ v: '', s: 0 }, { v: '', s: 0 }, { v: platform + (opt.page ? ' · ' + opt.page : ''), s: 13 }] });
+  rows.push({ h: 20, cells: [{ v: '', s: 0 }, { v: '', s: 0 }, { v: site, s: 11 }] });
+  rows.push({ h: 10, cells: [] });
+
+  const section = (t) => {
+    const r = rows.length + 1;
+    rows.push({ h: 26, cells: [{ v: t, s: 12 }] });
+    merges.push('A' + r + ':' + LAST + r);
+  };
+
+  section(opt.title || TT('数据说明'));
+
+  (opt.meta || []).forEach(([k, v]) => {
+    const r = rows.length + 1;
+    rows.push({ h: 22, cells: [{ v: k, s: 13 }, { v: v == null ? '' : String(v), s: 11 }] });
+    merges.push('B' + r + ':' + LAST + r);
+  });
+
+  (opt.notes || []).forEach((txt) => {
+    if (!txt) return;
+    const r = rows.length + 1;
+    rows.push({ h: 34, cells: [{ v: '', s: 0 }, { v: txt, s: 11 }] });
+    merges.push('B' + r + ':' + LAST + r);
+  });
+
+  if (opt.columns && opt.columns.length) {
+    rows.push({ h: 10, cells: [] });
+    section(opt.colTitle || TT('列说明'));
+    const hr = rows.length + 1;
+    rows.push({ h: 24, cells: [{ v: TT('列名'), s: 2 }, { v: TT('含义 / 口径'), s: 14 }] });
+    merges.push('B' + hr + ':' + LAST + hr);
+    opt.columns.forEach(([n, d]) => {
+      const r = rows.length + 1;
+      rows.push({ h: 22, cells: [{ v: n, s: 13 }, { v: d, s: 11 }] });
+      merges.push('B' + r + ':' + LAST + r);
+    });
+  }
+
+  rows.push({ h: 10, cells: [] });
+  const rr = rows.length + 1;
+  rows.push({ h: 30, cells: [{ v: '免责声明', s: 13 }, { v: TT('本文件由本站程序自动生成，数据来自各发行人官网与积金局公开资料，仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。'), s: 11 }] });
+  merges.push('B' + rr + ':' + LAST + rr);
+
+  const sheet = {
+    name: opt.sheetName || TT('数据说明'),
+    rows: rows,
+    merges: merges,
+    cols: [14, 26, 26, 22, 22, 22],
+  };
+  if (opt.logo) {
+    sheet.images = [{ data: opt.logo, col: 0, row: 0, col2: 2, row2: 4, name: 'logo' }];
+  }
+  return sheet;
+};

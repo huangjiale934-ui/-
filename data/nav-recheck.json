@@ -1,0 +1,22 @@
+{
+ "runAt": "2026-11-04 20:56:12",
+ "window": [
+  "2026-10-30",
+  "2026-11-04"
+ ],
+ "sources": {
+  "bct": {
+   "checked": 108,
+   "secs": 55.6
+  },
+  "bea": {
+   "checked": 80,
+   "secs": 45.4
+  }
+ },
+ "checked": 188,
+ "applied": 0,
+ "diffs": [],
+ "missing": [],
+ "errors": []
+}

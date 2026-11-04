@@ -562,13 +562,7 @@ window.TREND = (function () {
         const nCol = cols.length + 1;
         const lastCol = (() => { let n = nCol; let s2 = ''; while (n > 0) { const m = (n - 1) % 26; s2 = String.fromCharCode(65 + m) + s2; n = Math.floor((n - 1) / 26); } return s2; })();
 
-        /* ---------- Sheet1 ---------- */
-        const r1 = [];
-        r1.push({ h: 34, cells: [{ v: '来源', s: 3 }, { v: '本平台「MPF基金可视化对比」 ' + location.host, s: 9 }] });
-        r1.push({ h: 34, cells: [{ v: '口径', s: 3 }, { v: '基金为发行人官网单位资产净值，指数为收盘价；涨跌幅 = 当日数值 ÷ 区间起点数值 − 1', s: 9 }] });
-        r1.push({ h: 34, cells: [{ v: '区间', s: 3 }, { v: dstr(startTs) + ' ~ ' + dstr(endTs) + '（' + allT.length + ' 个交易日，按日期倒序）', s: 9 }] });
-        /* 2026-10-22（用户要求）：把「数据完整性」说明放在来源/口径/区间同一区域，
-           讲清空白单元格是什么（官网未披露/非估值日），并明确未做插值。 */
+        /* ---------- 数据说明（独立工作表，2026-11-04 用户要求） ---------- */
         const missPer = cols.map((c, i) => {
           let n = 0;
           allT.forEach((t) => { if (maps[i].get(t) == null) n++; });
@@ -577,16 +571,40 @@ window.TREND = (function () {
         const missTotal = missPer.reduce((a, b) => a + b, 0);
         const missMax = missPer.length ? Math.max.apply(null, missPer) : 0;
         const missFunds = missPer.filter((n) => n > 0).length;
-        const missRow = missTotal === 0
-          ? { h: 34, cells: [{ v: '数据完整性', s: 3 }, { v: '区间内 ' + allT.length + ' 个交易日，所选标的全部有值，无空白。', s: 9 }] }
-          : { h: 34, cells: [{ v: '数据完整性', s: 3 }, {
-            v: '区间内共 ' + allT.length + ' 个交易日：' + (cols.length - missFunds) + ' 只完整、' + missFunds + ' 只有空白（合计 ' +
-               missTotal + ' 个单元格，单只最多 ' + missMax + ' 个）。空白 = 发行人官网当日未披露净值（周末、香港公众假期、非估值日，或该基金尚未推出/已终止），' +
-               '本表不插值、不用前值填充；如需连续日序列，请以「数据说明」为准。', s: 9 }] };
-        r1.push(missRow);
-        r1.push({ h: 8, cells: [] });
-        r1.push({ h: 28, cells: [{ v: '基金详细对比表', s: 1 }] });
-        r1.push({ h: 30, cells: [{ v: '对比项', s: 2 }].concat(cols.map((c) => ({ v: c.name, s: 2 }))) });
+        const missText = missTotal === 0
+          ? '区间内 ' + allT.length + ' 个交易日，所选标的全部有值，无空白。'
+          : '区间内共 ' + allT.length + ' 个交易日：' + (cols.length - missFunds) + ' 只完整、' + missFunds +
+            ' 只有空白（合计 ' + missTotal + ' 个单元格，单只最多 ' + missMax + ' 个）。空白＝发行人官网当日未披露净值（周末、香港公众假期、非估值日，或该基金尚未推出／已终止），本表不插值、不用前值填充。';
+
+        const coverRows = window.buildCoverSheet ? window.buildCoverSheet({
+          page: _t('基金对比'),
+          title: _t('数据说明'),
+          meta: [
+            [_t('来源'), _t('广州精研数据有限公司 · 香港强积金数据平台') + '（' + location.host + '）'],
+            [_t('净值来源'), _t('各计划受托人／保荐人官网公布的单位资产净值；指数为收市点位。')],
+            [_t('口径'), _t('涨跌幅 = 当日数值 ÷ 区间起点数值 − 1，区间起点当天记为 0%。')],
+            [_t('区间'), dstr(startTs) + ' ~ ' + dstr(endTs) + '（' + allT.length + _t(' 个交易日，按日期倒序）')],
+            [_t('数据完整性'), missText],
+          ],
+          notes: [
+            _t('对比表每一列是一个标的（基金或指数）；指数没有基金档案，因此规模、费率、推出日期等栏显示「—」。'),
+            _t('基金名称为发行人官网的中文／英文名称；同一基金的不同单位类别（A / T 类）净值与回报各自独立，对比时请看清类别。'),
+            _t('本文件由本站程序自动生成，仅供研究参考，不构成投资建议。'),
+          ],
+          columns: [
+            [_t('区间收益'), _t('区间末值 ÷ 区间起点 − 1')],
+            [_t('最大回撤'), _t('区间内自高点回落的最大幅度')],
+            [_t('回撤区间'), _t('上述最大回撤的起止日期')],
+            [_t('年率化回报'), _t('按几何平均折算的年化回报，供不同期限横向比较')],
+          ],
+          logo: (await window.loadLogoB64()),
+        }) : { name: _t('数据说明'), rows: [], merges: [], cols: [14, 60] };
+
+        /* ---------- 基金对比表（第二个工作表） ---------- */
+        const r1 = [];
+        r1.push({ h: 28, cells: [{ v: _t('基金详细对比表'), s: 1 }] });
+        r1.push({ h: 22, cells: [{ v: dstr(startTs) + ' ~ ' + dstr(endTs) + '（' + allT.length + _t(' 个交易日') + '）', s: 11 }] });
+        r1.push({ h: 30, cells: [{ v: _t('对比项'), s: 2 }].concat(cols.map((c) => ({ v: c.name, s: 2 }))) });
         cmpRows.forEach(([label, fn]) => {
           /* 2026-10-22：按 cols 遍历（与 stat 下标对齐）；指数没有基金档案也要能算出区间指标 */
           r1.push({ h: 24, cells: [{ v: label, s: 3 }].concat(cols.map((c, i) => {
@@ -594,11 +612,7 @@ window.TREND = (function () {
             try { return fn(f || {}, i); } catch (e) { return { v: '—', s: 4 }; }
           })) });
         });
-        const merges1 = [
-          'B1:' + lastCol + '1', 'B2:' + lastCol + '2', 'B3:' + lastCol + '3', 'B4:' + lastCol + '4',
-          'A6:' + lastCol + '6',
-        ];
-
+        const merges1 = ['A1:' + lastCol + '1', 'A2:' + lastCol + '2'];
         /* ---------- Sheet2 ---------- */
         const r2 = [];
         r2.push({ h: 26, cells: [{ v: '基金的逐日净值数据', s: 1 }] });
@@ -639,8 +653,12 @@ window.TREND = (function () {
 
         const blob = window.MPFXLSX.build({
           sheets: [
-            { name: '基金对比_' + dstr(startTs) + '_' + dstr(endTs), rows: r1, merges: merges1,
-              cols: [20].concat(cols.map(() => 32)) },
+            /* 2026-11-04（用户要求）：说明独立成第一张工作表（含公司名/网址/LOGO），
+               第二张才是对比表；对照表冻结首列与表头。 */
+            coverRows,
+            { name: _t('基金对比'), rows: r1, merges: merges1,
+              cols: [22].concat(cols.map(() => 32)),
+              freeze: { x: 1, y: 3, top: 'B4' } },
             { name: '基金逐日净值数据', rows: r2, merges: merges2,
               cols: [13].concat(cols.reduce((a) => a.concat([12, 12]), [])).concat([2, 2, 2]),
               /* 2026-10-22（用户要求）：走势图横向拉长（8 → 15 列），纵向高度不变 */
@@ -657,7 +675,7 @@ window.TREND = (function () {
         a.download = '基金对比_' + dstr(startTs) + '_' + dstr(endTs) + ' ' + nm + '.xlsx';
         document.body.appendChild(a); a.click();
         setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
-        if (window.mpfToast) mpfToast(_t('已导出（三个工作表，含走势图与持仓分布玫瑰图）'));
+        if (window.mpfToast) mpfToast(_t('已导出（四个工作表：数据说明 / 基金对比 / 逐日净值 / 持仓与分布）'));
       });
     }
     const shrBtn = q('.tr-share');
@@ -688,7 +706,8 @@ window.TREND = (function () {
     let cachedIdx = null, cachedPerf = null;
     function indexName(key) {
       const d = cachedIdx && cachedIdx.items && cachedIdx.items[key];
-      return (d && d.name) || key;
+      /* 2026-11-04：指数名也要过 _t —— 英文模式下图例曾是「恒生指数」 */
+      return _t((d && d.name) || key);
     }
     function fundLabel(id) {
       const d = S.data['f:' + id];
@@ -700,7 +719,7 @@ window.TREND = (function () {
     }
     function tavgName(key) {
       const d = cachedTAvg && cachedTAvg.items && cachedTAvg.items[key];
-      return (d && d.name) || key;
+      return _t((d && d.name) || key);
     }
     function itemLabel(it) {
       if (it.type === 'index') return indexName(it.key);

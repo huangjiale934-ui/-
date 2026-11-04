@@ -73,9 +73,10 @@
         const want = new URLSearchParams(location.search).get('open');
         if (want && findFund(want)) openAnalysis(want, { replace: true });
       } catch (e) {}
-      /* 2026-10-31：合并页上 app.js/rank.js 也注册了 __onRefresh——链式调用，别覆盖 */
-      const __prevRefresh = window.__onRefresh;
-      window.__onRefresh = () => { try { if (__prevRefresh) __prevRefresh(); } catch (e) {} mountMain(); };
+      /* 2026-11-04：注册到刷新钩子表——以前在这里捕获「上一个 __onRefresh」再链式调用，
+         若当时资料库还没赋值，链就断了（英文名表到货后表格不重绘的根因）。
+         基金列表也要一起重绘，否则英文模式下名单仍是中文。 */
+      window.addRefreshHook(() => { mountMain(); renderFundList(); });
     });
     /* 语言切换：侧栏、主对比模块、基金列表与详情视图全部重绘（含动态文案） */
     document.addEventListener('mpf:lang', () => {
@@ -204,7 +205,8 @@
         '<span>' + TT('全部') + '</span><b>' + funds.length + '</b></button>' +
       list.map((t) =>
         '<button type="button" class="an-pitem' + (S.trustee === t ? ' on' : '') + '" data-t="' + escA(t) + '">' +
-        '<span>' + esc(t) + '</span><b>' + map[t] + '</b></button>').join('');
+        /* 2026-11-04：发行人名称走 trusteeDisplay —— 英文模式下侧栏一度仍显示中文 */
+        '<span>' + esc((window.trusteeDisplay ? window.trusteeDisplay(t) : t)) + '</span><b>' + map[t] + '</b></button>').join('');
     if (!el.__bound) {
       el.__bound = 1;
       el.addEventListener('click', (e) => {
@@ -568,7 +570,7 @@
         return '<tr class="idx-row">' + cols.map((c) => {
           switch (c.k) {
             case 'sel': return '<td class="fselcell" data-c="sel"></td>';
-            case 'fund': return '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(m.name || it.key) + '<span class="tag unit">' + TT('指数') + '</span></div></td>';
+            case 'fund': return '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(TT(m.name || it.key)) + '<span class="tag unit">' + TT('指数') + '</span></div></td>';
             case 'nav': return '<td data-c="nav" class="r num" data-l="' + TT('单位资产净值') + '"><span class="idx-pt" data-tip="' + esc(TT('指数显示的是点位（收市指数），不是单位净值')) + '">' + nf(last[1], 2) + '<em>' + TT('点位') + '</em></span><div class="nav-d">' + esc(last[0].slice(5).replace('-', '/')) + '</div></td>';
             case 'selfD1': return '<td data-c="selfD1" class="r num" data-l="' + TT('日涨跌') + '">' + (chg == null ? '—' : '<span class="' + cls(chg) + '">' + pct(chg) + '</span>') + '</td>';
             case 'selfYtd': return '<td data-c="selfYtd" class="r num" data-l="' + TT('年初至今') + '">' + (ytd == null ? '—' : '<span class="' + cls(ytd) + '">' + pct(ytd) + '</span>') + '</td>';
@@ -665,7 +667,7 @@
           ? TQ('该基金共有 {n} 个单位类别；此处显示 {u} 类的净值与回报。', { n: x.groupSize, u: x.unit || '' })
           : TQ('该基金仅 1 个单位类别（{u} 类）。', { u: x.unit || '' });
         return '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '">' +
-          '<div class="fund-name" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(x.fundBase || x.fund) +
+          '<div class="fund-name" onclick="openDetail(\'' + esc(x.id) + '\')">' + esc(window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)) +
           (x.unit ? '<span class="tag unit" data-tip="' + esc(utip) + '" aria-label="' + esc(utip) + '">' + TQ('{u} 类', { u: esc(x.unit) }) + '</span>' : '') +
           '</div></td>';
       }

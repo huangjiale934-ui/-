@@ -513,7 +513,7 @@
     const PIE_COLORS = PALETTE;   // 与全站图表同色板（去掉此前的自定义配色）
     const pieItems = PIE_KEYS.map((k, i) => {
       const r = mo.rows.find((x) => x.key === k);
-      return r ? { name: r.name, value: r.share, lt: r.shareLt, color: PIE_COLORS[i % PIE_COLORS.length] } : null;
+      return r ? { name: typeLabel(r.name), value: r.share, lt: r.shareLt, color: PIE_COLORS[i % PIE_COLORS.length] } : null;
     }).filter(Boolean);
     const pie = pieItems.length >= 2
       ? '<div class="mo-pietitle">' + TT('全市场资产占比') + '</div>' +
@@ -585,7 +585,8 @@
     }) + legendHTML(typeItems, m.unitRows, (it) => num(it.value) + ' ' + TT('条') + ' · ' + fmtSize(it.size));
 
     const trs = m.byTrustee || [];
-    const top5 = trs.slice(0, 5).map((x, i) => ({ name: x.name, value: x.size, color: PALETTE_TR[i] }));
+    /* 2026-11-04：受托人名同样走 trusteeDisplay，英文模式下饼图与图例不再残留中文 */
+    const top5 = trs.slice(0, 5).map((x, i) => ({ name: (window.trusteeDisplay ? window.trusteeDisplay(x.name) : x.name), value: x.size, color: PALETTE_TR[i] }));
     const restSize = trs.slice(5).reduce((a, x) => a + (x.size || 0), 0);
     if (restSize > 0) top5.push({ name: TQ('其他 {n} 家受托人', { n: trs.length - 5 }), label: TQ('其他 {n} 家', { n: trs.length - 5 }), value: restSize, color: PALETTE_TR[5] });
     const trTotal = trs.reduce((a, x) => a + (x.size || 0), 0);
@@ -616,17 +617,36 @@
     const dy = m.byYear && m.byYear.length ? m.byYear[m.byYear.length - 1] : null;
 
     /* 2026-11-03（第三十三轮，领导要求）：积金局口径的「推出至今累积回报 / 规模领先」下线，
-       四张榜单全部改为「基金最新数据」口径（发行人官网净值自算、每日更新）。 */
-    renderTop('#mkTop1', m.topReturn, (x) => pctv(x.ann1), (x) => x.ann1);
-    renderTop('#mkTop4', m.topReturn5, (x) => pctv(x.ann5), (x) => x.ann5);
+       四张榜单全部改为「基金最新数据」口径（发行人官网净值自算、每日更新）。
+       2026-11-04：自算榜已就位时不再用积金局数据覆盖一次（切换语言会闪回旧口径）。 */
+    if (!__selfTop) {
+      renderTop('#mkTop1', m.topReturn, (x) => pctv(x.ann1), (x) => x.ann1);
+      renderTop('#mkTop4', m.topReturn5, (x) => pctv(x.ann5), (x) => x.ann5);
+    }
     try { renderSelfTop(window.__MPF_FUNDS || (typeof DATA !== 'undefined' ? DATA.funds : null)); } catch (e) {}
   }
 
 
   /* 2026-10-19：前两张榜单改用「官网净值自算」口径（比积金局月报新 2–6 周）
-     2026-11-03（第三十三轮）：四张全部走自算口径，其中「最抗跌」按最大回撤由小到大。 */
+     2026-11-03（第三十三轮）：四张全部走自算口径，其中「最抗跌」按最大回撤由小到大。
+     2026-11-04（第三十六轮，用户报障）：切换语言时「基金规模」「年化波动率」两张榜仍是英文名 / 上一语言。
+     根因：__selfDone 一次性标记让 renderSelfTop 直接 return，四张榜都不再重绘；
+     同时 render(m) 又把前两张榜改回积金局数据（口径与数字都变了）。改为缓存数据 + 每次重绘。 */
   let __selfDone = false;
+  let __selfTop = null;   /* { t1, t5, tsz, tvol } —— 拿到一次后长期复用，切换语言只重画不重拉 */
+  function paintSelfTop() {
+    if (!__selfTop) return false;
+    const { t1, t5, tsz, tvol } = __selfTop;
+    if (t1 && t1.length) renderTop('#mkTop1', t1, (x) => pctv(x.sY1), (x) => x.sY1);
+    if (t5 && t5.length) renderTop('#mkTop4', t5, (x) => pctv(x.sY5a), (x) => x.sY5a);
+    /* 规模：不做红绿着色（规模大小无好坏）；波动率同理 */
+    renderTop('#mkTopSize', tsz, (x) => fmtSize(x.size), null);
+    /* 波动率不加正负号（不是涨跌） */
+    renderTop('#mkTopVol', tvol, (x) => (x.vol1 == null ? '—' : Number(x.vol1).toFixed(2) + '%'), null);
+    return true;
+  }
   function renderSelfTop(funds) {
+    if (__selfTop) { paintSelfTop(); return; }
     if (__selfDone) return;
     __selfDone = true;
     /* 2026-10-20：改用轻量接口 /api/top（各取前 5），不再下载 508KB 全量基金表 */
@@ -638,12 +658,8 @@
     Promise.all([get('y1'), get('y5a'), get('size'), get('vol1')]).then(([t1, t5, tsz, tvol]) => {
       /* 2026-11-02（第二十七轮）：接口超时/为空时不要清掉已经渲染好的积金局榜单
          （线上首屏偶发「近 1 年回报领先 = 暂无数据」就是这个：自算接口慢一步就把列表清空） */
-      if (t1 && t1.length) renderTop('#mkTop1', t1, (x) => pctv(x.sY1), (x) => x.sY1);
-      if (t5 && t5.length) renderTop('#mkTop4', t5, (x) => pctv(x.sY5a), (x) => x.sY5a);
-      /* 规模：不做红绿着色（规模大小无好坏）；波动率同理 */
-      renderTop('#mkTopSize', tsz, (x) => fmtSize(x.size), null);
-      /* 波动率不加正负号（不是涨跌） */
-      renderTop('#mkTopVol', tvol, (x) => (x.vol1 == null ? '—' : Number(x.vol1).toFixed(2) + '%'), null);
+      __selfTop = { t1, t5, tsz, tvol };
+      paintSelfTop();
     }).catch(() => {});
   }
 
@@ -704,7 +720,6 @@
   /* 2026-11-01（6.0）：英文名表异步到达后重绘榜单（否则首页仍是中文名） */
   document.addEventListener('mpf:names', () => {
     if (!lastM) return;
-    __selfDone = false;
     setTimeout(() => render(lastM), 16);
   });
 

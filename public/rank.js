@@ -74,6 +74,9 @@
       buildTabs();
       const sd = document.querySelector('#rkScopeDate');
       if (sd && DATA.dataAsOf) sd.textContent = DATA.dataAsOf;
+      /* 2026-11-04：月报头部的「资料截至」与表格下方说明同一来源 */
+      const ma = document.querySelector('#mpfaAsOf');
+      if (ma && DATA.dataAsOf) ma.textContent = DATA.dataAsOf;
       buildFilters();
       buildMobileSort();
       initDualScroll('#rkTscroll', '#rkTopScroll', '#rkScrollGhost');
@@ -81,7 +84,8 @@
       // 排名页表头排序由本页状态管理（名次列始终按榜单指标）
       bindHeadSort();
       bind();
-      window.__onRefresh = () => { buildFilters(); render(); };
+      /* 2026-11-04：注册到刷新钩子表（资料库/对比页共存），不再独占 __onRefresh */
+      window.addRefreshHook(() => { buildFilters(); render(); });
       render();
       /* 自算净值榜数据（/api/navperf）：到达后若当前正是自算榜则重绘 */
       fetchJSON('/api/navperf', 'navperf').then((j) => {
@@ -136,9 +140,13 @@
       /* 2026-10-26 重做：fund 表头按可见列顺序数组生成（与行渲染同源，不会错位） */
       fundOrder = rkVisibleOrder();
       $('#rkThead').innerHTML = fundOrder.map((k) => TH_FUND[k]).join('');
+      /* 2026-11-04：表头模板用 data-i18n-parts，重建后必须再跑一次 applyI18n，
+         否则切到英文后表头又变回中文（重建发生在 mpf:lang 之后）。 */
+      if (window.applyI18n) window.applyI18n($('#rkThead'));
       window.__rkOrder = fundOrder;
     } else if (mode !== HEAD_MODE) {
       $('#rkThead').innerHTML = mode === 'agg' ? aggHead() : selfHead();
+      if (window.applyI18n) window.applyI18n($('#rkThead'));
     }
     if (mode !== HEAD_MODE || mode === 'fund') { HEAD_MODE = mode; bindHeadSort(); }
     const thCal = $('#rkThCalYear');
@@ -233,7 +241,7 @@
   function buildFilters() {
     const f = DATA.funds;
     fill('#rkRType', uniq(f.map((x) => x.type)), (v) => typeLabel(v));
-    fill('#rkRTrustee', uniq(f.map((x) => x.trustee)));
+    fill('#rkRTrustee', uniq(f.map((x) => x.trustee)), (v) => (window.trusteeDisplay ? window.trusteeDisplay(v) : v));
     buildSubRisk();
   }
 
@@ -281,7 +289,7 @@
     arr.sort((a, b) => String(a).localeCompare(String(b), 'zh-Hans-CN'));
     arr.forEach((v) => {
       const o = document.createElement('option'); o.value = v;
-      o.textContent = optText(v, !!fmt);
+      o.textContent = (typeof fmt === 'function') ? fmt(v) : optText(v, !!fmt);
       el.appendChild(o);
     });
     if (arr.indexOf(cur) >= 0) el.value = cur;
@@ -847,7 +855,7 @@
     $('#rkChampions').innerHTML = top.length ? top.map((x, i) => {
       return '<div class="pod p' + (i + 1) + '">' +
         '<div class="no">' + TQ('第 {n} 名', { n: i + 1 }) + '</div>' +
-        '<div class="nm">' + esc(x.trustee) + '</div>' +
+        '<div class="nm">' + esc(window.trusteeDisplay ? window.trusteeDisplay(x.trustee) : x.trustee) + '</div>' +
         '<div class="tr">' + TT('受托人／保荐人') + '</div>' +
         '<div class="val num ' + cls(x.ann1Avg) + '">' + pct(x.ann1Avg) + '</div>' +
         '<div class="meta"><span>' + TQ('旗下 {n} 条', { n: x.count }) + '</span><span>' + TQ('规模 {v} 百万', { v: nf(x.sizeSum, 0) }) + '</span><span>' + TT('近5年') + ' ' + pct(x.ann5Avg) + '</span></div>' +
@@ -881,8 +889,8 @@
       const c = b.metric === 'mgmtFee' || b.metric === 'size' ? '' : cls(v);
       return '<div class="pod p' + (i + 1) + '">' +
         '<div class="no">' + TQ('{t} 冠军', { t: esc(typeLabel(x.type)) }) + '</div>' +
-        '<div class="nm">' + esc(x.fund) + '</div>' +
-        '<div class="tr">' + esc(x.trustee) + '</div>' +
+        '<div class="nm">' + esc(fundFullName(x)) + '</div>' +
+        '<div class="tr">' + esc(window.trusteeDisplay ? window.trusteeDisplay(x.trustee) : x.trustee) + '</div>' +
         '<div class="val num ' + c + '">' + label + '</div>' +
         '<div class="meta"><span' + (x.risk == null ? '' : ' data-tip="' + esc(MPF_RISK.tip(x.risk)) + '"') + '>' + TT('风险') + ' ' + (x.risk == null ? 'n.a.' : x.risk + ' ' + TT('级')) + '</span><span>' + (x.size == null ? TT('规模 n.a.') : TQ('规模 {v} 百万', { v: nf(x.size, 0) })) + '</span><span>' + podRefText(b, x) + '</span></div>' +
         '</div>';

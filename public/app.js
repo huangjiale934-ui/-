@@ -211,7 +211,8 @@
       makeSorter($$('#thead th'), S, render, DEF_SORT);
       bindAll();
       initDualScroll('#tscroll', '#topScroll', '#scrollGhost');
-      window.__onRefresh = () => { buildFilters(); render(); };
+      /* 2026-11-04：注册到刷新钩子表（多模块共存），不再独占 __onRefresh */
+      window.addRefreshHook(() => { buildFilters(); buildMobileSort(); syncSortDir(); render(); });
       bindSelfTabs();
       render();
       /* 2026-11-03（第二十九轮，用户反馈）：首页「查看完整榜单」原指向积金局榜单（口径不同、数字对不上），
@@ -254,7 +255,7 @@
     /* 2026-11-01（6.0）：下拉 option 是 JS 生成的，必须在语言切换时一并重建，
        否则繁/英模式下仍停留上一语言的文案（曾出现繁体页下拉全是简体）。 */
     document.addEventListener('mpf:lang', () => {
-      if (DATA.count) { buildFilters(); render(); }
+      if (DATA.count) { buildFilters(); buildMobileSort(); render(); }
       /* 2026-11-02：走势图顶部与统计表的文案是挂载时生成的，语言切换后整体重挂一次 */
       try { DBTREND = null; initDbTrend(); } catch (e) {}
     });
@@ -296,7 +297,7 @@
   function buildFilters() {
     const f = DATA.funds;
     fill('#fType', uniq(f.map((x) => x.type)), (v) => typeLabel(v));
-    fill('#fTrustee', uniq(f.map((x) => x.trustee)));
+    fill('#fTrustee', uniq(f.map((x) => x.trustee)), (v) => (window.trusteeDisplay ? window.trusteeDisplay(v) : v));
     fillSub();
   }
 
@@ -332,15 +333,26 @@
     if (arr.indexOf(cur) >= 0 || arr.map(String).indexOf(String(cur)) >= 0) el.value = cur;
   }
 
+  /* 2026-11-04（第三十六轮）：下拉每次重建（语言切换也要重建，否则选项停在上一语言），
+     方向按钮只读当前状态重写文案 —— 监听只绑一次，反复调用不会叠加。 */
+  function syncSortDir() {
+    const b = $('#mSortDir');
+    if (b) b.textContent = S.dir === 'asc' ? TT('升序 ↑') : TT('降序 ↓');
+  }
   function buildMobileSort() {
     const el = $('#mSortKey');
+    if (!el) return;
+    const cur = el.value || S.key;
     el.innerHTML = Object.keys(SORT_LABEL).map((k) => '<option value="' + k + '">' + TT(SORT_LABEL[k]) + '</option>').join('');
-    el.value = S.key;
+    el.value = cur;
+    syncSortDir();
+    if (el.__sortBound) return;
+    el.__sortBound = 1;
     el.addEventListener('change', () => { window.__dimApply(el.value); });
     $('#mSortDir').addEventListener('click', () => {
       S.dir = S.dir === 'asc' ? 'desc' : 'asc';
       if (window.__DIMSEL && window.__DIMSEL[0]) window.__DIMSEL[0].d = S.dir;
-      $('#mSortDir').textContent = S.dir === 'asc' ? TT('升序 ↑') : TT('降序 ↓');
+      syncSortDir();
       render();
     });
   }
@@ -384,30 +396,130 @@
   window.syncTrusteeMenu = syncTrusteeMenu;
   window.__getDbTrustee = function () { return F.trustee || ''; };
 
-  /** 导出当前筛选结果（全部行，非仅当前页，CSV；Excel 直接打开） */
+  /** 导出当前筛选结果（全部行，非仅当前页）→ xlsx 工作簿
+      2026-11-04（第三十六轮，用户要求）：
+      ① 最左侧加「名次」列；② 写明排名维度与筛选条件；③ 冻结首列（含表头）；
+      ④ 说明文字独立成「数据说明」工作表（含公司名、网址、LOGO），第二个表才是数据。 */
   function exportIdx() {
-    const head = [TT('基金名称'), TT('单位类别'), TT('基金种类'), TT('强积金计划'), TT('受托人'), TT('风险级别'),
-      TT('单位资产净值'), TT('净值估值日'), TT('近1年年率化回报'), TT('近5年年率化回报'), TT('近10年年率化回报'),
-      TT('推出至今年率化回报'), TQ('基金规模（{u}）', { u: TT('百万港元') }), TT('基金管理费 %'), TT('最近期基金开支比率'), TT('推出日期')];
-    const body = ROWS.map((x) => [
-      x.fundBase || x.fund,
-      x.unit || '',
-      typeLabel(x.type) + (x.subtype ? ' / ' + typeLabel(x.subtype) : ''),
-      x.scheme,
-      x.trustee,
-      x.risk == null ? '' : x.risk,
-      x.nav == null ? '' : x.nav,
-      x.navAsOf || '',
-      x.ann1 == null ? '' : x.ann1,
-      x.ann5 == null ? '' : x.ann5,
-      x.ann10 == null ? '' : x.ann10,
-      x.annLaunch == null ? '' : x.annLaunch,
-      x.size == null ? '' : x.size,
-      x.mgmtFee == null ? '' : feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee),
-      x.fer == null ? '' : x.fer,
-      x.launch || '',
-    ]);
-    csvDownload(csvSourceNote().concat([head], body), 'MPF资料库_' + TT('数据截至') + '_' + (DATA.dataAsOf || '') + '.csv');
+    if (!window.MPFXLSX) { if (window.mpfToast) mpfToast(TT('导出组件未加载，请刷新页面')); return; }
+    const dimTxt = (window.__DIMSEL || []).map((d, i) => (i ? '+ ' : '') + dimLabel(d.k) + (d.d === 'asc' ? ' ↑' : ' ↓')).join(' ');
+    const dirTxt = (d) => (d === 'asc' ? TT('由小到大') : TT('由大到小'));
+    const filterBits = [];
+    if (F.kw) filterBits.push(TQ('关键词「{v}」', { v: F.kw }));
+    if (F.type) filterBits.push(TQ('种类：{v}', { v: typeLabel(F.type) }));
+    if (F.sub) filterBits.push(TQ('细类：{v}', { v: typeLabel(F.sub) }));
+    if (F.trustee) filterBits.push(TQ('受托人：{v}', { v: window.trusteeDisplay ? window.trusteeDisplay(F.trustee) : F.trustee }));
+    if (F.navDate) filterBits.push(TQ('净值估值日：{v}', { v: F.navDate }));
+
+    const pct = (v) => (v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e6, s: 5 });
+    const num = (v, s0) => (v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e4, s: s0 || 7 });
+    /* 2026-11-04：导出同样要跟随语言——简体模式下基金名/计划名要繁转简，
+       否则 Excel 里全是繁体（页面是简体的）。 */
+    const conv = (v) => (((window.getLang && window.getLang() === 'zh-Hans') && window.t2s) ? window.t2s(String(v)) : String(v));
+    const txt = (v, s0) => ({ v: v == null || v === '' ? '' : conv(v), s: s0 || 4 });
+    /* 表格标题用「净值最新日」而不是积金局月报日，避免被误读成净值滞后一个月 */
+    let navLatest = '';
+    (DATA.funds || []).forEach((f) => { if (f.navAsOf && f.navAsOf > navLatest) navLatest = f.navAsOf; });
+
+    /* [表头, 取值, 类型, 列宽, 列说明] */
+    const COLS = [
+      [TT('名次'), (x, i) => i + 1, 'rank', 6, TT('按当前排名维度排出的名次（1 = 排在最前）')],
+      [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 40, TT('成分基金名称；单位类别在下一列单列')],
+      [TT('单位类别'), (x) => x.unit || '', 'txt', 9, TT('同一基金的不同单位类别（A / T / B 等），净值与回报各自独立')],
+      [TT('基金种类'), (x) => typeLabel(x.type) + (x.subtype ? ' / ' + typeLabel(x.subtype) : ''), 'txtL', 26, TT('积金局的基金类别与细类')],
+      [TT('强积金计划'), (x) => x.scheme || '', 'txtL', 36, TT('所属强积金计划（受托人／保荐人）')],
+      [TT('受托人'), (x) => (window.trusteeDisplay ? window.trusteeDisplay(x.trustee) : x.trustee), 'txtL', 14, TT('受托人／保荐人')],
+      [TT('风险级别'), (x) => x.risk, 'int', 8, TT('积金局按近三年波幅评定的 1–7 级（1 最低、7 最高）')],
+      [TT('单位资产净值'), (x) => x.nav, 'nav', 12, TT('发行人官网公布的单位资产净值（NAV），估值日见下一列')],
+      [TT('净值估值日'), (x) => x.navAsOf || '', 'txt', 11, TT('该净值的官方估值日；与全站最新日相差 3 天以上属源站未更新')],
+      [TT('日涨跌'), (x) => x.selfD1, 'pct', 9, TT('本站自算：最新净值 ÷ 前一交易日净值 − 1')],
+      [TT('近1周'), (x) => x.selfW1, 'pct', 9, TT('本站自算：近 5 个交易日累计涨跌')],
+      [TT('近1个月'), (x) => x.selfM1, 'pct', 9, TT('本站自算：近 1 个月累计涨跌')],
+      [TT('年初至今'), (x) => x.selfYtd, 'pct', 9, TT('本站自算：年初至最新净值日累计涨跌')],
+      [TT('近1年'), (x) => x.selfY1, 'pct', 9, TT('本站自算：近 1 年累计涨跌')],
+      [TT('近3年年化'), (x) => x.selfY3a, 'pct', 10, TT('本站自算：近 3 年几何年化回报')],
+      [TT('近5年年化'), (x) => x.selfY5a, 'pct', 10, TT('本站自算：近 5 年几何年化回报')],
+      [TT('近1年最大回撤'), (x) => x.selfMdd, 'pct', 11, TT('本站自算：近 1 年区间内自高点回落的最大幅度')],
+      [TT('近5年最大回撤'), (x) => x.selfMdd5, 'pct', 11, TT('本站自算：近 5 年区间内自高点回落的最大幅度')],
+      [TT('年化波动率（近1年）'), (x) => x.vol1, 'pct', 11, TT('本站自算：日收益标准差 × √252')],
+      [TT('3年波幅'), (x) => x.vol3, 'pct', 9, TT('本站自算：近 3 年年化波动率')],
+      [TT('夏普比率（近1年）'), (x) => x.sharpe1, 'num2', 10, TT('本站自算：（年化回报 − 无风险利率）÷ 年化波动率')],
+      [TT('超额收益（对恒指·近1年）'), (x) => x.excess1, 'pct', 13, TT('本站自算：近 1 年回报 − 恒生指数同期回报')],
+      [TT('正收益月份占比'), (x) => x.posM12, 'pct0', 11, TT('近 12 个月中录得正回报的月份占比')],
+      [TQ('基金规模（{u}）', { u: TT('百万港元') }), (x) => x.size, 'num2', 12, TT('积金局公布的最新基金规模，按月更新')],
+      [TT('基金管理费 %'), (x) => (x.mgmtFee == null ? '' : feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee)), 'txt', 11, TT('积金局披露的基金管理费；区间或「最高」按原文显示')],
+      [TT('最近期基金开支比率'), (x) => x.fer, 'num2', 11, TT('基金开支比率（FER），积金局披露')],
+      [TT('推出日期'), (x) => x.launch || '', 'txt', 11, TT('基金推出日期')],
+    ];
+
+    const cellOf = (x, i, def) => {
+      const v = def[1](x, i);
+      switch (def[2]) {
+        case 'rank': return { v: i + 1, s: 3 };
+        case 'txtL': return txt(v, 10);
+        case 'txt': return txt(v);
+        case 'int': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Number(v), s: 7 };
+        case 'nav': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e4, s: 6 };
+        case 'pct': return pct(v);
+        case 'pct0': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 100) / 1e4, s: 5 };
+        case 'num2': return num(v, 7);
+        default: return txt(v);
+      }
+    };
+
+    const head = COLS.map((c) => ({ v: c[0], s: 2 }));
+    const body = ROWS.map((x, i) => COLS.map((c) => cellOf(x, i, c)));
+    const lastCol = (() => { let n = COLS.length; let out = ''; while (n > 0) { const m = (n - 1) % 26; out = String.fromCharCode(65 + m) + out; n = Math.floor((n - 1) / 26); } return out; })();
+
+    const rows = [];
+    rows.push({ h: 30, cells: [{ v: TT('基金最新数据') + ' · ' + TQ('净值截至 {d}', { d: navLatest || DATA.dataAsOf || '—' }), s: 1 }] });
+    rows.push({ h: 22, cells: [{ v: TQ('排名维度：{d}', { d: dimTxt || '—' }) + '　|　' + (filterBits.length ? TQ('筛选：{f}', { f: filterBits.join('、') }) : TT('筛选：无（全市场）')) + '　|　' + TQ('共 {n} 条', { n: ROWS.length }), s: 11 }] });
+    rows.push({ h: 30, cells: head });
+    body.forEach((r) => rows.push({ h: 20, cells: r }));
+
+    const merges = ['A1:' + lastCol + '1', 'A2:' + lastCol + '2'];
+
+    setTimeout(() => {
+      window.loadLogoB64().then((logo) => {
+        const cover = window.buildCoverSheet({
+          page: TT('基金最新数据'),
+          title: TT('数据说明'),
+          meta: [
+            [TT('净值截至'), navLatest || '—'],
+            [TT('积金局字段截至'), DATA.dataAsOf || '—'],
+            [TT('本站同步时间'), new Date(DATA.updatedAt || Date.now()).toLocaleString('zh-CN', { hour12: false })],
+            [TT('导出时间'), new Date().toLocaleString('zh-CN', { hour12: false })],
+            [TT('收录范围'), TQ('{n} 条成分基金（按单位类别逐条，全市场 {u} 家受托人）', { n: ROWS.length, u: DATA.trusteeCount || '—' })],
+            [TT('排名维度'), (window.__DIMSEL || []).map((d) => dimLabel(d.k) + '（' + dirTxt(d.d) + '）').join(' + ') || '—'],
+            [TT('筛选条件'), filterBits.length ? filterBits.join('、') : TT('无（全市场）')],
+          ],
+          notes: [
+            TT('净值来源：各计划受托人／保荐人官网每日公布的单位资产净值；风险级别、基金规模、历年回报、基金开支比率等字段取自积金局「强积金基金平台」（按月更新，通常滞后 1–2 个月）。'),
+            TT('自算指标（日涨跌 / 近1周 / 近1个月 / 年初至今 / 近1年 / 近3年 / 近5年年化 / 最大回撤 / 波动率 / 夏普 / 超额收益）由本站按发行人官网净值直接计算，不含分红再投资与费用调整；与积金局公布的同名指标口径不同，不可直接相减。'),
+            TT('空白单元格＝该基金当日无官方净值（周末、香港公众假期、非估值日，或该基金尚未推出／已终止），或积金局未公布该字段；本站不插值、不使用前值填充。'),
+          ],
+          columns: COLS.map((c) => [c[0], c[4]]),
+          logo: logo,
+        });
+        const blob = window.MPFXLSX.build({
+          sheets: [
+            cover,
+            {
+              name: TT('基金数据'), rows: rows, merges: merges,
+              cols: COLS.map((c) => c[3]),
+              freeze: { x: 1, y: 3, top: 'B4' },
+              autoFilter: 'A3:' + lastCol + rows.length,
+            },
+          ],
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'MPF基金最新数据_' + (navLatest || DATA.dataAsOf || '') + '.xlsx';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+        if (window.mpfToast) mpfToast(TT('已导出（含数据说明与基金数据两个工作表）'));
+      });
+    }, 30);
   }
 
   /** 重置全部筛选（含估值日标签，2026-10-14） */
@@ -599,6 +711,7 @@
     $('#cnt').textContent = total;
     $('#loading').style.display = 'none';
     renderStats(ROWS);
+    renderScopeNote();
 
     /* 2026-10-26 重做：可见列顺序单源——表头与表体由同一数组生成，物理上不可能错位 */
     const order = visibleOrder();
@@ -811,13 +924,23 @@
       card(TT('基金种类'), uniq(rows.map((x) => x.type)).length, TT('类'), TQ('{n} 个细类', { n: uniq(rows.map((x) => x.subtype)).length })),
       card(TT('近1年平均回报'), pct(avg('ann1')), '', TT('已剔除无数据基金')),
       card(TT('近1年上涨占比'), tot ? Math.round((pos / tot) * 100) : 0, '%', TQ('{n} / {m} 条录得正回报', { n: pos, m: tot })),
-      card(TT('规模最大基金'), big ? big.fund : '—', '', big ? nf(big.size, 0) + ' ' + TT('百万港元') + ' · ' + big.trustee : ''),
+      /* 2026-11-04：基金名/受托人也走显示函数，英文模式下不再残留中文 */
+      card(TT('规模最大基金'), big ? fundDisplayName(big) : '—', '', big ? nf(big.size, 0) + ' ' + TT('百万港元') + ' · ' + (window.trusteeDisplay ? window.trusteeDisplay(big.trustee) : big.trustee) : ''),
     ].join('');
   }
 
   function card(k, v, unit, s) {
     /* 2026-10-31：v（基金名等数据值）也走 esc——简体模式下繁转简 */
     return '<div class="stat"><div class="k">' + k + '</div><div class="v num">' + esc(v) + '<small>' + unit + '</small></div><div class="s">' + esc(s) + '</div></div>';
+  }
+
+  /* 2026-11-04（第三十六轮）：表格下方那条口径提示改为 JS 渲染 —— 静态 HTML 没有词条，
+     英文模式下一直显示中文（用户截图中的「有些东西切不过去」之一）。 */
+  function renderScopeNote() {
+    const el = document.getElementById('dbScopeNote');
+    if (!el) return;
+    const n = DATA.trusteeCount || 11;
+    el.textContent = TQ('数据取自 {n} 家受托人官网（每交易日更新），指标由本平台自行计算；个别基金公布较慢，可能滞后 1–2 天。', { n: n });
   }
 
   /* 2026-10-31（用户要求）：「筛选条件：无」chips 行与「重置条件」按钮删除——

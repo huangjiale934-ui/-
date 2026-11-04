@@ -122,7 +122,7 @@ window.MPFXLSX = (function () {
       '<top style="thin"><color rgb="FFCFDCEA"/></top><bottom style="thin"><color rgb="FFCFDCEA"/></bottom><diagonal/></border>' +
     '</borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-    '<cellXfs count="10">' +
+    '<cellXfs count="16">' +
       /* 0 默认 */ '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
       /* 1 标题 */ '<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 2 表头 */ '<xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
@@ -133,7 +133,15 @@ window.MPFXLSX = (function () {
       /* 7 两位小数 */ '<xf numFmtId="166" fontId="4" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 8 日期 */ '<xf numFmtId="167" fontId="4" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 9 文本（无边框，声明行） */ '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
+      /* 10 文本左对齐（带边框）—— 基金名、计划名等长文本 */ '<xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>' +
+      /* 11 说明段落（无边框、左对齐、可换行） */ '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="top" wrapText="1"/></xf>' +
+      /* 12 封面小节标题（左对齐、蓝色加粗） */ '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+      /* 13 封面键列（加粗、无边框） */ '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
+      /* 14 表头左对齐 */ '<xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>' +
+      /* 15 灰色小字（无边框） */ '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>' +
     '</cellXfs>' +
+    /* 2026-11-04：补 cellStyles —— 缺这一段时 Excel/openpyxl 会报「没有默认样式」 */
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
     '</styleSheet>';
 
   /* ---------- sheet xml ---------- */
@@ -141,6 +149,17 @@ window.MPFXLSX = (function () {
     var x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
       'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
+    /* 2026-11-04：冻结窗格（首列 + 表头）。sheet.freeze = {x:1, y:3, top:'B4'} */
+    if (sheet.freeze && (sheet.freeze.x || sheet.freeze.y)) {
+      var fz = sheet.freeze;
+      var xSplit = fz.x || 0, ySplit = fz.y || 0;
+      var topLeft = fz.top || (colName(xSplit) + (ySplit + 1));
+      x += '<sheetViews><sheetView workbookViewId="0"' + (sheet.tab ? ' tabSelected="1"' : '') + '>' +
+        '<pane xSplit="' + xSplit + '" ySplit="' + ySplit + '" topLeftCell="' + topLeft +
+        '" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>';
+    } else if (sheet.tab) {
+      x += '<sheetViews><sheetView workbookViewId="0" tabSelected="1"/></sheetViews>';
+    }
     if (sheet.cols && sheet.cols.length) {
       x += '<cols>' + sheet.cols.map(function (w, i) {
         return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>';
@@ -164,6 +183,8 @@ window.MPFXLSX = (function () {
       x += '</row>';
     });
     x += '</sheetData>';
+    /* 2026-11-04：自动筛选（放在 mergeCells 之前，符合 OOXML 元素顺序） */
+    if (sheet.autoFilter) x += '<autoFilter ref="' + sheet.autoFilter + '"/>';
     if (sheet.merges && sheet.merges.length) {
       x += '<mergeCells count="' + sheet.merges.length + '">' +
         sheet.merges.map(function (m) { return '<mergeCell ref="' + m + '"/>'; }).join('') + '</mergeCells>';
