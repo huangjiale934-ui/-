@@ -1419,7 +1419,7 @@
   '· 官网复核 {n} 点 · 未发现偏差': '· {n} points re-checked · no discrepancy',
   '· 官网复核 {n} 点 · 偏差 {d} 处（已修正 {a} 处）': '· {n} points re-checked · {d} discrepancies ({a} corrected)',
   '复核时间 {t}，窗口 {a} ~ {b}': 'Re-checked at {t}, window {a} ~ {b}',
-  '数据来自积金局「强积金基金平台」，按月公布、已扣费并计入分红再投资；与本站「基金最新数据」的每日自算口径不同，不可直接相减。': 'Sourced from the MPFA MPF Fund Platform, published monthly, net of fees and assuming dividend reinvestment. Not directly comparable with the daily self-calculated figures under "Latest fund data".',
+  '数据来自积金局「强积金基金平台」，按月公布、已扣费并计入分红再投资；与本站「基金最新数据」的每日自算口径不同，不可直接相减。': 'Sourced from the MPFA MPF Fund Platform, monthly and net of fees; not directly comparable with our daily figures.',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);
