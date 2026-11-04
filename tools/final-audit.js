@@ -155,7 +155,8 @@ hkeys.forEach((id) => {
 });
 console.log('  报告期分布：' + Object.keys(hMonth).sort().map((m) => m + '×' + hMonth[m]).join(' · '));
 if (badWeight) bad('持仓权重越界 ' + badWeight + ' 条');
-if (badAlloc) wrn('投资分布合计偏离 100% 的有 ' + badAlloc + ' 只');
+/* 2026-11-04：不足 100% 属源便览只列主要类别，页面已用灰色「其他／未列明」补足（不推测拆分），故只作提示 */
+if (badAlloc) wrn('投资分布合计 <100% 的有 ' + badAlloc + ' 只（源便览只列主要类别；页面已用「其他／未列明」补足，不推测拆分）');
 if (noTop) wrn('无前十大持仓 ' + noTop + ' 只');
 const hIds = new Set(hkeys);
 const noHold = funds.filter((f) => !hIds.has(String(f.id)));
