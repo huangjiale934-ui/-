@@ -1345,8 +1345,10 @@ function breadthPrevPct(perf) {
   file = path.normalize(file).replace(/^([/\\])+/, '');
   const full = path.join(PUBLIC_DIR, file);
   if (!full.startsWith(PUBLIC_DIR)) return sendRaw(req, res, 403, 'Forbidden', 'text/plain; charset=utf-8');
-  // 以「_」开头的文件一律不外发（调试/临时页面专用），避免把内部页面暴露给客户
-  if (path.basename(file).charAt(0) === '_') {
+  // 以「_」开头、或以 zz- / zz_ 开头的文件一律不外发（调试/临时页面专用），避免把内部页面暴露给客户
+  // 2026-11-04：部署包不会删除远端旧文件，已删的 zz-t2s-test.html 仍留在服务器上 → 用请求层兜住
+  const base0 = path.basename(file);
+  if (base0.charAt(0) === '_' || /^zz[-_]/i.test(base0)) {
     return sendRaw(req, res, 404, 'Not Found', 'text/plain; charset=utf-8');
   }
   fs.readFile(full, (err, buf) => {
