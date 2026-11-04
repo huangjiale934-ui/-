@@ -103,12 +103,13 @@ window.MPFXLSX = (function () {
       '<numFmt numFmtId="166" formatCode="0.00"/>' +
       '<numFmt numFmtId="167" formatCode="yyyy\\-mm\\-dd"/>' +
     '</numFmts>' +
-    '<fonts count="5">' +
+    '<fonts count="6">' +
       '<font><sz val="11"/><name val="微软雅黑"/></font>' +
       '<font><b/><sz val="11"/><color rgb="FF1A1A1A"/><name val="微软雅黑"/></font>' +
       '<font><b/><sz val="14"/><color rgb="FF0F4C81"/><name val="微软雅黑"/></font>' +
       '<font><b/><sz val="11"/><color rgb="FF0F4C81"/><name val="微软雅黑"/></font>' +
       '<font><sz val="11"/><color rgb="FF1A1A1A"/><name val="微软雅黑"/></font>' +
+      /* 5 灰色小字（封面副标题/免责） */ '<font><sz val="10.5"/><color rgb="FF6B7785"/><name val="微软雅黑"/></font>' +
     '</fonts>' +
     '<fills count="4">' +
       '<fill><patternFill patternType="none"/></fill>' +
@@ -122,7 +123,7 @@ window.MPFXLSX = (function () {
       '<top style="thin"><color rgb="FFCFDCEA"/></top><bottom style="thin"><color rgb="FFCFDCEA"/></bottom><diagonal/></border>' +
     '</borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-    '<cellXfs count="16">' +
+    '<cellXfs count="20">' +
       /* 0 默认 */ '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
       /* 1 标题 */ '<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 2 表头 */ '<xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
@@ -139,6 +140,10 @@ window.MPFXLSX = (function () {
       /* 13 封面键列（加粗、无边框） */ '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>' +
       /* 14 表头左对齐 */ '<xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>' +
       /* 15 灰色小字（无边框） */ '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>' +
+      /* 16 封面公司名（14 号蓝、居中、无框） */ '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
+      /* 17 封面副标题（居中、无框） */ '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
+      /* 18 封面网址（11 号蓝、居中、无框） */ '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
+      /* 19 灰色小字居中（免责） */ '<xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
     '</cellXfs>' +
     /* 2026-11-04：补 cellStyles —— 缺这一段时 Excel/openpyxl 会报「没有默认样式」 */
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +

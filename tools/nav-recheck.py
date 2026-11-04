@@ -337,6 +337,148 @@ def fetch_haitong(sess):
     return per_fund(pick("haitong"), one)
 
 
+def _norm_name(v):
+    s = str(v or "")
+    for ch in "（）()【】[]-–—－·,，.。 ":
+        s = s.replace(ch, "")
+    return s
+
+
+def fetch_sunlife(sess):
+    """永明：按日 POST 一次拿当日全部基金（5 天 = 5 个请求）"""
+    api = "https://www.sunlife.com.hk/webservice/getmpforsofunddata"
+    H = {"Referer": "https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/"
+                    "mpf-fund-prices-performance.type-MPF/",
+         "Content-Type": "application/json; charset=utf-8", "Accept": "application/json, text/plain, */*"}
+    ours = {}
+    for x in FUNDS:
+        if x.get("trustee") != "永明":
+            continue
+        m = re.match(r"^(.*?)\s*-\s*([A-Z])類$", x["fund"])
+        ours[(m.group(1) if m else x["fund"], m.group(2) if m else "")] = str(x["id"])
+    out = {}
+    for d in WINDOW:
+        try:
+            r = sess.post(api, headers=H, impersonate="chrome", timeout=45,
+                          json={"domainAndUserName": "hkportal", "sqlKey": "MPF_DAILYPRICE",
+                                "sqlParams": [d, "MPF"]})
+            rows = r.json() or []
+        except Exception:  # noqa: BLE001
+            continue
+        for row in rows:
+            nm = (row.get("FUND_DESCRIPTION_ZH") or "").strip()
+            cls_raw = str(row.get("FUND_CLASS") or "").strip()
+            cm = re.match(r"([A-Z])類", cls_raw)
+            c = cm.group(1) if cm else cls_raw
+            fid = ours.get((nm, c)) or ours.get((nm, ""))
+            vd = row.get("VALUATION_DT") or ""
+            m = re.match(r"^(\d{1,2})/(\d{1,2})/(\d{4})$", str(vd).strip())
+            iso = ("%s-%02d-%02d" % (m.group(3), int(m.group(2)), int(m.group(1)))) if m else d
+            if fid and row.get("NAV") is not None and iso in WINDOW_SET:
+                try:
+                    out[(fid, iso)] = round(float(row["NAV"]), 4)
+                except (TypeError, ValueError):
+                    pass
+    return out
+
+
+def fetch_hsbc(sess):
+    """滙豐 / 恒生：下載「單位價格」CSV（一個計劃一次請求，含區間內全部日期）"""
+    import csv as _csv
+    plats = [
+        {"key": "hsbc", "scheme": "滙豐強積金智選計劃", "code": "HB"},
+        {"key": "hangseng", "scheme": "恒生強積金智選計劃", "code": "HS"},
+    ]
+    proxy = "wpb-gpbw-mmw-hk-hase-pa-p-wpp-mpf-market-data-prod-proxy"
+    out = {}
+    for plat in plats:
+        ours = {}
+        for x in FUNDS:
+            if x.get("scheme") == plat["scheme"]:
+                ours.setdefault(_norm_name(x["fund"]), str(x["id"]))
+        if not ours:
+            continue
+        try:
+            r = sess.get("https://rbwm-api.hsbc.com.hk/%s/v1/download-funds" % proxy,
+                         params={"schemeCodes": plat["code"], "fundPricePeriodFrom": WINDOW[0],
+                                 "fundPricePeriodTo": WINDOW[-1], "language": "zh_HK"},
+                         headers={"client_id": "5eca677638ab454086052a18da4e2cb0",
+                                  "x-hsbc-channel-id": "WEB", **UA},
+                         impersonate="chrome", timeout=60)
+            text = r.text
+        except Exception:  # noqa: BLE001
+            continue
+        rows = list(_csv.reader(io.StringIO(text)))
+        if len(rows) < 3:
+            continue
+        dates = rows[0]
+        for row in rows[2:]:
+            if not row or not row[0]:
+                continue
+            fid = ours.get(_norm_name(row[0]))
+            if not fid:
+                continue
+            for i in range(1, min(len(dates), len(row))):
+                ds = (dates[i] or "").strip()
+                if ds not in WINDOW_SET:
+                    continue
+                try:
+                    v = float(row[i])
+                except (TypeError, ValueError):
+                    continue
+                if v > 0:
+                    out[(fid, ds)] = round(v, 4)
+    return out
+
+
+def fetch_bocpt(sess):
+    """中銀保誠：取表單 token 後按「計劃 × 日期」POST（2 × 5 = 10 次）"""
+    POST = "https://www.bocpt.com/homepage/umbraco/Surface/FundForm/FundPriceEnquiry"
+    SCH = {
+        "MYMP": "https://www.bocpt.com/homepage/zh-hk/my-choice-mpf/fund-price-enquiry/",
+        "ECMP": "https://www.bocpt.com/homepage/zh-hk/easy-choice-mpf/fund-price-enquiry/",
+    }
+    code2fid = {}
+    for fid, v in pick("bocpt").items():
+        if v.get("code"):
+            code2fid[v["code"]] = fid
+    out = {}
+    for sch, url in SCH.items():
+        tok = None
+        try:
+            r0 = sess.get(url, headers=UA, impersonate="chrome", timeout=45)
+            m = re.search(r'name="__RequestVerificationToken"[^>]*value="([^"]+)"', r0.text)
+            tok = m.group(1) if m else None
+        except Exception:  # noqa: BLE001
+            continue
+        if not tok:
+            continue
+        for d in WINDOW:
+            dd = dt.date.fromisoformat(d)
+            try:
+                r = sess.post(POST, data={"__RequestVerificationToken": tok, "FundCode": sch,
+                                          "StartDate": dd.strftime("%d/%m/%Y"), "Lang": "zh-HK"},
+                              headers={**UA, "Referer": url, "X-Requested-With": "XMLHttpRequest"},
+                              impersonate="chrome", timeout=45)
+                j = json.loads(r.text)
+                if isinstance(j, str):
+                    j = json.loads(j)
+                t1 = j.get("Table1") or []
+                if isinstance(t1, str):
+                    t1 = json.loads(t1)
+            except Exception:  # noqa: BLE001
+                continue
+            for f in t1:
+                fid = code2fid.get(str(f.get("fund_code") or ""))
+                if not fid:
+                    continue
+                try:
+                    out[(fid, d)] = round(float(f.get("bid_price")), 4)
+                except (TypeError, ValueError):
+                    pass
+    return out
+
+
 ADAPTERS = [
     ("bct", fetch_bct),
     ("bea", fetch_bea),
@@ -346,6 +488,9 @@ ADAPTERS = [
     ("chinalife", fetch_chinalife),
     ("yflife", fetch_yflife),
     ("haitong", fetch_haitong),
+    ("sunlife", fetch_sunlife),
+    ("hsbc", fetch_hsbc),
+    ("bocpt", fetch_bocpt),
 ]
 
 
@@ -367,8 +512,9 @@ def main():
         for (fid, d), nav in got.items():
             loc = local_recent(fid)
             if d not in loc:
-                if len(missing) < 60:
-                    missing.append({"id": fid, "date": d, "src": name})
+                # 2026-11-04：官网有、库里没有 → 记录（--apply 时补进 hist）
+                if len(missing) < 400:
+                    missing.append({"id": fid, "date": d, "src": name, "nav": nav})
                 continue
             checked += 1
             n_src += 1
@@ -382,6 +528,24 @@ def main():
                 })
         per_src[name] = {"checked": n_src, "secs": round(time.time() - t0, 1)}
         print("ok %-11s %4d pts  %.1fs" % (name, n_src, time.time() - t0), flush=True)
+
+    added = 0
+    if APPLY and missing:
+        for m0 in missing:
+            obj, p = load_hist(m0["id"])
+            if not obj:
+                continue
+            arr = obj.get("series") or []
+            if any(r[0] == m0["date"] for r in arr):
+                continue
+            arr.append([m0["date"], m0["nav"]])
+            arr.sort(key=lambda r: r[0])
+            obj["series"] = arr
+            obj["last"] = arr[-1][1]
+            obj["asOf"] = arr[-1][0]
+            obj["points"] = len(arr)
+            io.open(p, "w", encoding="utf-8", newline="").write(json.dumps(obj, ensure_ascii=False))
+            added += 1
 
     if APPLY and diffs:
         for d0 in diffs:
@@ -408,18 +572,21 @@ def main():
         "applied": applied,
         "diffs": diffs,
         "missing": missing,
+        "added": added,
         "errors": errors,
     }
     io.open(OUT, "w", encoding="utf-8", newline="").write(json.dumps(report, ensure_ascii=False, indent=1))
-    line = "[%s] 窗口 %s~%s 比对 %d 点，偏差 %d 条%s\n" % (
+    line = "[%s] 窗口 %s~%s 比对 %d 点，偏差 %d 条%s" % (
         report["runAt"], WINDOW[0], WINDOW[-1], checked, len(diffs),
         "，已修正 %d 条" % applied if APPLY else "（未写入）")
+    if added:
+        line += "，补入 %d 个缺失日" % added
     if diffs:
-        line = line.rstrip("\n") + "：" + "；".join(
-            "%s %s %s→%s" % (d["name"][:12], d["date"], d["old"], d["new"]) for d in diffs[:8]) + "\n"
+        line += "：" + "；".join(
+            "%s %s %s→%s" % (d["name"][:12], d["date"], d["old"], d["new"]) for d in diffs[:8])
     with io.open(LOG, "a", encoding="utf-8") as fh:
-        fh.write(line)
-    print(line.strip())
+        fh.write(line + chr(10))
+    print(line)
     if missing:
         print("note: %d 个「官网已有、库里缺失」的日期（前 5 个：%s）" % (
             len(missing), ", ".join("%s %s" % (m["id"], m["date"]) for m in missing[:5])))

@@ -1835,7 +1835,7 @@ chk('二十一轮·④基金表说明条移入 #dbSec、与表格同宽且蓝色
   (function () {
     const a = rawIdxHtml.indexOf('id="dbScopeNote"');
     const b = rawIdxHtml.indexOf('id="rkSec"');
-    return a > 0 && b > a && /\.scope-note\.scope-db \{ margin: 12px 2px 0/.test(readSrc('style.css'));
+    return a > 0 && b > a && /\.scope-note\.scope-db \{ margin: 12px 0 0/.test(readSrc('style.css'));
   })() && /\.scope-note\.scope-mpfa \{ background: #eef4fd; color: #35507a; \}/.test(readSrc('style.css')));
 chk('二十一轮·⑤走势图：区间含 10年/全部、高度 +20%、无图内纵轴说明、说明简写',
   /'10y', '10年'/.test(readSrc('trend.js')) && /'all', '全部'/.test(readSrc('trend.js')) &&

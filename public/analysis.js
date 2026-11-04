@@ -598,7 +598,7 @@
       Array.prototype.forEach.call(thead.querySelectorAll('th'), (c) => {
         const txt = (c.textContent || '').replace(/[↕↑↓\s]/g, '');
         const tip = COL_TIPS[txt] || COL_TIPS[txt.replace(/（.*$/, '')];
-        if (tip && !c.getAttribute('data-tip')) { c.setAttribute('data-tip', TT(tip)); c.style.cursor = 'help'; }
+        if (tip && !c.getAttribute('data-tip')) { c.setAttribute('data-tip', TT(tip)); c.style.cursor = 'pointer'; }
         if (c.hasAttribute('data-lsk')) c.setAttribute('tabindex', '0');
       });
     }

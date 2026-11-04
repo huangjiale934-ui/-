@@ -424,10 +424,10 @@
     /* [表头, 取值, 类型, 列宽, 列说明] */
     const COLS = [
       [TT('名次'), (x, i) => i + 1, 'rank', 6, TT('按当前排名维度排出的名次（1 = 排在最前）')],
-      [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 40, TT('成分基金名称；单位类别在下一列单列')],
+      [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 44, TT('成分基金名称；单位类别在下一列单列')],
       [TT('单位类别'), (x) => x.unit || '', 'txt', 9, TT('同一基金的不同单位类别（A / T / B 等），净值与回报各自独立')],
       [TT('基金种类'), (x) => typeLabel(x.type) + (x.subtype ? ' / ' + typeLabel(x.subtype) : ''), 'txtL', 26, TT('积金局的基金类别与细类')],
-      [TT('强积金计划'), (x) => x.scheme || '', 'txtL', 36, TT('所属强积金计划（受托人／保荐人）')],
+      [TT('强积金计划'), (x) => x.scheme || '', 'txtL', 40, TT('所属强积金计划（受托人／保荐人）')],
       [TT('受托人'), (x) => (window.trusteeDisplay ? window.trusteeDisplay(x.trustee) : x.trustee), 'txtL', 14, TT('受托人／保荐人')],
       [TT('风险级别'), (x) => x.risk, 'int', 8, TT('积金局按近三年波幅评定的 1–7 级（1 最低、7 最高）')],
       [TT('单位资产净值'), (x) => x.nav, 'nav', 12, TT('发行人官网公布的单位资产净值（NAV），估值日见下一列')],
@@ -456,7 +456,7 @@
       const v = def[1](x, i);
       switch (def[2]) {
         case 'rank': return { v: i + 1, s: 3 };
-        case 'txtL': return txt(v, 10);
+        case 'txtL': return txt(v, 4);
         case 'txt': return txt(v);
         case 'int': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Number(v), s: 7 };
         case 'nav': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e4, s: 6 };
@@ -471,16 +471,25 @@
     const body = ROWS.map((x, i) => COLS.map((c) => cellOf(x, i, c)));
     const lastCol = (() => { let n = COLS.length; let out = ''; while (n > 0) { const m = (n - 1) % 26; out = String.fromCharCode(65 + m) + out; n = Math.floor((n - 1) / 26); } return out; })();
 
+    /* 2026-11-04（第三十七轮，用户要求）：表头上方不再重复「排名维度 / 筛选」说明
+       （这些已写在「数据说明」工作表），只保留一行居中的标题。 */
     const rows = [];
-    rows.push({ h: 30, cells: [{ v: TT('基金最新数据') + ' · ' + TQ('净值截至 {d}', { d: navLatest || DATA.dataAsOf || '—' }), s: 1 }] });
-    rows.push({ h: 22, cells: [{ v: TQ('排名维度：{d}', { d: dimTxt || '—' }) + '　|　' + (filterBits.length ? TQ('筛选：{f}', { f: filterBits.join('、') }) : TT('筛选：无（全市场）')) + '　|　' + TQ('共 {n} 条', { n: ROWS.length }), s: 11 }] });
-    rows.push({ h: 30, cells: head });
-    body.forEach((r) => rows.push({ h: 20, cells: r }));
+    rows.push({ h: 32, cells: [{ v: TT('基金最新数据') + ' · ' + TQ('净值截至 {d}', { d: navLatest || DATA.dataAsOf || '—' }), s: 1 }] });
+    rows.push({ h: 34, cells: head });
+    /* 行高按「名称/计划/种类」三列的实际字数估算，长名字自动加高，短名字不空一大截 */
+    const cjkLen = (v) => String(v == null ? '' : v).replace(/[一-龥　-〿＀-￯]/g, 'xx').length;
+    body.forEach((r) => {
+      const lines = Math.max(
+        Math.ceil(cjkLen(r[1] && r[1].v) / 44),
+        Math.ceil(cjkLen(r[4] && r[4].v) / 40),
+        Math.ceil(cjkLen(r[3] && r[3].v) / 26), 1);
+      rows.push({ h: 20 + Math.max(0, lines - 1) * 15, cells: r });
+    });
 
-    const merges = ['A1:' + lastCol + '1', 'A2:' + lastCol + '2'];
+    const merges = ['A1:' + lastCol + '1'];
 
     setTimeout(() => {
-      window.loadLogoB64().then((logo) => {
+      Promise.resolve(null).then((logo) => {
         const cover = window.buildCoverSheet({
           page: TT('基金最新数据'),
           title: TT('数据说明'),
@@ -499,7 +508,6 @@
             TT('空白单元格＝该基金当日无官方净值（周末、香港公众假期、非估值日，或该基金尚未推出／已终止），或积金局未公布该字段；本站不插值、不使用前值填充。'),
           ],
           columns: COLS.map((c) => [c[0], c[4]]),
-          logo: logo,
         });
         const blob = window.MPFXLSX.build({
           sheets: [
@@ -507,8 +515,8 @@
             {
               name: TT('基金数据'), rows: rows, merges: merges,
               cols: COLS.map((c) => c[3]),
-              freeze: { x: 1, y: 3, top: 'B4' },
-              autoFilter: 'A3:' + lastCol + rows.length,
+              freeze: { x: 1, y: 2, top: 'B3' },
+              autoFilter: 'A2:' + lastCol + rows.length,
             },
           ],
         });

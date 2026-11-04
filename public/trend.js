@@ -597,22 +597,22 @@ window.TREND = (function () {
             [_t('回撤区间'), _t('上述最大回撤的起止日期')],
             [_t('年率化回报'), _t('按几何平均折算的年化回报，供不同期限横向比较')],
           ],
-          logo: (await window.loadLogoB64()),
+          logo: null,
         }) : { name: _t('数据说明'), rows: [], merges: [], cols: [14, 60] };
 
         /* ---------- 基金对比表（第二个工作表） ---------- */
+        /* 2026-11-04（第三十七轮，用户要求）：区间等说明已写在「数据说明」表，这里只留标题 + 表头 */
         const r1 = [];
-        r1.push({ h: 28, cells: [{ v: _t('基金详细对比表'), s: 1 }] });
-        r1.push({ h: 22, cells: [{ v: dstr(startTs) + ' ~ ' + dstr(endTs) + '（' + allT.length + _t(' 个交易日') + '）', s: 11 }] });
-        r1.push({ h: 30, cells: [{ v: _t('对比项'), s: 2 }].concat(cols.map((c) => ({ v: c.name, s: 2 }))) });
+        r1.push({ h: 32, cells: [{ v: _t('基金详细对比表'), s: 1 }] });
+        r1.push({ h: 34, cells: [{ v: _t('对比项'), s: 2 }].concat(cols.map((c) => ({ v: c.name, s: 2 }))) });
         cmpRows.forEach(([label, fn]) => {
           /* 2026-10-22：按 cols 遍历（与 stat 下标对齐）；指数没有基金档案也要能算出区间指标 */
-          r1.push({ h: 24, cells: [{ v: label, s: 3 }].concat(cols.map((c, i) => {
+          r1.push({ h: 26, cells: [{ v: label, s: 3 }].concat(cols.map((c, i) => {
             const f = pickF(c.it);
             try { return fn(f || {}, i); } catch (e) { return { v: '—', s: 4 }; }
           })) });
         });
-        const merges1 = ['A1:' + lastCol + '1', 'A2:' + lastCol + '2'];
+        const merges1 = ['A1:' + lastCol + '1'];
         /* ---------- Sheet2 ---------- */
         const r2 = [];
         r2.push({ h: 26, cells: [{ v: '基金的逐日净值数据', s: 1 }] });
@@ -657,8 +657,8 @@ window.TREND = (function () {
                第二张才是对比表；对照表冻结首列与表头。 */
             coverRows,
             { name: _t('基金对比'), rows: r1, merges: merges1,
-              cols: [22].concat(cols.map(() => 32)),
-              freeze: { x: 1, y: 3, top: 'B4' } },
+              cols: [24].concat(cols.map(() => 30)),
+              freeze: { x: 1, y: 2, top: 'B3' } },
             { name: '基金逐日净值数据', rows: r2, merges: merges2,
               cols: [13].concat(cols.reduce((a) => a.concat([12, 12]), [])).concat([2, 2, 2]),
               /* 2026-10-22（用户要求）：走势图横向拉长（8 → 15 列），纵向高度不变 */

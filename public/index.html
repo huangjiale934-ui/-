@@ -155,7 +155,7 @@
     <div class="mb-main">
       <div class="mb-top"><span class="mb-badge">MPFA</span><span class="mb-tag" data-i18n="官方月度公布 · 旧口径">官方月度公布 · 旧口径</span></div>
       <h1 class="mb-h" data-i18n="积金局月度数据">积金局月度数据</h1>
-      <p class="mb-p" data-i18n="数据来自积金局「强积金基金平台」的基金资讯表，按月公布。它已扣除费用、计入分红再投资，与首页「基金最新数据」的每日自算净值口径不同，两边数字不可直接相减。">数据来自积金局「强积金基金平台」的基金资讯表，按月公布。它已扣除费用、计入分红再投资，与首页「基金最新数据」的每日自算净值口径不同，两边数字不可直接相减。</p>
+      <p class="mb-p" data-i18n="数据来自积金局「强积金基金平台」，按月公布、已扣费并计入分红再投资；与本站「基金最新数据」的每日自算口径不同，不可直接相减。">数据来自积金局「强积金基金平台」，按月公布、已扣费并计入分红再投资；与本站「基金最新数据」的每日自算口径不同，不可直接相减。</p>
     </div>
     <div class="mb-side">
       <div class="mb-k" data-i18n="资料截至">资料截至</div>
@@ -256,7 +256,7 @@
     <div class="loading" id="rkLoading"><div class="spinner"></div><span data-i18n="正在同步最新数据…">正在同步最新数据…</span></div>
     <div class="pager" id="rkPager"></div>
   </div>
-  <p class="scope-note scope-mpfa" id="rkScopeNote" style="margin:10px 2px"><span data-i18n="本页数据全部来自积金局「强积金基金平台」，目前更新至">本页数据全部来自积金局「强积金基金平台」，目前更新至</span> <b id="rkScopeDate">—</b>。</p>
+  <p class="scope-note scope-mpfa" id="rkScopeNote" style="margin:10px 0"><span data-i18n="本页数据全部来自积金局「强积金基金平台」，目前更新至">本页数据全部来自积金局「强积金基金平台」，目前更新至</span> <b id="rkScopeDate">—</b>。</p>
 
   <div class="card" id="rkChampCard" style="margin:14px 0">
     <div class="board-head" style="border-bottom:none">
@@ -309,13 +309,14 @@
   <div class="foot">
     <details class="foot-fold" id="foldSpec">
       <summary>
-        <span class="ff-b"><span data-i18n="本次净值核对时间：">本次净值核对时间：</span><b id="navCheckAt">—</b></span>
-        <span class="ff-nav" id="ffNavdist"></span>
+        <span class="ff-b"><span data-i18n="本次净值核对时间：">本次净值核对时间：</span><b id="navCheckAt">—</b><span class="ff-ck" id="ffRecheck"></span></span>
         <span class="ff-a" data-i18n="数据统计口径说明">数据统计口径说明</span>
         <span class="ff-arrow">▾</span>
       </summary>
       <div class="ff-body">
-      <!-- 2026-11-04：来源与免责已并入下方三行式口径说明（#srcNote），这里不再重复一大段 -->
+      <!-- 2026-11-04（第三十七轮）：核对时间加粗加大后，估值日分布挤在标题行会换行 →
+           移入折叠区顶部（它本身就是口径明细的一部分）。 -->
+        <div class="ff-nav ff-nav-body" id="ffNavdist"></div>
         <div class="src-note" id="srcNote"></div>
       </div>
     </details>

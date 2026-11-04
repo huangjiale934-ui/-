@@ -1218,6 +1218,21 @@ function breadthPrevPct(perf) {
         navStat: cache
           ? cache.navStat || null
           : null,
+        /* 2026-11-04（第三十七轮）：最近一次「近 5 交易日与官网复核」摘要——
+           页脚徽标显示「复核 N 点 · 偏差 M 处」，让客户看到每天在自查。 */
+        navRecheck: (function () {
+          try {
+            const r = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'nav-recheck.json'), 'utf8'));
+            return {
+              runAt: r.runAt || '',
+              window: r.window || [],
+              checked: r.checked || 0,
+              diffs: (r.diffs || []).length,
+              applied: r.applied || 0,
+              sources: Object.keys(r.sources || {}).length,
+            };
+          } catch (e) { return null; }
+        })(),
         /* 2026-10-30（5.0）：季度便览哨兵结果摘要——有新季自动写回时，顶栏提示复核 */
         quarterly: (function () {
           try {

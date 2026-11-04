@@ -1037,7 +1037,7 @@ body { overflow-x: visible; }
 /* ===== 2026-10-31 二版（用户反馈） ===== */
 /* 小标题 ⓘ 悬浮 */
 .h3-tip { display: inline-block; margin-left: 7px; font-size: 11.5px; font-weight: 600; color: var(--brand, #0866bb);
-  cursor: help; border: 1px solid var(--brand-line, #cfe2f3); border-radius: 50%; width: 15px; height: 15px;
+  cursor: pointer; border: 1px solid var(--brand-line, #cfe2f3); border-radius: 50%; width: 15px; height: 15px;
   line-height: 13px; text-align: center; vertical-align: 2px; font-style: normal; }
 /* 标题与年份标签拉开间距 */
 .yr-tabs { margin-top: 14px; }

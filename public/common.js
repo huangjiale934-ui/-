@@ -516,6 +516,17 @@ window.fetchHeaderStatus = function () {
       }
       const cnt = document.querySelector('.upd .cnt');
       if (cnt) cnt.textContent = TQ('{n} 条基金', { n: st.count });
+      /* 2026-11-04（第三十七轮）：页脚「官网复核 N 点 · 偏差 M 处」徽标 */
+      const rk = st.navRecheck;
+      const rkEl = document.getElementById('ffRecheck');
+      if (rkEl && rk && rk.checked) {
+        rkEl.textContent = rk.diffs
+          ? TQ('· 官网复核 {n} 点 · 偏差 {d} 处（已修正 {a} 处）', { n: rk.checked, d: rk.diffs, a: rk.applied })
+          : TQ('· 官网复核 {n} 点 · 未发现偏差', { n: rk.checked });
+        rkEl.title = TQ('复核时间 {t}，窗口 {a} ~ {b}', {
+          t: rk.runAt || '—', a: (rk.window || [])[0] || '—', b: (rk.window || [])[1] || '—',
+        });
+      }
       fillVerChip(st);
     })
     .catch(() => {});
@@ -610,8 +621,12 @@ function renderSrcNote() {
         TT('空白＝当日官网未披露净值，本站不插值、不前值填充。') +
       '</span></div>' +
       staleNote() +
-      '<div class="snote-foot"><span>' + TT('仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。') + '</span>' +
-        '<a class="snote-link" href="#rank">' + TT('积金局月度数据（旧口径）') + ' <em>MPFA</em> →</a></div>' +
+      /* 2026-11-04（第三十七轮，用户要求）：积金局入口另起一行，并写明「想看官方月报点这里」 */
+      '<div class="snote-foot">' +
+        '<div class="snote-dis">' + TT('仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。') + '</div>' +
+        '<div class="snote-mpfa">' + TT('想看积金局官方每月公布的基金列表，可点击') +
+          ' <a class="snote-link" href="#rank">' + TT('积金局月度数据（旧口径）') + ' <em>MPFA</em> →</a></div>' +
+      '</div>' +
     '</div>';
   /* 2026-11-03（第三十二轮）：计划名点击 → 同页直接筛选（不刷新）；没有 mpfSetKw 时走 href 深链 */
   Array.prototype.forEach.call(el.querySelectorAll('.ns-link'), function (a) {
@@ -634,9 +649,17 @@ function staleNote() {
   let max = '';
   all.forEach((f) => { if (f.navAsOf && f.navAsOf > max) max = f.navAsOf; });
   if (!max) return '';
+  /* 2026-11-04（第三十七轮）：原先把「任何比最新日旧一天」的计划都列为「公布较晚」，
+     补入 11-03 之后变成 16 个计划（T+1 属正常节奏）。改为「落后 ≥2 个估值日」才列出：
+     用全站出现过的净值日排序当交易日近似，周末/假期不会误判。 */
+  const dates = Array.from(new Set(all.map((f) => f.navAsOf).filter(Boolean))).sort().reverse();
+  const lagOf = {};
+  dates.forEach((d, i) => { lagOf[d] = i; });
   const m = {};
   all.forEach((f) => {
-    if (!f.navAsOf || f.navAsOf >= max) return;
+    if (!f.navAsOf) return;
+    const lag = lagOf[f.navAsOf];
+    if (lag == null || lag < 2) return;
     const k = f.scheme || f.trustee || '—';
     if (!m[k]) m[k] = { n: 0, d: f.navAsOf };
     m[k].n++;
@@ -3715,23 +3738,32 @@ window.loadLogoB64 = function () {
 window.buildCoverSheet = function (o) {
   const opt = o || {};
   const NCOL = 6;
-  const L = (n) => { let s = ''; let i = n + 1; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
-  const LAST = L(NCOL - 1);
+  const LAST = 'F';
   const rows = [];
   const merges = [];
   const site = opt.site || (location.origin + location.pathname).replace(/\/[^/]*$/, '/');
   const company = opt.company || TT('广州精研数据有限公司');
   const platform = opt.platform || TT('香港强积金数据平台');
+  /* 合并列 B:F 的可用宽度（字符数）——用于按内容估算行高，避免文字被裁掉 */
+  const MERGE_W = 122;
+  const cjk = (v) => String(v == null ? '' : v).replace(/[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]/g, 'xx').length;
+  const hOf = (v, base) => {
+    const lines = Math.max(1, Math.ceil(cjk(v) / MERGE_W));
+    return Math.max(base || 20, lines * 17 + 6);
+  };
 
-  /* 品牌区：A1:B4 = LOGO，C1 起三行公司名 / 平台 / 网址 */
-  rows.push({ h: 30, cells: [{ v: '', s: 0 }, { v: '', s: 0 }, { v: company, s: 12 }] });
-  rows.push({ h: 22, cells: [{ v: '', s: 0 }, { v: '', s: 0 }, { v: platform + (opt.page ? ' · ' + opt.page : ''), s: 13 }] });
-  rows.push({ h: 20, cells: [{ v: '', s: 0 }, { v: '', s: 0 }, { v: site, s: 11 }] });
+  /* 品牌区：无 LOGO（用户 2026-11-04 要求去掉），公司名/平台/网址三行居中 */
+  rows.push({ h: 30, cells: [{ v: company, s: 16 }] });
+  merges.push('A1:' + LAST + '1');
+  rows.push({ h: 22, cells: [{ v: platform + (opt.page ? ' · ' + opt.page : ''), s: 17 }] });
+  merges.push('A2:' + LAST + '2');
+  rows.push({ h: 20, cells: [{ v: site, s: 18 }] });
+  merges.push('A3:' + LAST + '3');
   rows.push({ h: 10, cells: [] });
 
   const section = (t) => {
     const r = rows.length + 1;
-    rows.push({ h: 26, cells: [{ v: t, s: 12 }] });
+    rows.push({ h: 28, cells: [{ v: t, s: 16 }] });
     merges.push('A' + r + ':' + LAST + r);
   };
 
@@ -3739,14 +3771,15 @@ window.buildCoverSheet = function (o) {
 
   (opt.meta || []).forEach(([k, v]) => {
     const r = rows.length + 1;
-    rows.push({ h: 22, cells: [{ v: k, s: 13 }, { v: v == null ? '' : String(v), s: 11 }] });
+    const val = v == null ? '' : String(v);
+    rows.push({ h: hOf(val), cells: [{ v: k, s: 13 }, { v: val, s: 11 }] });
     merges.push('B' + r + ':' + LAST + r);
   });
 
   (opt.notes || []).forEach((txt) => {
     if (!txt) return;
     const r = rows.length + 1;
-    rows.push({ h: 34, cells: [{ v: '', s: 0 }, { v: txt, s: 11 }] });
+    rows.push({ h: hOf(txt), cells: [{ v: '', s: 0 }, { v: txt, s: 11 }] });
     merges.push('B' + r + ':' + LAST + r);
   });
 
@@ -3758,24 +3791,21 @@ window.buildCoverSheet = function (o) {
     merges.push('B' + hr + ':' + LAST + hr);
     opt.columns.forEach(([n, d]) => {
       const r = rows.length + 1;
-      rows.push({ h: 22, cells: [{ v: n, s: 13 }, { v: d, s: 11 }] });
+      rows.push({ h: hOf(d), cells: [{ v: n, s: 13 }, { v: d, s: 11 }] });
       merges.push('B' + r + ':' + LAST + r);
     });
   }
 
   rows.push({ h: 10, cells: [] });
-  const rr = rows.length + 1;
-  rows.push({ h: 30, cells: [{ v: '免责声明', s: 13 }, { v: TT('本文件由本站程序自动生成，数据来自各发行人官网与积金局公开资料，仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。'), s: 11 }] });
-  merges.push('B' + rr + ':' + LAST + rr);
+  const r2 = rows.length + 1;
+  const dis = TT('本文件由本站程序自动生成，数据来自各发行人官网与积金局公开资料，仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。');
+  rows.push({ h: hOf(dis, 30), cells: [{ v: dis, s: 19 }] });
+  merges.push('A' + r2 + ':' + LAST + r2);
 
-  const sheet = {
+  return {
     name: opt.sheetName || TT('数据说明'),
     rows: rows,
     merges: merges,
-    cols: [14, 26, 26, 22, 22, 22],
+    cols: [18, 24, 26, 24, 24, 24],
   };
-  if (opt.logo) {
-    sheet.images = [{ data: opt.logo, col: 0, row: 0, col2: 2, row2: 4, name: 'logo' }];
-  }
-  return sheet;
 };
