@@ -48,6 +48,10 @@ if (lag.length) wrn('早于全站最新日 ' + navMax + ' 的有 ' + lag.length 
 
 console.log('== B 净值 vs 历史末点 ==');
 let histMissing = 0, tailMismatch = 0, valMismatch = 0, badSeries = 0, emptySeries = 0;
+/* 2026-11-04：新增「稳定类基金异常日波动」扫描 —— BCT 源站曾在 2026-10-30 给出偏高标价，
+   货币/保证/债券类基金单日跳 3~4% 后次日回吐，靠这个扫描才发现的。 */
+const stableHits = [];
+const cutoff = (() => { const d = new Date(); d.setUTCDate(d.getUTCDate() - 60); return d.toISOString().slice(0, 10); })();
 const histDir = path.join(D, 'hist');
 const histFiles = fs.existsSync(histDir) ? fs.readdirSync(histDir).filter((f) => f.endsWith('.json')) : [];
 const histIds = new Set(histFiles.map((f) => f.replace(/\.json$/, '')));
@@ -58,6 +62,13 @@ funds.forEach((f) => {
   let s;
   try { s = JSON.parse(fs.readFileSync(path.join(histDir, id + '.json'), 'utf8')).series || []; } catch (e) { badSeries++; return; }
   if (!s.length) { emptySeries++; return; }
+  if (/貨幣|货币|保證|保证|債券|债券/.test(String(f.type || '') + String(f.typeFull || ''))) {
+    for (let i = 1; i < s.length; i++) {
+      if (s[i][0] < cutoff) continue;
+      const r = s[i][1] / s[i - 1][1] - 1;
+      if (Math.abs(r) > 0.02) stableHits.push(f.id + ' ' + f.fund + ' ' + s[i][0] + ' ' + (r * 100).toFixed(2) + '%');
+    }
+  }
   const last = s[s.length - 1];
   if (last[0] !== f.navAsOf) tailMismatch++;
   else if (Math.abs(last[1] - f.nav) > 1e-6) valMismatch++;
@@ -74,6 +85,10 @@ if (tailMismatch) bad('历史末点日期 ≠ 基金净值日 ' + tailMismatch +
 else ok('历史末点日期与基金净值日全部一致');
 if (valMismatch) bad('末点净值与基金表净值不一致 ' + valMismatch + ' 只');
 else ok('末点净值与基金表净值一致');
+if (stableHits.length) {
+  wrn('稳定类基金近 60 日出现 >2% 单日波动 ' + stableHits.length + ' 处（先核对源站是否标价错误）：');
+  stableHits.slice(0, 8).forEach((x) => console.log('       ' + x));
+} else ok('稳定类基金近 60 日无异常单日波动');
 
 console.log('== C 自算指标 nav-perf ==');
 const perf = read('nav-perf.json', { funds: {} });
