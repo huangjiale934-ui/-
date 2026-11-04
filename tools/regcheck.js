@@ -2159,3 +2159,9 @@ chk('三十四轮·⑦详情表头右侧四块字号 +1（12.5 / 18 / 17 / 12.5�
   /\.modal-bd \.fd-v2 \{ font-size: 18px/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-v2\.fd-type \{ font-size: 17px/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-s \{ font-size: 12\.5px/.test(readSrc('analysis.css')));
+chk('三十四轮·⑨静态站已落盘规模/波动率榜（GitHub 站不 404）',
+  /top-size\.json/.test(fs.readFileSync(path.join(__dirname, '..', 'tools', 'build-static.js'), 'utf8')) &&
+  /top-vol1\.json/.test(fs.readFileSync(path.join(__dirname, '..', 'tools', 'build-static.js'), 'utf8')) &&
+  /size: 'api\/top-size\.json'/.test(readSrc('api-adapter.js')));
+chk('三十四轮·⑩手机端隐藏旧口径入口（桌面保留）',
+  /@media \(max-width: 760px\) \{\s*\.db-side-more \{ display: none; \}/.test(readSrc('style.css')));

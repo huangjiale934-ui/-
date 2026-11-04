@@ -2661,3 +2661,9 @@ body.has-sidebar .dca-fab { display: none !important; }
 .fr-list .fr-nolink .fr-t span { margin-top: auto; padding-top: 5px; }
 /* 主三段（积金局等）文字更长，给一点行高，避免两行挤在一起 */
 .fr-list:not(.fr-sm) a { line-height: 1.45; }
+
+/* 2026-11-04（第三十四轮）：手机端横向导航里不再显示「更多数据 / 积金局月度数据」，
+   避免旧口径入口在窄屏又变成一级项（桌面仍保留小号入口） */
+@media (max-width: 760px) {
+  .db-side-more { display: none; }
+}

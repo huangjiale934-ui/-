@@ -78,6 +78,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   /* 2026-11-03（第三十三轮）：首页四榜新增「年初至今 / 近 3 年年化」 */
   put('top-ytd.json', await getJson('/api/top?k=ytd&n=20'));
   put('top-y3a.json', await getJson('/api/top?k=y3a&n=20'));
+  /* 2026-11-04（第三十四轮）：首页四榜改为 1Y/5Y/规模/波动率 */
+  put('top-size.json', await getJson('/api/top?k=size&n=20'));
+  put('top-vol1.json', await getJson('/api/top?k=vol1&n=20'));
   /* 2026-11-01（6.0）：补两个 10-31 新增端点——此前静态站缺行情栏与积金表现指数 */
   put('ticker.json', await getJson('/api/ticker'));
   put('perf-idx.json', await getJson('/api/perf-idx'));
