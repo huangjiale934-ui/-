@@ -412,9 +412,19 @@ chk('翻译·本轮新键抽查在字典中', (function () {
 /* 接口层（Node 原生 fetch；本环境的沙箱禁止 spawn 子进程，故不用 curl）：
    /api/funds 应已下发 units 分组；/api/status 应含 syncStatus */
 (async function () {
+  /* 2026-11-05：GitHub Pages 是纯静态站，/api/funds 返回 404 的 HTML，
+     真正的文件是 /api/funds.json。这里统一做一次回退，两个站点都能跑同一套断言。 */
+  const apiGet = async (path, init) => {
+    try {
+      const r = await fetch(BASE + path, init);
+      const ct = r.headers.get('content-type') || '';
+      if (r.ok && /json/.test(ct)) return r;
+    } catch (e) { /* 落到 .json */ }
+    return fetch(BASE + path + '.json', init);
+  };
   try {
     let r;
-    for (let i = 0; i < 3; i++) { try { r = await fetch(BASE + '/api/funds', { signal: AbortSignal.timeout(25000) }); break; } catch (e2) { if (i === 2) throw e2; await new Promise((x) => setTimeout(x, 1500)); } }
+    for (let i = 0; i < 3; i++) { try { r = await apiGet('/api/funds', { signal: AbortSignal.timeout(25000) }); break; } catch (e2) { if (i === 2) throw e2; await new Promise((x) => setTimeout(x, 1500)); } }
     const j = await r.json();
     const withUnits = (j.funds || []).filter((f) => Array.isArray(f.units) && f.units.length > 1);
     const ok1 = withUnits.length > 0 && withUnits[0].units[0].cfId != null && typeof withUnits[0].units[0].unit === 'string';
@@ -423,14 +433,14 @@ chk('翻译·本轮新键抽查在字典中', (function () {
     chk('接口·funds 含 units 分组（单位类别明细数据）', false, String(e.message || e).slice(0, 60));
   }
   try {
-    const r2 = await fetch(BASE + '/api/status');
+    const r2 = await apiGet('/api/status');
     const j2 = await r2.json();
     chk('接口·status 含 syncStatus 字段', j2.syncStatus === 'ok' || j2.syncStatus === 'degraded', 'syncStatus=' + j2.syncStatus);
   } catch (e) {
     chk('接口·status 含 syncStatus 字段', false, String(e.message || e).slice(0, 60));
   }
   try {
-    const r3 = await fetch(BASE + '/api/market');
+    const r3 = await apiGet('/api/market');
     const j3 = await r3.json();
     const mo = j3.mpfaMonthly;
     chk('接口·market 含 mpfaMonthly（官方月度数据）', !!(mo && mo.rows && mo.rows.length === 9), mo ? ('asOf ' + mo.asOf) : '缺失');
@@ -438,7 +448,7 @@ chk('翻译·本轮新键抽查在字典中', (function () {
     chk('接口·market 含 mpfaMonthly（官方月度数据）', false, String(e.message || e).slice(0, 60));
   }
   try {
-    const r4 = await fetch(BASE + '/api/funds');
+    const r4 = await apiGet('/api/funds');
     const j4 = await r4.json();
     const wf = (j4.funds || []).filter((f) => f.feeMore);
     const sample = wf.find((f) => f.feeMore.mgmtFee && f.feeMore.mgmtFee.max != null);
