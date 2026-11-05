@@ -1380,7 +1380,7 @@ function breadthPrevPct(perf) {
       if (looksLikeFile && !isHtml) return sendRaw(req, res, 404, 'Not Found', 'text/plain; charset=utf-8');
       fs.readFile(path.join(PUBLIC_DIR, '404.html'), (e2, b2) => {
         if (e2) return sendRaw(req, res, 404, 'Not Found', 'text/plain; charset=utf-8');
-        sendRaw(req, res, 404, b2.toString('utf8').replace(/\?v=[0-9a-zA-Z.]+/g, '?v=' + ASSET_V), MIME['.html'], { cache: 'no-cache' });
+        sendRaw(req, res, 404, b2.toString('utf8').replace(/([?&])v=[0-9a-zA-Z.]+/g, '$1v=' + ASSET_V), MIME['.html'], { cache: 'no-cache' });
       });
       return;
     }
@@ -1394,7 +1394,11 @@ function breadthPrevPct(perf) {
         : 'public, max-age=604800';
     if (ext === '.html') {
       // HTML 内的 ?v= 版本号动态替换（见 ASSET_V 注释）——每次部署后自动失效旧缓存
-      const html = buf.toString('utf8').replace(/\?v=[0-9a-zA-Z.]+/g, '?v=' + ASSET_V);
+      /* 2026-11-05（第三十九轮，自查发现）：原来只替换「?v=」，而打包脚本生成的
+         b.css/b.js 是「?p=index&v=20261104b」——用 & 连接，永远匹配不到，
+         于是这两种主资源一直带着写死的旧版本号，最长可被缓存 7 天（改版后用户看旧版）。
+         现在 ?v= 与 &v= 都替换。 */
+      const html = buf.toString('utf8').replace(/([?&])v=[0-9a-zA-Z.]+/g, '$1v=' + ASSET_V);
       return sendRaw(req, res, 200, html, MIME['.html'], { cache: 'no-cache' });
     }
     sendRaw(req, res, 200, buf, MIME[ext] || 'application/octet-stream', { cache: cache });

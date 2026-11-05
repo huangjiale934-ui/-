@@ -2190,6 +2190,10 @@ chk('三十五轮·③资料库积金局口径列表头有悬浮说明（无 ⓘ
     /cell\.setAttribute\('data-tip', TT\(TH_TIPS\[k\]\)\)/.test(a) &&
     /if \(a && a\.tagName === 'TH'\) \{ hide\(\); return; \}/.test(readSrc('common.js'));
 })());
+chk('三十九轮·资源版本号：?v= 与 &v= 都替换成同一版本（防用户看旧版）', (function () {
+  const sv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+  return /\(\[\?&\]\)v=\[0-9a-zA-Z\.\]\+/.test(sv) && /'\$1v=' \+ ASSET_V/.test(sv);
+})());
 chk('三十五轮·④首屏卡改「较上周 ±N 个百分点」（接口给 delta）', (function () {
   const sv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
   /* 2026-11-05（第三十九轮，用户选定）：回到滚动口径（本周 vs 上一周，两个窗口同步前移） */
