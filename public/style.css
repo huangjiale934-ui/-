@@ -3021,3 +3021,64 @@ body { overflow-x: clip; }
   #dbSec > #dbScopeNote { order: 5; }
   #dbSec > #dbTrendCard { order: 6; margin-top: 4px; }
 }
+
+/* ==========================================================
+   2026-11-05（第四十轮）手机端：走势图下方对比表 → 卡片 + 可展开
+   原来是 7 列的宽表，手机上必须横滑才能看全。
+   现在每只标的一张卡：名称一行，默认 3 个关键指标，其余收进「全部指标」。
+   ========================================================== */
+.tr-more { display: none; }
+@media (max-width: 720px) {
+  .tr-tbl-scroll { overflow: visible !important; }
+  .tr-tbl, .tr-tbl thead, .tr-tbl tbody, .tr-tbl tr, .tr-tbl td { display: block; width: 100%; }
+  .tr-tbl thead { display: none; }
+  .tr-tbl tr {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 9px 12px; align-items: start;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 11px 12px 12px; margin-bottom: 9px;
+    background: var(--surface) !important; box-shadow: var(--shadow-sm);
+  }
+  .tr-tbl td {
+    display: block; border: 0 !important; padding: 0 !important;
+    text-align: left !important; font-size: 13px; line-height: 1.45; min-width: 0;
+  }
+  .tr-tbl td::before {
+    content: attr(data-l); display: block; margin-bottom: 1px;
+    font-size: 11px; color: var(--text-3); font-weight: 500;
+  }
+  /* 名称行 */
+  .tr-tbl td.n {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 8px;
+    padding: 0 0 8px !important; border-bottom: 1px dashed var(--border) !important;
+  }
+  .tr-tbl td.n::before { display: none; }
+  .tr-tbl td.n .nm { font-weight: 600; font-size: 14px; color: var(--text); }
+  .tr-tbl td.n .tr-more {
+    display: inline-flex; align-items: center; gap: 3px; margin-left: auto;
+    border: 1px solid var(--border-strong); background: var(--surface);
+    color: var(--brand); border-radius: 999px; padding: 3px 10px;
+    font-size: 11.5px; font-family: inherit; cursor: pointer; white-space: nowrap;
+  }
+  .tr-tbl td.n .tr-more::after { content: '▾'; font-size: 10px; }
+  .tr-tbl tr.open td.n .tr-more::after { content: '▴'; }
+  .tr-tbl td.n .tr-lg-x { margin-left: 2px; font-size: 16px; color: var(--text-3); }
+  /* 次要指标：默认收起 */
+  .tr-tbl td.m-extra { display: none; }
+  .tr-tbl tr.open td.m-extra { display: block; }
+  /* 数值右对齐会显得散，卡片里统一左对齐；日期折行 */
+  .tr-tbl td.r, .tr-tbl td.r.date { text-align: left !important; }
+  .tr-tbl td.date { grid-column: 1 / -1; font-size: 12px; color: var(--text-2); }
+}
+
+/* 2026-11-05（第四十轮）手机端页脚折叠条：原来「核对时间」被压成 86px 宽、折成三行 */
+@media (max-width: 720px) {
+  /* 桌面端给右侧留 134px 是为了「避让悬浮按钮 + 两条折叠箭头上下对齐」，
+     手机上这会把可用宽度压到 185px，核对时间被迫折三行 → 手机上收回到正常内距。 */
+  .foot-fold summary, #foldSpec summary { padding: 10px 13px !important; flex-wrap: wrap; gap: 6px 10px; }
+  /* 让「本次净值核对时间：」与日期成为两个可换行的 flex 项，避免日期被拆成两行 */
+  .foot-fold .ff-b { flex: 0 0 100%; font-size: 12.5px; line-height: 1.5; display: flex; flex-wrap: wrap; gap: 0 4px; align-items: baseline; }
+  .foot-fold .ff-b b { font-size: 12.5px; }
+  .foot-fold .ff-a { font-size: 12.5px; }
+  .foot-fold .ff-arrow { margin-left: auto; }
+}

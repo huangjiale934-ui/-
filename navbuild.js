@@ -17,7 +17,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { execFileSync } = require('child_process');
+const { execFileSync, execFile } = require('child_process');
 
 const ROOT = __dirname;
 const SRC_DIR = path.join(ROOT, 'tmp', 'navsrc');
@@ -228,54 +228,60 @@ function isValid(res, s) {
   return true;
 }
 
-function renderAll() {
-  if (!fs.existsSync(CHROME)) {
-    console.log('[NAV] 未找到 Chrome，跳过渲染（已尝试：' + CHROME_CANDIDATES.join(' / ') + '）');
-    return false;
-  }
-  console.log('[NAV] 渲染器：' + CHROME);
-  fs.mkdirSync(SRC_DIR, { recursive: true });
-  const done = {};
-  for (const s of SOURCES) {
-    if (done[s.file]) continue;
-    done[s.file] = 1;
-    const out = path.join(SRC_DIR, s.file);
-    // PDF 等非 HTML 源由外部脚本（如 shkp_nav.py）预先抽取，不能用 dump-dom 覆盖
-    if (s.noRender) {
-      const sz = fs.existsSync(out) ? fs.statSync(out).size : 0;
-      console.log('       ' + s.file + '  跳过渲染（保留已有文件' + (sz ? '，' + sz + ' bytes' : '，缺失!') + '）');
-      continue;
-    }
-    let ok = false;
-    for (const u of urlCandidates(s.url)) {
-      const res = fetchDom(u, s.key, s.budget);
-      if (isValid(res, s)) { fs.writeFileSync(out, res); ok = true; break; }
-    }
-    if (ok) console.log('       ' + s.file + '  ' + fs.statSync(out).size + ' bytes');
-    else console.error('       ' + s.file + '  抓取无效，保留上一次文件');
-  }
-  return true;
-}
-
-function fetchDom(url, key, budget) {
+/* 2026-11-05（第四十轮）：渲染改成 3 路并发 —— 20 个页面串行要 7 分钟，
+   并发后约 2.5–3 分钟。每个页面本来就用自己的 user-data-dir，互不干扰；
+   单页失败仍然「保留上一次文件」，行为与串行版一致。 */
+async function fetchDomAsync(url, key, budget) {
   const ms = budget || 25000;
   const udd = path.join(os.tmpdir(), 'nav-' + key);
   const args = ['--headless=new', '--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage',
     '--user-data-dir=' + udd, '--virtual-time-budget=' + ms,
     '--window-size=1920,3000', '--user-agent=' + UA, '--dump-dom', url];
-  try {
-    /* 2026-11-05：硬超时从「虚拟时间 + 150s」收到 +90s —— 页面卡住时每个候选地址少等 1 分钟，
-       正常页面（45–60s 预算）仍有 90s 余量，不受影响。 */
-    return execFileSync(CHROME, args, { maxBuffer: 128 * 1024 * 1024, timeout: ms + 90000 }).toString();
-  } catch (e) {
-    try {
-      return execFileSync('timeout', [String(Math.ceil((ms + 90000) / 1000)), CHROME].concat(args),
-        { maxBuffer: 128 * 1024 * 1024, timeout: ms + 110000 }).toString();
-    } catch (e2) {
-      console.error('[NAV] 读取失败 ' + key + ': ' + e2.message);
-      return null;
-    }
+  const run = (file, argv, opts) => new Promise((resolve) => {
+    execFile(file, argv, opts, (err, stdout) => resolve(err ? null : stdout));
+  });
+  const out = await run(CHROME, args, { maxBuffer: 128 * 1024 * 1024, timeout: ms + 90000 });
+  if (out != null) return out;
+  return run('timeout', [String(Math.ceil((ms + 90000) / 1000)), CHROME].concat(args),
+    { maxBuffer: 128 * 1024 * 1024, timeout: ms + 110000 });
+}
+
+async function renderAll(concurrency) {
+  if (!fs.existsSync(CHROME)) {
+    console.log('[NAV] 未找到 Chrome，跳过渲染（已尝试：' + CHROME_CANDIDATES.join(' / ') + '）');
+    return false;
   }
+  console.log('[NAV] 渲染器：' + CHROME + '（并发 ' + (concurrency || 3) + '）');
+  fs.mkdirSync(SRC_DIR, { recursive: true });
+  const seen = {};
+  const list = [];
+  for (const s of SOURCES) {
+    if (seen[s.file]) continue;
+    seen[s.file] = 1;
+    const out = path.join(SRC_DIR, s.file);
+    if (s.noRender) {
+      const sz = fs.existsSync(out) ? fs.statSync(out).size : 0;
+      console.log('       ' + s.file + '  跳过渲染（保留已有文件' + (sz ? '，' + sz + ' bytes' : '，缺失!') + '）');
+      continue;
+    }
+    list.push({ s, out });
+  }
+  const queue = list.slice();
+  const worker = async () => {
+    while (queue.length) {
+      const { s, out } = queue.shift();
+      let ok = false;
+      for (const u of urlCandidates(s.url)) {
+        const res = await fetchDomAsync(u, s.key, s.budget);
+        if (res && isValid(res, s)) { fs.writeFileSync(out, res); ok = true; break; }
+      }
+      if (ok) console.log('       ' + s.file + '  ' + fs.statSync(out).size + ' bytes');
+      else console.error('       ' + s.file + '  抓取无效，保留上一次文件');
+    }
+  };
+  const n = Math.max(1, Math.min(concurrency || 3, queue.length));
+  await Promise.all(Array.from({ length: n }, worker));
+  return true;
 }
 
 /* ============================ 通用工具 ============================ */
@@ -964,7 +970,10 @@ function build() {
 }
 
 function main() {
-  if (process.argv.includes('--render')) renderAll();
+  if (process.argv.includes('--render')) {
+    renderAll(3).then(() => build()).catch((e) => { console.error('[NAV] 渲染失败：' + e.message); build(); });
+    return;
+  }
   build();
 }
 if (require.main === module) main();

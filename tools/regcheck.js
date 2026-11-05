@@ -1949,10 +1949,16 @@ chk('二十七轮·⑬页脚两个折叠箭头缩小 15%（42 → 36）',
 chk('二十七轮·⑭详情弹窗价格与四项并排（5 列一行）',
   /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{ grid-column: auto;/.test(readSrc('analysis.css')));
-chk('二十七轮·设计页（20 套整页 / 20 套详情头 / 对比表 4 种，放在 public/ 可直接访问）',
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-shell.html')) &&
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-detail.html')) &&
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-cmp.html')));
+chk('四十轮·public 内不得残留任何 design-*.html（避免内部评审页被外部访问）', (function () {
+  try {
+    const dir = path.join(__dirname, '..', 'public');
+    return !fs.readdirSync(dir).some((f) => /^design-.*\.html$/i.test(f));
+  } catch (e) { return false; }
+})());
+chk('四十轮·设计页已移出 public（改存 output/design-pages，不再对外发布）',
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-shell.html')) &&
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-detail.html')) &&
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-cmp.html')));
 
 /* ===== 2026-11-03 第二十八轮（9 条反馈）===== */
 chk('二十八轮·①详情弹窗不再加宽（1060 已下线，现 765）',
@@ -1982,9 +1988,9 @@ chk('二十八轮·⑧页头 LOGO 去拼音、去副标题，语言移入侧栏'
 chk('二十八轮·⑧行情迷你折线恢复（≥980 显示）',
   /@media \(max-width: 980px\) \{\s*\.hdr \.tk-spark \{ display: none; \}/.test(readSrc('style.css')) &&
   !/max-width: 1700px[\s\S]{0,80}tk-spark/.test(readSrc('style.css')));
-chk('二十八轮·⑦⑧两个新设计页在位（10 套详情头 / 20 套页头）',
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-detail2.html')) &&
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-shell2.html')));
+chk('四十轮·设计页（第二批）也已移出 public',
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-detail2.html')) &&
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-shell2.html')));
 chk('二十八轮·详情弹窗「放大」先切到对比页（修「点了没反应」）',
   /window\.__dbShowTab = function \(t\) \{ show\(t, false, false\); \};/.test(readSrc('index.html')) &&
   /__dbShowTab\('cmp'\)/.test(readSrc('common.js')));
@@ -2019,9 +2025,9 @@ chk('二十九轮·⑧首页榜单可点进详情（data-fid + ?f= 深链）',
   /\.mk-top li\[data-fid\] \{ cursor: pointer; \}/.test(readSrc('home.css')));
 chk('二十九轮·⑧资料库支持 ?dim= 深链（落到同一自算维度排序）',
   /get\('dim'\)/.test(readSrc('app.js')) && /window\.__DIMSEL = \[\{ k: dk, d: hit\.d \|\| 'desc' \}\];/.test(readSrc('app.js')));
-chk('二十九轮·⑦首屏设计页（20 套真实尺寸）在位',
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-hero.html')) &&
-  /1160px; height: 316px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'design-hero.html'), 'utf8')));
+chk('四十轮·首屏设计页已移出 public',
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-hero.html')) &&
+  /1160px; height: 316px/.test(fs.readFileSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-hero.html'), 'utf8')));
 
 /* ===== 2026-11-03 第三十轮（12 条反馈）===== */
 chk('三十轮·②走势图与详情图的年份都改为单独一行居中',
@@ -2085,9 +2091,9 @@ chk('三十一轮·⑤数据说明列出源站滞后名单（折叠区内）',
   /function staleNote\(\)/.test(readSrc('common.js')) &&
   /note-stale/.test(readSrc('style.css')) &&
   /id="foldSpec"/.test(readSrc('index.html')));
-chk('三十一轮·⑥前十大持仓两行式设计页在位（真实 729px）',
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-hold.html')) &&
-  /width:729px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'design-hold.html'), 'utf8')));
+chk('四十轮·持仓设计页已移出 public',
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-hold.html')) &&
+  /width:729px/.test(fs.readFileSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-hold.html'), 'utf8')));
 
 /* ===== 2026-11-03 第三十二轮（6 条反馈）===== */
 chk('三十二轮·③情绪卡口径统一：近一周占比 + 跳「近 1 周」维度',
@@ -2104,9 +2110,9 @@ chk('三十二轮·①源站名单：折叠块 + 每计划一行 + 可点击筛�
 chk('三十二轮·②行情悬浮提示写清折线维度与数据日期',
   /折线为近 \{n\} 个交易日的走势/.test(readSrc('common.js')) &&
   /数据截至 \{d\}/.test(readSrc('common.js')));
-chk('三十二轮·③37% 迷你图 20 套设计页在位',
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-breadth.html')) &&
-  (fs.readFileSync(path.join(__dirname, '..', 'public', 'design-breadth.html'), 'utf8').match(/const b\d\d = /g) || []).length >= 20);
+chk('四十轮·迷你图设计页已移出 public',
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-breadth.html')) &&
+  (fs.readFileSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-breadth.html'), 'utf8').match(/const b\d\d = /g) || []).length >= 20);
 
 /* ===== 2026-11-03 第三十三轮（11 条反馈）===== */
 chk('三十三轮·①行情数字改「近 40 个交易日区间收益」+ 上证换标普 500',
@@ -2134,8 +2140,8 @@ chk('三十三轮·⑦市场回报年份视图补三块（各类平均 / 分布 
   /function yearDetailHTML/.test(readSrc('home.js')) &&
   /\.yr-dist \{/.test(readSrc('home.css')) && /\.yr-rank li \{/.test(readSrc('home.css')));
 chk('三十三轮·⑧三个图表 20 套配色方案页在位（真实图表）',
-  fs.existsSync(path.join(__dirname, '..', 'public', 'design-palette.html')) &&
-  (fs.readFileSync(path.join(__dirname, '..', 'public', 'design-palette.html'), 'utf8').match(/id: 'P\d\d'/g) || []).length >= 20);
+  fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-palette.html')) &&
+  (fs.readFileSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-palette.html'), 'utf8').match(/id: 'P\d\d'/g) || []).length >= 20);
 chk('三十三轮·⑨数据统计口径说明改写（2026-11-04 精简为来源/收录/核对三行）',
   /单位净值取自 \{u\} 家受托人官网/.test(readSrc('common.js')) &&
   /本次已逐条核实/.test(readSrc('common.js')) &&

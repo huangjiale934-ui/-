@@ -1429,6 +1429,8 @@
     'Last week (as of {b}): {p}% of funds up over the trailing week. This week: {c}%. The figure shown is this week minus last week, in percentage points.',
   '筛选与排序': 'Filters & sorting',
   '共 {n} 条': '{n} funds',
+  '全部指标': 'All metrics',
+  '收起': 'Collapse',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

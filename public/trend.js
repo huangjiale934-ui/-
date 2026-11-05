@@ -271,6 +271,16 @@ window.TREND = (function () {
        ——2026-10-14 修复：此前 × 点击无效的 bug；同时新增「点线条改样式」 */
     /* 2026-11-02（第二十三轮）：图例行删除，×（移除）与「点线条改样式」迁到下方表格的名称列 */
     box.querySelector('.tr-tablewrap').addEventListener('click', (e) => {
+      /* 2026-11-05（第四十轮）：手机端「全部指标 / 收起」——只影响展示，不影响数据 */
+      const mb = e.target.closest('.tr-more');
+      if (mb) {
+        e.preventDefault(); e.stopPropagation();
+        const tr = mb.closest('tr');
+        const open = tr.classList.toggle('open');
+        mb.setAttribute('aria-expanded', open ? 'true' : 'false');
+        mb.textContent = _t(open ? '收起' : '全部指标');
+        return;
+      }
       const t = e.target.closest('[data-toggle]');
       if (t) { e.stopPropagation(); toggleItem(t.getAttribute('data-toggle')); return; }
       /* 2026-11-02（第二十五轮）：点「基金名称」= 打开基金详情；点左侧线条 = 改样式 */
@@ -1414,17 +1424,22 @@ window.TREND = (function () {
         const nameAttr = fId
           ? ' data-openfund="' + esc0(fId) + '" title="' + esc0(_t('查看基金详情')) + '"'
           : ' title="' + esc0(nameTip) + '"';
+        /* 2026-11-05（第四十轮）：手机上这张表改成「卡片 + 可展开」——
+           每张卡默认只留「区间收益 / 年化波动率 / 区间最大回撤」三个关键指标，
+           高低点与回撤区间收进「全部指标」，彻底不需要横滑。
+           data-l 供 CSS 生成「标签在上、数值在下」的排版（桌面端不显示）。 */
         return '<tr>' +
-          '<td class="n">' + linePrev +
+          '<td class="n" data-l="' + esc0(_t('名称')) + '">' + linePrev +
             '<span class="nm"' + nameAttr + '>' + esc0(L.name) + '</span>' +
-            '<b class="tr-lg-x" data-toggle="' + esc0(L.key) + '" title="' + esc0(_t('移除')) + '">×</b></td>' +
+            '<b class="tr-lg-x" data-toggle="' + esc0(L.key) + '" title="' + esc0(_t('移除')) + '">×</b>' +
+            '<button type="button" class="tr-more" aria-expanded="false">' + esc0(_t('全部指标')) + '</button></td>' +
           /* 2026-11-02（第二十六轮，用户要求）：删掉「期初 / 期末」两列 —— 与区间收益重复，留着浪费宽度 */
-          '<td class="r">' + fmtV(hi) + '</td>' +
-          '<td class="r">' + fmtV(lo) + '</td>' +
-          '<td class="r ' + clsOf(ret) + '">' + fmtPct(ret) + lateMark + '</td>' +
-          '<td class="r">' + (vol == null ? '—' : vol.toFixed(1) + '%') + '</td>' +
-          '<td class="r down">' + (m.mdd < -0.005 ? fmtPct(m.mdd) : '0.00%') + lateMark + '</td>' +
-          '<td class="r date">' + (m.mdd < -0.005 ? (dstr(m.fromT) + ' → ' + dstr(m.toT)) : '—') + '</td>' +
+          '<td class="r m-extra" data-l="' + esc0(_t('区间最高')) + '">' + fmtV(hi) + '</td>' +
+          '<td class="r m-extra" data-l="' + esc0(_t('区间最低')) + '">' + fmtV(lo) + '</td>' +
+          '<td class="r ' + clsOf(ret) + '" data-l="' + esc0(_t('区间收益')) + '">' + fmtPct(ret) + lateMark + '</td>' +
+          '<td class="r" data-l="' + esc0(_t('年化波动率')) + '">' + (vol == null ? '—' : vol.toFixed(1) + '%') + '</td>' +
+          '<td class="r down" data-l="' + esc0(_t('区间最大回撤')) + '">' + (m.mdd < -0.005 ? fmtPct(m.mdd) : '0.00%') + lateMark + '</td>' +
+          '<td class="r date m-extra" data-l="' + esc0(_t('最大回撤区间')) + '">' + (m.mdd < -0.005 ? (dstr(m.fromT) + ' → ' + dstr(m.toT)) : '—') + '</td>' +
           '</tr>';
       }).join('');
       wrap.innerHTML =

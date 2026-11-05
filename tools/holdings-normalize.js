@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const P = path.join(__dirname, '..', 'data', 'holdings.json');
 const j = JSON.parse(fs.readFileSync(P, 'utf8'));
-let t = 0, s = 0, d = 0;
+let t = 0, s = 0, d = 0, a = 0;
 
 const MONTH_END = (ym) => {
   const [y, m] = ym.split('-').map(Number);
@@ -30,6 +30,13 @@ Object.values(j.funds).forEach((x) => {
       if (diff <= 1) { x.asOf = me; d++; }
     }
   }
+  /* 2026-11-05（第四十轮）：BCT 便览解析只写 allocLabel + alloc，没有 allocSum，
+     health-check 的字段完整性哨兵会报「缺失 83 只」（页面不受影响，因为前端自己求和）。
+     这里按逐项 weight 补上；已有值一律不动。 */
+  if ((x.alloc || []).length && x.allocSum == null) {
+    x.allocSum = Math.round(x.alloc.reduce((q, b) => q + (Number(b.weight) || 0), 0) * 100) / 100;
+    a++;
+  }
 });
 fs.writeFileSync(P, JSON.stringify(j));
-console.log('规范化：补口径标题', t, '| 排序', s, '| 日期归一', d);
+console.log('规范化：补口径标题', t, '| 排序', s, '| 日期归一', d, '| 补 allocSum', a);

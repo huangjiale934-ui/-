@@ -35,6 +35,56 @@ want="${1:-full}"
 NODE="C:/Users/11718/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
 "$NODE" tools/hist-merge-snap.js save
 
+# 2026-11-05（第四十轮）：recent 模式改成两波并行 —— 9 家串行约 9–10 分钟，
+# 并行后由最慢的一家（銀聯信託 BCT 171 只 / 友邦 21 只）决定，约 4–5 分钟。
+# 各脚本写各自的 hist 文件，共享的 hist-index.json 已是加锁 + 原子写入（histidx.py）。
+if [ "$want" = "recent" ]; then
+  PAR_DIR="tmp/par-topup-$$"
+  mkdir -p "$PAR_DIR"
+  : > "$PAR_DIR/jobs"
+  parx() {                     # parx <名称> <超时秒> <命令...>
+    local n="$1"; local to="$2"; shift 2
+    local safe; safe=$(printf '%s' "$n" | tr ' /' '__')
+    echo ""; echo "--- [$n] ---"
+    ( timeout "$to" "$@"; echo $? > "$PAR_DIR/$safe.rc"; date +%s > "$PAR_DIR/$safe.end" ) > "$PAR_DIR/$safe.log" 2>&1 &
+    echo "$n|$safe|$!|$(date +%s)" >> "$PAR_DIR/jobs"
+  }
+  wait_parx() {
+    while IFS='|' read -r n safe pid t0; do
+      [ -n "${pid:-}" ] || continue
+      wait "$pid"
+      local rc t1
+      rc=$(cat "$PAR_DIR/$safe.rc" 2>/dev/null || echo '?')
+      t1=$(cat "$PAR_DIR/$safe.end" 2>/dev/null || date +%s)
+      echo "    [$n] 完成：$(( t1 - t0 ))s，退出码 $rc"
+      sed 's/^/    /' "$PAR_DIR/$safe.log" 2>/dev/null | tail -8
+      [ "$rc" != "0" ] && echo "!!! [$n] 失败或超时（$rc），跳过，保留原数据"
+    done < "$PAR_DIR/jobs"
+    : > "$PAR_DIR/jobs"
+  }
+
+  # 第一波：四个最重的
+  parx "銀聯信託 BCT 171 只（近 10 日）" 1500 "$PY" fetch-bct-hist.py --max-dates 10
+  parx "友邦 21 只" 1200 "$PY" aia_ingest2.py
+  parx "滙豐/恒生 40 只（近端）" 900 "$PY" fetch-hsbc-family.py --from "$SINCE"
+  parx "中銀保誠 34 只（近端）" 900 "$PY" fetch-bocpt-hist.py --from "$SINCE"
+  wait_parx
+  # 第二波：其余五家
+  parx "永明 31 只（近端）" 2400 "$PY" fetch-sunlife-hist.py --from "$SINCE"
+  parx "萬通 14 只" 900 "$PY" yflife_daily.py
+  parx "中國人壽 10 只" 900 "$PY" fetch-chinalife-hist.py
+  parx "交通 14 只" 900 "$PY" fetch-bocom-hist.py
+  parx "渣打信托（新地）10 只" 900 "$PY" fetch-shkp-hist.py
+  wait_parx
+  rm -f "$PAR_DIR"/*.log "$PAR_DIR"/*.rc "$PAR_DIR"/*.end 2>/dev/null; rmdir "$PAR_DIR" 2>/dev/null || true
+
+  "$NODE" tools/hist-merge-snap.js merge
+  echo ""
+  echo "=== 补齐结束 $(date '+%F %T')；日志：$LOG ==="
+  rm -rf ../.hist-snap.old-* 2>/dev/null || true
+  exit 0
+fi
+
 # 滙豐 / 恒生（40 只，两个智選計劃）
 case "$want" in
   full|hsbc) run "滙豐/恒生 40 只（全量 2021 起）" 1800 "$PY" fetch-hsbc-family.py ;;

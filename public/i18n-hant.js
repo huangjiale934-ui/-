@@ -1348,6 +1348,8 @@
     '上週（截至 {b}）近一週上漲佔比 {p}%，本週 {c}%；本行 = 本週 − 上週（百分點）。',
   '筛选与排序': '篩選與排序',
   '共 {n} 条': '共 {n} 條',
+  '全部指标': '全部指標',
+  '收起': '收起',
 };
   for (var k in H) { if (Object.prototype.hasOwnProperty.call(H, k)) w.HANT[k] = H[k]; }
 })(window);

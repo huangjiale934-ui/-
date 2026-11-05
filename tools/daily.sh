@@ -84,12 +84,43 @@ step() {
 
 # 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
 soft_step "1/9 抓发行人最新净值" timeout 1800 node navbuild.js --render
+
+# 2026-11-05（第四十轮，用户要求）：下面四家互相独立（各写自己的 hist，共享索引已是加锁 + 原子写入），
+# 改成同一波并行。原先串行合计约 10 分钟，并行后由最慢的一家决定（约 3–4 分钟）。
+# 注意：必须排在 navbuild 之后 —— 这四个脚本都要读 navbuild 刚写出的 funds.json 做映射。
+PAR_DIR="tmp/par-daily-$$"
+mkdir -p "$PAR_DIR"
+: > "$PAR_DIR/jobs"
+par() {
+  local n="$1"; shift
+  local safe; safe=$(printf '%s' "$n" | tr ' /' '__')
+  echo ""; echo "--- [$n] $* ---"
+  write_ustat running "$n"
+  ( "$@"; echo $? > "$PAR_DIR/$safe.rc"; date +%s > "$PAR_DIR/$safe.end" ) > "$PAR_DIR/$safe.log" 2>&1 &
+  echo "$n|$safe|$!|$(date +%s)" >> "$PAR_DIR/jobs"
+}
+wait_par() {
+  while IFS='|' read -r n safe pid t0; do
+    [ -n "${pid:-}" ] || continue
+    wait "$pid"
+    local rc t1
+    rc=$(cat "$PAR_DIR/$safe.rc" 2>/dev/null || echo '?')
+    t1=$(cat "$PAR_DIR/$safe.end" 2>/dev/null || date +%s)
+    echo "    [$n] 完成：$(( t1 - t0 ))s，退出码 $rc"
+    sed 's/^/    /' "$PAR_DIR/$safe.log" 2>/dev/null | tail -12
+    if [ "$rc" != "0" ]; then echo "!!! [$n] 失败（$rc），已跳过，继续后续步骤"; fi
+  done < "$PAR_DIR/jobs"
+  : > "$PAR_DIR/jobs"
+}
+
 # 2026-10-26 新增：富達独立兜底。navbuild 内嵌富達解析连续 3 天返回 0 只（页面恒 38KB），
 # 而独立脚本 fetch-fidelity-hist.py 正常 → 固化进链路，避免每天靠人工补。
-soft_step "1.2/9 富達历史（独立脚本兜底）" "$PY" fetch-fidelity-hist.py
-soft_step "1.8/9 宏利历史增量" "$PY" fetch-manulife-hist.py
-soft_step "2/9 etnet 日度补漏" "$PY" nav-etnet.py
-soft_step "3/9 東亞日度历史" "$PY" fetch-bea-hist.py
+par "1.2/9 富達历史" "$PY" fetch-fidelity-hist.py
+par "1.8/9 宏利历史" "$PY" fetch-manulife-hist.py
+par "2/9 etnet 补漏" "$PY" nav-etnet.py
+par "3/9 東亞历史"   "$PY" fetch-bea-hist.py
+wait_par
+rm -f "$PAR_DIR"/*.log "$PAR_DIR"/*.rc "$PAR_DIR"/*.end 2>/dev/null; rmdir "$PAR_DIR" 2>/dev/null || true
 # 2026-10-22 新增：其余发行人的历史序列近端补齐（近 10 天）。
 # 原来只跑宏利/東亞，滙豐、中銀保誠、友邦、萬通、銀聯等 hist 会停在上一次运行日，
 # 导出表就出现「前面有值、最后几格空白」。脚本内含快照合并，不会截断历史。
@@ -101,6 +132,9 @@ node tools/holdings-txn.js save
 soft_step "4/9 BCT 便览持仓" "$PY" bct_ffs_auto.py
 soft_step "5/9 资产分布解析" "$PY" alloc_fill.py
 node tools/holdings-txn.js check --restore || echo "!!! 持仓事务：已检测到退化并回滚到抓取前快照"
+# 2026-11-05（第四十轮）：BCT 便览解析只写 allocLabel + alloc，缺 allocSum / allocTitle，
+# health-check 会一直报「allocSum 缺失 83 只」。这里统一补齐（幂等，已有值不动）。
+node tools/holdings-normalize.js || echo "!! 持仓字段归一失败（继续）"
 # 2026-11-04（第三十六轮，用户要求）：最近 5 个交易日与官网重比对。
 # 源站偶发错价（BCT 10-30 曾把 23.3134 报成 24.2958），只靠人工发现太被动：
 # 这里逐只重抓、偏差 >0.2% 自动改正并写 data/nav-recheck.log，

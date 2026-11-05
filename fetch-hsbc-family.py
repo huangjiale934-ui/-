@@ -163,8 +163,20 @@ def main():
             x = by_name.get(norm(name))
             if not x:
                 continue
-            arr = sorted(dmap.items())
-            if len(arr) < 5:   # 2026-10-22：近端增量（--from）只有几个点，原 60 的门槛会把增量全部丢弃；历史完整性由 tools/hist-merge-snap.js 的并集合并保证
+            # 2026-11-05（第四十轮）：--from 只抓近 10 天，原来直接覆盖写 → 每次都把 4000+ 点
+            # 冲成 10 个点，再由 hist-merge-snap 从快照救回来（每轮重写 40 只、补 19 万点，
+            # 而且抓取与合并之间有一个「历史只剩 10 天」的窗口，中途挂掉就真丢数据）。
+            # 现在改为「读旧文件 → 并集 → 再写」，同一天以新抓到的值为准。
+            dest = os.path.join(HIST_DIR, "%s.json" % x["id"])
+            merged = dict(dmap)
+            try:
+                _old = json.load(open(dest, encoding="utf-8"))
+                for _d, _p in (_old.get("series") or []):
+                    merged.setdefault(_d, _p)
+            except Exception:  # noqa: BLE001
+                pass
+            arr = sorted(merged.items())
+            if len(arr) < 5:   # 2026-10-22：近端增量（--from）只有几个点，原 60 的门槛会把增量全部丢弃
                 continue
             obj = {
                 "id": str(x["id"]), "code": plat["code"], "name": x["fund"], "unit": x.get("unit", ""),
@@ -173,7 +185,7 @@ def main():
                 "asOf": arr[-1][0], "last": arr[-1][1], "first": arr[0][0],
                 "points": len(arr), "series": [[d, p] for d, p in arr],
             }
-            with open(os.path.join(HIST_DIR, "%s.json" % x["id"]), "w", encoding="utf-8") as fh:
+            with open(dest, "w", encoding="utf-8") as fh:
                 json.dump(obj, fh, ensure_ascii=False, separators=(",", ":"))
             idx[str(x["id"])] = {
                 "code": plat["code"], "src": plat["key"], "name": x["fund"], "unit": x.get("unit", ""),
