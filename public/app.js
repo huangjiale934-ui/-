@@ -980,5 +980,44 @@
     }));
   }
 
+  /* 2026-11-05（第三十九轮）：手机上筛选卡片默认收起 —— 五个筛选项 + 工具条要占 370px，
+     一屏就被吃掉了。收起后只留一行「筛选与排序 · 共 N 条」，点开才展开。
+     桌面端这个按钮直接 display:none，行为与原来完全一致。 */
+  (function initMobileFilter() {
+    const box = document.querySelector('.card.filters');
+    if (!box || box.dataset.mToggle) return;
+    box.dataset.mToggle = '1';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'm-filter-toggle';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = '<span class="mft-ic">☰</span><span class="mft-t" data-i18n="筛选与排序">' + TT('筛选与排序') + '</span>' +
+      '<span class="mft-s" id="mftCount"></span><i class="mft-c">▾</i>';
+    box.parentNode.insertBefore(btn, box);
+    const sync = () => {
+      const c = document.getElementById('cnt');
+      const el = document.getElementById('mftCount');
+      if (!el) return;
+      const n = c ? String(c.textContent || '').replace(/\s+/g, '').trim() : '';
+      el.textContent = n ? TQ('共 {n} 条', { n: n }) : '';
+    };
+    btn.addEventListener('click', () => {
+      const open = box.classList.toggle('m-open');
+      btn.classList.toggle('on', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      sync();
+    });
+    if (window.addRefreshHook) window.addRefreshHook(sync);
+    /* 筛选条件一变，#cnt 就会被重写 → 用它驱动折叠条上的条数 */
+    const cntEl = document.getElementById('cnt');
+    if (cntEl && window.MutationObserver) new MutationObserver(sync).observe(cntEl, { childList: true, characterData: true, subtree: true });
+    document.addEventListener('mpf:lang', () => {
+      const t = btn.querySelector('.mft-t');
+      if (t) t.textContent = TT('筛选与排序');
+      sync();
+    });
+    sync();
+  })();
+
   init();
 })();

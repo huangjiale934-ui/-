@@ -2827,3 +2827,197 @@ body { overflow-x: clip; }
   /* 表格操作列按钮在手机上仍保持紧凑高度，只放宽左右内距 */
   td .btn.sm, td .btn.ghost.sm { min-height: 32px; padding-left: 12px; padding-right: 12px; }
 }
+
+/* ==========================================================
+   2026-11-05（第三十九轮）手机端重排
+   背景：≤720px 已有「表格转卡片」，但一张卡要 500px 高（一个屏幕放不下 2 只），
+   名次与风险徽章还飘在卡片中间。这里改成两列网格卡片，密度提高约 2.5 倍。
+   仅手机生效，桌面端完全不受影响。
+   ========================================================== */
+@media (max-width: 720px) {
+  /* —— 基金卡片：两列网格 —— */
+  table.data tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 9px 14px;
+    padding: 12px 13px 11px;
+    margin-bottom: 9px;
+    position: relative;            /* 名次徽章的定位基准（缺这行徽章会跑到页面顶部） */
+  }
+  table.data tbody tr > td {
+    display: block; border: 0; padding: 0; min-width: 0;
+    font-size: 13px; line-height: 1.45;
+  }
+  table.data td::before {
+    display: block; margin-bottom: 1px; font-size: 11px; line-height: 1.4;
+    color: var(--text-3); font-weight: 500;
+  }
+  /* 名次：右上角，不再占一行 */
+  table.data td[data-c="rank"] {
+    position: absolute; top: 12px; right: 13px; width: auto; z-index: 3;
+  }
+  table.data td[data-c="rank"]::before { display: none; }
+  /* 4 名以后是纯文本 .rank-cell（白底上看不见），这里统一做成灰底小胶囊 */
+  table.data td[data-c="rank"] .rank-cell {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+    background: #eef3f8; color: #4a5b6e; font-size: 11.5px; font-weight: 700;
+  }
+  /* 基金名跨两列，右侧留出名次位置 */
+  table.data td[data-c="fund"] {
+    grid-column: 1 / -1; padding: 0 40px 8px 0; margin: 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  table.data td[data-c="fund"]::before { display: none; }
+  table.data td[data-c="fund"] .fund-name { font-size: 14.5px; font-weight: 650; line-height: 1.4; }
+  /* 受托人 / 风险：去掉标签，保持一行 */
+  table.data td[data-c="trustee"]::before { display: none; }
+  table.data td[data-c="trustee"] { display: flex; align-items: center; }
+  /* 风险级别保留标签：右上角已有名次数字，不留标签会被误读成名次 */
+  table.data td[data-c="risk"] { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+  table.data td[data-c="risk"]::before { display: inline; margin: 0; font-size: 11px; white-space: nowrap; }
+  /* 数值：标签在上、数字在下，右列右对齐 */
+  table.data td[data-c="nav"] .nav-v { font-size: 14.5px; font-weight: 650; }
+  table.data td[data-c="nav"] .nav-d { font-size: 11px; }
+  table.data td[data-c="selfD1"], table.data td[data-c="selfM1"],
+  table.data td[data-c="selfYtd"], table.data td[data-c="selfY1"],
+  table.data td[data-c="size"] { text-align: right; }
+  table.data td[data-c="selfD1"]::before, table.data td[data-c="selfM1"]::before,
+  table.data td[data-c="selfYtd"]::before, table.data td[data-c="selfY1"]::before,
+  table.data td[data-c="size"]::before { text-align: right; }
+  table.data td[data-c="selfD1"] { font-size: 14px; font-weight: 650; }
+  /* 积金局页在 36 轮给 td 加了细虚线（桌面报表感），手机上会变成卡片内的横线，
+     这里在卡片布局里取消掉（id 选择器优先级更高，必须显式覆盖）。 */
+  #rkSec table.data td { border: 0 !important; }
+
+  /* 积金局榜的「基金种类」与各类年率化列：与右列数字统一右对齐 */
+  table.data td[data-c="type"] { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+  table.data td[data-c="type"]::before { display: inline; margin: 0; font-size: 11px; }
+  table.data td[data-c="ann1"], table.data td[data-c="ann5"], table.data td[data-c="ann10"],
+  table.data td[data-c="annLaunch"], table.data td[data-c="size"] { text-align: right; }
+  table.data td[data-c="ann1"]::before, table.data td[data-c="ann5"]::before,
+  table.data td[data-c="ann10"]::before, table.data td[data-c="annLaunch"]::before { text-align: right; }
+
+  /* 对比 + 详情并排 */
+  table.data td[data-c="cmp"] { display: flex; align-items: center; justify-content: flex-start; gap: 7px; }
+  table.data td[data-c="cmp"]::before { display: inline; margin: 0; font-size: 12px; }
+  table.data td[data-c="ops"] { display: flex; align-items: center; justify-content: flex-end; }
+  table.data td[data-c="ops"]::before { display: none; }
+  table.data td[data-c="ops"] .btn-detail { width: auto; min-width: 96px; padding: 7px 14px; }
+
+  /* —— 顶部行情条：横向滑动 + 右侧渐隐，提示「还有更多」 —— */
+  .mkt-ticker { position: relative; }
+  .mkt-ticker .tk-track,
+  .mkt-ticker .mkt-inner {
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity; padding-right: 34px;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 88%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 88%, rgba(0,0,0,0) 100%);
+  }
+  .mkt-ticker .tk-track::-webkit-scrollbar,
+  .mkt-ticker .mkt-inner::-webkit-scrollbar { display: none; }
+  .mkt-ticker .tk-item { scroll-snap-align: start; flex: 0 0 auto; }
+  /* 页头在手机上再收一点，首屏多留 20px 给内容 */
+  .hdr-inner { padding: 8px 12px 6px; }
+  .logo-img { height: 30px; }
+
+  /* —— 更新提示条：手机上压成一行，详情收进第二行小字 —— */
+  .upd-bar.show { padding: 7px 12px; gap: 4px 8px; font-size: 12.5px; flex-wrap: nowrap; }
+  .upd-bar .lb { flex: 0 0 auto; }
+  .upd-bar .t {
+    flex: 1 1 auto; min-width: 0; font-size: 12px; line-height: 1.35;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .upd-bar .meta { display: none; }
+  .upd-bar .x { margin-left: 4px; flex: 0 0 auto; }
+
+  /* —— 顶部导航：横向滑动，显示完整胶囊（右侧渐隐提示还有内容） —— */
+  .nav {
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(90deg, #000 0, #000 90%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(90deg, #000 0, #000 90%, rgba(0,0,0,0) 100%);
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { white-space: nowrap; }
+  .db-navs, .db-tabs { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .db-navs::-webkit-scrollbar, .db-tabs::-webkit-scrollbar { display: none; }
+  .db-nav, .db-tab { white-space: nowrap; font-size: 12.5px; padding: 8px 11px; }
+
+  /* —— 筛选卡片：搜索独占一行，其余两列，统计/分页/导出收进底部工具条 —— */
+  .filters { padding: 11px 12px; }
+  .f-row, .f-row-main, .f-row-merged { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .f-item { min-width: 0; }
+  .f-item label { font-size: 11.5px; }
+  .f-item select, .f-item input, .mpfsel-btn { width: 100%; }
+  .search-box { grid-column: 1 / -1; }
+  /* 搜索框提到最前（DOM 里在「排名维度」之后，靠 order 提前） */
+  .f-item.f-search { order: -1; grid-column: 1 / -1; }
+  /* 底部工具条：共筛出 N 条 / 每页 / 列设置 / 导出 */
+  .tb-tail {
+    grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center;
+    gap: 8px 10px; margin-top: 2px; padding-top: 9px; border-top: 1px dashed var(--border);
+  }
+  .tb-tail > * { flex: 0 0 auto; }
+  .tb-tail .tb-count, .tb-tail .cnt { margin-right: auto; }
+  .tb-tail .btn, .tb-tail .btn.sm { min-height: 34px; padding: 6px 12px; font-size: 12.5px; }
+  .tb-tail select { min-height: 34px; }
+
+  /* —— 走势图工具条：按钮收紧，避免占三行 —— */
+  .tr-tools, .tr-opts { gap: 6px; }
+  .tr-exp, .tr-share, .tr-clear { padding: 6px 10px; font-size: 12px; }
+  /* 区间分段：放不下就横向滑，不要换行 */
+  .tr-seg, .seg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .tr-seg::-webkit-scrollbar, .seg::-webkit-scrollbar { display: none; }
+
+  /* —— 走势图下方的对比表：给出「可左右滑」的视觉提示 —— */
+  .tr-table-wrap, .an-tablecard .table-scroll {
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tr-table-wrap::after, .an-tablecard .table-scroll::after {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 26px;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.92));
+  }
+
+  /* —— 回到顶部按钮：别压住卡片内容 —— */
+  .to-top { right: 12px; bottom: 74px; height: 38px; width: 38px; }
+  .to-top:hover { width: 38px; }
+}
+
+/* 2026-11-05（第三十九轮）手机端「筛选与排序」折叠开关（按钮由 app.js 注入，桌面端不显示） */
+.m-filter-toggle { display: none; }
+@media (max-width: 720px) {
+  .m-filter-toggle {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    padding: 11px 14px; margin-bottom: 10px; min-height: 44px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); font-family: inherit; font-size: 13.5px;
+    color: var(--text); cursor: pointer; text-align: left;
+  }
+  .m-filter-toggle .mft-ic { color: var(--brand); font-size: 14px; }
+  .m-filter-toggle .mft-s { margin-left: auto; color: var(--text-3); font-size: 12px; }
+  .m-filter-toggle .mft-c { font-style: normal; color: var(--text-3); transition: transform .15s; }
+  .m-filter-toggle.on .mft-c { transform: rotate(180deg); }
+  /* 收起时整块隐藏，展开才显示（桌面端始终显示，不受影响） */
+  .card.filters { display: none; }
+  .card.filters.m-open { display: block; }
+}
+
+/* 2026-11-05（第三十九轮）手机端：列表优先
+   手机上走势图卡片要占 500px+，把筛选与列表全推到下面。
+   这里把「列表 → 说明 → 走势图」重排（只是视觉顺序，DOM 不动），
+   桌面端布局完全不变。 */
+@media (max-width: 720px) {
+  /* display:flex 会盖掉 [hidden] 的默认 display:none —— 不补这条，切到积金局页
+     下方仍会露出资料库内容（2026-11-05 自查发现）。 */
+  #dbSec[hidden], #rkSec[hidden], #anSec[hidden] { display: none !important; }
+  #dbSec { display: flex; flex-direction: column; }
+  #dbSec > #stats { order: 1; }
+  #dbSec > .m-filter-toggle { order: 2; }
+  #dbSec > .card.filters { order: 3; }
+  #dbSec > .card:not(.filters):not(#dbTrendCard) { order: 4; }
+  #dbSec > #dbScopeNote { order: 5; }
+  #dbSec > #dbTrendCard { order: 6; margin-top: 4px; }
+}

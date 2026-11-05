@@ -2192,9 +2192,8 @@ chk('三十五轮·③资料库积金局口径列表头有悬浮说明（无 ⓘ
 })());
 chk('三十五轮·④首屏卡改「较上周 ±N 个百分点」（接口给 delta）', (function () {
   const sv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
-  /* 2026-11-05（第三十八轮）：基准日固定为「上周最后一个交易日」，
-     断言同步改成「按 base 计算 + 回传 prevAsOf」，仍校验前端用 delta 渲染。 */
-  return /breadthPrevPct\(perf, \{ base: prevBase \}\)/.test(sv) && /prevAsOf: prev\.asOf/.test(sv) &&
+  /* 2026-11-05（第三十九轮，用户选定）：回到滚动口径（本周 vs 上一周，两个窗口同步前移） */
+  return /const prev = breadthPrevPct\(perf\);/.test(sv) && /prevAsOf/.test(sv) &&
     /delta/.test(sv) && /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js')) &&
     !/最近一周 · 每日更新/.test(readSrc('home.html'));
 })());

@@ -16,6 +16,12 @@ import time
 
 from curl_cffi import requests as cffi
 
+# 2026-11-05（第三十九轮）：索引统一走加锁 + 原子写入，抓取脚本可并行跑。
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import histidx
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
 HIST_DIR = os.path.join(DATA, "hist")
@@ -88,10 +94,7 @@ def main():
         time.sleep(0.6)
         if dry and saved >= 2:
             break
-    with open(INDEX, "w", encoding="utf-8") as fh:
-        json.dump({"updatedAt": int(time.time() * 1000),
-                   "source": "各发行人官网（宏利 + BCT + 友邦 + HSBC系 + 中银保诚 + 中国人寿）",
-                   "count": len(idx), "funds": idx}, fh, ensure_ascii=False, separators=(",", ":"))
+    histidx.merge_save(INDEX, idx.get('funds', idx) if isinstance(idx, dict) else {})
     print("\n完成：写入 %d 只（hist-index 共 %d）" % (saved, len(idx)))
 
 

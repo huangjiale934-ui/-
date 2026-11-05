@@ -12,13 +12,19 @@ const args = process.argv.slice(2);
 const url = args[0];
 const out = args[1];
 const jsList = [];
-let waitMs = 4000, W = 1440, H = 2000, VP = false;
+let waitMs = 4000, W = 1440, H = 2000, VP = false, MOBILE = 0;
 for (let i = 2; i < args.length; i++) {
   if (args[i] === '--js') jsList.push(args[++i]);
   else if (args[i] === '--wait') waitMs = parseInt(args[++i], 10);
   else if (args[i] === '--w') W = parseInt(args[++i], 10);
   else if (args[i] === '--h') H = parseInt(args[++i], 10);
   else if (args[i] === '--vp') VP = true;
+  /* 2026-11-05：--mobile [宽度] 走真实设备模拟（默认 390×844 @2x），
+     headless 窗口最小约 500px，不模拟就测不出手机真实排版。 */
+  else if (args[i] === '--mobile') {
+    const n = parseInt(args[i + 1], 10);
+    if (n > 0) { MOBILE = n; i++; } else MOBILE = 390;
+  }
 }
 
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
@@ -80,6 +86,13 @@ async function getWs() {
   await send('Page.enable');
   await send('Log.enable');
   await send('Runtime.enable');
+  if (MOBILE) {
+    await send('Emulation.setDeviceMetricsOverride', {
+      width: MOBILE, height: 844, deviceScaleFactor: 2, mobile: true,
+      screenWidth: MOBILE, screenHeight: 844,
+    });
+    await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  }
   await send('Page.navigate', { url });
   await sleep(waitMs);
 

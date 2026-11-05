@@ -17,6 +17,12 @@ from datetime import datetime, timezone
 
 from curl_cffi import requests
 
+# 2026-11-05（第三十九轮）：索引统一走加锁 + 原子写入，抓取脚本可并行跑。
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import histidx
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
 HIST = os.path.join(DATA, "hist")
@@ -111,7 +117,7 @@ def main():
         idx["count"] = len(idx["funds"])
         srcs = set(v.get("src") for v in idx["funds"].values())
         idx["source"] = " + ".join(sorted(x for x in srcs if x))
-        json.dump(idx, open(IDX, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+        histidx.merge_save(IDX, idx.get('funds', idx), idx.get('source'))
     print("完成：%d 只%s" % (ok, "" if not dry else "（dry，未写盘）"))
 
 

@@ -21,6 +21,13 @@ import time
 
 from curl_cffi import requests as cffi
 
+# 2026-11-05：索引统一走加锁 + 原子写入
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import histidx
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
 HIST_DIR = os.path.join(DATA, "hist")
@@ -32,6 +39,7 @@ HEADERS = {
     "Origin": "https://www.manulife.com.hk",
 }
 SRC_LABEL = "宏利官网（www.manulife.com.hk）"
+WORKERS = max(1, int(os.environ.get("MPF_WORKERS", "6")))   # 并发抓取数（2026-11-05）
 
 
 def fetch_history(code, retries=3):
@@ -99,32 +107,46 @@ def main():
     # 2026-10-29：改为「先全部取回落内存 → 按批次末点找出滞后只 → 二次重试 → 再写盘」。
     # 原先是边取边写，个别单位类别（宏利退休精選的 A/B/T 三类）在云端偶发取到滞后一天
     # 的截断序列，写完就固化了（10-28：9 只停在 10-23，本机同源已到 10-26）。
+    # 2026-11-05（第三十九轮）：67 只串行要 7 分钟，是整条早间链路的瓶颈。
+    # 改成 6 线程并发（fetch_history 内部用模块级 cffi.get，每次独立请求，无共享会话）。
     results = {}
     ok = fail = 0
-    for i, (fid, code, scheme, name, unit) in enumerate(tasks, 1):
-        series = fetch_history(code)
-        if not series or len(series) < 30:
-            fail += 1
-            print("  %2d/%d  %s %s  [无数据/过短，跳过]" % (i, len(tasks), code, name))
-            continue
-        results[str(fid)] = (code, scheme, name, unit, series)
-        print("  %2d/%d  %s %s   %s → %s (%d 点)" %
-              (i, len(tasks), code.ljust(6), name[:22].ljust(22), series[0][0], series[-1][0], len(series)))
-        time.sleep(0.35)  # 轻微限速，避免触发风控
+    done = 0
+    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        futs = {ex.submit(fetch_history, code): (fid, code, scheme, name, unit) for (fid, code, scheme, name, unit) in tasks}
+        for fut in as_completed(futs):
+            fid, code, scheme, name, unit = futs[fut]
+            done += 1
+            try:
+                series = fut.result()
+            except Exception as e:  # noqa: BLE001
+                print("  %2d/%d  %s 异常：%s" % (done, len(tasks), code, str(e)[:60]))
+                fail += 1
+                continue
+            if not series or len(series) < 30:
+                fail += 1
+                print("  %2d/%d  %s %s  [无数据/过短，跳过]" % (done, len(tasks), code, name))
+                continue
+            results[str(fid)] = (code, scheme, name, unit, series)
+            print("  %2d/%d  %s %s   %s → %s (%d 点)" %
+                  (done, len(tasks), code.ljust(6), name[:22].ljust(22), series[0][0], series[-1][0], len(series)))
 
     if results:
         batch_max = max(v[4][-1][0] for v in results.values())
         laggards = [fid for fid, v in results.items() if v[4][-1][0] < batch_max]
         if laggards:
             print("  [i] 批次末点 %s；%d 只落后，二次重试…" % (batch_max, len(laggards)))
-            for fid in laggards:
+            def _retry(fid):
                 code, scheme, name, unit, old = results[fid]
                 for _ in range(2):
-                    time.sleep(1.2)
                     series = fetch_history(code, retries=2)
                     if series and series[-1][0] > old[-1][0]:
-                        results[fid] = (code, scheme, name, unit, series)
-                        break
+                        return fid, (code, scheme, name, unit, series)
+                return fid, None
+            with ThreadPoolExecutor(max_workers=max(3, WORKERS // 2)) as ex2:
+                for fid, got in ex2.map(_retry, laggards):
+                    if got:
+                        results[fid] = got
             still = [fid for fid in laggards if results[fid][4][-1][0] < batch_max]
             if still:
                 print("  [!] 重试后仍落后：%s" % ",".join(still))
@@ -164,14 +186,8 @@ def main():
         }
         ok += 1
 
-    out = {
-        "updatedAt": int(time.time() * 1000),
-        "source": SRC_LABEL,
-        "count": len(index),
-        "funds": index,
-    }
-    with open(index_path, "w", encoding="utf-8") as fh:
-        json.dump(out, fh, ensure_ascii=False, separators=(",", ":"))
+    # 2026-11-05：改为加锁 + 读合并 + 原子替换，支持脚本并行
+    histidx.merge_save(index_path, index, SRC_LABEL)
     print("\n完成：成功 %d，失败 %d；索引 %s（共 %d 只）" %
           (ok, fail, index_path, len(index)))
 

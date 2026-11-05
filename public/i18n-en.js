@@ -29,7 +29,7 @@
 '基金资料与单位净值主要取自各计划发行人官网（净值每日同步，最新至 <b>{n}</b>）；风险级别、基金规模、历年回报等字段沿用积金局公开资料（截至 <b>{d}</b>）。': 'Fund profiles and unit NAVs come mainly from each scheme trustee’s official website (NAVs synced daily, latest <b>{n}</b>); risk level, fund size and calendar-year returns follow MPFA published data (as at <b>{d}</b>).',
 '注：积金局按「合并单位类别」口径统计为 {d} 只，本站按单位类别逐条收录为 {c} 条，两者并不矛盾。': 'Note: the MPFA counts {d} funds with unit classes merged, while this site lists {c} entries by unit class; the two are consistent.',
 
-'基金上涨': 'of funds gained',
+'近日基金上涨': 'of funds up recently',
 '近一周有 {p}% 的成分基金上涨，查看是哪些': '{p}% of constituent funds gained over the past week — see which ones',
 '更多数据': 'More data',
 '积金局月度数据': 'MPFA monthly data',
@@ -1427,6 +1427,8 @@
     'A full refresh runs automatically at 22:40 daily; this banner disappears once it finishes.',
   '上周（截至 {b}）近一周上涨占比 {p}%，本周 {c}%；本行 = 本周 − 上周（百分点）。':
     'Last week (as of {b}): {p}% of funds up over the trailing week. This week: {c}%. The figure shown is this week minus last week, in percentage points.',
+  '筛选与排序': 'Filters & sorting',
+  '共 {n} 条': '{n} funds',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -17,6 +17,12 @@ spec.loader.exec_module(fbh)
 
 from curl_cffi import requests as cffi
 
+# 2026-11-05（第三十九轮）：索引统一走加锁 + 原子写入，抓取脚本可并行跑。
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import histidx
+
+
 N_DAYS = 10
 SLEEP = 0.5
 
@@ -68,9 +74,18 @@ def main():
                 ser = o.get('series') or []
                 have = set(dd for dd, _ in ser)
                 key = fbh.norm(x.get('fundBase') or x.get('fund'))
+                my_unit = fbh.norm_unit(x.get('unit') or '')
                 added = 0
                 for row in rows:
                     if key and key in fbh.norm(row.get('name') or ''):
+                        # 2026-11-05（第三十九轮，真 bug）：BCT 同一只基金的不同单位类别
+                        # （A/H、D/I）在接口里 name 完全相同，只能靠 unitClass 区分。
+                        # 原来只按名称命中就 break → 所有类别都取到第一行的价格，
+                        # 11-03 因此有 46 组基金的两个类别数值完全一样（景順均衡 H 直接变成 A 的值）。
+                        # 只有「我们这只基金本身有单位类别」时才强制比对；
+                        # 行業計劃等没有类别的基金（unit 为空）仍按名称取第一行。
+                        if my_unit and fbh.norm_unit(row.get('unitClass') or '') != my_unit:
+                            continue
                         fp = row.get('fundPerformanceDetail') or {}
                         pd, pv = fp.get('priceDate'), to_float(fp.get('price'))
                         if pd and pv is not None and pd not in have:
@@ -95,7 +110,7 @@ def main():
         print('  %s 完成（累计 +%d）' % (fbh.SCHEMES[sid][:14], got), flush=True)
 
     idx['updatedAt'] = int(time.time() * 1000)
-    json.dump(idx, open(idx_path, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+    histidx.merge_save(idx_path, idx.get('funds', idx), idx.get('source'))
     print('BCT 近端补抓完成：新增 %d 点，失败 %d 组合' % (got, fail))
 
 if __name__ == '__main__':

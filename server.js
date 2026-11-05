@@ -691,23 +691,19 @@ const server = http.createServer(async (req, res) => {
 /* 2026-11-04（第三十五轮）：首屏卡要给「较上周」的方向感 ——
    用同一套 7 日窗口口径，算「再往前一周」（last-14 → last-7）的上涨占比，
    与本周占比相减即得百分点变化。读 450 份 hist 约 230ms，按 nav-perf 的 mtime 缓存。 */
-function breadthPrevPct(perf, cal) {
+function breadthPrevPct(perf) {
   try {
-    /* 2026-11-05（第三十八轮，用户提问）：原先是「今天的滚动 7 天占比」减「7 天前的滚动 7 天占比」——
-       两边都在滚，所以数字每天都变。用户看「较上周」期望的是与本身上周比，不是与上周同日比。
-       现改为固定基准：取「上一个自然周最后一个交易日」（通常是上周五）作为基准日，
-       用同一天各基金回溯 7 天的涨跌算占比；同一周内这个差值不再变化，周一才换基准。 */
+    /* 2026-11-05（第三十九轮，用户选择）：回到「滚动对比」口径 ——
+       本周 = 每只基金最近 7 天的涨跌是否为正；
+       上周 = 同一个「7 天前的那一天」再往前 7 天的涨跌是否为正。
+       两个窗口同步前移，所以这个差值每天都会变——这是用户要的口径。 */
     const cache = global.__mpfBreadthPrev || (global.__mpfBreadthPrev = { key: '', val: null });
-    const key = String(fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs) + '|' +
-                String(cal && cal.base ? cal.base : '');
+    const key = String(fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs);
     if (cache.key === key) return cache.val;
-
     const minusDays = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() - n); return x.toISOString().slice(0, 10); };
     const idxAt = (s, d) => { let lo = 0, hi = s.length - 1, ans = -1;
       while (lo <= hi) { const m = (lo + hi) >> 1; if (s[m][0] <= d) { ans = m; lo = m + 1; } else hi = m - 1; }
       return ans; };
-
-    const base = cal && cal.base;                    /* 基准日（上周最后一个交易日） */
     let n = 0, up = 0;
     Object.keys(perf).forEach((id) => {
       const x = perf[id];
@@ -715,17 +711,16 @@ function breadthPrevPct(perf, cal) {
       let series;
       try { series = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'hist', id + '.json'), 'utf8')).series; } catch (e) { return; }
       if (!series || series.length < 2) return;
-      /* 基准日优先；缺基准日时退回「该基金自己的末点 − 7 天」（首周或新基金） */
-      const ref = base || series[series.length - 1][0];
-      const i0 = idxAt(series, ref), i1 = idxAt(series, minusDays(ref, 7));
-      if (i0 < 0 || i1 < 0 || !series[i1][1]) return;
-      n++; if (series[i0][1] / series[i1][1] - 1 > 0) up++;
+      const last = series[series.length - 1][0];
+      const i7 = idxAt(series, minusDays(last, 7)), i14 = idxAt(series, minusDays(last, 14));
+      if (i7 < 0 || i14 < 0 || !series[i14][1]) return;
+      n++; if (series[i7][1] / series[i14][1] - 1 > 0) up++;
     });
-    const val = { pct: n ? Math.round(up / n * 100) : null, asOf: base || null, n: n };
+    const val = { pct: n ? Math.round(up / n * 100) : null };
     cache.key = key;
     cache.val = val;
     return val;
-  } catch (e) { return { pct: null, asOf: null, n: 0 }; }
+  } catch (e) { return { pct: null }; }
 }
 
   if (p === '/api/breadth') {
@@ -756,23 +751,14 @@ function breadthPrevPct(perf, cal) {
         if (x.asOf && x.asOf > asOf) asOf = x.asOf;
       });
       const pct = total ? Math.round((up / total) * 100) : null;
-      /* 2026-11-05：基准日 = 上一个自然周的最后一个交易日（用自算指数的交易日历判断）。
-         同一周内这个基准不变 → 「较上周」不会再每天跳动。 */
-      let prevBase = null;
-      (function () {
-        const hk = new Date(Date.now() + 8 * 3600e3);
-        const dow = (hk.getUTCDay() + 6) % 7;                    /* 周一=0 */
-        const monday = new Date(hk); monday.setUTCDate(hk.getUTCDate() - dow);
-        const mondayStr = monday.toISOString().slice(0, 10);
-        const ds = mpf.map((r) => r[0]).filter((d) => d < mondayStr);
-        if (ds.length) prevBase = ds[ds.length - 1];
-      })();
-      const prev = breadthPrevPct(perf, { base: prevBase });
+      const prev = breadthPrevPct(perf);
       const pctPrev = prev.pct;
+      /* 仅供提示文案用：上一周窗口的右端（最新净值日 − 7 天） */
+      const prevAsOf = asOf ? new Date(new Date(asOf + 'T00:00:00Z').getTime() - 7 * 86400e3).toISOString().slice(0, 10) : null;
       /* delta 单位为「个百分点」；上周无数据时为 null，前端只显示本周占比 */
       const delta = (pct != null && pctPrev != null) ? pct - pctPrev : null;
       const body = JSON.stringify({
-        asOf, total, up, pct, pctPrev, delta, prevAsOf: prev.asOf, prevN: prev.n,
+        asOf, total, up, pct, pctPrev, delta, prevAsOf,
         pctDay: total ? Math.round((upDay / total) * 100) : null, days,
       });
       global.__mpfBreadthResp = { key: rk, body };

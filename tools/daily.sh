@@ -117,6 +117,10 @@ step "8/9 净值合并校准（最后写档后执行）" node tools/merge-nav.js
 # 但 navperf 已在第 6 步跑过 → 自算指标停在被追加前的末点（云端 10-28 有 16 只 AMTD 停在 10-23）。
 # 追加后必须再算一遍，顺序不能反。
 step "8.2/9 自算指标重算（hist 追加后）" node navperf.js
+# 2026-11-05（第三十九轮，用户要求「每天自动判断数据是否有误」）：
+# 扫最近 5 个净值日，按「绝对幅度 + 同类偏离」双判据标记疑似源站错价，
+# 写 data/anomaly.json 并在日志里列出。只告警、不阻断（源站修正后自动消失）。
+soft_step "8.3/9 净值异动检测" node tools/anomaly-check.js
 # 2026-10-29 修：merge-nav 只写 hist 文件、不更新 hist-index.json，索引会长期落后于实际序列
 # （10-28 本机 109 条、云端 25 条）。此处按文件对齐，幂等。
 step "8.4/9 历史索引对齐" node tools/hist-index-sync.js

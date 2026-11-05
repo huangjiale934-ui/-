@@ -56,25 +56,67 @@ fi
 # 会把 2015 年以来的历史冲成 5 个点（今早就是这么被截断的）。
 # 抓取前快照、抓取后按日期取并集，是这条链唯一的安全做法。
 node tools/hist-merge-snap.js save || echo "!! hist 快照失败（继续，但有可能截断历史）"
-soft "2 宏利" "$PY" fetch-manulife-hist.py
-soft "3 東亞" "$PY" fetch-bea-hist.py
-soft "4 富達" "$PY" fetch-fidelity-hist.py
-soft "5 永明" "$PY" fetch-sunlife-hist.py --from "$SINCE"
-soft "6 滙豐/恒生" "$PY" fetch-hsbc-family.py --from "$SINCE"
-soft "7 中銀保誠" "$PY" fetch-bocpt-hist.py --from "$SINCE"
-soft "8 交通" "$PY" fetch-bocom-hist.py
-soft "9 中國人壽" "$PY" fetch-chinalife-hist.py
-soft "10 友邦" "$PY" aia_ingest2.py
-soft "11 新地" "$PY" fetch-shkp-hist.py
-soft "12 萬通" "$PY" yflife_daily.py
-soft "13 海通" "$PY" ht_daily.py
-soft "14 BCT 净值" "$PY" tools/bct-recent.py
+# 2026-11-05（第三十九轮，用户要求「早间只更新净值与自算指标、并且要快」）：
+# 抓取步骤改为「分波并行」——每个脚本只写自己的 data/hist/<id>.json，
+# 共享的 hist-index.json 已改成加锁 + 原子替换（histidx.merge_save），并行不会互相覆盖。
+# 四波各 3–4 个脚本，实测总耗时从 ~19 分钟降到 ~5 分钟。
+PAR_DIR="tmp/par-$$"
+mkdir -p "$PAR_DIR"
+: > "$PAR_DIR/jobs"
+par() {                                  # par "名称" 命令...
+  local n="$1"; shift
+  local safe; safe=$(printf '%s' "$n" | tr ' /' '__')
+  echo ""; echo "--- [$n] $* ---"
+  write_ustat running "$n"
+  ( "$@"; echo $? > "$PAR_DIR/$safe.rc"; date +%s > "$PAR_DIR/$safe.end" ) > "$PAR_DIR/$safe.log" 2>&1 &
+  echo "$n|$safe|$!|$(date +%s)" >> "$PAR_DIR/jobs"
+}
+wait_par() {
+  while IFS='|' read -r n safe pid t0; do
+    [ -n "${pid:-}" ] || continue
+    wait "$pid"
+    local rc t1
+    rc=$(cat "$PAR_DIR/$safe.rc" 2>/dev/null || echo '?')
+    t1=$(cat "$PAR_DIR/$safe.end" 2>/dev/null || date +%s)
+    echo "    [$n] 完成：$(( t1 - t0 ))s，退出码 $rc"
+    sed 's/^/    /' "$PAR_DIR/$safe.log" 2>/dev/null | tail -20
+    # 抓取步骤是「软失败」：某家挂了不应把整条链路标成失败（否则顶部红条挂一整天）
+    if [ "$rc" != "0" ]; then echo "!!! [$n] 失败（$rc），跳过"; fi
+  done < "$PAR_DIR/jobs"
+  : > "$PAR_DIR/jobs"
+}
+
+# 第 1 波：四家最重的历史（宏利 67 / 東亞 40 / 富達 23 / 友邦）
+par "2 宏利"      "$PY" fetch-manulife-hist.py
+par "3 東亞"      "$PY" fetch-bea-hist.py
+par "4 富達"      "$PY" fetch-fidelity-hist.py
+par "10 友邦"     "$PY" aia_ingest2.py
+wait_par
+
+# 第 2 波：银行系 + 保险系
+par "5 永明"      "$PY" fetch-sunlife-hist.py --from "$SINCE"
+par "6 滙豐/恒生"  "$PY" fetch-hsbc-family.py --from "$SINCE"
+par "7 中銀保誠"   "$PY" fetch-bocpt-hist.py --from "$SINCE"
+par "8 交通"      "$PY" fetch-bocom-hist.py
+wait_par
+
+# 第 3 波：其余发行人 + BCT
+par "9 中國人壽"   "$PY" fetch-chinalife-hist.py
+par "11 新地"     "$PY" fetch-shkp-hist.py
+par "12 萬通"     "$PY" yflife_daily.py
+par "13 海通"     "$PY" ht_daily.py
+wait_par
+
+par "14 BCT 净值" "$PY" tools/bct-recent.py
+wait_par
+rm -f "$PAR_DIR"/*.log "$PAR_DIR"/*.rc "$PAR_DIR"/*.end 2>/dev/null; rmdir "$PAR_DIR" 2>/dev/null || true
 
 # 3) 自算指标与校准（与每日链路同口径）
 # 2026-10-28：先做 hist 并集合并，再算指标——顺序反了 ytd/mdd 就会建立在被截断的点上
 node tools/hist-merge-snap.js merge || echo "!! hist 合并失败（继续）"
 write_ustat running "重算自算指标"
 node navperf.js || { echo "!!! navperf 失败，中止"; write_ustat error "navperf 失败"; exit 1; }
+node tools/anomaly-check.js || echo "!! 异动检测失败（继续）"
 node tools/fix-nulls.js || true
 node tools/merge-nav.js || { echo "!!! merge-nav 失败，中止"; exit 1; }
 # 2026-11-05（第三十八轮，真 bug）：merge-nav 会把「官网当日净值」追加进 data/hist/<id>.json，
@@ -87,9 +129,8 @@ node tools/nav-consistency.js || echo "!!! nav-consistency 未通过（详见输
 node tools/gap-check.js || true
 # 2026-10-29（5.0）：早间同样跑链接巡检，避免友链在数据更新后退化
 node tools/link-audit.js || echo "!!! 链接巡检未通过（详见上）"
-# 2026-10-29（5.0）：早间同样跑季度哨兵
-# 2026-11-05：原来用裸 python（该解释器没装 pymupdf）→ 每天必报 ModuleNotFoundError
-"$PY" tools/quarterly-watch.py || echo "!!! 季度哨兵未通过（详见上）"
+# 2026-11-05（第三十九轮）：季度便览哨兵（要下 4–6MB PDF）移出早间链路 ——
+# 早间只保留「净值 + 自算指标」，便览由 21:00 的季度任务与晚间全量链路负责。
 
 echo ""
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致时不写 done、不发布

@@ -15,6 +15,12 @@ import time
 
 from curl_cffi import requests as cffi
 
+# 2026-11-05（第三十九轮）：索引统一走加锁 + 原子写入，抓取脚本可并行跑。
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import histidx
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(BASE, "data")
 HIST = os.path.join(DATA, "hist")
@@ -102,7 +108,7 @@ def main():
             time.sleep(0.5)
     idx["count"] = len(idx["funds"])
     idx["updatedAt"] = int(time.time() * 1000)
-    json.dump(idx, open(INDEX, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
+    histidx.merge_save(INDEX, idx.get('funds', idx), idx.get('source'))
     print("完成：OK %d / skip %d；hist-index 共 %d 只" % (ok, skip, len(idx["funds"])))
 
 
