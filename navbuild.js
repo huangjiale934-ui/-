@@ -264,11 +264,13 @@ function fetchDom(url, key, budget) {
     '--user-data-dir=' + udd, '--virtual-time-budget=' + ms,
     '--window-size=1920,3000', '--user-agent=' + UA, '--dump-dom', url];
   try {
-    return execFileSync(CHROME, args, { maxBuffer: 128 * 1024 * 1024, timeout: ms + 150000 }).toString();
+    /* 2026-11-05：硬超时从「虚拟时间 + 150s」收到 +90s —— 页面卡住时每个候选地址少等 1 分钟，
+       正常页面（45–60s 预算）仍有 90s 余量，不受影响。 */
+    return execFileSync(CHROME, args, { maxBuffer: 128 * 1024 * 1024, timeout: ms + 90000 }).toString();
   } catch (e) {
     try {
-      return execFileSync('timeout', [String(Math.ceil((ms + 150000) / 1000)), CHROME].concat(args),
-        { maxBuffer: 128 * 1024 * 1024, timeout: ms + 170000 }).toString();
+      return execFileSync('timeout', [String(Math.ceil((ms + 90000) / 1000)), CHROME].concat(args),
+        { maxBuffer: 128 * 1024 * 1024, timeout: ms + 110000 }).toString();
     } catch (e2) {
       console.error('[NAV] 读取失败 ' + key + ': ' + e2.message);
       return null;

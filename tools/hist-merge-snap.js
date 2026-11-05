@@ -20,20 +20,47 @@ const INDEX = path.join(ROOT, 'data', 'hist-index.json');
 const SNAP_INDEX = path.join(SNAP, '_index.json');
 
 function save() {
-  /* 2026-10-24：不删目录（删除在本环境会挂/被拦），旧的整个改名后新建；
-     由 bash 侧在本次任务结束时统一清理 *.old */
-  if (fs.existsSync(SNAP)) {
-    try { fs.renameSync(SNAP, SNAP + '.old-' + Date.now()); } catch (e) {}
-  }
+  /* 2026-11-05（第三十八轮，数据事故复盘）：
+     旧实现是「把当前 data/hist 整体复制成快照，再把上一份快照改名成 .old-时间戳」。
+     11-05 早上 09:53 那一轮跑到一半被打断，HSBC/恒生 40 只 hist 被截成 7 个点；
+     10:35 重跑时 save() 直接把这份残缺状态当作基线 → 快照也残缺，merge() 救不回来，
+     40 只 2015 年以来的历史全部只剩 7 天（当天已从 git 恢复）。
+     现在改为「快照 = 历史见过的所有点的并集」，并且不再轮转目录：
+       · 当前文件被截断时，快照仍保留完整序列（先写后读，不回退）
+       · 不再产生 .hist-snap.old-* 这种 100MB+ 的目录
+     同一天以「当前文件的值」为准（官网可能修订），其余日期保留。 */
   fs.mkdirSync(SNAP, { recursive: true });
-  let n = 0;
+  let n = 0, kept = 0;
   fs.readdirSync(HIST).forEach((f) => {
     if (!f.endsWith('.json')) return;
-    fs.copyFileSync(path.join(HIST, f), path.join(SNAP, f));
+    const pCur = path.join(HIST, f);
+    const pSnap = path.join(SNAP, f);
+    let cur;
+    try { cur = JSON.parse(fs.readFileSync(pCur, 'utf8')); } catch (e) { return; }
+    const curSeries = cur.series || [];
+    let out = cur;
+    if (fs.existsSync(pSnap)) {
+      try {
+        const old = JSON.parse(fs.readFileSync(pSnap, 'utf8'));
+        const m = new Map();
+        (old.series || []).forEach(([d, v]) => m.set(d, v));
+        curSeries.forEach(([d, v]) => m.set(d, v));       /* 同日以当前为准 */
+        if (m.size > curSeries.length) kept++;
+        const arr = Array.from(m.entries()).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+        out = Object.assign({}, old, cur, {
+          series: arr,
+          points: arr.length,
+          first: arr[0] ? arr[0][0] : '',
+          asOf: arr.length ? arr[arr.length - 1][0] : '',
+          last: arr.length ? arr[arr.length - 1][1] : null,
+        });
+      } catch (e) { out = cur; }
+    }
+    fs.writeFileSync(pSnap, JSON.stringify(out));
     n++;
   });
-  fs.copyFileSync(INDEX, SNAP_INDEX);
-  console.log('[snap] 已备份', n, '个 hist 文件 →', path.relative(ROOT, SNAP));
+  try { fs.copyFileSync(INDEX, SNAP_INDEX); } catch (e) {}
+  console.log('[snap] 快照已更新', n, '个 hist 文件（其中', kept, '只用快照里的完整历史兜底）');
 }
 
 function merge() {

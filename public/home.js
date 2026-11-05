@@ -779,11 +779,18 @@
     if (!arc) return;
     let delta = null;
     /* 2026-11-04（第三十五轮，用户要求）：第二行改「较上周 ±N 个百分点」，给方向感；
-       语言切换时用同一份 delta 重绘，避免残留上一语言的文案。 */
+       语言切换时用同一份 delta 重绘，避免残留上一语言的文案。
+       2026-11-05（第三十八轮）：基准日固定为「上周最后一个交易日」（接口回传 prevAsOf），
+       同一周内不再每天变化；悬浮可看两边的具体占比与基准日。 */
+    let basis = null;
     function paintDelta() {
       if (!dEl) return;
-      if (delta == null) { dEl.textContent = ''; return; }
+      if (delta == null) { dEl.textContent = ''; dEl.removeAttribute('title'); return; }
       dEl.textContent = TQ('较上周 {d} 个百分点', { d: (delta > 0 ? '+' : '') + delta });
+      if (basis && basis.prev != null) {
+        dEl.title = TQ('上周（截至 {b}）近一周上涨占比 {p}%，本周 {c}%；本行 = 本周 − 上周（百分点）。',
+          { b: basis.date || '—', p: basis.prev, c: basis.now });
+      }
     }
     document.addEventListener('mpf:lang', paintDelta);
     fetch('/api/breadth').then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -792,7 +799,11 @@
       const C = 2 * Math.PI * 30;   /* r=30，与 SVG 的 r 一致 */
       arc.style.strokeDasharray = (C * pct / 100).toFixed(1) + ' ' + C.toFixed(1);
       if (pctEl) pctEl.textContent = pct + '%';
-      if (j.delta != null) { delta = j.delta; paintDelta(); }
+      if (j.delta != null) {
+        delta = j.delta;
+        basis = { prev: j.pctPrev, now: pct, date: j.prevAsOf || '' };
+        paintDelta();
+      }
       const card = document.getElementById('heroSent');
       if (card) card.setAttribute('aria-label', TQ('近一周有 {p}% 的成分基金上涨，查看是哪些', { p: pct }));
     }).catch(() => {});

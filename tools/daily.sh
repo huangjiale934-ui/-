@@ -44,8 +44,10 @@ soft_step() {
   echo ""
   echo "--- [$n] $* ---"
   write_ustat running "$n $*"
+  local t0; t0=$(date +%s)          # 2026-11-05：记每步耗时，便于定位瓶颈
   "$@"
   local rc=$?
+  echo "    [耗时 $(( $(date +%s) - t0 ))s]"
   if [ $rc -ne 0 ]; then
     echo "!!! [$n] 失败（退出码 $rc），已跳过，继续后续步骤"
   fi
@@ -56,7 +58,9 @@ soft_step() {
 USTAT="data/update-status.json"
 write_ustat() {
   [ -n "${NODE:-}" ] || return 0
-  "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" >/dev/null 2>&1 || true
+  # 2026-11-05：补 day 字段（YYYY-MM-DD）——前端要判断「这条完成状态是不是今天的」，
+  # 否则昨天/上一轮的 done 会让「更新窗口」提示一直挂着。
+  "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,day:process.argv[5],host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" "$(date '+%F')" >/dev/null 2>&1 || true
 }
 USTART=$(date +%s)
 USTARTH=$(date '+%H:%M')
@@ -67,8 +71,10 @@ step() {
   echo ""
   echo "--- [$n] $* ---"
   write_ustat running "$n $*"
+  local t0; t0=$(date +%s)
   "$@"
   local rc=$?
+  echo "    [耗时 $(( $(date +%s) - t0 ))s]"
   if [ $rc -ne 0 ]; then
     echo "!!! [$n] 失败（退出码 $rc），中止后续步骤，保留上次产物"
     write_ustat error "$n 失败：$*"
@@ -125,7 +131,8 @@ soft_step "9.5/9 缺日检查 + 自动补抓" node tools/gap-check.js --fix
 # 结构问题（空 href / 缺官网地址 / undefined）会让退出码非 0；网络 403 只告警。
 soft_step "9.7/9 链接巡检" node tools/link-audit.js
 # 2026-10-29（5.0）：季度哨兵——汇丰/恒生/AMTD 一旦发布新季便览，自动下载并写复核报告
-soft_step "9.8/9 季度便览哨兵" python tools/quarterly-watch.py
+# 2026-11-05：裸 python 没装 pymupdf → 每天必报 ModuleNotFoundError（长期误报），改用 $PY
+soft_step "9.8/9 季度便览哨兵" "$PY" tools/quarterly-watch.py
 
 echo ""
 echo "=== 数据链路完成 $(date '+%F %T')；日志：$LOG ==="
@@ -143,6 +150,9 @@ if [ "${1:-}" = "--sync" ]; then
 else
   echo "（已跳过 GitHub 推送：两站独立更新；确需推送加 --sync）"
 fi
+# 2026-11-05（第三十八轮）：发布前清一次临时文件。抓取过程的 PDF/渲染快照可达 130MB+，
+# 而发布平台对项目包有 268MB 上限（曾因此发布被拒）。这些都是可再生中间产物，清掉不损失数据。
+soft_step "10/10 清理临时文件" bash tools/clean-scratch.sh
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致（如新 funds 配旧 nav-perf）时禁止发布
 step "10/10 发布前一致性" node tools/predeploy-check.js
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"

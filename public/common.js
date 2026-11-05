@@ -249,8 +249,12 @@ function initUpdateBanner() {
     const w = inWindow();
     if (!w || quiet) return false;
     phase = 'window';
+    /* 2026-11-05（第三十八轮，用户反馈）：原来写「预计 10:20 前完成」，
+       实际链路 20–30 分钟、偶尔被源站拖到 11 点，读者会以为更新失败。
+       改成「完成后自动消失」，并且这条只在还没有今天的完成状态时才出现（见 check）。 */
     paint('info', TT('数据更新窗口'),
-      w === 'light' ? TT('交易日 09:40 开始更新净值，预计 10:20 前完成') : TT('每日 22:40 自动全量更新'),
+      w === 'light' ? TT('交易日 09:40 起自动更新净值，通常 20–30 分钟，完成后本提示自动消失')
+                    : TT('每日 22:40 自动全量更新，完成后本提示自动消失'),
       (shown || '') + ' · ' + TT('更新期间页面可能显示上一次的数据'), true);
     return true;
   }
@@ -270,17 +274,26 @@ function initUpdateBanner() {
           paint('run', TT('数据刷新中'), TT('正在重新读取最新数据…'), '', false);
           return;
         }
-        if (u && u.phase === 'done' && phase === 'running') {
-          phase = 'done';
-          paint('ok', TT('数据更新完成'), (u.finishedAt ? u.finishedAt + ' ' : '') + TT('全部步骤已完成'), shown + ' · ' + TT('刷新页面即可看到最新数据'), true);
-          doneTimer = setTimeout(hide, 12000);
-          return;
-        }
-        /* 2026-10-30（5.0）：季度便览哨兵发现新季并自动写回 → 常驻提示复核（不自动消失） */
+        /* 2026-10-30（5.0）：季度便览哨兵发现新季并自动写回 → 常驻提示复核（不自动消失）。
+           2026-11-05：挪到「已完成」判断之前——它是要人复核的提示，不能被 done 静默掉。 */
         const q = j && j.quarterly;
         if (q && q.updated && q.updated.length && phase !== 'running') {
           const names = q.updated.map((g) => g.name + '（' + g.latestPeriod + '）').join('、');
           paint('ok', TT('季度便览已自动更新'), names, TT('已写回持仓与分布数据，请复核'), false);
+          return;
+        }
+        /* 2026-11-05（第三十八轮，用户反馈）：今天的更新已经跑完，就不该再显示「更新窗口」。
+           只有本页亲历过 running 时才给 12 秒绿色完成提示，其余情况直接收起。 */
+        if (u && u.phase === 'done' && (!u.day || u.day === hk().toISOString().slice(0, 10))) {
+          if (phase === 'running') {
+            phase = 'done';
+            paint('ok', TT('数据更新完成'), (u.finishedAt ? u.finishedAt + ' ' : '') + TT('全部步骤已完成'),
+              shown + ' · ' + TT('刷新页面即可看到最新数据'), true);
+            doneTimer = setTimeout(hide, 12000);
+          } else {
+            phase = '';
+            hide();
+          }
           return;
         }
         /* 失败状态只在窗口内或本页亲历过 running 时展示，避免上一轮的红条挂一整天 */
@@ -516,17 +529,9 @@ window.fetchHeaderStatus = function () {
       }
       const cnt = document.querySelector('.upd .cnt');
       if (cnt) cnt.textContent = TQ('{n} 条基金', { n: st.count });
-      /* 2026-11-04（第三十七轮）：页脚「官网复核 N 点 · 偏差 M 处」徽标 */
-      const rk = st.navRecheck;
-      const rkEl = document.getElementById('ffRecheck');
-      if (rkEl && rk && rk.checked) {
-        rkEl.textContent = rk.diffs
-          ? TQ('· 官网复核 {n} 点 · 偏差 {d} 处（已修正 {a} 处）', { n: rk.checked, d: rk.diffs, a: rk.applied })
-          : TQ('· 官网复核 {n} 点 · 未发现偏差', { n: rk.checked });
-        rkEl.title = TQ('复核时间 {t}，窗口 {a} ~ {b}', {
-          t: rk.runAt || '—', a: (rk.window || [])[0] || '—', b: (rk.window || [])[1] || '—',
-        });
-      }
+      /* 2026-11-05（第三十八轮，用户要求）：页脚不再展示「官网复核 N 点」——
+         两站各自跑复核、点位数不同（覆盖的来源与运行时刻不一样），展示出来只会让人误会。
+         复核结果仍写 data/nav-recheck.json 与 /api/status.navRecheck，供自检脚本使用。 */
       fillVerChip(st);
     })
     .catch(() => {});

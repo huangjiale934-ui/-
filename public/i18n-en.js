@@ -1420,6 +1420,13 @@
   '· 官网复核 {n} 点 · 偏差 {d} 处（已修正 {a} 处）': '· {n} points re-checked · {d} discrepancies ({a} corrected)',
   '复核时间 {t}，窗口 {a} ~ {b}': 'Re-checked at {t}, window {a} ~ {b}',
   '数据来自积金局「强积金基金平台」，按月公布、已扣费并计入分红再投资；与本站「基金最新数据」的每日自算口径不同，不可直接相减。': 'Sourced from the MPFA MPF Fund Platform, monthly and net of fees; not directly comparable with our daily figures.',
+  /* ===== 2026-11-05（第三十八轮）：更新窗口提示 / 较上周口径 ===== */
+  '交易日 09:40 起自动更新净值，通常 20–30 分钟，完成后本提示自动消失':
+    'Net asset values refresh from 09:40 on trading days; it usually takes 20–30 minutes, and this banner disappears once done.',
+  '每日 22:40 自动全量更新，完成后本提示自动消失':
+    'A full refresh runs automatically at 22:40 daily; this banner disappears once it finishes.',
+  '上周（截至 {b}）近一周上涨占比 {p}%，本周 {c}%；本行 = 本周 − 上周（百分点）。':
+    'Last week (as of {b}): {p}% of funds up over the trailing week. This week: {c}%. The figure shown is this week minus last week, in percentage points.',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -34,11 +34,13 @@ echo "=== 早晨净值更新开始 $(date '+%F %T') · 近端起点 $SINCE ==="
 USTAT="data/update-status.json"
 write_ustat() {
   [ -n "${NODE:-}" ] || return 0
-  "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" >/dev/null 2>&1 || true
+  # 2026-11-05：补 day 字段（YYYY-MM-DD）——前端要判断「这条完成状态是不是今天的」，
+  # 否则昨天/上一轮的 done 会让「更新窗口」提示一直挂着。
+  "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,day:process.argv[5],host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" "$(date '+%F')" >/dev/null 2>&1 || true
 }
 write_ustat running "早晨净值更新：启动" "$(date '+%H:%M')"
 
-soft() { local n="$1"; shift; echo ""; echo "--- [$n] $* ---"; write_ustat running "$n"; "$@"; local rc=$?; if [ $rc -ne 0 ]; then echo "!!! [$n] 失败（$rc），跳过"; write_ustat error "$n 失败（$rc）"; fi; return 0; }
+soft() { local n="$1"; shift; echo ""; echo "--- [$n] $* ---"; write_ustat running "$n"; local t0; t0=$(date +%s); "$@"; local rc=$?; echo "    [耗时 $(( $(date +%s) - t0 ))s]"; if [ $rc -ne 0 ]; then echo "!!! [$n] 失败（$rc），跳过"; write_ustat error "$n 失败（$rc）"; fi; return 0; }
 
 # 1) 发行人官网快照（今日净值）
 # 2026-10-27：实测 navbuild --render 可能卡在某个发行人页面（无输出、无限等待）。
@@ -75,13 +77,19 @@ write_ustat running "重算自算指标"
 node navperf.js || { echo "!!! navperf 失败，中止"; write_ustat error "navperf 失败"; exit 1; }
 node tools/fix-nulls.js || true
 node tools/merge-nav.js || { echo "!!! merge-nav 失败，中止"; exit 1; }
+# 2026-11-05（第三十八轮，真 bug）：merge-nav 会把「官网当日净值」追加进 data/hist/<id>.json，
+# 而 navperf 在它之前已经跑过 → AMTD 16 只 + 交通 14 只的自算指标一直停在更早的日期
+#（日志里的「日期不一致 30」就是它）。这里补一次重算，与 daily.sh 的 8.2 步一致。
+node navperf.js || echo "!!! 指标重算（hist 追加后）失败（继续）"
+node tools/hist-index-sync.js || echo "!!! 历史索引对齐失败（继续）"
 node mpfindex.js || echo "!!! 自算指数失败（继续）"
 node tools/nav-consistency.js || echo "!!! nav-consistency 未通过（详见输出）"
 node tools/gap-check.js || true
 # 2026-10-29（5.0）：早间同样跑链接巡检，避免友链在数据更新后退化
 node tools/link-audit.js || echo "!!! 链接巡检未通过（详见上）"
 # 2026-10-29（5.0）：早间同样跑季度哨兵
-python tools/quarterly-watch.py || echo "!!! 季度哨兵未通过（详见上）"
+# 2026-11-05：原来用裸 python（该解释器没装 pymupdf）→ 每天必报 ModuleNotFoundError
+"$PY" tools/quarterly-watch.py || echo "!!! 季度哨兵未通过（详见上）"
 
 echo ""
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致时不写 done、不发布

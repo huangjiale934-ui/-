@@ -691,17 +691,23 @@ const server = http.createServer(async (req, res) => {
 /* 2026-11-04（第三十五轮）：首屏卡要给「较上周」的方向感 ——
    用同一套 7 日窗口口径，算「再往前一周」（last-14 → last-7）的上涨占比，
    与本周占比相减即得百分点变化。读 450 份 hist 约 230ms，按 nav-perf 的 mtime 缓存。 */
-function breadthPrevPct(perf) {
+function breadthPrevPct(perf, cal) {
   try {
-    /* 2026-11-04：缓存必须挂在 global 上 —— 这个函数定义在请求回调里，
-       用局部 let 的话每次请求都会新建，等于没缓存（实测每次 220ms 全量重算）。 */
+    /* 2026-11-05（第三十八轮，用户提问）：原先是「今天的滚动 7 天占比」减「7 天前的滚动 7 天占比」——
+       两边都在滚，所以数字每天都变。用户看「较上周」期望的是与本身上周比，不是与上周同日比。
+       现改为固定基准：取「上一个自然周最后一个交易日」（通常是上周五）作为基准日，
+       用同一天各基金回溯 7 天的涨跌算占比；同一周内这个差值不再变化，周一才换基准。 */
     const cache = global.__mpfBreadthPrev || (global.__mpfBreadthPrev = { key: '', val: null });
-    const key = String(fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs);
+    const key = String(fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs) + '|' +
+                String(cal && cal.base ? cal.base : '');
     if (cache.key === key) return cache.val;
-    const minusDays = (d, n) => { const x = new Date(d); x.setUTCDate(x.getUTCDate() - n); return x.toISOString().slice(0, 10); };
+
+    const minusDays = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() - n); return x.toISOString().slice(0, 10); };
     const idxAt = (s, d) => { let lo = 0, hi = s.length - 1, ans = -1;
       while (lo <= hi) { const m = (lo + hi) >> 1; if (s[m][0] <= d) { ans = m; lo = m + 1; } else hi = m - 1; }
       return ans; };
+
+    const base = cal && cal.base;                    /* 基准日（上周最后一个交易日） */
     let n = 0, up = 0;
     Object.keys(perf).forEach((id) => {
       const x = perf[id];
@@ -709,16 +715,17 @@ function breadthPrevPct(perf) {
       let series;
       try { series = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'hist', id + '.json'), 'utf8')).series; } catch (e) { return; }
       if (!series || series.length < 2) return;
-      const last = series[series.length - 1][0];
-      const i7 = idxAt(series, minusDays(last, 7)), i14 = idxAt(series, minusDays(last, 14));
-      if (i7 < 0 || i14 < 0 || !series[i14][1]) return;
-      n++; if (series[i7][1] / series[i14][1] - 1 > 0) up++;
+      /* 基准日优先；缺基准日时退回「该基金自己的末点 − 7 天」（首周或新基金） */
+      const ref = base || series[series.length - 1][0];
+      const i0 = idxAt(series, ref), i1 = idxAt(series, minusDays(ref, 7));
+      if (i0 < 0 || i1 < 0 || !series[i1][1]) return;
+      n++; if (series[i0][1] / series[i1][1] - 1 > 0) up++;
     });
-    const val = n ? Math.round(up / n * 100) : null;
+    const val = { pct: n ? Math.round(up / n * 100) : null, asOf: base || null, n: n };
     cache.key = key;
     cache.val = val;
     return val;
-  } catch (e) { return null; }
+  } catch (e) { return { pct: null, asOf: null, n: 0 }; }
 }
 
   if (p === '/api/breadth') {
@@ -749,11 +756,23 @@ function breadthPrevPct(perf) {
         if (x.asOf && x.asOf > asOf) asOf = x.asOf;
       });
       const pct = total ? Math.round((up / total) * 100) : null;
-      const pctPrev = breadthPrevPct(perf);
+      /* 2026-11-05：基准日 = 上一个自然周的最后一个交易日（用自算指数的交易日历判断）。
+         同一周内这个基准不变 → 「较上周」不会再每天跳动。 */
+      let prevBase = null;
+      (function () {
+        const hk = new Date(Date.now() + 8 * 3600e3);
+        const dow = (hk.getUTCDay() + 6) % 7;                    /* 周一=0 */
+        const monday = new Date(hk); monday.setUTCDate(hk.getUTCDate() - dow);
+        const mondayStr = monday.toISOString().slice(0, 10);
+        const ds = mpf.map((r) => r[0]).filter((d) => d < mondayStr);
+        if (ds.length) prevBase = ds[ds.length - 1];
+      })();
+      const prev = breadthPrevPct(perf, { base: prevBase });
+      const pctPrev = prev.pct;
       /* delta 单位为「个百分点」；上周无数据时为 null，前端只显示本周占比 */
       const delta = (pct != null && pctPrev != null) ? pct - pctPrev : null;
       const body = JSON.stringify({
-        asOf, total, up, pct, pctPrev, delta,
+        asOf, total, up, pct, pctPrev, delta, prevAsOf: prev.asOf, prevN: prev.n,
         pctDay: total ? Math.round((upDay / total) * 100) : null, days,
       });
       global.__mpfBreadthResp = { key: rk, body };

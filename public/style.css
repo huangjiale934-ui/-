@@ -121,7 +121,8 @@ a:hover { text-decoration: underline; }
   color: #304864;
   font-size: 15.5px;
   font-weight: 500;
-  transition: all 0.15s;
+  /* 2026-11-05（第三十八轮）：transition:all → 仅颜色/背景，避免误触发重排 */
+  transition: background-color .15s, border-color .15s, color .15s;
   white-space: nowrap;
 }
 .nav a:hover { background: #edf7ff; border-color: #d1e3f2; color: var(--brand); text-decoration: none; }
@@ -155,7 +156,7 @@ a:hover { text-decoration: underline; }
   font-size: 12px;
   cursor: pointer;
   display: flex; align-items: center; gap: 6px;
-  transition: all 0.15s;
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
   font-family: inherit;
 }
 .btn-refresh:hover { border-color: var(--brand-2); color: var(--brand); background: var(--brand-soft); }
@@ -279,7 +280,7 @@ input[type="text"]:focus, select:focus {
   font-family: inherit; font-size: 13px; cursor: pointer;
   border-radius: 8px; padding: 8px 16px; height: 36px;
   border: 1px solid var(--brand); background: var(--brand); color: #fff;
-  transition: all 0.15s; font-weight: 500;
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s; font-weight: 500;
 }
 .btn:hover { background: var(--brand-2); border-color: var(--brand-2); }
 .btn.ghost { background: var(--surface); color: var(--text-2); border-color: var(--border-strong); }
@@ -431,7 +432,7 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
   font-family: inherit; font-size: 13px; padding: 8px 15px;
   border: 1px solid var(--border-strong); background: var(--surface);
   border-radius: 999px; color: var(--text-2); cursor: pointer;
-  transition: all 0.15s; box-shadow: var(--shadow-sm);
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s; box-shadow: var(--shadow-sm);
 }
 .tab:hover { border-color: var(--brand-2); color: var(--brand); }
 .tab.on { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 500; }
@@ -446,7 +447,8 @@ table.data tbody tr:nth-child(even):hover td.fz { background: var(--brand-soft);
 .th-toggle {
   font-family: inherit; font-size: 12.5px; padding: 5px 13px;
   border: 1px solid var(--border-strong); background: var(--surface); color: var(--brand);
-  border-radius: 999px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow-sm);
+  border-radius: 999px; cursor: pointer;
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s; box-shadow: var(--shadow-sm);
 }
 .th-toggle:hover { border-color: var(--brand-2); background: var(--brand-soft, #f2f7fc); }
 /* 收起状态：只保留当前榜单所在的一组，其余隐藏 */
@@ -1004,7 +1006,7 @@ html.fx-enter body { opacity: 0; }
   background: var(--surface); border: 1px solid var(--border);
   font-variant-numeric: tabular-nums;
 }
-.navdist b.ndk { cursor: pointer; color: var(--brand); transition: all 0.15s; }
+.navdist b.ndk { cursor: pointer; color: var(--brand); transition: background-color .15s, border-color .15s, color .15s; }
 .navdist b.ndk:hover { border-color: var(--brand-2); background: var(--brand-soft, #f2f7fc); }
 .navdist b.on { background: var(--brand); border-color: var(--brand); color: #fff; }
 .navdist .ndhint { font-style: normal; color: var(--text-3); font-size: 11px; }
@@ -1263,7 +1265,8 @@ body.an-detail .foot { display: none; }
 /* 基金列表行首方框快筛（2026-10-17） */
 .fsel { width: 16px; height: 16px; border: 1.5px solid #b9c6d6; border-radius: 3px; background: #fff;
   display: inline-flex; align-items: center; justify-content: center; font-size: 12px; line-height: 1;
-  color: #fff; cursor: pointer; margin-right: 7px; vertical-align: -2px; padding: 0; transition: all .12s; }
+  color: #fff; cursor: pointer; margin-right: 7px; vertical-align: -2px; padding: 0;
+  transition: background-color .12s, border-color .12s, box-shadow .12s; }
 .fsel:hover { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(24, 95, 165, .10); }
 .fsel.on { background: var(--brand); border-color: var(--brand); }
 
@@ -2774,3 +2777,53 @@ body.has-sidebar .dca-fab { display: none !important; }
 /* 2026-11-04（第三十七轮）：估值日分布从标题行移入折叠区，独占一行 */
 .ff-nav.ff-nav-body { display: block; flex: none; margin: 0 0 8px; overflow: visible; }
 .ff-nav.ff-nav-body .navdist { flex-wrap: wrap; white-space: normal; }
+
+/* ==========================================================
+   2026-11-05（第三十八轮）可访问性与移动端手感
+   桌面端版式与配色一律不动，只做三类「视觉零变化 / 仅手机」的加固：
+   ① 键盘焦点环：鼠标用户完全看不到，键盘 Tab 时才出现
+   ② 减少动态：仅在系统开启「减少动态效果」时生效
+   ③ 移动端（≤720px）：小字号抬到 11.5px、可点区域抬到 40px
+   ========================================================== */
+
+/* ① 统一焦点环（:where 无特异性，任何已有规则都能覆盖它） */
+:where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand, #0866bb);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* 表格行/单元格本身已有内描边焦点样式，这里不重复加外框 */
+:where(tr, td, th):focus-visible { outline: 2px solid var(--brand, #0866bb); outline-offset: -2px; }
+
+/* ② 减少动态（系统级开关） */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 窄屏兜底：任何意外超宽的元素都不再带出整页横向滚动 */
+html { overflow-x: clip; }
+body { overflow-x: clip; }
+
+/* ③ 移动端：字号与可点区域 */
+@media (max-width: 720px) {
+  /* 之前 10.5–11px 的功能性文字，手机上抬到 11.5px（桌面端不变） */
+  .fz, .scope-note, .navdist .ndhint, .db-side .cnt, .mpfa-band .mb-tag,
+  .snote-more > summary, .snote-foot, .snote-link em, .ff-ck,
+  .foot-fold, .tag, .db-tag, .mk-more, .news-date { font-size: 11.5px; }
+
+  /* 可点区域最小 40px（触屏标准），仅手机生效 */
+  .btn, .btn.ghost, .btn.sm, .tab, .th-toggle, .db-nav, .mpfsel-btn,
+  .tr-exp, .tr-seg, .seg button, .rk-cols .btn {
+    min-height: 40px;
+  }
+  .btn.sm, .th-toggle, .seg button { padding-top: 8px; padding-bottom: 8px; }
+  /* 行内小图标按钮不拉高，避免撑坏表格行 */
+  .fsel, .x, .tk-close, .to-top, .lang-sw button { min-height: 0; }
+  /* 表格操作列按钮在手机上仍保持紧凑高度，只放宽左右内距 */
+  td .btn.sm, td .btn.ghost.sm { min-height: 32px; padding-left: 12px; padding-right: 12px; }
+}

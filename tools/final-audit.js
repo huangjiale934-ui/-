@@ -71,7 +71,10 @@ funds.forEach((f) => {
   }
   const last = s[s.length - 1];
   if (last[0] !== f.navAsOf) tailMismatch++;
-  else if (Math.abs(last[1] - f.nav) > 1e-6) valMismatch++;
+  /* 2026-11-05：原按 1e-6 绝对差判等，但 hist 统一存 4 位小数、funds.json 保留官网原始精度，
+     41 只因此被判「不一致」，实际最大差 0.02%（纯舍入）。改为相对容差 0.05%，
+     真错价（通常 >0.5%）依然会被抓到。 */
+  else if (Math.abs(last[1] / f.nav - 1) > 0.0005) valMismatch++;
   for (let i = 1; i < s.length; i++) {
     if (!(s[i][0] > s[i - 1][0])) { badSeries++; return; }
     if (!(s[i][1] > 0)) { badSeries++; return; }
