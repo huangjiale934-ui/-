@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-05 19:43:29",
+ "runAt": "2026-11-05 16:16:29",
  "window": [
   "2026-10-31",
   "2026-11-05"
@@ -7,270 +7,138 @@
  "sources": {
   "bct": {
    "checked": 108,
-   "secs": 63.0
+   "secs": 45.4
   },
   "bea": {
-   "checked": 80,
-   "secs": 75.3
+   "checked": 120,
+   "secs": 2.0
   },
   "manulife": {
-   "checked": 101,
-   "secs": 32.2
+   "checked": 112,
+   "secs": 6.1
   },
   "fidelity": {
    "checked": 69,
-   "secs": 8.1
+   "secs": 4.6
   },
   "aia": {
-   "checked": 38,
-   "secs": 52.7
+   "checked": 42,
+   "secs": 6.8
   },
   "chinalife": {
    "checked": 20,
-   "secs": 0.8
+   "secs": 30.3
   },
   "yflife": {
    "checked": 28,
-   "secs": 4.9
+   "secs": 1.3
   },
   "haitong": {
-   "checked": 28,
-   "secs": 6.2
+   "checked": 42,
+   "secs": 9.2
   },
   "sunlife": {
-   "checked": 62,
-   "secs": 12.3
+   "checked": 93,
+   "secs": 7.3
   },
   "hsbc": {
    "checked": 60,
-   "secs": 3.2
+   "secs": 1.2
   },
   "bocpt": {
-   "checked": 68,
-   "secs": 1.8
+   "checked": 102,
+   "secs": 3.6
   }
  },
- "checked": 662,
+ "checked": 796,
  "applied": 0,
  "diffs": [],
  "missing": [
   {
-   "id": "264",
-   "date": "2026-11-03",
-   "src": "manulife",
-   "nav": 18.914
-  },
-  {
-   "id": "265",
-   "date": "2026-11-03",
-   "src": "manulife",
-   "nav": 58.95
-  },
-  {
-   "id": "890",
-   "date": "2026-11-03",
-   "src": "manulife",
-   "nav": 42.531
-  },
-  {
-   "id": "1525",
-   "date": "2026-11-03",
-   "src": "manulife",
-   "nav": 18.9608
-  },
-  {
-   "id": "1526",
-   "date": "2026-11-03",
-   "src": "manulife",
-   "nav": 12.0878
-  },
-  {
-   "id": "282",
+   "id": "383",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 30.1234
+   "src": "yflife",
+   "nav": 12.1407
   },
   {
-   "id": "283",
+   "id": "384",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 34.6615
+   "src": "yflife",
+   "nav": 27.8517
   },
   {
-   "id": "284",
+   "id": "385",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 67.8537
+   "src": "yflife",
+   "nav": 26.7469
   },
   {
-   "id": "285",
+   "id": "386",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 74.6551
+   "src": "yflife",
+   "nav": 12.2596
   },
   {
-   "id": "286",
+   "id": "387",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 46.85
+   "src": "yflife",
+   "nav": 52.8773
   },
   {
-   "id": "287",
+   "id": "388",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 53.5246
+   "src": "yflife",
+   "nav": 11.0337
   },
   {
-   "id": "288",
+   "id": "389",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 12.62
+   "src": "yflife",
+   "nav": 15.4085
   },
   {
-   "id": "289",
+   "id": "390",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 12.8826
+   "src": "yflife",
+   "nav": 19.6295
   },
   {
-   "id": "290",
+   "id": "391",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 71.5533
+   "src": "yflife",
+   "nav": 52.4813
   },
   {
-   "id": "291",
+   "id": "392",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 79.7554
+   "src": "yflife",
+   "nav": 22.6777
   },
   {
-   "id": "1553",
+   "id": "394",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 22.8585
+   "src": "yflife",
+   "nav": 33.104
   },
   {
-   "id": "1554",
+   "id": "874",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 23.0184
+   "src": "yflife",
+   "nav": 24.4714
   },
   {
-   "id": "1555",
+   "id": "1487",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 13.9909
+   "src": "yflife",
+   "nav": 19.7485
   },
   {
-   "id": "1556",
+   "id": "1488",
    "date": "2026-11-04",
-   "src": "haitong",
-   "nav": 13.991
-  },
-  {
-   "id": "654",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 8.0009
-  },
-  {
-   "id": "232",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 43.3862
-  },
-  {
-   "id": "226",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 17.1873
-  },
-  {
-   "id": "234",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 25.3729
-  },
-  {
-   "id": "231",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 63.3115
-  },
-  {
-   "id": "999",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 15.4153
-  },
-  {
-   "id": "1001",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 29.3286
-  },
-  {
-   "id": "1000",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 52.0565
-  },
-  {
-   "id": "227",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 36.9555
-  },
-  {
-   "id": "228",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 26.9651
-  },
-  {
-   "id": "1959",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 12.1616
-  },
-  {
-   "id": "229",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 21.7148
-  },
-  {
-   "id": "233",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 12.0757
-  },
-  {
-   "id": "1119",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 12.8446
-  },
-  {
-   "id": "230",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 13.6249
-  },
-  {
-   "id": "1541",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 19.3541
-  },
-  {
-   "id": "1542",
-   "date": "2026-11-04",
-   "src": "bocpt",
-   "nav": 12.4734
+   "src": "yflife",
+   "nav": 12.7466
   }
  ],
- "added": 36,
+ "added": 14,
  "errors": []
 }
