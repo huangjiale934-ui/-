@@ -176,6 +176,8 @@ echo ""
 echo "=== 数据链路完成 $(date '+%F %T')；日志：$LOG ==="
 if [ "${1:-}" = "--no-deploy" ]; then
   echo "（--no-deploy：跳过发布）"
+  # 2026-11-05（第四十轮）：原来直接 exit，done 状态没写 → 线上顶部一直显示「更新中」。
+  write_ustat done "全部完成（未发布）" "" "$(date '+%H:%M')"
   exit 0
 fi
 
