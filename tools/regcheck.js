@@ -529,8 +529,10 @@ chk('零线对齐·缩进行不再整行缩进（轨道一律对齐）', (functi
   try { const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'home.css'), 'utf8');
     return !/\.mo-row\.sub \{ padding-left/.test(c) && /\.mo-row\.sub \.mo-name \{ padding-left: 18px/.test(c); } catch (e) { return false; }
 })());
-chk('性能·资源版本号动态生成（响应 HTML 内为纯数字 mtime）', /\?v=\d{10,}/.test(home) && /\?v=\d{10,}/.test(idx));
-chk('性能·资源版本号动态生成（响应 HTML 内为纯数字 mtime）', /\?v=\d{10,}/.test(home) && /\?v=\d{10,}/.test(idx));
+/* 2026-11-05：动态站用 mtime 数字、静态站（GitHub Pages）用内容哈希，两种都算通过；
+   重复的两条断言合并为一条。 */
+chk('性能·资源版本号随构建变化（动态站数字 mtime / 静态站内容哈希）',
+  /[?&]v=[0-9a-zA-Z]{8,}/.test(home) && /[?&]v=[0-9a-zA-Z]{8,}/.test(idx));
 chk('视觉·月报行距/栏宽三版（170px 列宽）', /\.mo-row \{ grid-template-columns: 170px 1fr 122px; gap: 13px; padding: 13px 0;/.test(css));
 chk('视觉·环形图水平居中（align-items: center + 图例全宽）', /\.mo-right \{[^}]*align-items: center/.test(css) && /\.mo-right \.pie-legend \{ width: 100%; \}/.test(css));
 
