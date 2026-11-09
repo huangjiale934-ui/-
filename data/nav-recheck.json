@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-09 02:40:51",
+ "runAt": "2026-11-09 16:15:35",
  "window": [
   "2026-11-04",
   "2026-11-09"
@@ -7,180 +7,150 @@
  "sources": {
   "bct": {
    "checked": 0,
-   "secs": 52.7
+   "secs": 45.7
   },
   "bea": {
-   "checked": 80,
-   "secs": 1.9
+   "checked": 120,
+   "secs": 2.5
   },
   "manulife": {
-   "checked": 95,
-   "secs": 8.5
+   "checked": 108,
+   "secs": 5.7
   },
   "fidelity": {
-   "checked": 46,
-   "secs": 0.8
+   "checked": 69,
+   "secs": 4.7
   },
   "aia": {
-   "checked": 21,
-   "secs": 10.8
+   "checked": 42,
+   "secs": 8.5
   },
   "chinalife": {
    "checked": 20,
-   "secs": 1.9
+   "secs": 1.8
   },
   "yflife": {
    "checked": 28,
    "secs": 1.4
   },
   "haitong": {
-   "checked": 28,
-   "secs": 9.1
+   "checked": 42,
+   "secs": 10.3
   },
   "sunlife": {
-   "checked": 62,
-   "secs": 8.5
+   "checked": 93,
+   "secs": 7.3
   },
   "hsbc": {
-   "checked": 40,
-   "secs": 1.3
+   "checked": 60,
+   "secs": 1.0
   },
   "bocpt": {
-   "checked": 68,
-   "secs": 4.9
+   "checked": 102,
+   "secs": 3.5
   }
  },
- "checked": 488,
+ "checked": 684,
  "applied": 0,
  "diffs": [],
  "missing": [
   {
-   "id": "102",
+   "id": "255",
    "date": "2026-11-05",
-   "src": "aia",
-   "nav": 380.87
+   "src": "manulife",
+   "nav": 31.9665
   },
   {
-   "id": "131",
+   "id": "1523",
    "date": "2026-11-05",
-   "src": "aia",
-   "nav": 217.5
+   "src": "manulife",
+   "nav": 18.3438
   },
   {
-   "id": "132",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 267.85
+   "id": "383",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 12.0998
   },
   {
-   "id": "133",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 410.2
+   "id": "384",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 27.88
   },
   {
-   "id": "134",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 127.24
+   "id": "385",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 26.4305
   },
   {
-   "id": "137",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 520.33
+   "id": "386",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 12.2616
   },
   {
-   "id": "141",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 404.84
+   "id": "387",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 50.8139
   },
   {
-   "id": "142",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 558.72
+   "id": "388",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 10.9533
   },
   {
-   "id": "145",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 426.78
+   "id": "389",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 15.785
   },
   {
-   "id": "146",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 141.17
+   "id": "390",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 19.1913
   },
   {
-   "id": "657",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 113.81
+   "id": "391",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 50.3568
   },
   {
-   "id": "658",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 293.65
+   "id": "392",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 21.7849
   },
   {
-   "id": "699",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 246.0
+   "id": "394",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 32.5628
   },
   {
-   "id": "875",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 119.27
+   "id": "874",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 23.9493
   },
   {
-   "id": "876",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 273.81
+   "id": "1487",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 19.3092
   },
   {
-   "id": "877",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 180.28
-  },
-  {
-   "id": "878",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 483.05
-  },
-  {
-   "id": "1519",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 1.8569
-  },
-  {
-   "id": "1520",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 1.2292
-  },
-  {
-   "id": "1579",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 116.72
-  },
-  {
-   "id": "2379",
-   "date": "2026-11-05",
-   "src": "aia",
-   "nav": 101.31
+   "id": "1488",
+   "date": "2026-11-06",
+   "src": "yflife",
+   "nav": 12.6715
   }
  ],
- "added": 21,
+ "added": 16,
  "errors": []
 }
