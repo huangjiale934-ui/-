@@ -1,0 +1,20 @@
+{
+ "generatedAt": "2026-11-10T16:44:19+08:00",
+ "samples": 2,
+ "funds": {
+  "SHK122": {
+   "label": "宏利環球精選 · 宏利MPF穩健基金",
+   "transitions": [],
+   "stats": {
+    "days": 0
+   }
+  },
+  "RBIA": {
+   "label": "宏利退休精選 · 安聯亞洲基金 A",
+   "transitions": [],
+   "stats": {
+    "days": 0
+   }
+  }
+ }
+}
