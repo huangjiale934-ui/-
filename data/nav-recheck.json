@@ -1,156 +1,186 @@
 {
- "runAt": "2026-11-09 16:15:35",
+ "runAt": "2026-11-10 02:36:43",
  "window": [
-  "2026-11-04",
-  "2026-11-09"
+  "2026-11-05",
+  "2026-11-10"
  ],
  "sources": {
   "bct": {
    "checked": 0,
-   "secs": 45.7
+   "secs": 45.2
   },
   "bea": {
-   "checked": 120,
-   "secs": 2.5
+   "checked": 80,
+   "secs": 1.6
   },
   "manulife": {
-   "checked": 108,
-   "secs": 5.7
+   "checked": 67,
+   "secs": 5.9
   },
   "fidelity": {
-   "checked": 69,
-   "secs": 4.7
+   "checked": 46,
+   "secs": 5.1
   },
   "aia": {
-   "checked": 42,
-   "secs": 8.5
+   "checked": 21,
+   "secs": 10.1
   },
   "chinalife": {
    "checked": 20,
-   "secs": 1.8
+   "secs": 1.9
   },
   "yflife": {
    "checked": 28,
-   "secs": 1.4
+   "secs": 1.8
   },
   "haitong": {
-   "checked": 42,
-   "secs": 10.3
+   "checked": 28,
+   "secs": 8.4
   },
   "sunlife": {
-   "checked": 93,
-   "secs": 7.3
+   "checked": 62,
+   "secs": 6.4
   },
   "hsbc": {
-   "checked": 60,
-   "secs": 1.0
+   "checked": 40,
+   "secs": 1.4
   },
   "bocpt": {
-   "checked": 102,
-   "secs": 3.5
+   "checked": 68,
+   "secs": 3.8
   }
  },
- "checked": 684,
+ "checked": 460,
  "applied": 0,
  "diffs": [],
  "missing": [
   {
-   "id": "255",
-   "date": "2026-11-05",
-   "src": "manulife",
-   "nav": 31.9665
-  },
-  {
-   "id": "1523",
-   "date": "2026-11-05",
-   "src": "manulife",
-   "nav": 18.3438
-  },
-  {
-   "id": "383",
+   "id": "102",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 12.0998
+   "src": "aia",
+   "nav": 370.21
   },
   {
-   "id": "384",
+   "id": "131",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 27.88
+   "src": "aia",
+   "nav": 215.8
   },
   {
-   "id": "385",
+   "id": "132",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 26.4305
+   "src": "aia",
+   "nav": 264.75
   },
   {
-   "id": "386",
+   "id": "133",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 12.2616
+   "src": "aia",
+   "nav": 402.27
   },
   {
-   "id": "387",
+   "id": "134",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 50.8139
+   "src": "aia",
+   "nav": 127.25
   },
   {
-   "id": "388",
+   "id": "137",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 10.9533
+   "src": "aia",
+   "nav": 505.7
   },
   {
-   "id": "389",
+   "id": "141",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 15.785
+   "src": "aia",
+   "nav": 403.09
   },
   {
-   "id": "390",
+   "id": "142",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 19.1913
+   "src": "aia",
+   "nav": 561.15
   },
   {
-   "id": "391",
+   "id": "145",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 50.3568
+   "src": "aia",
+   "nav": 420.41
   },
   {
-   "id": "392",
+   "id": "146",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 21.7849
+   "src": "aia",
+   "nav": 141.18
   },
   {
-   "id": "394",
+   "id": "657",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 32.5628
+   "src": "aia",
+   "nav": 113.5
   },
   {
-   "id": "874",
+   "id": "658",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 23.9493
+   "src": "aia",
+   "nav": 290.75
   },
   {
-   "id": "1487",
+   "id": "699",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 19.3092
+   "src": "aia",
+   "nav": 241.92
   },
   {
-   "id": "1488",
+   "id": "875",
    "date": "2026-11-06",
-   "src": "yflife",
-   "nav": 12.6715
+   "src": "aia",
+   "nav": 119.26
+  },
+  {
+   "id": "876",
+   "date": "2026-11-06",
+   "src": "aia",
+   "nav": 264.89
+  },
+  {
+   "id": "877",
+   "date": "2026-11-06",
+   "src": "aia",
+   "nav": 177.88
+  },
+  {
+   "id": "878",
+   "date": "2026-11-06",
+   "src": "aia",
+   "nav": 484.42
+  },
+  {
+   "id": "1519",
+   "date": "2026-11-06",
+   "src": "aia",
+   "nav": 1.8484
+  },
+  {
+   "id": "1520",
+   "date": "2026-11-06",
+   "src": "aia",
+   "nav": 1.2274
+  },
+  {
+   "id": "1579",
+   "date": "2026-11-06",
+   "src": "aia",
+   "nav": 115.91
+  },
+  {
+   "id": "2379",
+   "date": "2026-11-06",
+   "src": "aia",
+   "nav": 100.47
   }
  ],
- "added": 16,
+ "added": 21,
  "errors": []
 }
