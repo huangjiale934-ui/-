@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-10 02:36:43",
+ "runAt": "2026-11-10 16:06:40",
  "window": [
   "2026-11-05",
   "2026-11-10"
@@ -7,180 +7,66 @@
  "sources": {
   "bct": {
    "checked": 0,
-   "secs": 45.2
+   "secs": 72.1
   },
   "bea": {
-   "checked": 80,
-   "secs": 1.6
+   "checked": 120,
+   "secs": 3.1
   },
   "manulife": {
-   "checked": 67,
-   "secs": 5.9
+   "checked": 121,
+   "secs": 9.3
   },
   "fidelity": {
-   "checked": 46,
-   "secs": 5.1
+   "checked": 69,
+   "secs": 4.8
   },
   "aia": {
-   "checked": 21,
-   "secs": 10.1
+   "checked": 42,
+   "secs": 9.7
   },
   "chinalife": {
    "checked": 20,
-   "secs": 1.9
+   "secs": 2.5
   },
   "yflife": {
    "checked": 28,
-   "secs": 1.8
+   "secs": 2.2
   },
   "haitong": {
-   "checked": 28,
-   "secs": 8.4
+   "checked": 42,
+   "secs": 11.2
   },
   "sunlife": {
-   "checked": 62,
-   "secs": 6.4
+   "checked": 93,
+   "secs": 6.7
   },
   "hsbc": {
-   "checked": 40,
-   "secs": 1.4
+   "checked": 57,
+   "secs": 1.8
   },
   "bocpt": {
-   "checked": 68,
-   "secs": 3.8
+   "checked": 102,
+   "secs": 5.2
   }
  },
- "checked": 460,
+ "checked": 694,
  "applied": 0,
  "diffs": [],
  "missing": [
   {
-   "id": "102",
+   "id": "258",
    "date": "2026-11-06",
-   "src": "aia",
-   "nav": 370.21
+   "src": "manulife",
+   "nav": 44.2539
   },
   {
-   "id": "131",
+   "id": "890",
    "date": "2026-11-06",
-   "src": "aia",
-   "nav": 215.8
-  },
-  {
-   "id": "132",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 264.75
-  },
-  {
-   "id": "133",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 402.27
-  },
-  {
-   "id": "134",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 127.25
-  },
-  {
-   "id": "137",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 505.7
-  },
-  {
-   "id": "141",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 403.09
-  },
-  {
-   "id": "142",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 561.15
-  },
-  {
-   "id": "145",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 420.41
-  },
-  {
-   "id": "146",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 141.18
-  },
-  {
-   "id": "657",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 113.5
-  },
-  {
-   "id": "658",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 290.75
-  },
-  {
-   "id": "699",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 241.92
-  },
-  {
-   "id": "875",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 119.26
-  },
-  {
-   "id": "876",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 264.89
-  },
-  {
-   "id": "877",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 177.88
-  },
-  {
-   "id": "878",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 484.42
-  },
-  {
-   "id": "1519",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 1.8484
-  },
-  {
-   "id": "1520",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 1.2274
-  },
-  {
-   "id": "1579",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 115.91
-  },
-  {
-   "id": "2379",
-   "date": "2026-11-06",
-   "src": "aia",
-   "nav": 100.47
+   "src": "manulife",
+   "nav": 42.2171
   }
  ],
- "added": 21,
+ "added": 2,
  "errors": []
 }
