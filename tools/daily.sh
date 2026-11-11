@@ -149,7 +149,8 @@ soft_step "5.8/9 積金局基金資訊表刷新" node tools/mpfa-refresh.js
 soft_step "5.7/9 雅虎補空" node tools/yahoo-fill.js
 # 2026-11-11（用户要求自动化）：積金局月度統計（新聞稿表格是圖片）—— 每月 1–12 日試抓，
 # 官方 6 日前後發佈；OCR 解析 + 三重校驗，官方未發佈或校驗不過就保留舊資料。
-if [ "$(date +%d)" -le 12 ]; then
+# 20 號前每天試一次：官方約 6 日發佈，萬一機器月初停機也能在恢復後補上
+if [ "$(date +%d)" -le 20 ]; then
   soft_step "5.85/9 積金局月度統計" "$PY" tools/mpfa-monthly-sync.py
 fi
 step "6/9 重算自算指标" node navperf.js

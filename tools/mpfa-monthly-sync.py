@@ -60,7 +60,8 @@ def find_release(today=None, only=None):
         cands = [only]
     else:
         d0 = today or datetime.date.today()
-        cands = [(d0 - datetime.timedelta(days=i)).strftime("%Y%m%d") for i in range(0, 12)]
+        # 回溯 20 天：機器若在月初停機幾天，恢復後仍能補上（官方約每月 6 日發佈）
+        cands = [(d0 - datetime.timedelta(days=i)).strftime("%Y%m%d") for i in range(0, 20)]
     for d in cands:
         url = "https://www.mpfa.org.hk/tc/info-centre/press-releases/%s" % d
         try:
@@ -296,7 +297,7 @@ def main():
 
     date, url, html = find_release(only=a.date or None)
     if not date:
-        print("SKIP 最近 12 天沒有新的「投資回報臨時數據」新聞稿（官網尚未發佈）")
+        print("SKIP 最近 20 天沒有新的「投資回報臨時數據」新聞稿（官網尚未發佈）")
         return 2
 
     asof_m = re.search(r"截至\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(?:底|(\d{1,2})\s*日)", html)
