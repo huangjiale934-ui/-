@@ -139,6 +139,10 @@ jobs:
           # 2026-10-28：先做 hist 并集合并（快照 ∪ 本次新值），再算指标——
           # 顺序不能反，否则算出来的 ytd/mdd 是建立在被截断的 5 个点上。
           node tools/hist-merge-snap.js merge
+          # 2026-11-11（自查发现）：積金局基金資訊表字段（规模/年率化/风险）此前只有本机
+          # 手工跑 build.js 才会更新，云端与本机都停在 09-30。这里按 cfid 外科式合并，
+          # 只覆盖積金局口径字段（保护 nav/navAsOf），官网日期倒退时自动跳过。
+          if [ "${{ steps.mode.outputs.light }}" = "0" ]; then node tools/mpfa-refresh.js || echo "!! 積金局快照刷新失敗（保留舊數據）"; fi
           node navperf.js
           # 2026-11-11（用户反馈两站数据不一致）：原来只有 22:40 全量跑 indexbuild，
           # 白天 09:45 的轻量任务不更新市场指数 → GitHub 站的恒指/标普在白天比
@@ -159,6 +163,8 @@ jobs:
           # 而本机每天两次重算（11-09）→ 两站顶部行情条差 5 天。
           # mpfindex 只读 data/hist + funds + holdings，纯 JS，几十毫秒。
           node mpfindex.js || echo "!! 自算指數失敗（保留舊數據）"
+          # 2026-11-11：走势图「未选基金」统计表数据源，必须与最新净值日同步
+          node allstats.js || echo "!! 區間統計失敗（保留舊數據）"
           # 2026-10-26：先判定持仓是否退化（退化则整档回滚），再做规范化与守卫——
           # 避免「坏数据已落盘、守卫只告警」的旧问题在云端复现
           if [ "${{ steps.mode.outputs.light }}" = "0" ]; then

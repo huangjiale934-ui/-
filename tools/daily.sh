@@ -140,7 +140,14 @@ node tools/holdings-normalize.js || echo "!! 持仓字段归一失败（继续�
 # 这里逐只重抓、偏差 >0.2% 自动改正并写 data/nav-recheck.log，
 # 紧随其后的 navperf 会把修正结果重新算进自算指标。
 soft_step "5.5/9 近5交易日净值复核" "$PY" tools/nav-recheck.py --apply
+# 2026-11-11（自查发现）：funds.json 的積金局字段（规模/年率化回报/风险/开支）
+# 从来没有进入每日链路，一直停在上次手工跑 build.js 的月份（实测 09-30 vs 官网 10-31）。
+# 新增外科式刷新：按 cfid 对齐，只覆盖積金局口径字段，保护 nav/navAsOf 等净值字段。
+soft_step "5.8/9 積金局基金資訊表刷新" node tools/mpfa-refresh.js
 step "6/9 重算自算指标" node navperf.js
+# 2026-11-11（自查发现）：allstats 是「走势图未选基金时」的统计表数据源，
+# 上次生成停在 10-28（两周前）→ 用户默认看到的是旧区间收益。6 秒可重算完。
+soft_step "6.2/9 全量区间统计" node allstats.js
 step "6.5/9 修正 n.a. 被写成 0 的字段" node tools/fix-nulls.js
 step "6.7/9 自算指数（MPFAVG/五大类，2026-10-31 用户要求每日更新）" node mpfindex.js
 step "7/9 指数补齐" node indexbuild.js

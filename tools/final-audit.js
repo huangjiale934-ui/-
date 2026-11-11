@@ -29,6 +29,13 @@ const ids = new Set(funds.map((f) => String(f.id)));
 
 console.log('== A 基金表 ==');
 console.log('  条数 ' + funds.length + ' · dataAsOf ' + fundsJ.dataAsOf + ' · 声明总数 ' + fundsJ.declaredTotal);
+/* 2026-11-11（自查发现）：積金局資訊表按月更新（月底数据约次月 6 日上线）。
+   曾经停在 09-30 而官网已到 10-31，站内「规模/年率化/风险」整整旧一个月。 */
+if (/^\d{4}-\d{2}-\d{2}$/.test(fundsJ.dataAsOf || '')) {
+  const mpfaAge = Math.floor((Date.now() - new Date(fundsJ.dataAsOf + 'T00:00:00Z').getTime()) / 864e5);
+  if (mpfaAge > 45) bad('積金局資料已 ' + mpfaAge + ' 天未刷新（dataAsOf ' + fundsJ.dataAsOf + '）');
+  else ok('積金局資料日期 ' + fundsJ.dataAsOf + '（' + mpfaAge + ' 天前，按月更新属正常）');
+}
 if (!funds.length) bad('funds.json 为空');
 if (ids.size !== funds.length) bad('存在重复 id：' + (funds.length - ids.size) + ' 条');
 /* navStatus === 'na' 是发行人明确不提供单位价格（保证／非单位化基金），算已知项不算故障 */
@@ -184,6 +191,11 @@ console.log('  积金局月度：' + monthly.asOf + '（' + (monthly.rows || [])
 if (!monthly.asOf) bad('mpfa-monthly.json 缺 asOf');
 const allstats = read('allstats.json', {});
 console.log('  allstats 键：' + Object.keys(allstats).slice(0, 8).join(','));
+/* 2026-11-11：allstats 是走势图「未选基金」统计表的数据源，必须跟着净值日重算。 */
+const asAt = Number(allstats.updatedAt) || 0;
+const asDays = asAt ? Math.floor((Date.now() - asAt) / 864e5) : 999;
+if (asDays > 2) bad('allstats 已 ' + asDays + ' 天未重算（走势图默认统计表会显示旧区间收益）');
+else ok('allstats 更新于 ' + new Date(asAt).toISOString().slice(0, 16) + 'Z');
 const gaps = read('hist-gaps.json', {});
 console.log('  缺口文件：' + (Array.isArray(gaps.gaps) ? gaps.gaps.length : Object.keys(gaps).length) + ' 项');
 
