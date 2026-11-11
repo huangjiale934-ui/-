@@ -189,6 +189,15 @@ if (!newsN) bad('news.json 为空');
 const monthly = read('mpfa-monthly.json', {});
 console.log('  积金局月度：' + monthly.asOf + '（' + (monthly.rows || []).length + ' 类）');
 if (!monthly.asOf) bad('mpfa-monthly.json 缺 asOf');
+/* 2026-11-11：月度统计改为自动抓取（OCR）后，若连续失败会悄悄停在旧月份。
+   官方每月 6 日前后发佈，超过 45 天未推进就说明自动化失效了。 */
+if (/^\d{4}-\d{2}-\d{2}$/.test(monthly.asOf || '')) {
+  const mAge = Math.floor((Date.now() - new Date(monthly.asOf + 'T00:00:00Z').getTime()) / 864e5);
+  /* 45 天以上先提醒（官方偶爾晚發），60 天以上才視為自動化失效 */
+  if (mAge > 60) bad('積金局月度統計已 ' + mAge + ' 天未推進（asOf ' + monthly.asOf + '，OCR 可能失敗）');
+  else if (mAge > 45) wrn('積金局月度統計已 ' + mAge + ' 天未推進（asOf ' + monthly.asOf + '，等官方發佈）');
+  else ok('積金局月度統計 ' + monthly.asOf + '（' + mAge + ' 天前）');
+}
 const allstats = read('allstats.json', {});
 console.log('  allstats 键：' + Object.keys(allstats).slice(0, 8).join(','));
 /* 2026-11-11：allstats 是走势图「未选基金」统计表的数据源，必须跟着净值日重算。 */
