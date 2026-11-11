@@ -1999,6 +1999,12 @@ chk('四十二轮·宏利每小时补抓已撤销（改为雅虎補空 + 早晚�
     return gone && fill && !/10 9 \* \* 1-5/.test(d);
   } catch (e) { return false; }
 })());
+chk('四十六轮·旧榜单链接 #5 要跳到 ann5（不能落默认榜）', (function () {
+  try {
+    const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'ranking.html'), 'utf8');
+    return /'ann' \+ id/.test(j) && /location\.replace\('index\.html\?rk='/.test(j);
+  } catch (e) { return false; }
+})());
 chk('四十二轮·雅虎補空（映射已校验 + 只補空不覆蓋官網）', (function () {
   try {
     const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'yahoo-map.json'), 'utf8')).funds || {};

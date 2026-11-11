@@ -11,7 +11,11 @@
 (function () {
   var h = (location.hash || '').replace(/^#/, '');
   var id = /^[A-Za-z0-9]+$/.test(h) ? h : '1';
-  location.replace('index.html?rk=' + id + (id === '1' ? '#ann1' : '#' + id));
+  /* 2026-11-11 修：榜单 id 在页内是 ann1 / ann5 / ann10 / annLaunch…，
+     旧链接给的是纯数字（#5），直接拼成 #5 不会被识别 → 一律落到默认榜。
+     纯数字要补 ann 前缀，其余（trusteeAgg / champion）原样保留。 */
+  var target = /^\d+$/.test(id) ? ('ann' + id) : id;
+  location.replace('index.html?rk=' + id + '#' + target);
 })();
 </script>
 </head>
