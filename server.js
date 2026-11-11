@@ -48,11 +48,17 @@ const median = (arr) => {
  * 官方口径为「過去 12 個月」及长期年率化净回报——积金局不发布「本月/年初至今」公开数据。
  */
 let MPFA_MONTHLY = undefined;
+let MPFA_MTIME = 0;
 function loadMpfaMonthly() {
-  if (MPFA_MONTHLY !== undefined) return MPFA_MONTHLY;
+  /* 2026-11-11：月度统计已改为自动抓取（tools/mpfa-monthly-sync.py），
+     文件会在不重启进程的情况下更新，所以按 mtime 热加载，避免服务端一直返回旧月份。 */
   try {
     const fp = path.join(__dirname, 'data', 'mpfa-monthly.json');
-    MPFA_MONTHLY = fs.existsSync(fp) ? JSON.parse(fs.readFileSync(fp, 'utf8')) : null;
+    if (!fs.existsSync(fp)) { MPFA_MONTHLY = null; return MPFA_MONTHLY; }
+    const m = fs.statSync(fp).mtimeMs;
+    if (MPFA_MONTHLY !== undefined && m === MPFA_MTIME) return MPFA_MONTHLY;
+    MPFA_MONTHLY = JSON.parse(fs.readFileSync(fp, 'utf8'));
+    MPFA_MTIME = m;
   } catch (e) {
     console.error('[MPF] 读取 mpfa-monthly.json 失败:', e.message);
     MPFA_MONTHLY = null;

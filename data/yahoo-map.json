@@ -1,0 +1,229 @@
+{
+ "updatedAt": 1794385358470,
+ "funds": {
+  "367": {
+   "ticker": "0P00008SUZ.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF香港股票基金"
+  },
+  "368": {
+   "ticker": "0P00008VBC.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF國際股票基金"
+  },
+  "369": {
+   "ticker": "0P00008SUW.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF歐洲股票基金"
+  },
+  "377": {
+   "ticker": "0P00008VBD.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF北美股票基金"
+  },
+  "371": {
+   "ticker": "0P00008SV3.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF日本股票基金"
+  },
+  "370": {
+   "ticker": "0P00008VBE.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF亞太股票基金"
+  },
+  "375": {
+   "ticker": "0P00008SRN.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF中華威力基金"
+  },
+  "907": {
+   "ticker": "0P0000WAH7.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF恒指ESG基金"
+  },
+  "1485": {
+   "ticker": "0P00019VA5.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF核心累積基金"
+  },
+  "1486": {
+   "ticker": "0P00019VA4.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF 65歲後基金"
+  },
+  "695": {
+   "ticker": "0P0000GG4K.HK",
+   "ratio": 1.0,
+   "samples": 243,
+   "maxDev": 0.0,
+   "name": "宏利MPF康健護理基金"
+  },
+  "908": {
+   "ticker": "0P0000WLUC.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT世界股票基金"
+  },
+  "909": {
+   "ticker": "0P0000WLUD.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT大中華股票基金"
+  },
+  "800": {
+   "ticker": "0P0000MPRK.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT恒指基金"
+  },
+  "1821": {
+   "ticker": "0P0001OFPM.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT美國股票基金"
+  },
+  "1533": {
+   "ticker": "0P0001A2TW.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT核心累積基金"
+  },
+  "1534": {
+   "ticker": "0P0001A2TV.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT65歲後基金"
+  },
+  "187": {
+   "ticker": "0P000099WM.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT亞洲股票基金"
+  },
+  "659": {
+   "ticker": "0P0000FYUE.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT中國及香港股票基金"
+  },
+  "660": {
+   "ticker": "0P0000FYUD.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT歐洲股票基金"
+  },
+  "190": {
+   "ticker": "0P00008SSV.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "BCT環球股票基金"
+  },
+  "145": {
+   "ticker": "0P00008SSF.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "歐洲股票基金"
+  },
+  "102": {
+   "ticker": "0P00008SRK.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "大中華股票基金"
+  },
+  "137": {
+   "ticker": "0P00008SRJ.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "亞洲股票基金"
+  },
+  "141": {
+   "ticker": "0P00009RKH.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "綠色退休基金"
+  },
+  "877": {
+   "ticker": "0P0000U7QD.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "中港基金"
+  },
+  "142": {
+   "ticker": "0P00008VB7.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "北美股票基金"
+  },
+  "878": {
+   "ticker": "0P0000U7Q9.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "美洲基金"
+  },
+  "876": {
+   "ticker": "0P0000U7QB.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "亞歐基金"
+  },
+  "658": {
+   "ticker": "0P0000GEJY.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "全球基金"
+  },
+  "1520": {
+   "ticker": "0P0001A2S0.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "65歲後基金"
+  },
+  "1519": {
+   "ticker": "0P0001A2S1.HK",
+   "ratio": 1.0,
+   "samples": 244,
+   "maxDev": 0.0,
+   "name": "核心累積基金"
+  }
+ }
+}

@@ -126,14 +126,29 @@ jobs:
           python ht_daily.py || echo "!! 海通失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
 
-      - name: 積金局月度業績（每月 5 號後官方更新；失敗保留舊數據）
+      - name: 積金局基金資訊表（scraper；失敗保留舊 dataAsOf）
         if: steps.mode.outputs.light == '0'
         run: node scraper.js || echo "!! 積金局抓取失敗（保留舊 dataAsOf）"
+
+      # 2026-11-11（用户要求自动化）：月度統計表在新聞稿裡是**圖片**，用 OCR 解析。
+      # 官方 6 日前後發佈，所以只在每月 1–12 日跑；OCR 校驗不通過就保留舊資料。
+      - name: 積金局月度統計（OCR，1–12 日）
+        if: steps.mode.outputs.light == '0'
+        run: |
+          if [ "$(date -u +%d)" -le 12 ]; then
+            python -m pip install -q rapidocr-onnxruntime 2>/dev/null || echo "!! OCR 依賴安裝失敗"
+            python tools/mpfa-monthly-sync.py || echo "!! 月度統計未更新（保留舊數據）"
+          else
+            echo "非月初窗口，跳過月度統計"
+          fi
 
       - name: 近 5 個交易日淨值複核（官網重比對，偏差自動修正）
         # 2026-11-04：源站偶發錯價（BCT 10-30 曾報高 4.2%）——每日對最近 5 個交易日逐只重抓，
         # 偏差 >0.2% 自動改正並寫 data/nav-recheck.log；後面的 navperf 會重算受影響的指標。
         run: python tools/nav-recheck.py --apply || echo "!! 淨值複核失敗（不影響已抓到的最新值）"
+
+      - name: 雅虎補空（官網未發布時先用雅虎同源淨值）
+        run: node tools/yahoo-fill.js || echo "!! 雅虎補空失敗（不影響已抓到的最新值）"
 
       - name: 重算指標與校驗
         run: |

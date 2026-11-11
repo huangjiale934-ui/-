@@ -476,14 +476,30 @@ chk('翻译·本轮新键抽查在字典中', (function () {
   /* ---- 第十轮：官方月度板块 / 官方链接按钮 / 走势图注释 ---- */
 chk('首页·积金局最新公布板块已渲染', /积金局最新公布/.test(home) && /class="mo-row/.test(home));
 chk('首页·官方月度数字正确（10.3 / 9.5 / -1.5）', /\+10\.3%/.test(home) && /\+9\.5%/.test(home) && /-1\.5%/.test(home));
-chk('首页·官方日期标注（截至 2026-09-30 / 2026-10-06 公布）', /2026-09-30/.test(home) && /2026-10-06/.test(home));
+/* 2026-11-11：月度数据改为自动抓取后日期会推进，改为校验「日期格式 + 两处一致」 */
+chk('首页·官方日期标注（截至 YYYY-MM-DD / YYYY-MM-DD 公布）', (function () {
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'mpfa-monthly.json'), 'utf8'));
+    return home.indexOf(j.asOf) >= 0 && home.indexOf(j.publishedAt) >= 0;
+  } catch (e) { return false; }
+})());
 chk('首页·官方口径小注（已按要求删除“未发布本月/年初至今”句）', !/未发布「本月」或「年初至今」/.test(home) && /官方口径为「過去 12 個月」/.test(home));
 chk('首页·走势ⓘ含口径（2026-10-31）', /id="yrTip"[^>]*data-tip="数据取自积金局/.test(home));
 chk('详情·官方核对按钮（srcbtn）已就位', (function () {
   try { return /class="srcbtn"/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8')); } catch (e) { return false; }
 })());
-chk('官方月度数据文件完整（9 行）', (function () {
-  try { const j = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'mpfa-monthly.json'), 'utf8')); return j.rows && j.rows.length === 9 && j.asOf === '2026-09-30'; } catch (e) { return false; }
+/* 2026-11-11：改为自动化抓取后，asOf 会随官方每月推进，不能再写死 2026-09-30。
+   校验「9 行 + 关键字段齐全 + asOf 是合法日期 + 上層六類占比合计≈100」。 */
+chk('官方月度数据文件完整（9 行 / 字段齐全 / 占比自洽）', (function () {
+  try {
+    const j = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'mpfa-monthly.json'), 'utf8'));
+    if (!j.rows || j.rows.length !== 9) return false;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(j.asOf || '')) return false;
+    const need = ['share', 'm12', 'm12Hi', 'm12Lo'];
+    if (j.rows.some((r) => need.some((k) => typeof r[k] !== 'number'))) return false;
+    const top = [0, 1, 5, 6, 7, 8].reduce((a, i) => a + (j.rows[i].share || 0), 0);
+    return Math.abs(top - 100) <= 1.5;
+  } catch (e) { return false; }
 })());
 
 /* ---- 第十二轮：收费区间 / 对比列 / 绿按钮 / 环形图 / 条只统一 ---- */
@@ -1973,12 +1989,35 @@ chk('四十一轮·服务端数据热加载（daily 写盘后不必重启/刷新
     return /function reloadIfChanged\(\)/.test(sv) && /reloadIfChanged\(\);/.test(sv) && /DATA_MTIME/.test(sv);
   } catch (e) { return false; }
 })());
-chk('四十二轮·宏利按需补抓（守卫脚本 + 每小时工作流 + 无 17:10 全站窗口）', (function () {
+chk('四十二轮·宏利每小时补抓已撤销（改为雅虎補空 + 早晚两班，省积分）', (function () {
   try {
-    const w = fs.readFileSync(path.join(__dirname, '..', 'tools', 'manulife-watch.js'), 'utf8');
-    const y = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'manulife-watch.yml'), 'utf8');
-    const d = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
-    return /STATUS manu=/.test(w) && /UPDATED/.test(w) && /10 3-10 \* \* 1-5/.test(y) && !/10 9 \* \* 1-5/.test(d);
+    const base = path.join(__dirname, '..');
+    const gone = !fs.existsSync(path.join(base, 'tools', 'manulife-watch.js')) &&
+      !fs.existsSync(path.join(base, '.github', 'workflows', 'manulife-watch.yml'));
+    const d = fs.readFileSync(path.join(base, '.github', 'workflows', 'deploy.yml'), 'utf8');
+    const fill = fs.existsSync(path.join(base, 'tools', 'yahoo-fill.js'));
+    return gone && fill && !/10 9 \* \* 1-5/.test(d);
+  } catch (e) { return false; }
+})());
+chk('四十二轮·雅虎補空（映射已校验 + 只補空不覆蓋官網）', (function () {
+  try {
+    const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'yahoo-map.json'), 'utf8')).funds || {};
+    const y = fs.readFileSync(path.join(__dirname, '..', 'tools', 'yahoo-fill.js'), 'utf8');
+    const n = Object.keys(m).length;
+    return n >= 20 && Object.values(m).every((x) => x.ratio > 0 && x.maxDev <= 0.02) && /dev > 0.15/.test(y);
+  } catch (e) { return false; }
+})());
+chk('四十二轮·積金局月度統計已自動化（OCR + 三重校驗）', (function () {
+  try {
+    const p = fs.readFileSync(path.join(__dirname, '..', 'tools', 'mpfa-monthly-sync.py'), 'utf8');
+    const d = fs.readFileSync(path.join(__dirname, '..', 'tools', 'daily.sh'), 'utf8');
+    return /parse_table/.test(p) && /validate\(table/.test(p) && /mpfa-monthly-sync\.py/.test(d);
+  } catch (e) { return false; }
+})());
+chk('四十二轮·两站对齐脚本就位（每日任务收尾取仓庫最新 data/）', (function () {
+  try {
+    const sh = fs.readFileSync(path.join(__dirname, '..', 'tools', 'sync-from-cloud.sh'), 'utf8');
+    return /git checkout origin\/main -- data/.test(sh) && /KEEP/.test(sh) && /TAKEN/.test(sh);
   } catch (e) { return false; }
 })());
 chk('四十二轮·数据版本变化时整页自动刷新（无需手动 F5）', (function () {
