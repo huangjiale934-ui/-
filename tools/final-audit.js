@@ -137,6 +137,15 @@ const mpfDates = ['MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND'].map((k) => {
 });
 if (new Set(mpfDates).size > 1) bad('四个自算 MPF 指数末点日期不一致：' + mpfDates.join('/'));
 else ok('四个自算 MPF 指数末点一致：' + mpfDates[0]);
+/* 2026-11-11（用户反馈两站行情条差 5 天）：自算指数必须跟得上最新净值日。
+   云端 Actions 从未跑 mpfindex.js，指数冻结在 11-04 而净值已 11-09，此前没有任何断言能发现。 */
+const idxNavDates = funds.map((x) => x.navAsOf).filter(Boolean).sort();
+const latestNav = idxNavDates.length ? idxNavDates[idxNavDates.length - 1] : '';
+if (latestNav && mpfDates[0] && mpfDates[0] < latestNav) {
+  bad('自算 MPF 指数未跟上最新净值日：指数 ' + mpfDates[0] + ' / 净值 ' + latestNav + '（需跑 mpfindex.js）');
+} else if (latestNav) {
+  ok('自算 MPF 指数跟得上最新净值日：' + mpfDates[0]);
+}
 console.log('  外部指数末点：恒指 ' + (idx.items.HSI.asOf || '') + ' · 标普 ' + (idx.items.SPX.asOf || '') + '（各自市场交易日）');
 
 console.log('== E 持仓 ==');

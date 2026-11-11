@@ -1,0 +1,91 @@
+name: manulife-probe
+
+# 宏利净值发布时点探测（2026-11-10 建立）
+# 目的：宏利 API 只给 asOfDate，没有发布时间。用高频采样反推「每天几点几分上线」。
+# 运行在 GitHub 云端，不占用本机、不消耗 WorkBuddy 积分（公开仓库 Actions 免费）。
+# 每天两段：07:00–12:30 / 13:00–18:30（香港时间），5 分钟一次，覆盖实测发布区间 10:52–16:18。
+on:
+  schedule:
+    - cron: '0 23 * * *'   # 北京/香港 07:00 起，跑 5.5 小时
+    - cron: '0 5 * * *'    # 北京/香港 13:00 起，跑 5.5 小时
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: '本次连续采样时长（分钟）'
+        default: '330'
+      interval:
+        description: '采样间隔（分钟）'
+        default: '5'
+  push:
+    # 首次上线自测：改动本文件或脚本时自动跑一次单点采样，验证云端能否访问宏利 API
+    paths:
+      - '.github/workflows/manulife-probe.yml'
+      - 'tools/manulife-probe.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: manulife-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安裝依賴
+        run: |
+          python -m pip install --upgrade pip -q
+          pip install -q curl_cffi
+
+      - name: 採樣
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "自测模式：单点采样"
+            python tools/manulife-probe.py --once
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python tools/manulife-probe.py --minutes "${{ inputs.minutes }}" --interval "${{ inputs.interval }}"
+          else
+            python tools/manulife-probe.py --minutes 330 --interval 5
+          fi
+
+      - name: 寫入運行摘要
+        if: always()
+        run: |
+          if [ -f data/probe/manulife-summary.json ]; then
+            {
+              echo '### 宏利发布窗口（最近采样）'
+              echo '```json'
+              python -c "import json;d=json.load(open('data/probe/manulife-summary.json',encoding='utf-8'));print(json.dumps({k:{'stats':v['stats'],'last':v['transitions'][-1] if v['transitions'] else None} for k,v in d['funds'].items()},ensure_ascii=False,indent=1))"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 提交探測記錄
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config pull.rebase true
+          git add data/probe 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "无新增采样记录"
+            exit 0
+          fi
+          # [skip ci]：探测记录不触发 Pages 部署，避免每天多出两次无意义的站点构建
+          git commit -m "chore(probe): 宏利发布时点采样 $(date -u +%FT%TZ) [skip ci]"
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then echo "推送成功（第 $i 次）"; exit 0; fi
+            echo "推送被拒，rebase 后重试…"
+            git fetch origin main || true
+            git rebase --autostash origin/main || git rebase --abort || true
+            sleep 5
+          done
+          echo "!! 采样记录回写失败（数据仍在运行日志中，不影响探测）"

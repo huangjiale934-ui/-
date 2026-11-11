@@ -1431,6 +1431,8 @@
   '共 {n} 条': '{n} funds',
   '全部指标': 'All metrics',
   '收起': 'Collapse',
+  '数据已自动更新至 {t}': 'Data auto-updated to {t}',
+  '本页已自动同步，无需手动刷新': 'This page synced automatically — no need to refresh',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

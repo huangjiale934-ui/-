@@ -1951,6 +1951,13 @@ chk('二十七轮·⑬页脚两个折叠箭头缩小 15%（42 → 36）',
 chk('二十七轮·⑭详情弹窗价格与四项并排（5 列一行）',
   /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{ grid-column: auto;/.test(readSrc('analysis.css')));
+chk('四十轮·云端链路必须重算自算指数与市场指数（否则 GitHub 站行情条冻结在旧日期）', (function () {
+  try {
+    const y = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
+    return /node mpfindex\.js/.test(y) && /node indexbuild\.js/.test(y) &&
+      !/if \[.*light.*=.*"0".*\] then node indexbuild\.js/.test(y);
+  } catch (e) { return false; }
+})());
 chk('四十轮·public 内不得残留任何 design-*.html（避免内部评审页被外部访问）', (function () {
   try {
     const dir = path.join(__dirname, '..', 'public');

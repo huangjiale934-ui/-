@@ -140,7 +140,10 @@ jobs:
           # 顺序不能反，否则算出来的 ytd/mdd 是建立在被截断的 5 个点上。
           node tools/hist-merge-snap.js merge
           node navperf.js
-          if [ "${{ steps.mode.outputs.light }}" = "0" ]; then node indexbuild.js; fi
+          # 2026-11-11（用户反馈两站数据不一致）：原来只有 22:40 全量跑 indexbuild，
+          # 白天 09:45 的轻量任务不更新市场指数 → GitHub 站的恒指/标普在白天比
+          # WorkBuddy 站晚一天（11-09 vs 11-10）。指数只取一次行情接口，成本很低。
+          node indexbuild.js || echo "!! 市場指數失敗（保留舊數據）"
           node tools/fix-nulls.js
           node tools/merge-nav.js
           # 2026-10-29 修：merge-nav 会把「官方当日净值」追加进 data/hist/<id>.json，
@@ -151,6 +154,11 @@ jobs:
           # 2026-10-29 修：merge-nav 只写 hist 文件、不更新 hist-index.json，
           # 云端没有第二个人补索引 → 索引长期落后（10-28 有 25 只：AMTD 16 + 宏利退休精選 9）。
           node tools/hist-index-sync.js
+          # 2026-11-11（用户反馈两站数据不一致，根因）：云端从未调用过 mpfindex.js，
+          # 自算的 MPF 市场/股票/混合/债券指数一直冻结在上一次提交的日期（实测 11-04），
+          # 而本机每天两次重算（11-09）→ 两站顶部行情条差 5 天。
+          # mpfindex 只读 data/hist + funds + holdings，纯 JS，几十毫秒。
+          node mpfindex.js || echo "!! 自算指數失敗（保留舊數據）"
           # 2026-10-26：先判定持仓是否退化（退化则整档回滚），再做规范化与守卫——
           # 避免「坏数据已落盘、守卫只告警」的旧问题在云端复现
           if [ "${{ steps.mode.outputs.light }}" = "0" ]; then

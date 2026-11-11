@@ -645,7 +645,7 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/hist-gaps') {
     return fs.readFile(path.join(__dirname, 'data', 'hist-gaps.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '未生成', funds: {} }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=3600' });
+      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
     });
   }
 
@@ -681,7 +681,7 @@ const server = http.createServer(async (req, res) => {
              只带最近 120 个交易日，约 15KB，静态站也能直接复用。 */
           items[k] = { name: it.name, asOf: s2[s2.length - 1][0], series: wseries, daily: s2.slice(-120) };
         });
-        return sendRaw(req, res, 200, JSON.stringify({ updatedAt: j.updatedAt, items }), MIME['.json'], { cache: 'public, max-age=900' });
+        return sendRaw(req, res, 200, JSON.stringify({ updatedAt: j.updatedAt, items }), MIME['.json'], { cache: 'no-cache' });
       } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }
     });
   }
@@ -804,14 +804,14 @@ function breadthPrevPct(perf) {
     const lite = u.searchParams.get('lite') === '1';
     return fs.readFile(path.join(__dirname, 'data', 'index.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '指数数据未生成' }));
-      if (!lite) return sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=900' });
+      if (!lite) return sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
       try {
         const j = JSON.parse(buf.toString('utf8'));
         const one = (j.items && (j.items.HSI || j.items.HSI2)) || null;
         const body = JSON.stringify({ updatedAt: j.updatedAt, items: one ? { HSI: one } : {} });
-        return sendRaw(req, res, 200, body, MIME['.json'], { cache: 'public, max-age=900' });
+        return sendRaw(req, res, 200, body, MIME['.json'], { cache: 'no-cache' });
       } catch (e2) {
-        return sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=900' });
+        return sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
       }
     });
   }
@@ -827,48 +827,48 @@ function breadthPrevPct(perf) {
         const obj = mergeLatestNav(JSON.parse(out), hid);
         out = JSON.stringify(obj);
       } catch (e) { /* 解析失败则原样返回 */ }
-      sendRaw(req, res, 200, out, MIME['.json'], { cache: 'public, max-age=3600' });
+      sendRaw(req, res, 200, out, MIME['.json'], { cache: 'no-cache' });
     });
   }
 
   // 自算指标（由历史净值计算：日涨跌 / 各区间涨幅 / 最大回撤）
   if (p === '/api/navperf') {
-    return serveJsonFile(req, res, path.join(__dirname, 'data', 'nav-perf.json'), { cache: 'public, max-age=900' });
+    return serveJsonFile(req, res, path.join(__dirname, 'data', 'nav-perf.json'), { cache: 'no-cache' });
   }
   // 历史净值索引（用于发行人数据完整性标识，2026-10-17）
   if (p === '/api/hist-index') {
-    return serveJsonFile(req, res, path.join(__dirname, 'data', 'hist-index.json'), { cache: 'public, max-age=900' });
+    return serveJsonFile(req, res, path.join(__dirname, 'data', 'hist-index.json'), { cache: 'no-cache' });
   }
   /* 2026-10-29（5.0）：来源官网页面映射（人工核定），供友链自愈与巡检共用 */
   if (p === '/api/source-pages') {
-    return serveJsonFile(req, res, path.join(__dirname, 'data', 'source-pages.json'), { cache: 'public, max-age=3600' });
+    return serveJsonFile(req, res, path.join(__dirname, 'data', 'source-pages.json'), { cache: 'no-cache' });
   }
   // 基金英文名（积金局英文版，供简繁英搜索）
   if (p === '/api/names-en') {
     return fs.readFile(path.join(__dirname, 'data', 'names-en.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '英文名未生成' }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=3600' });
+      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
     });
   }
   // 发行人官网业绩快照（不等积金局：近1/3/5年、历年回报、风险级别）
   if (p === '/api/trustee-perf') {
     return fs.readFile(path.join(__dirname, 'data', 'trustee-perf.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '发行人业绩数据未生成' }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=1800' });
+      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
     });
   }
   // 发行人平均指数（等权链式，供第四页「发行人平均 vs 恒指」对比）
   if (p === '/api/trustee-idx') {
     return fs.readFile(path.join(__dirname, 'data', 'trustee-idx.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '发行人平均指数未生成' }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=1800' });
+      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
     });
   }
   // 十大持仓与资产分布（各发行人官网「基金便览」，月度；未接入时 404，前端显示接入说明）
   if (p === '/api/allstats') {
     return fs.readFile(path.join(__dirname, 'data', 'allstats.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: 'allstats 未生成' }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=1800' });
+      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
     });
   }
 
@@ -1067,7 +1067,7 @@ function breadthPrevPct(perf) {
   if (p === '/api/news') {
     return fs.readFile(path.join(__dirname, 'data', 'news.json'), (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '资讯数据未生成' }));
-      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'public, max-age=1800' });
+      sendRaw(req, res, 200, buf.toString('utf8'), MIME['.json'], { cache: 'no-cache' });
     });
   }
 
@@ -1075,7 +1075,7 @@ function breadthPrevPct(perf) {
     /* 2026-10-20：支持 ?id= 单只查询（详情页只需 1 条，全量 433KB → 约 2KB） */
     const oneId = u.searchParams.get('id');
     const fp = path.join(__dirname, 'data', 'holdings.json');
-    if (!oneId) return serveJsonFile(req, res, fp, { cache: 'public, max-age=3600' });
+    if (!oneId) return serveJsonFile(req, res, fp, { cache: 'no-cache' });
     return fs.readFile(fp, (err, buf) => {
       if (err) return send(res, 404, JSON.stringify({ error: '持仓数据未生成' }));
       try {

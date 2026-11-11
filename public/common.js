@@ -94,7 +94,7 @@ function cacheClear() {
   } catch (e) {}
 }
 
-function fetchJSON(url, key, force) {
+function fetchJSON(url, key, force, onFresh) {
   const hit = cacheGet(key);
   if (hit && !force && Date.now() - hit.at < CACHE_TTL) return Promise.resolve(hit.data);
   /* 2026-10-20：force 刷新时给 URL 加时间戳，绕开 ETag 304（否则「更新数据」仍拿到旧响应体） */
@@ -102,10 +102,41 @@ function fetchJSON(url, key, force) {
   const req = fetch(reqUrl, { cache: 'default' })
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
     .then((j) => { cacheSet(key, j); return j; });
-  if (hit && !force) { req.catch(() => {}); return Promise.resolve(hit.data); } // 旧数据先上屏，后台更新
+  /* 2026-11-10（用户反馈）：旧数据先上屏之后，后台拿到的「新版本」必须回灌到页面。
+     此前这里只写缓存不通知调用方，于是页面停在上一版数据，用户必须手动刷新才看到新值
+     —— 典型表现：早上打开仍是昨天净值，F5 后才变成今天。onFresh 由 loadData 传入。 */
+  if (hit && !force) {
+    req.then((j) => { try { if (onFresh) onFresh(j, hit.data); } catch (e) {} }).catch(() => {});
+    return Promise.resolve(hit.data); // 旧数据先上屏，后台更新
+  }
   return req;
 }
 window.fetchJSON = fetchJSON;
+
+/* ======================= 新版本回灌（2026-11-10） =======================
+ * 统一入口：拿到比当前 DATA 更新的 funds 快照时，原地更新内存并重绘全部已注册视图。
+ * 与「更新数据」按钮走同一套钩子（window.__onRefresh），因此各板块表现一致；
+ * 只有 updatedAt 真的变新时才动作，避免重复渲染与死循环。 */
+let __applyingFresh = false;
+function applyFreshData(j) {
+  if (!j || !j.funds || !j.funds.length || !DATA || !DATA.updatedAt) return false;
+  const nv = Number(j.updatedAt) || 0;
+  const ov = Number(DATA.updatedAt) || 0;
+  if (!nv || nv <= ov) return false;
+  if (__applyingFresh) return false;
+  __applyingFresh = true;
+  try {
+    DATA = j;
+    if (window.__PERF_JSON) decorateSelfPerf(DATA.funds, window.__PERF_JSON);
+    renderUpdateTime();
+    try { renderFriends(); } catch (e) {}
+    try { renderNavDistCard(); } catch (e) {}
+    if (window.__onRefresh) window.__onRefresh();
+    try { mpfToast(TQ('数据已自动更新至 {t}', { t: fmtDT(nv) })); } catch (e) {}
+  } finally { __applyingFresh = false; }
+  return true;
+}
+window.applyFreshData = applyFreshData;
 
 function setLoadMsg(html) {
   document.querySelectorAll('.loading').forEach((el) => {
@@ -148,7 +179,7 @@ window.ensureFunds = function () {
 async function loadData(onDone, attempt, force) {
   attempt = attempt || 0;
   try {
-    const j = await fetchJSON(API, 'funds', force);
+    const j = await fetchJSON(API, 'funds', force, applyFreshData);
     if (!j.funds || !j.funds.length) throw new Error(TT('空数据'));
     DATA = j;
     if (window.__PERF_JSON) decorateSelfPerf(DATA.funds, window.__PERF_JSON);
@@ -258,12 +289,24 @@ function initUpdateBanner() {
       (shown || '') + ' · ' + TT('更新期间页面可能显示上一次的数据'), true);
     return true;
   }
+  /* 2026-11-10（用户反馈）：服务端数据版本比本页新 → 自动拉取并重绘，不再要求用户手动刷新。
+     限频 30 秒一次，避免 status 轮询（45s）与首屏加载互相叠加。 */
+  let autoSyncing = false, autoSyncAt = 0;
+  function autoSync() {
+    if (autoSyncing || Date.now() - autoSyncAt < 30000) return;
+    autoSyncing = true; autoSyncAt = Date.now();
+    fetchJSON(API, 'funds', true)
+      .then((fresh) => { applyFreshData(fresh); })
+      .catch(() => {})
+      .then(() => { autoSyncing = false; });
+  }
   function check() {
     fetch('/api/status', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
         const u = j && j.updateStatus;
         const shown = j && j.navLatest ? TQ('当前展示 {d} 的净值', { d: j.navLatest }) : '';
+        if (j && j.updatedAt && DATA && DATA.updatedAt && Number(j.updatedAt) > Number(DATA.updatedAt)) autoSync();
         if (u && u.phase === 'running') {
           phase = 'running'; clearTimeout(doneTimer);
           paint('run', TT('数据更新进行中'), (u.step ? u.step : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · 更新完成后本页提示，无需手动刷新', false);
@@ -288,7 +331,7 @@ function initUpdateBanner() {
           if (phase === 'running') {
             phase = 'done';
             paint('ok', TT('数据更新完成'), (u.finishedAt ? u.finishedAt + ' ' : '') + TT('全部步骤已完成'),
-              shown + ' · ' + TT('刷新页面即可看到最新数据'), true);
+              shown + ' · ' + TT('本页已自动同步，无需手动刷新'), true);
             doneTimer = setTimeout(hide, 12000);
           } else {
             phase = '';

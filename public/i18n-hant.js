@@ -1350,6 +1350,8 @@
   '共 {n} 条': '共 {n} 條',
   '全部指标': '全部指標',
   '收起': '收起',
+  '数据已自动更新至 {t}': '數據已自動更新至 {t}',
+  '本页已自动同步，无需手动刷新': '本頁已自動同步，無需手動刷新',
 };
   for (var k in H) { if (Object.prototype.hasOwnProperty.call(H, k)) w.HANT[k] = H[k]; }
 })(window);
