@@ -35,14 +35,32 @@ function log(msg) {
 }
 
 /* 雅虎在本機直連會被限流，走代理；雲端 runner 直連即可。先直連，失敗再試代理。 */
+/* 连续失败计数：雅虎对本机 IP 会 429、代理偶尔也会挂（实测 2026-11-11 22:52 代理整体 000），
+   这时不要一只一只报错刷屏，失败 5 次就整轮放弃，留给明天的班次。 */
+let FAILS = 0;
+const FAIL_LIMIT = 5;
+
 function curlJSON(url) {
-  const args = ['-s', '--max-time', '25', '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/142.0'];
-  const tryOnce = (extra) => execFileSync('curl', [...args, ...extra, url], { encoding: 'utf8', timeout: 30000 });
-  try {
-    return JSON.parse(tryOnce([]));
-  } catch (e) {
-    return JSON.parse(tryOnce(['-x', PROXY]));
+  if (FAILS >= FAIL_LIMIT) throw new Error('雅虎连续失败，本轮已放弃');
+  const args = ['-s', '--max-time', '20', '-A', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/142.0'];
+  const tryOnce = (extra) => execFileSync('curl', [...args, ...extra, url], { encoding: 'utf8', timeout: 25000 });
+  for (let i = 0; i < 2; i++) {
+    try {
+      const j = JSON.parse(tryOnce([]));
+      FAILS = 0;
+      return j;
+    } catch (e) {
+      try {
+        const j2 = JSON.parse(tryOnce(['-x', PROXY]));
+        FAILS = 0;
+        return j2;
+      } catch (e2) {
+        if (i === 0) execFileSync('sleep', ['1'], { timeout: 5000 });
+      }
+    }
   }
+  FAILS++;
+  throw new Error('雅虎不可達（直連+代理均失敗）');
 }
 
 function yahooSeries(ticker) {
@@ -69,11 +87,19 @@ function main() {
 
   const j = JSON.parse(fs.readFileSync(FUNDS, 'utf8'));
   const byId = new Map(j.funds.map((f) => [String(f.id), f]));
-  const market = j.funds.reduce((m, f) => (f.navAsOf && f.navAsOf > m ? f.navAsOf : m), '');
+  let market = j.funds.reduce((m, f) => (f.navAsOf && f.navAsOf > m ? f.navAsOf : m), '');
+  /* 防呆：市场最新日若超出「今天+1」，说明某只基金写坏了，退回到第二新的日期 */
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  if (market > tomorrow) {
+    const ds = [...new Set(j.funds.map((f) => f.navAsOf).filter(Boolean))].sort();
+    market = ds.filter((d) => d <= tomorrow).pop() || '';
+    log('WARN 出现未来日期，市场基准回退为 ' + market);
+  }
 
   const fills = [];
   let checked = 0;
   for (const id of ids) {
+    if (FAILS >= FAIL_LIMIT) { log('SKIP 雅虎連續失敗，剩餘 ' + (ids.length - checked) + ' 隻本輪跳過'); break; }
     const f = byId.get(id);
     const mp = map[id];
     if (!f || !mp || !mp.ticker) continue;
@@ -98,7 +124,8 @@ function main() {
   }
 
   if (!fills.length) {
-    log('OK 檢查 ' + checked + ' 隻，雅虎與官網同日期或無更新，無需補（市場最新 ' + market + '）');
+    log('OK 檢查 ' + checked + ' 隻，雅虎與官網同日期或無更新，無需補（市場最新 ' + market
+      + '；映射覆蓋 ' + ids.length + '/' + j.funds.length + '）');
     console.log('SKIP');
     return 0;
   }
@@ -128,6 +155,9 @@ function main() {
     x.f.navAsOf = lastP[0];
     x.f.navProvisional = true;
     x.f.navSrcYahoo = true;
+    /* 来源页也要跟着改：否则详情页会写「已核对官方来源」而实际是雅虎暂代 */
+    x.f.navSource = 'Yahoo（晨星，官網未發佈時暫代）';
+    x.f.navSourceUrl = 'https://finance.yahoo.com/quote/' + map[x.id].ticker;
   }
   if (DRY) { console.log('FILLED ' + fills.length + '（--dry 未寫盤）'); return 0; }
 
