@@ -151,11 +151,12 @@ def main():
             continue
         name = f.get("fundBase") or f.get("fund") or ""
         n = norm(name)
-        if len(n) < 3:
+        # 「強積金保守基金」去掉通用词后只剩「保守」两个字，旧门槛 (>=3) 会把这类整批跳过
+        if len(n) < 2:
             continue
         pool = [c for c in cands if trustee_ok(f.get("trustee"), c["name"], name)]
         scored = sorted(((score(n, c["n"]), c) for c in pool), key=lambda x: -x[0])[:4]
-        if not scored or scored[0][0] < 0.5:
+        if not scored or scored[0][0] < 0.45:
             continue
         try:
             hist = json.load(open(os.path.join(ROOT, "data", "hist", fid + ".json"), encoding="utf-8"))
@@ -167,7 +168,7 @@ def main():
 
         best = None
         for sc, c in scored:
-            if sc < 0.5:
+            if sc < 0.45:
                 break
             try:
                 ser = yahoo_series(c["perfId"], cache)
@@ -181,7 +182,10 @@ def main():
                 continue
             med = statistics.median(ratios)
             dev = max(abs(r / med - 1) for r in ratios)
-            if dev <= a.maxdev and (best is None or dev < best[2]):
+            # 两档门槛：名称很像（>=0.55）允许 0.05% 偏差；名称只算勉强对上（0.45-0.55）
+            # 必须近乎完全一致（0.02%），避免把两只走势相似但不同的基金配错。
+            limit = a.maxdev if sc >= 0.55 else min(a.maxdev, 0.0002)
+            if dev <= limit and (best is None or dev < best[2]):
                 best = (c, med, dev, len(common), sc)
 
         if best:
