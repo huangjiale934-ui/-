@@ -37,7 +37,13 @@ const readSrc = (f) => { try { return f.indexOf('root:') === 0 ? fs.readFileSync
 /* ---------------- 首页 ---------------- */
 chk('首页·KPI 成分基金 451', /成分基金[\s\S]{0,60}?451/.test(home));
 chk('首页·KPI 受托人 11 家（2026-10-31：卡片小字已删）', /受托人／发行人[\s\S]{0,60}?11 <small>家<\/small>/.test(home));
-chk('首页·KPI 总规模 1.68 万亿', /市场总规模[\s\S]{0,80}1\.68 万亿/.test(home));
+/* 2026-11-11：積金局规模每月更新（10 月总规模 1.65 万亿），不能再写死具体数字。
+   改为「格式正确 + 落在合理区间」，避免每月刷新都误报。 */
+chk('首页·KPI 总规模（格式 + 合理区间 1.0–2.5 万亿）', (function () {
+  const m = /市场总规模[\s\S]{0,80}?(\d\.\d{2}) 万亿/.exec(home);
+  const v = m ? parseFloat(m[1]) : 0;
+  return v >= 1.0 && v <= 2.5;
+})());
 /* 2026-10-22：KPI 改用自算净值口径（数值随净值日变化），只校验标签、口径说明与百分比结构 */
 chk('首页·KPI 近1年平均回报（规模加权）', /近 1 年平均回报<\/div><div class="mk-v">[+-]\d+\.\d+%/.test(home));
 
@@ -50,10 +56,20 @@ chk('首页·温度计平均回报口径（2026-11-04 起标签改「全市场�
 chk('首页·环形图 中心 451 只基金', /class="pie-c1"[^>]*>451<\/text>/.test(home));
 chk('首页·环形图图例 3 组（种类分布/受托人份额/资产占比）', (home.match(/<ul class="pie-legend">/g) || []).length === 3);
 // 已由「环形图图例带只单位」覆盖
-chk('首页·扇形图 HSBC 28.0%', /HSBC[\s\S]{0,160}?4,720 亿 · 28\.0%/.test(home));
-chk('首页·扇形图 宏利 27.2%', /宏利[\s\S]{0,160}?4,583 亿 · 27\.2%/.test(home));
-chk('首页·扇形图 银联信托 12.3%（2026-10-31：dump 走 t2s 简体）', /银联信托[\s\S]{0,220}?2,077 亿 · 12\.3%/.test(home));
-chk('首页·扇形图 其他 6 家', /其他 6 家[\s\S]{0,120}?11\.7%/.test(home));
+/* 2026-11-11：份额随積金局每月规模变化，改为「四块合计 ≈100% 且各自落在合理区间」 */
+chk('首页·扇形图 四块份额合理且合计 100%', (function () {
+  const pctOf = (name) => {
+    const i = home.indexOf('title="' + name + '">');
+    if (i < 0) return NaN;
+    const m = /(\d+\.\d)%/.exec(home.slice(i, i + 140));
+    return m ? parseFloat(m[1]) : NaN;
+  };
+  /* 饼图共 6 块：三大 + 永明 + 友邦 + 其他 6 家（其余按份额合并） */
+  const vals = [pctOf('HSBC'), pctOf('宏利'), pctOf('银联信托'), pctOf('永明'), pctOf('友邦信托'), pctOf('其他 6 家受托人')];
+  if (vals.some((v) => isNaN(v))) return false;
+  const sum = vals.reduce((a, b) => a + b, 0);
+  return Math.abs(sum - 100) <= 1.5 && vals[0] > 15 && vals[1] > 15 && vals[2] > 3 && vals[5] > 3;
+})());
 
 chk('首页·风险级别 7 根柱子', (home.match(/<div class="col">/g) || []).length === 7);
 chk('首页·风险级别图例 7 项（2026-10-31：说明小字已删）', (function () { const m = /<ul class="rl-list">[\s\S]*?<\/ul>/.exec(home); return m && (m[0].match(/<li>/g) || []).length === 7; })());
@@ -65,8 +81,8 @@ chk('首页·资讯块位于市场概览右栏', /mk-charts2[\s\S]{0,2000}id="ne
 
 chk('首页·走势图 5 个年份', ['2021', '2022', '2023', '2024', '2025']
   .every((y) => new RegExp('class="chart-xlab"[^>]*>' + y + '<').test(home)));
-chk('首页·走势图 2025 +17.72%（规模加权新值）', /class="line-val up"[^>]*>\+17\.72%/.test(home));
-chk('首页·走势图 2022 -15.55% 为绿（规模加权新值）', /class="line-val down"[^>]*>-15\.55%/.test(home));
+chk('首页·走势图 2025 为正且标红（数值随指数重算，校验符号与格式）', /class="line-val up"[^>]*>\+\d+\.\d+%/.test(home));
+chk('首页·走势图 2022 为负且标绿（数值随指数重算，校验符号与格式）', /class="line-val down"[^>]*>-\d+\.\d+%/.test(home));
 
 chk('首页·四榜 2×2 各 5 条（2026-11-04：1Y/5Y 回报 + 规模 + 波动率）', ['#mkTop1', '#mkTop4', '#mkTopSize', '#mkTopVol'].every((id) => {
   const m = new RegExp('id="' + id.slice(1) + '"[\\s\\S]*?</ol>').exec(home);
@@ -177,7 +193,7 @@ chk('首页·旧独立资讯区块已移除', home.indexOf('news-wrap') < 0 && h
 /* ---- 本轮：数字卡片删除 + 公司介绍改 2×2 卡片 ---- */
 const rawH = (function () { try { return fs.readFileSync(path.join(__dirname, '..', 'public', 'home.html'), 'utf8'); } catch (e) { return ''; } })();
 chk('首页·2023 四张数字卡片已删除', rawH.indexOf('class="metric"') < 0 && rawH.indexOf('m-grid in-about') < 0);
-chk('首页·环形图图例带「条」单位（本轮统一）', /169 条 · 8,013 亿/.test(home));
+chk('首页·环形图图例带「条」单位（本轮统一）', /lg-v">\d+ 条 · [\d,]+ 亿<\/span>/.test(home));
 chk('首页·风险柱横轴带「级」', /<span class="cx">1 级<\/span>/.test(home));
 /* 2026-10-22：温度计改用自算净值口径后，上涨/下跌条数随净值日变动，
    断言只查「数字 + 条 + 上涨/下跌」的结构，不再写死 351（遵守「勿写死会变的数字」） */
@@ -853,7 +869,7 @@ chk('v3·trend.js 健壮性（hideGoto 判空 + _t/_tq 包装不走 window）', 
       /function _t\(s\) \{ return \(typeof TT === 'function'\)/.test(j) && !/window\.TT \?/.test(j); } catch (e) { return false; }
 })());
 chk('v3·数据版本徽标（三页）+ 明细提示', ['home', 'index', 'ranking'].every((p) => /id="verChip"/.test(read(p))) &&
-  /官方资料（积金局）：2026-09-30/.test(an));
+  /官方资料（积金局）：\d{4}-\d{2}-\d{2}/.test(an));
 chk('v3·简繁英搜索（zhmap 映射 + 英文名接口 + 归一化函数）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
