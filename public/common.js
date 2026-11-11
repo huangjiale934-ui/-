@@ -297,11 +297,18 @@ function initUpdateBanner() {
   let autoSyncing = false, autoSyncAt = 0;
   function autoSync() {
     if (autoSyncing || Date.now() - autoSyncAt < 30000) return;
+    /* 2026-11-11（用户第二次反馈「仍要手动刷新」）：只换 funds 不够——
+       近1年/回撤等自算列来自 nav-perf、顶部行情条来自 index、持仓来自 holdings，
+       原地重绘必然有一部分还是旧的。这里直接自动刷新整页（先清本地缓存），
+       保证「更新完成后页面自己变成最新」，用户不需要按 F5。
+       弹窗打开或正在输入时跳过，避免打断操作；下一轮（45 秒后）再试。 */
+    if (document.querySelector('.modal.show, .cmp-box.show')) return;
+    const ae = document.activeElement;
+    if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '')) return;
     autoSyncing = true; autoSyncAt = Date.now();
-    fetchJSON(API, 'funds', true)
-      .then((fresh) => { applyFreshData(fresh); })
-      .catch(() => {})
-      .then(() => { autoSyncing = false; });
+    try { cacheClear(); } catch (e) {}
+    try { sessionStorage.setItem('mpf-auto-reload', String(Date.now())); } catch (e) {}
+    location.reload();
   }
   function check() {
     fetch('/api/status', { cache: 'no-store' })

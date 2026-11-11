@@ -1973,6 +1973,12 @@ chk('四十一轮·服务端数据热加载（daily 写盘后不必重启/刷新
     return /function reloadIfChanged\(\)/.test(sv) && /reloadIfChanged\(\);/.test(sv) && /DATA_MTIME/.test(sv);
   } catch (e) { return false; }
 })());
+chk('四十二轮·数据版本变化时整页自动刷新（无需手动 F5）', (function () {
+  try {
+    const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    return /mpf-auto-reload/.test(j) && /location\.reload\(\)/.test(j) && /cacheClear\(\);/.test(j);
+  } catch (e) { return false; }
+})());
 chk('四十一轮·列设置不持久化（刷新回默认 12 列）', (function () {
   try {
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
