@@ -12,9 +12,6 @@ on:
     - cron: '40 14 * * *'
     # 2026-10-28：交易日北京 09:45 = UTC 01:45（与本机 09:40 错开 5 分钟，避免同时打同一批官网），只更新「淨值 + 自算指標」，不动指数/新闻/持仓/积金局档案
     - cron: '45 1 * * 1-5'
-    # 2026-11-11（用户反馈：宏利常在下午发布，等到 22:40 才更新会慢一天）：
-    # 交易日北京 17:10 = UTC 09:10，再跑一次轻量更新，把当天下午发布的净值当天补上。
-    - cron: '10 9 * * 1-5'
   workflow_dispatch: {}
 
 permissions:
@@ -68,7 +65,7 @@ jobs:
       - name: 判定更新模式（全量 / 仅净值）
         id: mode
         run: |
-          if [ "${{ github.event.schedule }}" = "45 1 * * 1-5" ] || [ "${{ github.event.schedule }}" = "10 9 * * 1-5" ] || [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.event.schedule }}" = "45 1 * * 1-5" ] || [ "${{ github.event_name }}" = "push" ]; then
             echo "light=1" >> "$GITHUB_OUTPUT"
             echo "本次为「仅净值」模式（北京时间交易日 09:40）"
           else
@@ -105,7 +102,7 @@ jobs:
           python news_fetch.py || echo "!! 積金局新聞稿失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
 
-      - name: 抓取淨值（交易日 09:40 / 17:10 轻量模式）
+      - name: 抓取淨值（交易日 09:40 轻量模式）
         if: steps.mode.outputs.light == '1'
         run: |
           node tools/mpfa-refresh.js || echo "!! 積金局快照刷新失敗（保留舊數據）"

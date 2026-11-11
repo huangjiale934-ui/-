@@ -1,0 +1,61 @@
+name: manulife-watch
+
+# 宏利「当日补抓」—— 2026-11-11 用户要求
+# 背景：宏利发布时点不固定（下午/晚间/跨夜都有），等 22:40 全量会慢一天。
+# 做法：工作日北京 11:10–18:10 每小时判一次；宏利已追上全市场就秒退（不抓、不提交）；
+#       落后才只抓宏利 67 只，重算受影响指标并提交 → push 触发 Pages 重新发布。
+on:
+  schedule:
+    - cron: '10 3-10 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 安裝抓取依賴
+        run: pip install -q curl_cffi
+
+      - name: 判定 + 按需补抓
+        id: watch
+        run: |
+          node tools/manulife-watch.js --check | tee /tmp/watch.out
+          echo "result=$(tail -1 /tmp/watch.out)" >> "$GITHUB_OUTPUT"
+
+      - name: 提交数据（仅在确有推进时）
+        if: steps.watch.outputs.result == 'UPDATED'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config pull.rebase true
+          git add data/
+          if git diff --cached --quiet; then
+            echo "无变更"
+            exit 0
+          fi
+          git commit -m "data: 宏利当日补抓 $(date -u +%F' '%H:%M) UTC"
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then echo "推送成功"; exit 0; fi
+            git fetch origin main || true
+            git rebase --autostash origin/main || git rebase --abort || true
+            sleep 5
+          done
+          echo "!! 推送失败（不影响已抓到的数据，下一小时会再试）"

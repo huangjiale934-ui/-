@@ -1973,6 +1973,14 @@ chk('四十一轮·服务端数据热加载（daily 写盘后不必重启/刷新
     return /function reloadIfChanged\(\)/.test(sv) && /reloadIfChanged\(\);/.test(sv) && /DATA_MTIME/.test(sv);
   } catch (e) { return false; }
 })());
+chk('四十二轮·宏利按需补抓（守卫脚本 + 每小时工作流 + 无 17:10 全站窗口）', (function () {
+  try {
+    const w = fs.readFileSync(path.join(__dirname, '..', 'tools', 'manulife-watch.js'), 'utf8');
+    const y = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'manulife-watch.yml'), 'utf8');
+    const d = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
+    return /STATUS manu=/.test(w) && /UPDATED/.test(w) && /10 3-10 \* \* 1-5/.test(y) && !/10 9 \* \* 1-5/.test(d);
+  } catch (e) { return false; }
+})());
 chk('四十二轮·数据版本变化时整页自动刷新（无需手动 F5）', (function () {
   try {
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
@@ -1985,10 +1993,10 @@ chk('四十一轮·列设置不持久化（刷新回默认 12 列）', (function
     return !/localStorage\.setItem\('mpf-cols-v9'/.test(j) && /removeItem\('mpf-cols-v9'\)/.test(j);
   } catch (e) { return false; }
 })());
-chk('四十一轮·云端 17:10 傍晚补抓 + 构建前重算指数', (function () {
+chk('四十一轮·云端构建前重算指数', (function () {
   try {
     const y = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
-    return /10 9 \* \* 1-5/.test(y) && /10 9 \* \* 1-5/.test(y) && /node mpfindex\.js/.test(y);
+    return /node mpfindex\.js/.test(y);
   } catch (e) { return false; }
 })());
 chk('四十轮·云端链路必须重算自算指数与市场指数（否则 GitHub 站行情条冻结在旧日期）', (function () {

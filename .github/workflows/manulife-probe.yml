@@ -3,18 +3,19 @@ name: manulife-probe
 # 宏利净值发布时点探测（2026-11-10 建立）
 # 目的：宏利 API 只给 asOfDate，没有发布时间。用高频采样反推「每天几点几分上线」。
 # 运行在 GitHub 云端，不占用本机、不消耗 WorkBuddy 积分（公开仓库 Actions 免费）。
-# 每天两段：07:00–10:00 / 13:00–16:00（香港时间），5 分钟一次。
+# 每天三段：07:00–11:00 / 13:00–17:00 / 18:00–22:00（香港时间），5 分钟一次。
 # 2026-11-11：原 330 分钟窗口 + 350 分钟超时，实测会卡到超时来不及提交（11-11 07:27 那班）。
 # 缩短为 180 分钟 + 240 分钟超时，保证每班都能把采样记录提交回来。
 on:
   schedule:
-    - cron: '0 23 * * *'   # 北京/香港 07:00 起，跑 5.5 小时
-    - cron: '0 5 * * *'    # 北京/香港 13:00 起，跑 5.5 小时
+    - cron: '0 23 * * *'   # 北京/香港 07:00 起，跑 4 小时
+    - cron: '0 5 * * *'    # 北京/香港 13:00 起，跑 4 小时
+    - cron: '0 10 * * *'   # 北京/香港 18:00 起，跑 4 小时（覆盖用户提到的晚上 8 点）
   workflow_dispatch:
     inputs:
       minutes:
         description: '本次连续采样时长（分钟）'
-        default: '180'
+        default: '240'
       interval:
         description: '采样间隔（分钟）'
         default: '5'
@@ -34,7 +35,7 @@ concurrency:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +56,7 @@ jobs:
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             python tools/manulife-probe.py --minutes "${{ inputs.minutes }}" --interval "${{ inputs.interval }}"
           else
-            python tools/manulife-probe.py --minutes 180 --interval 5
+            python tools/manulife-probe.py --minutes 240 --interval 5
           fi
 
       - name: 寫入運行摘要
