@@ -1433,6 +1433,7 @@
   '收起': 'Collapse',
   '数据已自动更新至 {t}': 'Data auto-updated to {t}',
   '本页已自动同步，无需手动刷新': 'This page synced automatically — no need to refresh',
+  '交易日 17:10 补抓当日已发布的净值，通常 10–20 分钟，完成后本提示自动消失': 'On trading days, NAVs published during the day are fetched again from 17:10 (usually 10–20 minutes; this notice disappears when done)',
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -273,7 +273,9 @@ function initUpdateBanner() {
     const wd = hmDay();
     const full = t >= '22:33' && t <= '23:30';
     const light = wd >= 1 && wd <= 5 && t >= '09:38' && t <= '10:55';
-    return light ? 'light' : (full ? 'full' : '');
+    /* 2026-11-11：新增 17:10 傍晚补抓（宏利等下午才发布当日净值） */
+    const dusk = wd >= 1 && wd <= 5 && t >= '17:05' && t <= '17:55';
+    return light ? 'light' : (dusk ? 'dusk' : (full ? 'full' : ''));
   }
   function paintWindow(shown) {
     const quiet = dismissed && Date.now() - dismissed < 30 * 60 * 1000;
@@ -285,7 +287,8 @@ function initUpdateBanner() {
        改成「完成后自动消失」，并且这条只在还没有今天的完成状态时才出现（见 check）。 */
     paint('info', TT('数据更新窗口'),
       w === 'light' ? TT('交易日 09:40 起自动更新净值，通常 20–30 分钟，完成后本提示自动消失')
-                    : TT('每日 22:40 自动全量更新，完成后本提示自动消失'),
+        : w === 'dusk' ? TT('交易日 17:10 补抓当日已发布的净值，通常 10–20 分钟，完成后本提示自动消失')
+        : TT('每日 22:40 自动全量更新，完成后本提示自动消失'),
       (shown || '') + ' · ' + TT('更新期间页面可能显示上一次的数据'), true);
     return true;
   }
