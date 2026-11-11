@@ -579,10 +579,11 @@
   const COL_DEFAULT = ['rank', 'fund', 'trustee', 'risk', 'nav',
     'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'size', 'cmp', 'ops'];
   /* 2026-10-27（用户要求）：「精简模式」下线，改为「默认模式」——一键回到用户指定的 14 列 */
-  let colSet = null;
+  /* 2026-11-11（用户反馈）：列设置不再写 localStorage —— 刷新页面必须回到默认 12 列。
+     之前改过列的用户会一直停在自定义列，看起来像「列设置坏了 / 恢复不了默认」。 */
+  let colSet = new Set(COL_DEFAULT);
   let DIM_EXTRA = [];   /* 2026-11-02：维度联动临时放出的列（可多选，不持久化） */
-  try { const raw = localStorage.getItem('mpf-cols-v9'); colSet = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { colSet = null; }
-  if (!colSet || !colSet.size) colSet = new Set(COL_DEFAULT);
+  try { localStorage.removeItem('mpf-cols-v9'); } catch (e) {}
   /* 2026-11-02（第二十三轮，用户要求）：列设置给 3 个视角预设 + 全部列
      —— 默认（领导指定 12 列）/ 收益视角（回报与超额为主）/ 风险视角（风险与回撤为主） */
   const COL_PRESETS = {
@@ -593,8 +594,8 @@
       'sharpe1', 'posM12', 'size', 'cmp', 'ops'],
     '全部列': COL_DEFS.map((c) => c.k),
   };
-  function applyCols(save) {
-    if (save !== false) { try { localStorage.setItem('mpf-cols-v9', JSON.stringify([...colSet])); } catch (e) {} }
+  function applyCols() {
+    /* 2026-11-11：只作用于当前页面（内存），刷新即回默认列 */
     /* 2026-10-26 重做：列显隐改为「不渲染」（visibleOrder 过滤），不再用 CSS 隐藏——
        与维度列插队机制统一，从机制上杜绝表头/表体错位 */
     try { localStorage.removeItem('mpf-cols-v5'); localStorage.removeItem('mpf-cols-v6'); } catch (e) {}

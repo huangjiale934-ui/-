@@ -124,6 +124,8 @@ node tools/merge-nav.js || { echo "!!! merge-nav 失败，中止"; exit 1; }
 #（日志里的「日期不一致 30」就是它）。这里补一次重算，与 daily.sh 的 8.2 步一致。
 node navperf.js || echo "!!! 指标重算（hist 追加后）失败（继续）"
 node tools/hist-index-sync.js || echo "!!! 历史索引对齐失败（继续）"
+# 2026-11-11：積金局資訊表每月更新；早间顺手核对一次（未变则不写盘，约 40 秒）
+node tools/mpfa-refresh.js || echo "!! 積金局快照刷新失败（继续）"
 node mpfindex.js || echo "!!! 自算指数失败（继续）"
 # 2026-11-11：走势图「未选基金」统计表数据源，必须跟着最新净值日重算（6 秒）
 node allstats.js || echo "!! 区间统计重算失败（继续）"

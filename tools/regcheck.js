@@ -1967,6 +1967,24 @@ chk('二十七轮·⑬页脚两个折叠箭头缩小 15%（42 → 36）',
 chk('二十七轮·⑭详情弹窗价格与四项并排（5 列一行）',
   /\.modal-bd \.fd-head \{ grid-template-columns: 1\.1fr 1fr 1fr 1fr 1fr;/.test(readSrc('analysis.css')) &&
   /\.modal-bd \.fd-price \{ grid-column: auto;/.test(readSrc('analysis.css')));
+chk('四十一轮·服务端数据热加载（daily 写盘后不必重启/刷新）', (function () {
+  try {
+    const sv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+    return /function reloadIfChanged\(\)/.test(sv) && /reloadIfChanged\(\);/.test(sv) && /DATA_MTIME/.test(sv);
+  } catch (e) { return false; }
+})());
+chk('四十一轮·列设置不持久化（刷新回默认 12 列）', (function () {
+  try {
+    const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
+    return !/localStorage\.setItem\('mpf-cols-v9'/.test(j) && /removeItem\('mpf-cols-v9'\)/.test(j);
+  } catch (e) { return false; }
+})());
+chk('四十一轮·云端 17:10 傍晚补抓 + 构建前重算指数', (function () {
+  try {
+    const y = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
+    return /10 9 \* \* 1-5/.test(y) && /10 9 \* \* 1-5/.test(y) && /node mpfindex\.js/.test(y);
+  } catch (e) { return false; }
+})());
 chk('四十轮·云端链路必须重算自算指数与市场指数（否则 GitHub 站行情条冻结在旧日期）', (function () {
   try {
     const y = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');

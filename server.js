@@ -314,6 +314,25 @@ function loadSnapshot() {
   return null;
 }
 
+/* 2026-11-11（用户反馈「每日更新完仍要手动刷新」）：
+   服务端只在启动时把 funds.json 读进内存，本机 daily.sh 写盘后进程不会重载 →
+   /api/funds 与 /api/status 一直返回启动时的旧版本，前端 45 秒自动同步因此
+   永远看不到 updatedAt 变化（必须手动刷新，甚至手动重启才生效）。
+   这里按文件 mtime 做热加载：每次请求只 stat 一次（微秒级），变了就重读快照，
+   并清空 hist 缓存（hist/*.json 也会在同一批写盘里更新）。 */
+let DATA_MTIME = 0;
+function reloadIfChanged() {
+  let m = 0;
+  try { m = fs.statSync(DATA_FILE).mtimeMs; } catch (e) { return; }
+  if (!m || m === DATA_MTIME) return;
+  const j = loadSnapshot();
+  if (!j) return;
+  DATA_MTIME = m;
+  cache = j;
+  Object.keys(histCache).forEach((k) => { delete histCache[k]; });
+  console.log('[MPF] funds.json 已更新，热加载 ' + j.count + ' 只');
+}
+
 /* ---------- 单位类别分组派生（仅内存附加，绝不写数据文件） ----------
  * 同一只成分基金常有多个「单位类别」（A 类/T 类…），收费与净值不同。
  * 前端详情弹窗的「单位类别明细」表需要每个类别一行；此前该分组从未随接口下发，
@@ -376,6 +395,7 @@ function saveSnapshot(obj) {
   try {
     fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
     fs.writeFileSync(DATA_FILE, JSON.stringify(obj));
+    try { DATA_MTIME = fs.statSync(DATA_FILE).mtimeMs; } catch (e) {}
   } catch (e) {
     console.error('写入数据快照失败:', e.message);
   }
@@ -597,6 +617,8 @@ function warmJsonCache() {
 }
 
 const server = http.createServer(async (req, res) => {
+  /* 2026-11-11：每次请求先检查数据文件是否被每日链路改过（热加载） */
+  reloadIfChanged();
   const u = new URL(req.url, 'http://' + (req.headers.host || 'localhost'));
   const p = u.pathname;
 
@@ -1414,6 +1436,7 @@ server.listen(PORT, async () => {
   warmJsonCache();
   // 先用上一次从积金局官网抓取的快照兜底，保证页面打开即有数据，再后台拉取最新
   if (!cache) cache = loadSnapshot();
+  try { DATA_MTIME = fs.statSync(DATA_FILE).mtimeMs; } catch (e) {}
   if (cache) console.log('[MPF] 已载入本地快照：' + cache.count + ' 只基金');
   /* 2026-10-24（核验报告 v3 #2，领导确认）：关闭服务端自抓。
      根因：部署环境连不上积金局 mfp.mpfa.org.hk，refresh() 必超时（240s），
