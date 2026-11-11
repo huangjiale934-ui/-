@@ -313,7 +313,10 @@ function initUpdateBanner() {
       .then((j) => {
         const u = j && j.updateStatus;
         const shown = j && j.navLatest ? TQ('当前展示 {d} 的净值', { d: j.navLatest }) : '';
-        if (j && j.updatedAt && DATA && DATA.updatedAt && Number(j.updatedAt) > Number(DATA.updatedAt)) autoSync();
+        /* 2026-11-11：更新进行中（phase=running）不要自动刷新 —— 此时 funds.json 可能只写了一半，
+           刷新会看到「部分新、部分旧」。等 done 之后再刷。 */
+        if (j && j.updatedAt && DATA && DATA.updatedAt && Number(j.updatedAt) > Number(DATA.updatedAt)
+            && (!u || u.phase !== 'running')) autoSync();
         if (u && u.phase === 'running') {
           phase = 'running'; clearTimeout(doneTimer);
           paint('run', TT('数据更新进行中'), (u.step ? u.step : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · 更新完成后本页提示，无需手动刷新', false);
