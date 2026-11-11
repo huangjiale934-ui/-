@@ -1,5 +1,5 @@
 {
- "updatedAt": 1794385358470,
+ "updatedAt": 1794396571837,
  "funds": {
   "367": {
    "ticker": "0P00008SUZ.HK",
@@ -224,6 +224,2580 @@
    "samples": 244,
    "maxDev": 0.0,
    "name": "核心累積基金"
+  },
+  "875": {
+   "ticker": "0P0000U7QA.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "亞洲債券基金",
+   "msName": "友邦強積金優選計劃 亞洲債券基金",
+   "nameScore": 0.75
+  },
+  "132": {
+   "ticker": "0P00008SSC.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "均衡組合",
+   "msName": "友邦強積金優選計劃 均衡組合",
+   "nameScore": 0.75
+  },
+  "131": {
+   "ticker": "0P00008SSE.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "穩定資本組合",
+   "msName": "友邦強積金優選計劃 穩定資本組合",
+   "nameScore": 0.833
+  },
+  "1579": {
+   "ticker": "0P0001BM3A.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "中港動態資產配置基金",
+   "msName": "友邦強積金優選計劃 中港動態資產配置基金",
+   "nameScore": 0.875
+  },
+  "657": {
+   "ticker": "0P0000GEJX.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "環球債券基金",
+   "msName": "友邦強積金優選計劃 環球債券基金",
+   "nameScore": 0.75
+  },
+  "133": {
+   "ticker": "0P00008SSG.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "增長組合",
+   "msName": "友邦強積金優選計劃 增長組合",
+   "nameScore": 0.75
+  },
+  "699": {
+   "ticker": "0P0000K55R.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "基金經理精選退休基金",
+   "msName": "友邦強積金優選計劃 基金經理精選退休基金",
+   "nameScore": 0.833
+  },
+  "1522": {
+   "ticker": "0P0001A2SB.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行65歲後基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行65歲後基金",
+   "nameScore": 0.737
+  },
+  "210": {
+   "ticker": "0P0000GF59.HK",
+   "ratio": 1.0,
+   "samples": 482,
+   "maxDev": 0.0,
+   "name": "交通銀行亞洲動力股票成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行亞洲動力股票成分基金",
+   "nameScore": 0.815
+  },
+  "207": {
+   "ticker": "0P00008SRM.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行均衡成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行均衡成分基金",
+   "nameScore": 0.737
+  },
+  "697": {
+   "ticker": "0P0000K55S.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "交通銀行中國動力股票成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行中國動力股票成分基金",
+   "nameScore": 0.815
+  },
+  "1521": {
+   "ticker": "0P0001A2SC.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行核心累積基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行核心累積基金",
+   "nameScore": 0.737
+  },
+  "208": {
+   "ticker": "0P0000GF58.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "交通銀行動力增長成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行動力增長成分基金",
+   "nameScore": 0.783
+  },
+  "830": {
+   "ticker": "0P0000S2WQ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行環球債券成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行環球債券成分基金",
+   "nameScore": 0.783
+  },
+  "831": {
+   "ticker": "0P0000S2WR.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行大中華股票成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行大中華股票成分基金",
+   "nameScore": 0.8
+  },
+  "206": {
+   "ticker": "0P00008SOM.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行保證回報成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行保證回報成分基金",
+   "nameScore": 0.783
+  },
+  "653": {
+   "ticker": "0P0000GF57.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行香港動力股票成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行香港動力股票成分基金",
+   "nameScore": 0.815
+  },
+  "798": {
+   "ticker": "0P0000MPRM.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行恒指ESG成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行恒指ESG成分基金",
+   "nameScore": 0.8
+  },
+  "211": {
+   "ticker": "0P00008SOL.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行強積金保守基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行強積金保守基金",
+   "nameScore": 0.667
+  },
+  "1979": {
+   "ticker": "0P0001QM5N.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行北美股票成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行北美股票成分基金",
+   "nameScore": 0.783
+  },
+  "209": {
+   "ticker": "0P00008SRL.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "交通銀行平穩增長成分基金",
+   "msName": "交通銀行愉盈退休強積金計劃 交通銀行平穩增長成分基金",
+   "nameScore": 0.783
+  },
+  "1532": {
+   "ticker": "0P0001A2TT.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）65歲後基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）65歲後基金",
+   "nameScore": 0.941
+  },
+  "178": {
+   "ticker": "0P000099WP.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）亞洲股票基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）亞洲股票基金",
+   "nameScore": 0.941
+  },
+  "176": {
+   "ticker": "0P00008SSQ.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）中國及香港股票基金",
+   "msName": "BCT（強積金）行業計劃 BCT (行業) 中國及香港股票基金",
+   "nameScore": 0.957
+  },
+  "1531": {
+   "ticker": "0P0001A2TU.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）核心累積基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）核心累積基金",
+   "nameScore": 0.941
+  },
+  "180": {
+   "ticker": "0P00008SSR.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）E30 混合資產基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）E30 混合資產基金",
+   "nameScore": 0.957
+  },
+  "181": {
+   "ticker": "0P00008SOI.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）E50 混合資產基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）E50 混合資產基金",
+   "nameScore": 0.957
+  },
+  "174": {
+   "ticker": "0P00008SSP.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）E70 混合資產基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）E70 混合資產基金",
+   "nameScore": 0.957
+  },
+  "175": {
+   "ticker": "0P000099WN.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）靈活混合資產基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）靈活混合資產基金",
+   "nameScore": 0.952
+  },
+  "173": {
+   "ticker": "0P00008SSN.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）環球債券基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）環球債券基金",
+   "nameScore": 0.941
+  },
+  "177": {
+   "ticker": "0P00008SSO.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）環球股票基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）環球股票基金",
+   "nameScore": 0.941
+  },
+  "179": {
+   "ticker": "0P00008SOJ.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）強積金保守基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）強積金保守基金",
+   "nameScore": 0.923
+  },
+  "1099": {
+   "ticker": "0P0000YRXX.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT（行業）人民幣債券基金",
+   "msName": "BCT（強積金）行業計劃 BCT（行業）人民幣債券基金",
+   "nameScore": 0.947
+  },
+  "1859": {
+   "ticker": "0P0001Q4UA.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT亞洲收益退休基金",
+   "msName": "BCT積金之選 BCT亞洲收益退休基金",
+   "nameScore": 0.762
+  },
+  "188": {
+   "ticker": "0P00008VB8.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT E30 混合資產基金",
+   "msName": "BCT積金之選 BCT E30 混合資產基金",
+   "nameScore": 0.783
+  },
+  "185": {
+   "ticker": "0P00008SSS.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT E50 混合資產基金",
+   "msName": "BCT積金之選 BCT E50 混合資產基金",
+   "nameScore": 0.783
+  },
+  "184": {
+   "ticker": "0P00008SOK.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT E70 混合資產基金",
+   "msName": "BCT積金之選 BCT E70 混合資產基金",
+   "nameScore": 0.783
+  },
+  "701": {
+   "ticker": "0P0000INT5.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT E90 混合資產基金",
+   "msName": "BCT積金之選 BCT E90 混合資產基金",
+   "nameScore": 0.783
+  },
+  "189": {
+   "ticker": "0P000099WO.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT靈活混合資產基金",
+   "msName": "BCT積金之選 BCT靈活混合資產基金",
+   "nameScore": 0.762
+  },
+  "183": {
+   "ticker": "0P00008SSU.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT環球債券基金",
+   "msName": "BCT積金之選 BCT環球債券基金",
+   "nameScore": 0.706
+  },
+  "799": {
+   "ticker": "0P0000MPRL.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT港元債券基金",
+   "msName": "BCT積金之選 BCT港元債券基金",
+   "nameScore": 0.706
+  },
+  "182": {
+   "ticker": "0P00008SST.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT強積金保守基金",
+   "msName": "BCT積金之選 BCT強積金保守基金",
+   "nameScore": 0.615
+  },
+  "1100": {
+   "ticker": "0P0000YRXY.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT人民幣債券基金",
+   "msName": "BCT積金之選 BCT人民幣債券基金",
+   "nameScore": 0.737
+  },
+  "703": {
+   "ticker": "0P0000INT2.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT儲蓄易2025 基金",
+   "msName": "BCT積金之選 BCT儲蓄易2025 基金",
+   "nameScore": 0.783
+  },
+  "705": {
+   "ticker": "0P0000INT1.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT儲蓄易2030 基金",
+   "msName": "BCT積金之選 BCT儲蓄易2030 基金",
+   "nameScore": 0.783
+  },
+  "707": {
+   "ticker": "0P0000INT7.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT儲蓄易2035 基金",
+   "msName": "BCT積金之選 BCT儲蓄易2035 基金",
+   "nameScore": 0.783
+  },
+  "710": {
+   "ticker": "0P0000INT6.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT儲蓄易2040 基金",
+   "msName": "BCT積金之選 BCT儲蓄易2040 基金",
+   "nameScore": 0.783
+  },
+  "1819": {
+   "ticker": "0P0001OFPK.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT儲蓄易2045 基金",
+   "msName": "BCT積金之選 BCT儲蓄易2045 基金",
+   "nameScore": 0.783
+  },
+  "1820": {
+   "ticker": "0P0001OFPL.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "BCT儲蓄易2050 基金",
+   "msName": "BCT積金之選 BCT儲蓄易2050 基金",
+   "nameScore": 0.783
+  },
+  "1559": {
+   "ticker": "0P00019QRI.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順65歲後基金",
+   "msName": "BCT強積金策略計劃 景順65歲後基金 - 單位類別A",
+   "nameScore": 0.5
+  },
+  "628": {
+   "ticker": "0P0000A0QR.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順亞洲股票基金",
+   "msName": "BCT強積金策略計劃 景順亞洲股票基金 - 單位類別A",
+   "nameScore": 0.5
+  },
+  "627": {
+   "ticker": "0P0000A0QH.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順亞洲股票基金",
+   "msName": "BCT強積金策略計劃 景順亞洲股票基金 - 單位類別H",
+   "nameScore": 0.5
+  },
+  "191": {
+   "ticker": "0P00008SRS.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順資本穩定基金",
+   "msName": "BCT強積金策略計劃 景順資本穩定基金 - 單位類別A",
+   "nameScore": 0.5
+  },
+  "192": {
+   "ticker": "0P00008SRT.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順資本穩定基金",
+   "msName": "BCT強積金策略計劃 景順資本穩定基金 - 單位類別H",
+   "nameScore": 0.5
+  },
+  "1557": {
+   "ticker": "0P00019QRG.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順核心累積基金",
+   "msName": "BCT強積金策略計劃 景順核心累積基金 - 單位類別A",
+   "nameScore": 0.5
+  },
+  "202": {
+   "ticker": "0P00008SRV.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順環球債券基金",
+   "msName": "BCT強積金策略計劃 景順環球債券基金 - 單位類別A",
+   "nameScore": 0.5
+  },
+  "203": {
+   "ticker": "0P00008SRU.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順環球債券基金",
+   "msName": "BCT強積金策略計劃 景順環球債券基金 - 單位類別H",
+   "nameScore": 0.5
+  },
+  "2066": {
+   "ticker": "0P0001QMVW.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順環球追蹤指數基金",
+   "msName": "BCT強積金策略計劃 景順環球追蹤指數基金 - 單位類別A",
+   "nameScore": 0.583
+  },
+  "195": {
+   "ticker": "0P00008SWL.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 1e-05,
+   "name": "景順中港股票基金",
+   "msName": "BCT強積金策略計劃 景順中港股票基金 - 單位類別A",
+   "nameScore": 0.5
+  },
+  "196": {
+   "ticker": "0P00008SWN.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順中港股票基金",
+   "msName": "BCT強積金策略計劃 景順中港股票基金 - 單位類別H",
+   "nameScore": 0.5
+  },
+  "1101": {
+   "ticker": "0P0000YRYE.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順人民幣債券基金",
+   "msName": "BCT強積金策略計劃 景順人民幣債券基金 - 單位類別A",
+   "nameScore": 0.545
+  },
+  "1102": {
+   "ticker": "0P0000YRYF.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順人民幣債券基金",
+   "msName": "BCT強積金策略計劃 景順人民幣債券基金 - 單位類別H",
+   "nameScore": 0.545
+  },
+  "2068": {
+   "ticker": "0P0001QMVY.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "景順美國追蹤指數基金",
+   "msName": "BCT強積金策略計劃 景順美國追蹤指數基金 - 單位類別A",
+   "nameScore": 0.583
+  },
+  "1536": {
+   "ticker": "0P0001A2UC.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 65歲後基金",
+   "msName": "東亞（強積金）行業計劃 東亞（行業計劃）65歲後基金",
+   "nameScore": 0.933
+  },
+  "899": {
+   "ticker": "0P0000VS0W.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 亞洲股票基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 亞洲股票基金",
+   "nameScore": 0.933
+  },
+  "212": {
+   "ticker": "0P00008SON.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 均衡基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 均衡基金",
+   "nameScore": 0.909
+  },
+  "1535": {
+   "ticker": "0P0001A2UD.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 核心累積基金",
+   "msName": "東亞（強積金）行業計劃 東亞（行業計劃）核心累積基金",
+   "nameScore": 0.933
+  },
+  "812": {
+   "ticker": "0P0000NMXZ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 大中華股票基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 大中華股票基金",
+   "nameScore": 0.941
+  },
+  "215": {
+   "ticker": "0P00008SOP.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 增長基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 增長基金",
+   "nameScore": 0.909
+  },
+  "811": {
+   "ticker": "0P0000NMY0.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 香港股票基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 香港股票基金",
+   "nameScore": 0.933
+  },
+  "213": {
+   "ticker": "0P00008SOO.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 強積金保守基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 強積金保守基金",
+   "nameScore": 0.909
+  },
+  "913": {
+   "ticker": "0P0000WXFW.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 人民幣及港幣貨幣市場基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 人民幣及港幣貨幣市場基金",
+   "nameScore": 0.963
+  },
+  "214": {
+   "ticker": "0P00008SSX.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (行業計劃) 平穩基金",
+   "msName": "東亞（強積金）行業計劃 東亞 (行業計劃) 平穩基金",
+   "nameScore": 0.909
+  },
+  "900": {
+   "ticker": "0P0000VS0U.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞中國追蹤指數基金",
+   "msName": "東亞（強積金）行業計劃 東亞中國追蹤指數基金",
+   "nameScore": 0.824
+  },
+  "901": {
+   "ticker": "0P0000VS0V.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞香港追蹤指數基金",
+   "msName": "東亞（強積金）行業計劃 東亞香港追蹤指數基金",
+   "nameScore": 0.824
+  },
+  "1538": {
+   "ticker": "0P0001A2UE.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 65歲後基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞（強積金）65歲後基金",
+   "nameScore": 0.769
+  },
+  "221": {
+   "ticker": "0P0000A2LS.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 亞洲股票基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 亞洲股票基金",
+   "nameScore": 0.769
+  },
+  "216": {
+   "ticker": "0P00008SSY.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 均衡基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 均衡基金",
+   "nameScore": 0.667
+  },
+  "225": {
+   "ticker": "0P00008ST0.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 保守基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 保守基金",
+   "nameScore": 0.667
+  },
+  "1537": {
+   "ticker": "0P0001A2UH.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 核心累積基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞（強積金）核心累積基金",
+   "nameScore": 0.769
+  },
+  "814": {
+   "ticker": "0P0000NMY2.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 歐洲股票基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 歐洲股票基金",
+   "nameScore": 0.769
+  },
+  "219": {
+   "ticker": "0P0000A2LR.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 環球債券基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 環球債券基金",
+   "nameScore": 0.769
+  },
+  "813": {
+   "ticker": "0P0000NMY1.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 環球股票基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 環球股票基金",
+   "nameScore": 0.769
+  },
+  "218": {
+   "ticker": "0P0000A2LQ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 大中華股票基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 大中華股票基金",
+   "nameScore": 0.8
+  },
+  "224": {
+   "ticker": "0P00008SSZ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 增長基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 增長基金",
+   "nameScore": 0.667
+  },
+  "220": {
+   "ticker": "0P0000A2LO.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 香港股票基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 香港股票基金",
+   "nameScore": 0.769
+  },
+  "217": {
+   "ticker": "0P0000A2LN.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 日本股票基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 日本股票基金",
+   "nameScore": 0.769
+  },
+  "896": {
+   "ticker": "0P0000VS0Z.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 北美股票基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 北美股票基金",
+   "nameScore": 0.769
+  },
+  "912": {
+   "ticker": "0P0000WXFX.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 人民幣及港幣貨幣市場基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 人民幣及港幣貨幣市場基金",
+   "nameScore": 0.88
+  },
+  "223": {
+   "ticker": "0P00008ST2.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞 (強積金) 平穩基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞 (強積金) 平穩基金",
+   "nameScore": 0.667
+  },
+  "897": {
+   "ticker": "0P0000VS0X.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞中國追蹤指數基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞中國追蹤指數基金",
+   "nameScore": 0.824
+  },
+  "898": {
+   "ticker": "0P0000VS0Y.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞香港追蹤指數基金",
+   "msName": "東亞（強積金）集成信託計劃 東亞香港追蹤指數基金",
+   "nameScore": 0.824
+  },
+  "1540": {
+   "ticker": "0P0001A2UF.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞65歲後基金",
+   "msName": "東亞（強積金）享惠計劃 東亞65歲後基金",
+   "nameScore": 0.769
+  },
+  "1044": {
+   "ticker": "0P0000XN8S.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "東亞亞洲股票基金",
+   "msName": "東亞（強積金）享惠計劃 東亞亞洲股票基金",
+   "nameScore": 0.769
+  },
+  "1041": {
+   "ticker": "0P0000XN8T.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞均衡基金",
+   "msName": "東亞（強積金）享惠計劃 東亞均衡基金",
+   "nameScore": 0.667
+  },
+  "1539": {
+   "ticker": "0P0001A2UG.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞核心累積基金",
+   "msName": "東亞（強積金）享惠計劃 東亞核心累積基金",
+   "nameScore": 0.769
+  },
+  "1048": {
+   "ticker": "0P0000XN8U.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞環球債券基金",
+   "msName": "東亞（強積金）享惠計劃 東亞環球債券基金",
+   "nameScore": 0.769
+  },
+  "1043": {
+   "ticker": "0P0000XN8V.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞環球股票基金",
+   "msName": "東亞（強積金）享惠計劃 東亞環球股票基金",
+   "nameScore": 0.769
+  },
+  "1045": {
+   "ticker": "0P0000XN8W.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞大中華股票基金",
+   "msName": "東亞（強積金）享惠計劃 東亞大中華股票基金",
+   "nameScore": 0.8
+  },
+  "1040": {
+   "ticker": "0P0000XN8Y.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞增長基金",
+   "msName": "東亞（強積金）享惠計劃 東亞增長基金",
+   "nameScore": 0.667
+  },
+  "1047": {
+   "ticker": "0P0000XN8Z.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞香港追蹤指數基金",
+   "msName": "東亞（強積金）享惠計劃 東亞香港追蹤指數基金",
+   "nameScore": 0.824
+  },
+  "1039": {
+   "ticker": "0P0000XN90.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞強積金保守基金",
+   "msName": "東亞（強積金）享惠計劃 東亞強積金保守基金",
+   "nameScore": 0.667
+  },
+  "1042": {
+   "ticker": "0P0000XN91.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "東亞平穩基金",
+   "msName": "東亞（強積金）享惠計劃 東亞平穩基金",
+   "nameScore": 0.667
+  },
+  "1542": {
+   "ticker": "0P0001A2UI.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠65歲後基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠65歲後基金",
+   "nameScore": 0.824
+  },
+  "234": {
+   "ticker": "0P00008SRO.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠亞洲股票基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠亞洲股票基金",
+   "nameScore": 0.824
+  },
+  "228": {
+   "ticker": "0P00008SOQ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠均衡基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠均衡基金",
+   "nameScore": 0.769
+  },
+  "233": {
+   "ticker": "0P00008SOR.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠債券基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠債券基金",
+   "nameScore": 0.769
+  },
+  "654": {
+   "ticker": "0P00009TD5.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠中國股票基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠中國股票基金",
+   "nameScore": 0.824
+  },
+  "1541": {
+   "ticker": "0P0001A2UJ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠核心累積基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠核心累積基金",
+   "nameScore": 0.824
+  },
+  "999": {
+   "ticker": "0P0000X0L7.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "中銀保誠中證香港100指數基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠中證香港100指數基金",
+   "nameScore": 0.889
+  },
+  "1001": {
+   "ticker": "0P0000X0L8.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "中銀保誠歐洲指數追蹤基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠歐洲指數追蹤基金",
+   "nameScore": 0.857
+  },
+  "231": {
+   "ticker": "0P00008SOS.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠環球股票基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠環球股票基金",
+   "nameScore": 0.824
+  },
+  "227": {
+   "ticker": "0P00008ST3.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠增長基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠增長基金",
+   "nameScore": 0.769
+  },
+  "232": {
+   "ticker": "0P00008ST5.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠香港股票基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠香港股票基金",
+   "nameScore": 0.824
+  },
+  "1959": {
+   "ticker": "0P0001QM5M.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠香港平穩退休基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠香港平穩退休基金",
+   "nameScore": 0.857
+  },
+  "226": {
+   "ticker": "0P00008SRP.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠日本股票基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠日本股票基金",
+   "nameScore": 0.824
+  },
+  "230": {
+   "ticker": "0P00008ST4.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠強積金保守基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠強積金保守基金",
+   "nameScore": 0.769
+  },
+  "1119": {
+   "ticker": "0P0000YEAJ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠強積金人民幣及港元貨幣市場基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠強積金人民幣及港元貨幣市場基金",
+   "nameScore": 0.897
+  },
+  "1000": {
+   "ticker": "0P0000X0L9.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "中銀保誠北美指數追蹤基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠北美指數追蹤基金",
+   "nameScore": 0.857
+  },
+  "229": {
+   "ticker": "0P00008ST6.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中銀保誠平穩基金",
+   "msName": "中銀保誠簡易強積金計劃 中銀保誠平穩基金",
+   "nameScore": 0.769
+  },
+  "238": {
+   "ticker": "0P00008SOU.HK",
+   "ratio": 1.0,
+   "samples": 397,
+   "maxDev": 0.00021,
+   "name": "中國人壽強積金保守基金",
+   "msName": "中國人壽強積金集成信託計劃 中國人壽強積金保守基金",
+   "nameScore": 0.769
+  },
+  "802": {
+   "ticker": "0P0000MPRS.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "65歲後基金",
+   "msName": "滙豐強積金智選計劃 65歲後基金",
+   "nameScore": 0.6
+  },
+  "324": {
+   "ticker": "0P00008SPW.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "亞太股票基金",
+   "msName": "滙豐強積金智選計劃 亞太股票基金",
+   "nameScore": 0.6
+  },
+  "804": {
+   "ticker": "0P0000MPRR.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中國股票基金",
+   "msName": "滙豐強積金智選計劃 中國股票基金",
+   "nameScore": 0.6
+  },
+  "318": {
+   "ticker": "0P00008SUG.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "核心累積基金",
+   "msName": "滙豐強積金智選計劃 核心累積基金",
+   "nameScore": 0.6
+  },
+  "326": {
+   "ticker": "0P00008SPY.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "歐洲股票基金",
+   "msName": "滙豐強積金智選計劃 歐洲股票基金",
+   "nameScore": 0.6
+  },
+  "801": {
+   "ticker": "0P0000MPRT.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "環球債券基金",
+   "msName": "滙豐強積金智選計劃 環球債券基金",
+   "nameScore": 0.6
+  },
+  "1619": {
+   "ticker": "0P0001HQ17.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "環球股票基金",
+   "msName": "滙豐強積金智選計劃 環球股票基金",
+   "nameScore": 0.6
+  },
+  "1620": {
+   "ticker": "0P0001HQ1C.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "恒生中國企業指數基金",
+   "msName": "滙豐強積金智選計劃 恒生中國企業指數基金",
+   "nameScore": 0.778
+  },
+  "321": {
+   "ticker": "0P00008SU9.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "中港股票基金",
+   "msName": "滙豐強積金智選計劃 中港股票基金",
+   "nameScore": 0.6
+  },
+  "323": {
+   "ticker": "0P00008SUD.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "北美股票基金",
+   "msName": "滙豐強積金智選計劃 北美股票基金",
+   "nameScore": 0.6
+  },
+  "1621": {
+   "ticker": "0P0001HQ1B.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "智優逸亞太股票追蹤指數基金",
+   "msName": "滙豐強積金智選計劃 智優逸亞太股票追蹤指數基金",
+   "nameScore": 0.833
+  },
+  "1622": {
+   "ticker": "0P0001HQ18.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "智優逸均衡基金",
+   "msName": "滙豐強積金智選計劃 智優逸均衡基金",
+   "nameScore": 0.667
+  },
+  "1631": {
+   "ticker": "0P0001HQ1A.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "智優逸歐洲股票追蹤指數基金",
+   "msName": "滙豐強積金智選計劃 智優逸歐洲股票追蹤指數基金",
+   "nameScore": 0.833
+  },
+  "1624": {
+   "ticker": "0P0001HQ19.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "智優逸北美股票追蹤指數基金",
+   "msName": "滙豐強積金智選計劃 智優逸北美股票追蹤指數基金",
+   "nameScore": 0.833
+  },
+  "844": {
+   "ticker": "0P0000SF9F.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF 2025退休基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF 2025退休基金",
+   "nameScore": 0.933
+  },
+  "845": {
+   "ticker": "0P0000SF9E.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF 2030退休基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF 2030退休基金",
+   "nameScore": 0.933
+  },
+  "846": {
+   "ticker": "0P0000SF9H.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF 2035退休基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF 2035退休基金",
+   "nameScore": 0.933
+  },
+  "847": {
+   "ticker": "0P0000SF9G.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF 2040退休基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF 2040退休基金",
+   "nameScore": 0.933
+  },
+  "848": {
+   "ticker": "0P0000SF9J.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF 2045退休基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF 2045退休基金",
+   "nameScore": 0.933
+  },
+  "376": {
+   "ticker": "0P00008SUV.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF進取基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF進取基金",
+   "nameScore": 0.857
+  },
+  "366": {
+   "ticker": "0P00008SUX.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF保守基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF保守基金",
+   "nameScore": 0.857
+  },
+  "373": {
+   "ticker": "0P00008VBG.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF富達增長基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF富達增長基金",
+   "nameScore": 0.909
+  },
+  "374": {
+   "ticker": "0P00008SQD.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF富達平穩增長基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF富達平穩增長基金",
+   "nameScore": 0.933
+  },
+  "363": {
+   "ticker": "0P00008SUY.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF增長基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF增長基金",
+   "nameScore": 0.857
+  },
+  "362": {
+   "ticker": "0P00008VBB.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF香港債券基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF香港債券基金",
+   "nameScore": 0.909
+  },
+  "372": {
+   "ticker": "0P00008SV1.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF國際債券基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF國際債券基金",
+   "nameScore": 0.909
+  },
+  "1719": {
+   "ticker": "0P0001LIGV.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF退休收益基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF 退休收益基金",
+   "nameScore": 0.909
+  },
+  "1219": {
+   "ticker": "0P00011RM1.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF人民幣債券基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF人民幣債券基金",
+   "nameScore": 0.923
+  },
+  "842": {
+   "ticker": "0P0000SF9D.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF智優裕退休基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF智優裕退休基金",
+   "nameScore": 0.923
+  },
+  "364": {
+   "ticker": "0P00008VBF.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "宏利MPF穩健基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF穩健基金",
+   "nameScore": 0.857
+  },
+  "906": {
+   "ticker": "0P0000WAH8.HK",
+   "ratio": 1.0,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "宏利MPF可持續亞太債券基金",
+   "msName": "宏利環球精選（強積金）計劃 宏利MPF可持續亞太債券基金",
+   "nameScore": 0.941
+  },
+  "1199": {
+   "ticker": "0P00011J5C.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明富時強積金香港指數基金",
+   "msName": "永明彩虹強積金計劃 永明富時強積金香港指數基金 - A類",
+   "nameScore": 0.737
+  },
+  "1200": {
+   "ticker": "0P00011J5D.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明富時強積金香港指數基金",
+   "msName": "永明彩虹強積金計劃 永明富時強積金香港指數基金 - B類",
+   "nameScore": 0.737
+  },
+  "1505": {
+   "ticker": "0P0001A2XM.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金65歲後基金",
+   "msName": "永明彩虹強積金計劃 永明強積金65歲後基金",
+   "nameScore": 0.769
+  },
+  "689": {
+   "ticker": "0P0000GFDH.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "永明強積金亞洲股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金亞洲股票基金 - A類",
+   "nameScore": 0.667
+  },
+  "690": {
+   "ticker": "0P0000GFDO.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "永明強積金亞洲股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金亞洲股票基金 - B類",
+   "nameScore": 0.667
+  },
+  "500": {
+   "ticker": "0P00008SOW.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金均衡基金",
+   "msName": "永明彩虹強積金計劃 永明強積金均衡基金 - A類",
+   "nameScore": 0.545
+  },
+  "501": {
+   "ticker": "0P00008SOY.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金均衡基金",
+   "msName": "永明彩虹強積金計劃 永明強積金均衡基金 - B類",
+   "nameScore": 0.545
+  },
+  "506": {
+   "ticker": "0P00008SOX.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金保守基金",
+   "msName": "永明彩虹強積金計劃 永明強積金保守基金 - A類",
+   "nameScore": 0.545
+  },
+  "507": {
+   "ticker": "0P00008SOZ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金保守基金",
+   "msName": "永明彩虹強積金計劃 永明強積金保守基金 - B類",
+   "nameScore": 0.545
+  },
+  "1503": {
+   "ticker": "0P0001A2XO.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金核心累積基金",
+   "msName": "永明彩虹強積金計劃 永明強積金核心累積基金",
+   "nameScore": 0.769
+  },
+  "2064": {
+   "ticker": "0P0001RCKW.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金歐洲股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金歐洲股票基金",
+   "nameScore": 0.769
+  },
+  "809": {
+   "ticker": "0P0000N0MV.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金環球債券基金",
+   "msName": "永明彩虹強積金計劃 永明強積金環球債券基金 - A類",
+   "nameScore": 0.667
+  },
+  "810": {
+   "ticker": "0P0000N0MW.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金環球債券基金",
+   "msName": "永明彩虹強積金計劃 永明強積金環球債券基金 - B類",
+   "nameScore": 0.667
+  },
+  "2065": {
+   "ticker": "0P0001R9T8.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金環球低碳指數基金",
+   "msName": "永明彩虹強積金計劃 永明強積金環球低碳指數基金",
+   "nameScore": 0.824
+  },
+  "693": {
+   "ticker": "0P0000GFDG.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金大中華股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金大中華股票基金 - A類",
+   "nameScore": 0.706
+  },
+  "694": {
+   "ticker": "0P0000GFDP.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金大中華股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金大中華股票基金 - B類",
+   "nameScore": 0.706
+  },
+  "508": {
+   "ticker": "0P00008STA.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金增長基金",
+   "msName": "永明彩虹強積金計劃 永明強積金增長基金 - A類",
+   "nameScore": 0.545
+  },
+  "509": {
+   "ticker": "0P00008STB.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金增長基金",
+   "msName": "永明彩虹強積金計劃 永明強積金增長基金 - B類",
+   "nameScore": 0.545
+  },
+  "504": {
+   "ticker": "0P00008SP0.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金港元債券基金",
+   "msName": "永明彩虹強積金計劃 永明強積金港元債券基金 - A類",
+   "nameScore": 0.667
+  },
+  "505": {
+   "ticker": "0P00008SP1.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金港元債券基金",
+   "msName": "永明彩虹強積金計劃 永明強積金港元債券基金 - B類",
+   "nameScore": 0.667
+  },
+  "502": {
+   "ticker": "0P00008ST8.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金香港股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金香港股票基金 - A類",
+   "nameScore": 0.667
+  },
+  "503": {
+   "ticker": "0P00008ST9.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金香港股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金香港股票基金 - B類",
+   "nameScore": 0.667
+  },
+  "2239": {
+   "ticker": "0P0001UYIB.HK",
+   "ratio": 1.0,
+   "samples": 398,
+   "maxDev": 0.0,
+   "name": "永明強積金收益基金",
+   "msName": "永明強積金收益基金 HKD Acc",
+   "nameScore": 0.5
+  },
+  "691": {
+   "ticker": "0P0000GFDF.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金行業股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金行業股票基金 - A類",
+   "nameScore": 0.667
+  },
+  "692": {
+   "ticker": "0P0000GFDQ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金行業股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金行業股票基金 - B類",
+   "nameScore": 0.667
+  },
+  "910": {
+   "ticker": "0P0000WZEL.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金人民幣及港元基金",
+   "msName": "永明彩虹強積金計劃 永明強積金人民幣及港元基金 - A類",
+   "nameScore": 0.737
+  },
+  "911": {
+   "ticker": "0P0000WZEM.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金人民幣及港元基金",
+   "msName": "永明彩虹強積金計劃 永明強積金人民幣及港元基金 - B類",
+   "nameScore": 0.737
+  },
+  "498": {
+   "ticker": "0P00008STC.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金平穩基金",
+   "msName": "永明彩虹強積金計劃 永明強積金平穩基金 - A類",
+   "nameScore": 0.545
+  },
+  "499": {
+   "ticker": "0P00008STD.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金平穩基金",
+   "msName": "永明彩虹強積金計劃 永明強積金平穩基金 - B類",
+   "nameScore": 0.545
+  },
+  "2099": {
+   "ticker": "0P0001SB5O.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金美國及香港股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金美國及香港股票基金",
+   "nameScore": 0.842
+  },
+  "2063": {
+   "ticker": "0P0001R9T9.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "永明強積金美國股票基金",
+   "msName": "永明彩虹強積金計劃 永明強積金美國股票基金",
+   "nameScore": 0.769
+  },
+  "772": {
+   "ticker": "0P0000KUYP.HK",
+   "ratio": 1.0,
+   "samples": 258,
+   "maxDev": 0.00016,
+   "name": "AMTD 安聯精選均衡基金",
+   "msName": "AMTD強積金計劃 AMTD 安聯精選均衡基金",
+   "nameScore": 0.947
+  },
+  "770": {
+   "ticker": "0P0000KUYW.HK",
+   "ratio": 1.0,
+   "samples": 258,
+   "maxDev": 0.00031,
+   "name": "AMTD 安聯精選穩定資本基金",
+   "msName": "AMTD強積金計劃 AMTD 安聯精選穩定資本基金",
+   "nameScore": 0.957
+  },
+  "769": {
+   "ticker": "0P0000KUZ6.HK",
+   "ratio": 1.0,
+   "samples": 258,
+   "maxDev": 0.00029,
+   "name": "AMTD 安聯精選靈活資產基金",
+   "msName": "AMTD強積金計劃 AMTD 安聯精選靈活資產基金",
+   "nameScore": 0.957
+  },
+  "781": {
+   "ticker": "0P0000KUYY.HK",
+   "ratio": 1.0,
+   "samples": 258,
+   "maxDev": 0.00042,
+   "name": "AMTD景順強積金保守基金",
+   "msName": "AMTD 景順強積金保守基金",
+   "nameScore": 1.0
+  },
+  "1494": {
+   "ticker": "0P0001A2W4.HK",
+   "ratio": 1.000437,
+   "samples": 488,
+   "maxDev": 0.00043,
+   "name": "信安65 歲後基金",
+   "msName": "信安強積金—易富之選 信安65 歲後基金",
+   "nameScore": 0.667
+  },
+  "167": {
+   "ticker": "0P0000GEL5.HK",
+   "ratio": 1.000222,
+   "samples": 487,
+   "maxDev": 0.0003,
+   "name": "信安均衡基金",
+   "msName": "信安強積金—易富之選 信安均衡基金",
+   "nameScore": 0.545
+  },
+  "1493": {
+   "ticker": "0P0001A2W5.HK",
+   "ratio": 1.000302,
+   "samples": 488,
+   "maxDev": 0.00041,
+   "name": "信安核心累積基金",
+   "msName": "信安強積金—易富之選 信安核心累積基金",
+   "nameScore": 0.667
+  },
+  "160": {
+   "ticker": "0P0000GEKX.HK",
+   "ratio": 1.000221,
+   "samples": 486,
+   "maxDev": 0.00034,
+   "name": "信安動力亞太股票基金",
+   "msName": "信安強積金—易富之選 信安動力亞太股票基金",
+   "nameScore": 0.737
+  },
+  "161": {
+   "ticker": "0P0000GEKZ.HK",
+   "ratio": 1.00022,
+   "samples": 487,
+   "maxDev": 0.0003,
+   "name": "信安動力環球股票基金",
+   "msName": "信安強積金—易富之選 信安動力環球股票基金",
+   "nameScore": 0.737
+  },
+  "166": {
+   "ticker": "0P0000GEL1.HK",
+   "ratio": 1.000178,
+   "samples": 487,
+   "maxDev": 0.00028,
+   "name": "信安動力香港股票基金",
+   "msName": "信安強積金—易富之選 信安動力香港股票基金",
+   "nameScore": 0.737
+  },
+  "168": {
+   "ticker": "0P0000GEL0.HK",
+   "ratio": 1.000201,
+   "samples": 488,
+   "maxDev": 0.00025,
+   "name": "信安增長基金",
+   "msName": "信安強積金—易富之選 信安增長基金",
+   "nameScore": 0.545
+  },
+  "163": {
+   "ticker": "0P0000GEL3.HK",
+   "ratio": 1.00035,
+   "samples": 486,
+   "maxDev": 0.00042,
+   "name": "信安平穩基金",
+   "msName": "信安強積金—易富之選 信安平穩基金",
+   "nameScore": 0.545
+  },
+  "1492": {
+   "ticker": "0P0001A2WC.HK",
+   "ratio": 1.000004,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安65歲後基金",
+   "msName": "信安強積金計劃800系列 信安65歲後基金 - N類單位",
+   "nameScore": 0.5
+  },
+  "1739": {
+   "ticker": "0P0001KRKK.HK",
+   "ratio": 1.000002,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安進取策略基金",
+   "msName": "信安強積金計劃800系列 信安進取策略基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "1740": {
+   "ticker": "0P0001KRKL.HK",
+   "ratio": 1.000002,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安進取策略基金",
+   "msName": "信安強積金計劃800系列 信安進取策略基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "1741": {
+   "ticker": "0P0001KRKM.HK",
+   "ratio": 1.000005,
+   "samples": 488,
+   "maxDev": 1e-05,
+   "name": "信安亞洲債券基金",
+   "msName": "信安強積金計劃800系列 信安亞洲債券基金 - N類單位",
+   "nameScore": 0.5
+  },
+  "432": {
+   "ticker": "0P00008SVA.HK",
+   "ratio": 1.000001,
+   "samples": 485,
+   "maxDev": 0.0,
+   "name": "信安亞洲股票基金",
+   "msName": "信安強積金計劃800系列 信安亞洲股票基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "433": {
+   "ticker": "0P0000V1BR.HK",
+   "ratio": 1.000001,
+   "samples": 484,
+   "maxDev": 0.0,
+   "name": "信安亞洲股票基金",
+   "msName": "信安強積金計劃800系列 信安亞洲股票基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "619": {
+   "ticker": "0P0000A0UJ.HK",
+   "ratio": 1.000003,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安中國股票基金",
+   "msName": "信安強積金計劃800系列 信安中國股票基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "620": {
+   "ticker": "0P0000V1BK.HK",
+   "ratio": 1.000003,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安中國股票基金",
+   "msName": "信安強積金計劃800系列 信安中國股票基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "1491": {
+   "ticker": "0P0001A2WE.HK",
+   "ratio": 1.000003,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安核心累積基金",
+   "msName": "信安強積金計劃800系列 信安核心累積基金 - N類單位",
+   "nameScore": 0.5
+  },
+  "446": {
+   "ticker": "0P00008SVB.HK",
+   "ratio": 1.000001,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安環球增長基金",
+   "msName": "信安強積金計劃800系列 信安環球增長基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "447": {
+   "ticker": "0P0000V1BT.HK",
+   "ratio": 1.000002,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安環球增長基金",
+   "msName": "信安強積金計劃800系列 信安環球增長基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "450": {
+   "ticker": "0P00008SVC.HK",
+   "ratio": 1.000004,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安港元儲蓄基金",
+   "msName": "信安強積金計劃800系列 信安港元儲蓄基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "451": {
+   "ticker": "0P0000V1BU.HK",
+   "ratio": 1.000004,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安港元儲蓄基金",
+   "msName": "信安強積金計劃800系列 信安港元儲蓄基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "903": {
+   "ticker": "0P0000VTVM.HK",
+   "ratio": 1.000004,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安香港債券基金",
+   "msName": "信安強積金計劃800系列 信安香港債券基金 - N類單位",
+   "nameScore": 0.5
+  },
+  "428": {
+   "ticker": "0P0000A0UK.HK",
+   "ratio": 1.000002,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安香港股票基金",
+   "msName": "信安強積金計劃800系列 信安香港股票基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "429": {
+   "ticker": "0P0000V1BL.HK",
+   "ratio": 1.000002,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安香港股票基金",
+   "msName": "信安強積金計劃800系列 信安香港股票基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "426": {
+   "ticker": "0P00008SVE.HK",
+   "ratio": 1.000003,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安國際債券基金",
+   "msName": "信安強積金計劃800系列 信安國際債券基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "427": {
+   "ticker": "0P0000V1BV.HK",
+   "ratio": 1.000003,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安國際債券基金",
+   "msName": "信安強積金計劃800系列 信安國際債券基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "430": {
+   "ticker": "0P00008SVD.HK",
+   "ratio": 1.000002,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安國際股票基金",
+   "msName": "信安強積金計劃800系列 信安國際股票基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "431": {
+   "ticker": "0P0000V1BW.HK",
+   "ratio": 1.000002,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "信安國際股票基金",
+   "msName": "信安強積金計劃800系列 信安國際股票基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "434": {
+   "ticker": "0P00008VBH.HK",
+   "ratio": 1.000002,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安長線增值基金",
+   "msName": "信安強積金計劃800系列 信安長線增值基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "435": {
+   "ticker": "0P0000V1BX.HK",
+   "ratio": 1.000002,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "信安長線增值基金",
+   "msName": "信安強積金計劃800系列 信安長線增值基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "438": {
+   "ticker": "0P00008SVF.HK",
+   "ratio": 1.000003,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安平穩回報基金",
+   "msName": "信安強積金計劃800系列 信安平穩回報基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "696": {
+   "ticker": "0P0000V1BZ.HK",
+   "ratio": 1.000003,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "信安平穩回報基金",
+   "msName": "信安強積金計劃800系列 信安平穩回報基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "440": {
+   "ticker": "0P00008VBI.HK",
+   "ratio": 1.000001,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "信安美國股票基金",
+   "msName": "信安強積金計劃800系列 信安美國股票基金 - D類單位",
+   "nameScore": 0.5
+  },
+  "441": {
+   "ticker": "0P0000V1C0.HK",
+   "ratio": 1.000001,
+   "samples": 486,
+   "maxDev": 0.0,
+   "name": "信安美國股票基金",
+   "msName": "信安強積金計劃800系列 信安美國股票基金 - I類單位",
+   "nameScore": 0.5
+  },
+  "1626": {
+   "ticker": "0P0001HQ16.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.00015,
+   "name": "恒生中國企業指數基金",
+   "msName": "恒生強積金智選計劃 恒生中國企業指數基金",
+   "nameScore": 0.824
+  },
+  "247": {
+   "ticker": "0P00008SPF.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯亞洲基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯亞洲基金 - 單位A",
+   "nameScore": 0.545
+  },
+  "248": {
+   "ticker": "0P00008SPE.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯亞洲基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯亞洲基金 - 單位B",
+   "nameScore": 0.545
+  },
+  "249": {
+   "ticker": "0P00008SPD.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯亞洲基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯亞洲基金 - 單位T",
+   "nameScore": 0.545
+  },
+  "250": {
+   "ticker": "0P00008STN.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯均衡基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯均衡基金 - 單位A",
+   "nameScore": 0.545
+  },
+  "251": {
+   "ticker": "0P00008STL.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯均衡基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯均衡基金 - 單位B",
+   "nameScore": 0.545
+  },
+  "252": {
+   "ticker": "0P00008STM.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯均衡基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯均衡基金 - 單位T",
+   "nameScore": 0.545
+  },
+  "259": {
+   "ticker": "0P00008STQ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯穩定資本基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯穩定資本基金 - 單位A",
+   "nameScore": 0.667
+  },
+  "260": {
+   "ticker": "0P00008STO.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯穩定資本基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯穩定資本基金 - 單位B",
+   "nameScore": 0.667
+  },
+  "261": {
+   "ticker": "0P00008STP.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯穩定資本基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯穩定資本基金 - 單位T",
+   "nameScore": 0.667
+  },
+  "253": {
+   "ticker": "0P00008SPC.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯靈活均衡基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯靈活均衡基金 - 單位A",
+   "nameScore": 0.667
+  },
+  "254": {
+   "ticker": "0P00008STJ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯靈活均衡基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯靈活均衡基金 - 單位B",
+   "nameScore": 0.667
+  },
+  "255": {
+   "ticker": "0P00008STK.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯靈活均衡基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯靈活均衡基金 - 單位T",
+   "nameScore": 0.667
+  },
+  "889": {
+   "ticker": "0P0000UNYO.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯大中華基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯大中華基金 - 單位A",
+   "nameScore": 0.615
+  },
+  "890": {
+   "ticker": "0P0000UNYP.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯大中華基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯大中華基金 - 單位B",
+   "nameScore": 0.615
+  },
+  "891": {
+   "ticker": "0P0000UNYQ.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯大中華基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯大中華基金 - 單位T",
+   "nameScore": 0.615
+  },
+  "265": {
+   "ticker": "0P00008SPH.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯增長基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯增長基金 - 單位A",
+   "nameScore": 0.545
+  },
+  "266": {
+   "ticker": "0P00008SPI.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯增長基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯增長基金 - 單位B",
+   "nameScore": 0.545
+  },
+  "267": {
+   "ticker": "0P00008SPG.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯增長基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯增長基金 - 單位T",
+   "nameScore": 0.545
+  },
+  "244": {
+   "ticker": "0P00008SPL.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯香港基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯香港基金 - 單位A",
+   "nameScore": 0.545
+  },
+  "245": {
+   "ticker": "0P00008SPK.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯香港基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯香港基金 - 單位B",
+   "nameScore": 0.545
+  },
+  "246": {
+   "ticker": "0P00008SPJ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯香港基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯香港基金 - 單位T",
+   "nameScore": 0.545
+  },
+  "1526": {
+   "ticker": "0P0001A2QY.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯強積金65歲後基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯強積金65歲後基金 - 單位A",
+   "nameScore": 0.667
+  },
+  "1527": {
+   "ticker": "0P0001A2QZ.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯強積金65歲後基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯強積金65歲後基金 - 單位B",
+   "nameScore": 0.667
+  },
+  "262": {
+   "ticker": "0P00008STT.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯強積金保守基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯強積金保守基金 - 單位A",
+   "nameScore": 0.545
+  },
+  "263": {
+   "ticker": "0P00008STR.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯強積金保守基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯強積金保守基金 - 單位B",
+   "nameScore": 0.545
+  },
+  "264": {
+   "ticker": "0P00008STS.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯強積金保守基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯強積金保守基金 - 單位T",
+   "nameScore": 0.545
+  },
+  "1523": {
+   "ticker": "0P0001A2R1.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯強積金核心累積基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯強積金核心累積基金 - 單位A",
+   "nameScore": 0.667
+  },
+  "1524": {
+   "ticker": "0P0001A2R2.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯強積金核心累積基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯強積金核心累積基金 - 單位B",
+   "nameScore": 0.667
+  },
+  "892": {
+   "ticker": "0P0000UNYR.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯東方太平洋基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯東方太平洋基金 - 單位A",
+   "nameScore": 0.706
+  },
+  "893": {
+   "ticker": "0P0000UNYS.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯東方太平洋基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯東方太平洋基金 - 單位B",
+   "nameScore": 0.706
+  },
+  "894": {
+   "ticker": "0P0000UNYT.HK",
+   "ratio": 1.0,
+   "samples": 487,
+   "maxDev": 0.0,
+   "name": "安聯東方太平洋基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯東方太平洋基金 - 單位T",
+   "nameScore": 0.706
+  },
+  "1179": {
+   "ticker": "0P0000ZP9X.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯人民幣貨幣市場基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯人民幣貨幣市場基金 - 單位A",
+   "nameScore": 0.762
+  },
+  "1180": {
+   "ticker": "0P0000ZP9Y.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯人民幣貨幣市場基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯人民幣貨幣市場基金 - 單位B",
+   "nameScore": 0.762
+  },
+  "1181": {
+   "ticker": "0P0000ZP9Z.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯人民幣貨幣市場基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯人民幣貨幣市場基金 - 單位T",
+   "nameScore": 0.762
+  },
+  "256": {
+   "ticker": "0P00008STW.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯穩定增長基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯穩定增長基金 - 單位A",
+   "nameScore": 0.667
+  },
+  "257": {
+   "ticker": "0P00008STV.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯穩定增長基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯穩定增長基金 - 單位B",
+   "nameScore": 0.667
+  },
+  "258": {
+   "ticker": "0P00008STU.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0,
+   "name": "安聯穩定增長基金",
+   "msName": "宏利退休精選（強積金）計劃 安聯穩定增長基金 - 單位T",
+   "nameScore": 0.667
+  },
+  "1544": {
+   "ticker": "0P0001A2UK.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "我的65歲後基金",
+   "msName": "我的強積金計劃 我的65歲後基金",
+   "nameScore": 0.909
+  },
+  "820": {
+   "ticker": "0P0000SPCT.HK",
+   "ratio": 1.0,
+   "samples": 483,
+   "maxDev": 0.0,
+   "name": "我的亞洲股票基金",
+   "msName": "我的強積金計劃 我的亞洲股票基金",
+   "nameScore": 0.909
+  },
+  "817": {
+   "ticker": "0P0000SPCO.HK",
+   "ratio": 1.0,
+   "samples": 483,
+   "maxDev": 0.0,
+   "name": "我的均衡基金",
+   "msName": "我的強積金計劃 我的均衡基金",
+   "nameScore": 0.857
+  },
+  "821": {
+   "ticker": "0P0000SPCS.HK",
+   "ratio": 1.0,
+   "samples": 483,
+   "maxDev": 0.0,
+   "name": "我的中國股票基金",
+   "msName": "我的強積金計劃 我的中國股票基金",
+   "nameScore": 0.909
+  },
+  "1543": {
+   "ticker": "0P0001A2UL.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "我的核心累積基金",
+   "msName": "我的強積金計劃 我的核心累積基金",
+   "nameScore": 0.909
+  },
+  "825": {
+   "ticker": "0P0000SPCW.HK",
+   "ratio": 1.0,
+   "samples": 484,
+   "maxDev": 0.0,
+   "name": "我的環球債券基金",
+   "msName": "我的強積金計劃 我的環球債券基金",
+   "nameScore": 0.909
+  },
+  "819": {
+   "ticker": "0P0000SPCQ.HK",
+   "ratio": 1.0,
+   "samples": 483,
+   "maxDev": 0.0,
+   "name": "我的環球股票基金",
+   "msName": "我的強積金計劃 我的環球股票基金",
+   "nameScore": 0.909
+  },
+  "816": {
+   "ticker": "0P0000SPCP.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "我的增長基金",
+   "msName": "我的強積金計劃 我的增長基金",
+   "nameScore": 0.857
+  },
+  "826": {
+   "ticker": "0P0000SPCZ.HK",
+   "ratio": 1.0,
+   "samples": 484,
+   "maxDev": 0.0,
+   "name": "我的港元債券基金",
+   "msName": "我的強積金計劃 我的港元債券基金",
+   "nameScore": 0.909
+  },
+  "822": {
+   "ticker": "0P0000SPCV.HK",
+   "ratio": 1.0,
+   "samples": 483,
+   "maxDev": 0.0,
+   "name": "我的香港股票基金",
+   "msName": "我的強積金計劃 我的香港股票基金",
+   "nameScore": 0.909
+  },
+  "824": {
+   "ticker": "0P0000SPCX.HK",
+   "ratio": 1.0,
+   "samples": 483,
+   "maxDev": 0.0,
+   "name": "我的香港追蹤指數基金",
+   "msName": "我的強積金計劃 我的香港追蹤指數基金",
+   "nameScore": 0.933
+  },
+  "827": {
+   "ticker": "0P0000SPCY.HK",
+   "ratio": 1.0,
+   "samples": 484,
+   "maxDev": 0.0,
+   "name": "我的強積金保守基金",
+   "msName": "我的強積金計劃 我的強積金保守基金",
+   "nameScore": 0.857
+  },
+  "1359": {
+   "ticker": "0P00014G2B.HK",
+   "ratio": 1.0,
+   "samples": 489,
+   "maxDev": 0.0,
+   "name": "我的人民幣及港元貨幣市場基金",
+   "msName": "我的強積金計劃 我的人民幣及港元貨幣市場基金",
+   "nameScore": 0.957
+  },
+  "818": {
+   "ticker": "0P0000SPCR.HK",
+   "ratio": 1.0,
+   "samples": 483,
+   "maxDev": 0.0,
+   "name": "我的平穩基金",
+   "msName": "我的強積金計劃 我的平穩基金",
+   "nameScore": 0.857
+  },
+  "806": {
+   "ticker": "0P0000MPRO.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 4e-05,
+   "name": "65 歲後基金",
+   "msName": "恒生強積金智選計劃 65 歲後基金",
+   "nameScore": 0.6
+  },
+  "303": {
+   "ticker": "0P00008SPQ.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0001,
+   "name": "亞太股票基金",
+   "msName": "恒生強積金智選計劃 亞太股票基金",
+   "nameScore": 0.6
+  },
+  "808": {
+   "ticker": "0P0000MPRN.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.00016,
+   "name": "中國股票基金",
+   "msName": "恒生強積金智選計劃 中國股票基金",
+   "nameScore": 0.6
+  },
+  "304": {
+   "ticker": "0P00008SPU.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 9e-05,
+   "name": "核心累積基金",
+   "msName": "恒生強積金智選計劃 核心累積基金",
+   "nameScore": 0.6
+  },
+  "307": {
+   "ticker": "0P00008SPT.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.0003,
+   "name": "歐洲股票基金",
+   "msName": "恒生強積金智選計劃 歐洲股票基金",
+   "nameScore": 0.6
+  },
+  "805": {
+   "ticker": "0P0000MPRP.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 3e-05,
+   "name": "環球債券基金",
+   "msName": "恒生強積金智選計劃 環球債券基金",
+   "nameScore": 0.6
+  },
+  "1625": {
+   "ticker": "0P0001HQ11.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 2e-05,
+   "name": "環球股票基金",
+   "msName": "恒生強積金智選計劃 環球股票基金",
+   "nameScore": 0.6
+  },
+  "309": {
+   "ticker": "0P00008SU2.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 8e-05,
+   "name": "中港股票基金",
+   "msName": "恒生強積金智選計劃 中港股票基金",
+   "nameScore": 0.6
+  },
+  "308": {
+   "ticker": "0P00008SU3.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 0.00015,
+   "name": "北美股票基金",
+   "msName": "恒生強積金智選計劃 北美股票基金",
+   "nameScore": 0.6
+  },
+  "1627": {
+   "ticker": "0P0001HQ15.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 1e-05,
+   "name": "智優逸亞太股票追蹤指數基金",
+   "msName": "恒生強積金智選計劃 智優逸亞太股票追蹤指數基金",
+   "nameScore": 0.833
+  },
+  "1628": {
+   "ticker": "0P0001HQ12.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 2e-05,
+   "name": "智優逸均衡基金",
+   "msName": "恒生強積金智選計劃 智優逸均衡基金",
+   "nameScore": 0.667
+  },
+  "1629": {
+   "ticker": "0P0001HQ14.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 3e-05,
+   "name": "智優逸歐洲股票追蹤指數基金",
+   "msName": "恒生強積金智選計劃 智優逸歐洲股票追蹤指數基金",
+   "nameScore": 0.833
+  },
+  "1630": {
+   "ticker": "0P0001HQ13.HK",
+   "ratio": 1.0,
+   "samples": 488,
+   "maxDev": 1e-05,
+   "name": "智優逸北美股票追蹤指數基金",
+   "msName": "恒生強積金智選計劃 智優逸北美股票追蹤指數基金",
+   "nameScore": 0.833
   }
  }
 }

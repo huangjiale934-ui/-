@@ -78,6 +78,12 @@ function main() {
     const mp = map[id];
     if (!f || !mp || !mp.ticker) continue;
     if (f.navAsOf && f.navAsOf >= market) continue;   // 已跟上市場最新，無需補
+    /* 只處理「落後 1–10 個日曆日」的：月頻基金（新地/富達等）落後以月計，
+       雅虎那邊同樣是月頻，補不了；而且會讓每天多抓幾百個代碼。 */
+    if (f.navAsOf) {
+      const lagDays = (Date.parse(market) - Date.parse(f.navAsOf)) / 86400000;
+      if (lagDays > 10) continue;
+    }
     let ser;
     try { ser = yahooSeries(mp.ticker); } catch (e) { log('ERR ' + mp.ticker + ' ' + e.message.slice(0, 60)); continue; }
     if (!ser.length) continue;

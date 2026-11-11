@@ -2004,7 +2004,7 @@ chk('四十二轮·雅虎補空（映射已校验 + 只補空不覆蓋官網）'
     const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'yahoo-map.json'), 'utf8')).funds || {};
     const y = fs.readFileSync(path.join(__dirname, '..', 'tools', 'yahoo-fill.js'), 'utf8');
     const n = Object.keys(m).length;
-    return n >= 20 && Object.values(m).every((x) => x.ratio > 0 && x.maxDev <= 0.02) && /dev > 0.15/.test(y);
+    return n >= 250 && Object.values(m).every((x) => x.ratio > 0 && x.maxDev <= 0.001) && /dev > 0.15/.test(y);
   } catch (e) { return false; }
 })());
 chk('四十二轮·積金局月度統計已自動化（OCR + 三重校驗）', (function () {
