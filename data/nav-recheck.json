@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-12 06:22:16",
+ "runAt": "2026-11-12 16:14:42",
  "window": [
   "2026-11-07",
   "2026-11-12"
@@ -7,19 +7,19 @@
  "sources": {
   "bct": {
    "checked": 0,
-   "secs": 41.5
+   "secs": 47.2
   },
   "bea": {
-   "checked": 80,
-   "secs": 2.0
+   "checked": 120,
+   "secs": 2.7
   },
   "manulife": {
-   "checked": 95,
-   "secs": 5.0
+   "checked": 102,
+   "secs": 6.5
   },
   "fidelity": {
-   "checked": 46,
-   "secs": 0.8
+   "checked": 69,
+   "secs": 4.3
   },
   "aia": {
    "checked": 42,
@@ -27,33 +27,58 @@
   },
   "chinalife": {
    "checked": 20,
-   "secs": 2.0
+   "secs": 1.5
   },
   "yflife": {
    "checked": 28,
-   "secs": 1.2
+   "secs": 1.5
   },
   "haitong": {
-   "checked": 28,
-   "secs": 9.1
+   "checked": 42,
+   "secs": 9.8
   },
   "sunlife": {
-   "checked": 62,
-   "secs": 5.0
+   "checked": 93,
+   "secs": 6.3
   },
   "hsbc": {
-   "checked": 40,
-   "secs": 1.2
+   "checked": 60,
+   "secs": 1.1
   },
   "bocpt": {
-   "checked": 68,
-   "secs": 3.7
+   "checked": 102,
+   "secs": 3.4
   }
  },
- "checked": 509,
+ "checked": 678,
  "applied": 0,
  "diffs": [],
- "missing": [],
- "added": 0,
+ "missing": [
+  {
+   "id": "246",
+   "date": "2026-11-10",
+   "src": "manulife",
+   "nav": 70.7857
+  },
+  {
+   "id": "262",
+   "date": "2026-11-10",
+   "src": "manulife",
+   "nav": 18.525
+  },
+  {
+   "id": "263",
+   "date": "2026-11-10",
+   "src": "manulife",
+   "nav": 18.5342
+  },
+  {
+   "id": "1527",
+   "date": "2026-11-10",
+   "src": "manulife",
+   "nav": 12.3202
+  }
+ ],
+ "added": 4,
  "errors": []
 }
