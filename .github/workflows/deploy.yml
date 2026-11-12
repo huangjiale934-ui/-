@@ -192,7 +192,7 @@ jobs:
           if [ "${{ steps.mode.outputs.light }}" = "0" ]; then
             node tools/holdings-txn.js check --restore || echo "!! 檢測到持倉退化，已回滾到抓取前快照"
             node tools/holdings-normalize.js
-            node tools/holdings-guard.js
+            node tools/holdings-guard.js --fix   # 2026-11-13：--fix 让 allocIncomplete/allocSum 跟随实际合计落库
           fi
           # 2026-10-28：校验类步骤改为「告警不阻断」——10-28 10:41 的定时任务就是因为
           # 三处一致性巡检返回 1 直接整条 run 失败，连 Pages 都没发布出去。
