@@ -150,7 +150,18 @@ if (!process.argv.includes('--no-merge')) {
   const F = path.join(DATA, 'index.json');
   const j = fs.existsSync(F) ? JSON.parse(fs.readFileSync(F, 'utf8')) : { items: {} };
   j.items = j.items || {};
+  /* 2026-11-12（全量核验发现）：只增不删会留下已下线的自算指数。
+     2026-10-31 等权指数下线后 MPFEQ 一直残留在 index.json 里，走势图「添加指数」
+     仍列出「MPF 市场平均指数（等权）」，日期永远停在 10-21（看走势会以为站点停更）。
+     合并时清掉「本站自算（selfCalc）但本轮已不再生成」的旧键；市场指数（HSI 等）
+     不是 selfCalc，不受影响。 */
+  let pruned = [];
+  Object.keys(j.items).forEach((k) => {
+    const it = j.items[k];
+    if (it && it.selfCalc && !items[k]) { pruned.push(k); delete j.items[k]; }
+  });
   Object.keys(items).forEach((k) => { j.items[k] = items[k]; });
   fs.writeFileSync(F, JSON.stringify(j), 'utf8');
-  console.log('已合并进 data/index.json，共', Object.keys(j.items).length, '个指数');
+  console.log('已合并进 data/index.json，共', Object.keys(j.items).length, '个指数' +
+    (pruned.length ? '；已清除下线指数 ' + pruned.join(',') : ''));
 }
