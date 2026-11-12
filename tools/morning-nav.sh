@@ -103,6 +103,7 @@ wait_par
 # 第 3 波：其余发行人 + BCT
 par "9 中國人壽"   "$PY" fetch-chinalife-hist.py
 par "11 新地"     "$PY" fetch-shkp-hist.py
+par "11b 新地HKET" "$PY" tools/shkp-hket.py
 par "12 萬通"     "$PY" yflife_daily.py
 par "13 海通"     "$PY" ht_daily.py
 wait_par

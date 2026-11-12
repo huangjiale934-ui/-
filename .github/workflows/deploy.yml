@@ -98,6 +98,8 @@ jobs:
           python fetch-bocpt-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 中銀保誠失敗"
           python aia_ingest2.py || echo "!! 友邦失敗"
           python fetch-shkp-hist.py || echo "!! 新地失敗"
+          # 2026-11-12：官網 PDF 路徑帶 %20 被 WAF 返 999（非撤檔），改用發行人指定的 HKET 每日價格
+          python tools/shkp-hket.py || echo "!! 新地 HKET 兜底失敗"
           python yflife_daily.py || echo "!! 萬通失敗"
           python news_fetch.py || echo "!! 積金局新聞稿失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
@@ -122,6 +124,8 @@ jobs:
           python fetch-chinalife-hist.py || echo "!! 中國人壽失敗"
           python aia_ingest2.py || echo "!! 友邦失敗"
           python fetch-shkp-hist.py || echo "!! 新地失敗"
+          # 2026-11-12：官網 PDF 路徑帶 %20 被 WAF 返 999（非撤檔），改用發行人指定的 HKET 每日價格
+          python tools/shkp-hket.py || echo "!! 新地 HKET 兜底失敗"
           python yflife_daily.py || echo "!! 萬通失敗"
           python ht_daily.py || echo "!! 海通失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
