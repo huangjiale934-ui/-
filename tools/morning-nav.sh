@@ -127,6 +127,9 @@ node tools/hist-index-sync.js || echo "!!! 历史索引对齐失败（继续）"
 # 2026-11-11：積金局資訊表每月更新；早间顺手核对一次（未变则不写盘，约 40 秒）
 node tools/mpfa-refresh.js || echo "!! 積金局快照刷新失败（继续）"
 node mpfindex.js || echo "!!! 自算指数失败（继续）"
+# 2026-11-12：早间也刷一次市场指数 —— 美股 11-11 的收盘价要到香港时间次日凌晨才定，
+# 22:30 那班只能抓到盘中值。indexbuild 已加「未收盘点丢弃」保护，早间跑不会写入当日盘中价。
+node indexbuild.js || echo "!! 市场指数刷新失败（继续）"
 # 2026-11-11：走势图「未选基金」统计表数据源，必须跟着最新净值日重算（6 秒）
 node allstats.js || echo "!! 区间统计重算失败（继续）"
 node tools/nav-consistency.js || echo "!!! nav-consistency 未通过（详见输出）"

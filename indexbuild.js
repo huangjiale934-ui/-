@@ -59,6 +59,25 @@ function get(url) {
   });
 }
 
+/* 2026-11-12 修：行情源在开市期间会返回**当天未收盘**的日线，直接当收盘价写进
+   index.json 就会出现「标普 11-11 = 7579.11（当天 22:30 的盘中值）」，而真实收盘是
+   7619.38 —— 两站因此长期对不上。规则：
+     · 港股（100.xxx）：当天要 16:15 之后才算收盘；
+     · 其他市场（美股/日股等）：当天一律不算（收盘都在香港时间次日凌晨）。
+   只丢弃「今天及未来」未收盘的点，历史点原样保留。 */
+function dropUnclosed(series, code) {
+  const now = new Date(Date.now() + 8 * 3600 * 1000);   // 转成 HK 时间读数
+  const todayHK = now.toISOString().slice(0, 10);
+  const hhmm = now.getUTCHours() * 100 + now.getUTCMinutes();
+  const isHK = String(code || '').indexOf('100.') === 0;
+  return series.filter((pt) => {
+    const d = pt[0];
+    if (d < todayHK) return true;
+    if (d > todayHK) return false;
+    return isHK ? hhmm >= 1615 : false;
+  });
+}
+
 async function fetchIndex(it) {
   const url = 'https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=' + it.code +
     '&fields1=f1,f2,f3&fields2=f51,f53&klt=101&fqt=0&beg=' + BEG + '&end=20500101';
@@ -104,6 +123,12 @@ function fetchTxTail(code, n) {
       /* 2026-10-26：东财限流（socket hang up）是随机的——失败后隔 2.5s 再试一次，命中率显著提高 */
       if (!r.series.length) { await new Promise((x) => setTimeout(x, 2500)); try { r = await fetchIndex(it); } catch (e2) {} }
       if (!r.series.length) { console.log('  [!] ' + it.key + ' 空数据，跳过'); continue; }
+      {
+        const before = r.series.length;
+        r.series = dropUnclosed(r.series, it.code);
+        if (r.series.length !== before) console.log('  · ' + it.key + ' 丢弃未收盘的当日点');
+      }
+      if (!r.series.length) { console.log('  [!] ' + it.key + ' 全是未收盘点，跳过'); continue; }
       items[it.key] = {
         code: it.code, name: it.name, nameEn: it.nameEn,
         first: r.series[0][0], asOf: r.series[r.series.length - 1][0],
@@ -134,7 +159,10 @@ function fetchTxTail(code, n) {
      用腾讯港股日线补尾——① 缺的日期追加 ② 与末点同日则以腾讯收盘价覆盖（东财尾点可能是收盘前快照）。 */
   for (const [k, txCode] of Object.entries({ HSI: 'hkHSI', HSCEI: 'hkHSCEI', HSTECH: 'hkHSTECH' })) {
     try {
-      const tail = await fetchTxTail(txCode, 60);
+      const tailRaw = await fetchTxTail(txCode, 60);
+      /* 同样要丢掉「今天还没收盘」的点：12:55 跑出来的 11-12 只是盘中价，
+         写进 index.json 会被当成收盘价，线上就会显示一个假的当日涨跌。 */
+      const tail = dropUnclosed(tailRaw, '100.' + txCode);
       if (!tail.length) { console.log('  [!] ' + k + ' 腾讯补点为空'); continue; }
       const def = INDICES.find((x) => x.key === k);
       if (!items[k]) {
@@ -183,6 +211,24 @@ function fetchTxTail(code, n) {
       console.log('  · ' + k + ' 历史合并：' + o.series.length + ' + 补点 → ' + merged.length + ' 点（至 ' + cur.asOf + '）');
     });
   } catch (e) { /* 首次运行无旧文件 */ }
+
+  /* 2026-11-12：合并会从旧 index.json 里把「当天未收盘」的点带回来（另一台机器/早前跑批写的），
+     这里统一再做一次过滤，保证落盘序列里永远没有未收盘的当日点。 */
+  Object.keys(items).forEach((k) => {
+    const it = items[k];
+    if (!it || !Array.isArray(it.series)) return;
+    const clean = dropUnclosed(it.series, it.code);
+    if (clean.length !== it.series.length) {
+      console.log('  · ' + k + ' 清掉 ' + (it.series.length - clean.length) + ' 个未收盘点');
+    }
+    if (clean.length) {
+      it.series = clean;
+      it.points = clean.length;
+      it.first = clean[0][0];
+      it.asOf = clean[clean.length - 1][0];
+    }
+  });
+
   const obj = {
     updatedAt: Date.now(),
     source: '东方财富行情（push2his.eastmoney.com）',
