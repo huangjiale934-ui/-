@@ -259,6 +259,21 @@ jobs:
         with:
           node-version: '22'
 
+      - name: 必需檔案自檢（防止核心腳本被 .gitignore 漏掉）
+        # 2026-11-12（核驗發現）：mpfindex.js 一直在 .gitignore 裡，雲端 `node mpfindex.js`
+        # 每次都是 MODULE_NOT_FOUND，被後面的 `|| echo` 吞掉 → 自算指數的最後一個點
+        # 永遠停在本機某次快照推上來的舊值（兩站 ticker 差 0.02–0.17%，且永不收斂）。
+        # 這裡先自檢：缺任何一個必需文件就直接失敗，不讓「靜默沿用舊數據」再發生。
+        run: |
+          miss=0
+          for f in mpfindex.js indexbuild.js navperf.js allstats.js server.js scraper.js \
+                   tools/build-static.js tools/mpf-refresh.js tools/hist-index-sync.js \
+                   tools/merge-nav.js tools/fix-nulls.js public/index.html public/home.html; do
+            [ -f "$f" ] || { echo "!! 缺少必需文件：$f"; miss=1; }
+          done
+          [ "$miss" = "0" ] || exit 1
+          echo "必需文件齊全"
+
       - name: 重算自算指數（每次構建都用当前 hist 重算，避免任何触发方式留下舊值）
         run: |
           node mpfindex.js || echo "!! 自算指數失敗（沿用倉庫數據）"

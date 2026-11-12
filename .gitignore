@@ -45,8 +45,10 @@ hsbc_holdings.py
 ht_holdings.py
 mpfhk_alloc.py
 mpfhk_holdings.py
-mpfindex.js
 report-coverage.js
+# 2026-11-12：mpfindex.js 从忽略列表移除——它是云端构建必跑的核心脚本，
+# 被忽略会导致 Actions 里 `node mpfindex.js` 永远 MODULE_NOT_FOUND，
+# 自算指数只能沿用本机推上来的旧快照（两站 ticker 差 0.02–0.17%）。
 alloc_fill.py
 docs/
 data/update-status.json
