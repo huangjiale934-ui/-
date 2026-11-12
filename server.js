@@ -28,6 +28,31 @@ const ANALYTICS_FILE = path.join(__dirname, 'data', 'analytics.json'); // 匿名
 let cache = null; // { updatedAt, years, funds, source, count, origin }
 let lastError = null;
 let refreshing = false;
+
+/* 2026-11-12：部署版本标识——取 public/ 下 js/css/html 与 server.js 里最新的 mtime，
+   形如 2026-11-12-an。原来这串写死成 2026-10-13-an，部署后再怎么改都显示同一天，
+   无法用来判断「新代码到底有没有生效」。算一次缓存，进程重启（每次部署都会）时重算。 */
+let __buildStamp = null;
+function buildStamp() {
+  if (__buildStamp) return __buildStamp;
+  try {
+    let max = 0;
+    const walk = (dir) => {
+      fs.readdirSync(dir, { withFileTypes: true }).forEach((d) => {
+        const p = path.join(dir, d.name);
+        if (d.isDirectory()) return;
+        if (!/\.(js|css|html)$/.test(d.name)) return;
+        const t = fs.statSync(p).mtimeMs;
+        if (t > max) max = t;
+      });
+    };
+    walk(PUBLIC_DIR);
+    const t = fs.statSync(path.join(__dirname, 'server.js')).mtimeMs;
+    if (t > max) max = t;
+    __buildStamp = new Date(max).toISOString().slice(0, 10) + '-an';
+  } catch (e) { __buildStamp = '2026-11-12-an'; }
+  return __buildStamp;
+}
 let refreshingSince = 0; // 本次刷新开始时间（用于「卡死自愈」）
 let lastServerFetchOk = null; // 服务端自己直连积金局官网是否成功（true/false/null=未尝试）
 
@@ -1218,15 +1243,10 @@ function breadthPrevPct(perf) {
       res,
       200,
       JSON.stringify({
-        /* 2026-11-12：原来写死 '2026-10-13-an'，之后部署多少次都不变，无法用来判断「新代码是否生效」。
-           改为按 public/app.js 的 mtime 生成（部署上传的就是磁盘文件，mtime 即发布时刻），
-           失败时回落到固定串。 */
-        build: (() => {
-          try {
-            const st = require('fs').statSync(require('path').join(__dirname, 'public', 'app.js'));
-            return new Date(st.mtime).toISOString().slice(0, 10) + '-an';
-          } catch (e) { return '2026-11-12-an'; }
-        })(), // 部署版本标识（供验证「新代码是否已生效」）
+        /* 2026-11-12：原来写死 '2026-10-13-an'，之后部署多少次都不变，无法判断「新代码是否生效」。
+           改为取 public/ 下 js/css/html 与 server.js 的**最新** mtime（部署上传的是磁盘文件，
+           mtime 即最后一次改代码的日期）；算一次缓存住，进程重启（= 每次部署）时重算。 */
+        build: buildStamp(), // 部署版本标识（供验证「新代码是否已生效」）
         refreshing: refreshing,        // 诊断：是否有刷新在途
         /* 2026-10-26（用户要求）：更新进行中提示栏数据源（daily.sh 写盘） */
         updateStatus: (() => { try { return JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'data', 'update-status.json'), 'utf8')); } catch (e) { return null; } })(),
