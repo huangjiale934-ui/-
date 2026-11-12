@@ -7,6 +7,9 @@
 # 用法：bash tools/regdump.sh http://127.0.0.1:3999
 set -u
 BASE="${1:-http://127.0.0.1:3012}"
+# 2026-11-12：WorkBuddy 站被托管层加了分享码门禁，裸域一律 403「链接不完整」。
+# 传 MPF_SITE_A_CODE=<码> 即自动给每个页面 URL 附带 sharecode；未设置时行为不变。
+SHARE="${MPF_SITE_A_CODE:-}"
 CHROME="${CHROME_PATH:-/c/Program Files/Google/Chrome/Application/chrome.exe}"
 DIR="$(cd "$(dirname "$0")" && pwd)/../tmp/reg"
 mkdir -p "$DIR"
@@ -16,9 +19,13 @@ for pair in "home:/home.html" "index:/index.html" "ranking:/index.html?rk=ann1" 
   page="${pair#*:}"
   profile="D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\reg\\p_${name}"
   rm -rf "$DIR/p_${name}"
+  url="${BASE}${page}"
+  if [ -n "$SHARE" ]; then
+    case "$url" in *\?*) url="${url}&sharecode=${SHARE}" ;; *) url="${url}?sharecode=${SHARE}" ;; esac
+  fi
   timeout 120 "$CHROME" --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --hide-scrollbars \
     --virtual-time-budget=30000 --window-size=1440,3000 --dump-dom \
-    --user-data-dir="$profile" "${BASE}${page}" > "$DIR/${name}.html" 2>/dev/null
+    --user-data-dir="$profile" "$url" > "$DIR/${name}.html" 2>/dev/null
   echo "  ${name}  $(wc -c < "$DIR/${name}.html") bytes"
 done
 
