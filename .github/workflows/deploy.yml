@@ -44,7 +44,9 @@ jobs:
       - name: 安裝抓取依賴
         run: |
           python -m pip install --upgrade pip
-          pip install curl_cffi PyMuPDF pdfplumber requests pypdf
+          # 2026-11-13（第三方核验 E7）：锁定次版本区间，避免某天上游发新版把云端抓取打断；
+          # 区间而不是硬钉版本，是为了还能吃到安全补丁。
+          pip install 'curl_cffi>=0.16,<0.17' 'PyMuPDF>=1.26,<3' 'pdfplumber>=0.11,<0.12' 'requests>=2.32,<3' 'pypdf>=6,<7'
 
       - uses: actions/setup-node@v4
         with:
@@ -140,7 +142,7 @@ jobs:
         if: steps.mode.outputs.light == '0'
         run: |
           if [ "$(date -u +%d)" -le 12 ]; then
-            python -m pip install -q rapidocr-onnxruntime 2>/dev/null || echo "!! OCR 依賴安裝失敗"
+            python -m pip install -q 'rapidocr-onnxruntime>=1.2,<1.4' 2>/dev/null || echo "!! OCR 依賴安裝失敗"
             python tools/mpfa-monthly-sync.py || echo "!! 月度統計未更新（保留舊數據）"
           else
             echo "非月初窗口，跳過月度統計"
@@ -196,6 +198,10 @@ jobs:
           # 三处一致性巡检返回 1 直接整条 run 失败，连 Pages 都没发布出去。
           # 数据本身有防退化守卫兜底，发布上一次完整数据比「什么都不发」更安全。
           node tools/nav-consistency.js || echo "!! nav-consistency 未通过（不影响发布）"
+          # 2026-11-13：按来源的新鲜度闸门（新地 41 天静默停更就是这里没人看）
+          node tools/freshness-guard.js || echo "!! 有來源淨值停滯（見 data/freshness.json）"
+          # 2026-11-13：区间断档清单（前端「有区间缺日」提示的数据源）
+          node tools/hist-gaps-build.js --quiet || echo "!! 斷檔清單生成失敗"
           # 2026-10-26 修 4-05：补齐本机 health-check 覆盖的四类哨兵（缺日/渠道一致/allocSum/三处一致本地版）
           node tools/gap-check.js || echo "!! gap-check 有缺口（不影响发布）"
           node tools/health-check.js --local || echo "!! health-check 有告警（不影响发布）"

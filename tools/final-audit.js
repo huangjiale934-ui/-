@@ -38,6 +38,11 @@ if (/^\d{4}-\d{2}-\d{2}$/.test(fundsJ.dataAsOf || '')) {
 }
 if (!funds.length) bad('funds.json 为空');
 if (ids.size !== funds.length) bad('存在重复 id：' + (funds.length - ids.size) + ' 条');
+/* 2026-11-13（第三方核验发现 GH 站 391 计划名含 3 个 U+FFFD）：全表扫一遍替换字符，
+   这类编码瑕疵肉眼很难发现，但会直接显示在页面上。 */
+const fffd = funds.filter((f) => /\uFFFD/.test(JSON.stringify(f)));
+if (fffd.length) bad('字段含替换字符 U+FFFD ' + fffd.length + ' 只：' + fffd.slice(0, 5).map((f) => f.id).join(','));
+else ok('无 U+FFFD 乱码字段');
 /* navStatus === 'na' 是发行人明确不提供单位价格（保证／非单位化基金），算已知项不算故障 */
 const noNav = funds.filter((f) => f.nav == null || !isFinite(f.nav) || f.nav <= 0);
 const naOk = noNav.filter((f) => f.navStatus === 'na');

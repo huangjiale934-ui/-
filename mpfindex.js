@@ -161,6 +161,9 @@ if (!process.argv.includes('--no-merge')) {
     if (it && it.selfCalc && !items[k]) { pruned.push(k); delete j.items[k]; }
   });
   Object.keys(items).forEach((k) => { j.items[k] = items[k]; });
+  /* 2026-11-13（第三方核验 A15）：上面删掉下线指数后没同步顶层 count —— 实测 count=21 / items=20。
+     这里以实际键数为准，别让计数字段和内容脱节。 */
+  j.count = Object.keys(j.items).length;
   fs.writeFileSync(F, JSON.stringify(j), 'utf8');
   console.log('已合并进 data/index.json，共', Object.keys(j.items).length, '个指数' +
     (pruned.length ? '；已清除下线指数 ' + pruned.join(',') : ''));

@@ -71,6 +71,29 @@ function main() {
       merged.push(x);
     });
 
+    /* 2026-11-13（第三方核验 P3/用户要求）：编码守卫。
+       GitHub 站曾出现「萬全強制性公積金計劃」被写成 3 个 U+FFFD（本机抓取正常），
+       属传输/解码偶发。这里双向兜底：
+         ① 新抓到的字符串含 U+FFFD、旧值不含 → 用旧值（不让坏值落盘）；
+         ② 旧值含 U+FFFD、新抓的干净 → 用新值（把已有的坏值治好）。 */
+    const HASFFFD = /\uFFFD/;
+    let fffdFixed = 0, fffdKept = 0;
+    const strKeys = ['scheme', 'fund', 'trustee', 'type', 'subtype', 'fundBase', 'unit'];
+    merged.forEach((n) => {
+      const o = byId.get(String(n.id));
+      strKeys.forEach((k) => {
+        const nv = n[k];
+        if (typeof nv !== 'string') return;
+        const ov = o && typeof o[k] === 'string' ? o[k] : null;
+        if (HASFFFD.test(nv) && ov && !HASFFFD.test(ov)) { n[k] = ov; fffdKept++; }
+        else if (ov && HASFFFD.test(ov) && !HASFFFD.test(nv)) { fffdFixed++; }
+      });
+    });
+    if (fffdFixed) console.log('[mpfa] 修复历史乱码字段 ' + fffdFixed + ' 处（旧值含 U+FFFD，已用官方新值覆盖）');
+    if (fffdKept) console.log('[mpfa] 拦下本轮乱码取值 ' + fffdKept + ' 处（沿用上次正常值）');
+    const stillBad = merged.filter((x) => strKeys.some((k) => typeof x[k] === 'string' && HASFFFD.test(x[k])));
+    if (stillBad.length) console.log('[mpfa] ⚠ 仍有 ' + stillBad.length + ' 条含 U+FFFD（新旧值都坏，需人工看）：' + stillBad.slice(0, 5).map((x) => x.id).join(' '));
+
     const next = Object.assign({}, old, {
       updatedAt: Date.now(),
       dataAsOf: r.dataAsOf || old.dataAsOf || '',
@@ -92,6 +115,25 @@ function main() {
       return 0;
     }
     if (dry) { console.log('[mpfa] --dry：不写盘'); return 0; }
+
+    /* 2026-11-13（第三方核验 P3-1）：把本轮抓到的官方资讯表**原样存档**。
+       以前只有合并结果，没有可比快照，外部审计无法确认「规模/年化/风险」是否照抄官网。
+       只在月份变化时存一份（data/mpfa-snapshot-YYYY-MM.json），不每天堆文件。 */
+    try {
+      const stamp = r.dataAsOf || old.dataAsOf || '';
+      const snapPath = path.join(ROOT, 'data', 'mpfa-snapshot' + (stamp ? '-' + stamp.slice(0, 7) : '') + '.json');
+      if (stamp && !fs.existsSync(snapPath)) {
+        fs.writeFileSync(snapPath, JSON.stringify({
+          fetchedAt: new Date().toISOString(),
+          dataAsOf: stamp,
+          source: 'https://mfp.mpfa.org.hk/tch/mpp_list.jsp',
+          declaredTotal: r.declaredTotal || null,
+          rows: r.funds,
+        }));
+        console.log('[mpfa] 已存档官方快照 ' + path.basename(snapPath) + '（' + r.funds.length + ' 行）');
+      }
+    } catch (e) { console.log('[mpfa] 快照存档失败（不影响主流程）：' + e.message); }
+
     fs.writeFileSync(FUNDS, JSON.stringify(next));
     console.log('[mpfa] 已写入 data/funds.json');
     return changed;

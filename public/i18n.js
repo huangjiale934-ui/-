@@ -55,6 +55,13 @@ for (var m = 0; m < tts.length; m++) {
 var tk = tts[m].getAttribute('data-i18n-title');
 if (tk) tts[m].setAttribute('title', t(tk));
 }
+/* 2026-11-13：无障碍——选择框/输入框的可读名称。读屏软件念的是 aria-label，
+   placeholder 只在部分浏览器作为兜底，所以给「只有 placeholder」的控件补这条通道。 */
+var als = r.querySelectorAll('[data-i18n-aria]');
+for (var q2 = 0; q2 < als.length; q2++) {
+var ak = als[q2].getAttribute('data-i18n-aria');
+if (ak) als[q2].setAttribute('aria-label', t(ak));
+}
 var parts = r.querySelectorAll('[data-i18n-parts]');
 for (var p = 0; p < parts.length; p++) {
 var walker = document.createTreeWalker(parts[p], NodeFilter.SHOW_TEXT, null, false);

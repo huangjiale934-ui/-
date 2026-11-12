@@ -75,6 +75,33 @@ function cmpDist(da, db, label, out) {
   });
 }
 
+/* 2026-11-13（第三方核验 P0 排查体验）：只报「某净值日 401/411」还得自己去 451 只里翻是哪几只。
+   这里把差异基金列出来（最多 10 只，超出注明），排查时一眼能看到是哪家、哪只。 */
+function fundDiffList(fa, fb, label, out) {
+  if (!Array.isArray(fa) || !Array.isArray(fb)) return;
+  const mb = new Map(fb.map((x) => [String(x.id), x]));
+  const onlyA = [];
+  const onlyB = [];
+  const valDiff = [];
+  fa.forEach((x) => {
+    const y = mb.get(String(x.id));
+    if (!y) { onlyA.push(x); return; }
+    if (x.navAsOf !== y.navAsOf) valDiff.push([x, y]);
+    else if (x.nav != null && y.nav != null && Math.abs(x.nav - y.nav) > 1e-6) valDiff.push([x, y]);
+  });
+  const ida = new Set(fa.map((x) => String(x.id)));
+  fb.forEach((y) => { if (!ida.has(String(y.id))) onlyB.push(y); });
+  const fmt = (x) => `${x.id} ${String(x.fund || '').slice(0, 16)}(${x.navAsOf || '—'})`;
+  if (onlyA.length) out.push({ level: 'diff', field: `${label} 仅 A 站有`, a: onlyA.length, b: 0, detail: onlyA.slice(0, 10).map(fmt) });
+  if (onlyB.length) out.push({ level: 'diff', field: `${label} 仅 B 站有`, a: 0, b: onlyB.length, detail: onlyB.slice(0, 10).map(fmt) });
+  if (valDiff.length) {
+    out.push({
+      level: 'diff', field: `${label} 净值/日期不同`, a: valDiff.length, b: valDiff.length,
+      detail: valDiff.slice(0, 10).map(([x, y]) => `${x.id} ${String(x.fund || '').slice(0, 14)}：A ${x.navAsOf || '—'}/${x.nav} ↔ B ${y.navAsOf || '—'}/${y.nav}`),
+    });
+  }
+}
+
 (async () => {
   const issues = [];
   const rows = [];
@@ -125,6 +152,8 @@ function cmpDist(da, db, label, out) {
     const lb = fb.data.funds || [];
     if (la.length !== lb.length) issues.push({ level: 'critical', field: 'funds 条数', a: la.length, b: lb.length });
     cmpDist(dist(la, 'navAsOf'), dist(lb, 'navAsOf'), '净值日分布', issues);
+    /* 净值日/数值不同时，直接列出是哪几只（最多 10 只） */
+    fundDiffList(la, lb, '基金', issues);
     /* 同 id 的净值应完全相同（同源），差异说明某站用了不同批次/坏数据 */
     const mapB = new Map(lb.map((x) => [String(x.id), x]));
     let valueDiff = 0;
@@ -189,9 +218,13 @@ function cmpDist(da, db, label, out) {
       const crit = issues.filter((x) => x.level === 'critical');
       const timing = issues.filter((x) => x.level === 'timing');
       const diff = issues.filter((x) => x.level === 'diff');
-      timing.forEach((x) => console.log(`  · 时点差（正常）${x.field}: ${x.a} / ${x.b}`));
-      diff.forEach((x) => console.log(`  · 数量差 ${x.field}: ${x.a} / ${x.b}`));
-      crit.forEach((x) => console.log(`  ✘ 异常 ${x.field}: ${x.a} / ${x.b}`));
+      const detail = (x) => {
+        if (!x.detail || !x.detail.length) return;
+        console.log('      明细：' + x.detail.join('｜'));
+      };
+      timing.forEach((x) => { console.log(`  · 时点差（正常）${x.field}: ${x.a} / ${x.b}`); detail(x); });
+      diff.forEach((x) => { console.log(`  · 数量差 ${x.field}: ${x.a} / ${x.b}`); detail(x); });
+      crit.forEach((x) => { console.log(`  ✘ 异常 ${x.field}: ${x.a} / ${x.b}`); detail(x); });
       console.log(`  合计 ${issues.length} 项（异常 ${crit.length}、时点差 ${timing.length}、数量差 ${diff.length}）`);
     }
   }
