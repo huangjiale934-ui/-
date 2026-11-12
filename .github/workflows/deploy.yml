@@ -267,7 +267,7 @@ jobs:
         run: |
           miss=0
           for f in mpfindex.js indexbuild.js navperf.js allstats.js server.js scraper.js \
-                   tools/build-static.js tools/mpf-refresh.js tools/hist-index-sync.js \
+                   tools/build-static.js tools/mpfa-refresh.js tools/hist-index-sync.js \
                    tools/merge-nav.js tools/fix-nulls.js public/index.html public/home.html; do
             [ -f "$f" ] || { echo "!! 缺少必需文件：$f"; miss=1; }
           done
