@@ -1218,7 +1218,15 @@ function breadthPrevPct(perf) {
       res,
       200,
       JSON.stringify({
-        build: '2026-10-13-an', // 部署版本标识（供验证「新代码是否已生效」）
+        /* 2026-11-12：原来写死 '2026-10-13-an'，之后部署多少次都不变，无法用来判断「新代码是否生效」。
+           改为按 public/app.js 的 mtime 生成（部署上传的就是磁盘文件，mtime 即发布时刻），
+           失败时回落到固定串。 */
+        build: (() => {
+          try {
+            const st = require('fs').statSync(require('path').join(__dirname, 'public', 'app.js'));
+            return new Date(st.mtime).toISOString().slice(0, 10) + '-an';
+          } catch (e) { return '2026-11-12-an'; }
+        })(), // 部署版本标识（供验证「新代码是否已生效」）
         refreshing: refreshing,        // 诊断：是否有刷新在途
         /* 2026-10-26（用户要求）：更新进行中提示栏数据源（daily.sh 写盘） */
         updateStatus: (() => { try { return JSON.parse(require('fs').readFileSync(require('path').join(__dirname, 'data', 'update-status.json'), 'utf8')); } catch (e) { return null; } })(),
