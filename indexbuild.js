@@ -65,16 +65,37 @@ function get(url) {
      · 港股（100.xxx）：当天要 16:15 之后才算收盘；
      · 其他市场（美股/日股等）：当天一律不算（收盘都在香港时间次日凌晨）。
    只丢弃「今天及未来」未收盘的点，历史点原样保留。 */
-function dropUnclosed(series, code) {
+/* 2026-11-13（核验发现）：原来用「代码以 100. 开头」判断港股，但东财的 100. 是「全球指数」前缀，
+   SPX / NDX / DJIA / N225 全都以 100. 开头 → 被当成港股，于是 22:30 跑批时把**当天盘中价**
+   当收盘价写进去（实测 11-12 SPX 两站分别存了 7651.07 / 7643.53，都不是真收盘）。
+   现在按 key 明确市场与收盘时刻（HK 时间）：
+     · HK（恒指系）  16:15 后当日才收盘
+     · CN / JP       15:30 后当日收盘
+     · US            次日 06:00 才收盘（盘 21:30–05:00），所以「昨天」的点在早上 6 点前仍不可用 */
+const MARKET_OF = {
+  HSI: 'HK', HSCEI: 'HK', HSTECH: 'HK',
+  SPX: 'US', NDX: 'US', DJIA: 'US',
+  N225: 'JP',
+  CSI300: 'CN', SSE: 'CN', SZSE: 'CN', CHINEXT: 'CN', CSI500: 'CN', SSE50: 'CN', STAR50: 'CN',
+};
+
+function dropUnclosed(series, code, key) {
   const now = new Date(Date.now() + 8 * 3600 * 1000);   // 转成 HK 时间读数
   const todayHK = now.toISOString().slice(0, 10);
+  const yestHK = new Date(now.getTime() - 864e5).toISOString().slice(0, 10);
   const hhmm = now.getUTCHours() * 100 + now.getUTCMinutes();
-  const isHK = String(code || '').indexOf('100.') === 0;
+  const market = MARKET_OF[key] || (String(code || '').indexOf('100.') === 0 ? 'HK' : 'CN');
   return series.filter((pt) => {
     const d = pt[0];
-    if (d < todayHK) return true;
     if (d > todayHK) return false;
-    return isHK ? hhmm >= 1615 : false;
+    if (d === todayHK) {
+      if (market === 'HK') return hhmm >= 1615;
+      if (market === 'US') return false;              /* 美股当天永远还没收盘 */
+      return hhmm >= 1530;                            /* CN / JP */
+    }
+    /* d < todayHK：只有「昨天的美股」可能还开着（次日 05:00 收盘） */
+    if (market === 'US' && d === yestHK && hhmm < 600) return false;
+    return true;
   });
 }
 
@@ -125,7 +146,7 @@ function fetchTxTail(code, n) {
       if (!r.series.length) { console.log('  [!] ' + it.key + ' 空数据，跳过'); continue; }
       {
         const before = r.series.length;
-        r.series = dropUnclosed(r.series, it.code);
+        r.series = dropUnclosed(r.series, it.code, it.key);
         if (r.series.length !== before) console.log('  · ' + it.key + ' 丢弃未收盘的当日点');
       }
       if (!r.series.length) { console.log('  [!] ' + it.key + ' 全是未收盘点，跳过'); continue; }
@@ -162,7 +183,7 @@ function fetchTxTail(code, n) {
       const tailRaw = await fetchTxTail(txCode, 60);
       /* 同样要丢掉「今天还没收盘」的点：12:55 跑出来的 11-12 只是盘中价，
          写进 index.json 会被当成收盘价，线上就会显示一个假的当日涨跌。 */
-      const tail = dropUnclosed(tailRaw, '100.' + txCode);
+      const tail = dropUnclosed(tailRaw, '100.' + txCode, k);
       if (!tail.length) { console.log('  [!] ' + k + ' 腾讯补点为空'); continue; }
       const def = INDICES.find((x) => x.key === k);
       if (!items[k]) {
@@ -217,7 +238,7 @@ function fetchTxTail(code, n) {
   Object.keys(items).forEach((k) => {
     const it = items[k];
     if (!it || !Array.isArray(it.series)) return;
-    const clean = dropUnclosed(it.series, it.code);
+    const clean = dropUnclosed(it.series, it.code, k);
     if (clean.length !== it.series.length) {
       console.log('  · ' + k + ' 清掉 ' + (it.series.length - clean.length) + ' 个未收盘点');
     }
