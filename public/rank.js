@@ -62,6 +62,10 @@
   window.__rkRender = function () { render(); };
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => Array.from(document.querySelectorAll(s));
+  /* 2026-11-12（核验发现）：本文件多处 toast 用了 _t()，但 _t 只在 trend.js 内部定义过，
+     榜单页一调就是 ReferenceError（导出成功也没有提示、导出组件缺失时更是一片空白）。
+     这里补一个同签名的小helper：有 TT 就翻译，没有就原样返回。 */
+  const _t = (s) => (typeof TT === 'function' ? TT(s) : s);
 
   /* 2026-10-31 四版（用户要求）：未选榜单时默认按「近 1 年年率化」由高至低（列不高亮，仅默认序） */
   const FALLBACK_BOARD = { id: '', name: '全部基金', desc: '默认按近 1 年年率化回报由高至低；点击上方任一标签切换榜单', metric: 'ann1', dir: 'desc' };
@@ -812,7 +816,7 @@
       { h: 26, cells: [{ v: TT(b.name) + '（积金局口径，含费含息）· 数据截至 ' + (DATA.dataAsOf || '') + ' · 共 ' + list.length + ' 条', s: 1 }] },
       { h: 30, cells: head.map((v) => ({ v, s: 2 })) },
     ].concat(body.map((row) => ({ cells: row.map((v) => ({ v: v, s: 4 })) })));
-    const sheet2 = await window.buildHoldAllocSheet(list.map((x) => ({ id: String(x.id), name: x.fundBase || x.fund })));
+    const sheet2 = await window.buildHoldAllocSheet(list.map((x) => ({ id: String(x.id), name: x.fundBase || x.fund })), { chartLimit: 10, imgScale: 0.6 });
     const sheetName = TT(b.name).replace(/[\\/:*?[\]]/g, '').slice(0, 28) || '榜单';
     const blob = window.MPFXLSX.build({
       sheets: [

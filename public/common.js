@@ -1819,8 +1819,15 @@ window.buildTopBarsSVG = function (d, opts) {
 /* 「持仓与分布」工作表（前十大持仓 + 投资组合分布 + 各自合计 + 玫瑰图 PNG）。
    entries: [{ id, name }] —— 只传有便览概念的成分基金（指数/均值行由调用方过滤）。
    返回 { rows, merges, cols, images }，images 可直接挂到 MPFXLSX 的 sheet.images。 */
-window.buildHoldAllocSheet = async function (entries) {
+window.buildHoldAllocSheet = async function (entries, opts) {
   const list = Array.isArray(entries) ? entries : [];
+  /* 2026-11-12（核验发现）：榜单一次导出 400+ 只时，每只基金都要把两张 SVG 光栅化成 PNG
+     （1280×1100），实测 20 秒仍出不来文件、内存飙升，用户点了「导出」像没反应。
+     现在按 opts.chartLimit 只给前 N 只画图（数据行仍全部输出），默认不限制（走势页只选几只）。 */
+  const chartLimit = (opts && opts.chartLimit) || Infinity;
+  /* 图片分辨率比例：榜单导出 400+ 只时用 0.6，文件从 ~19MB 降到 ~7MB；走势页保持 1 */
+  const IMG = (opts && opts.imgScale) || 1;
+  let charted = 0;
   if (window.ensureHoldings) { try { await window.ensureHoldings(null); } catch (e) {} }
   const HLD = window.__HLDG && window.__HLDG.funds ? window.__HLDG.funds : {};
   const SRC3 = { manulife: 'Manulife', aia: 'AIA', bct: 'BCT', hsbc: 'HSBC', hangseng: 'Hang Seng', bocpt: '中銀保誠', bea: 'BEA', fidelity: 'Fidelity', sunlife: 'Sun Life', haitong: 'Haitong', bocom: '交通銀行信託', yflife: '萬通信託', chinalife: '中國人壽信託', shkp: '新地／渣打信託', amtd: 'AMTD', etnet: 'etnet 環富通' };
@@ -1830,6 +1837,9 @@ window.buildHoldAllocSheet = async function (entries) {
   const jobs = [];   /* {name, row, svg, span, kind}——kind: rose | bars */
   rows.push({ h: 26, cells: [{ v: '前十大持仓与投资组合分布（来源：各发行人官网「基金便览」；占基金资产净值 %）', s: 1 }] });
   rows.push({ h: 30, cells: ['序号', '成分基金', '数据类型', '名称 / 类别', '占基金资产净值(%)', '报告期', '数据来源'].map((v) => ({ v, s: 2 })) });
+  if (chartLimit !== Infinity && list.length > chartLimit) {
+    rows.push({ h: 22, cells: [{ v: '说明：本表列出全部 ' + list.length + ' 只基金的持仓与分布数据；为避免文件过大、导出过慢，图只画前 ' + chartLimit + ' 只。', s: 3 }] });
+  }
   list.forEach((ent) => {
     const id = String(ent.id);
     const nm = ent.name || ('#' + id);
@@ -1839,15 +1849,17 @@ window.buildHoldAllocSheet = async function (entries) {
       return;
     }
     const blockStart = rows.length;
+    const allowChart = charted < chartLimit;
     /* 双图并排锚点：玫瑰图 H..N（col 7..13）、柱状图 O..U（col 14..20），同一块首行 */
-    if (d.alloc && d.alloc.length && window.buildRoseSVG) {
+    if (allowChart && d.alloc && d.alloc.length && window.buildRoseSVG) {
       const R0 = window.buildRoseSVG(d, '', { embedStyle: true, fixedSize: true });
       if (R0 && R0.svg) jobs.push({ name: nm, row: blockStart, svg: R0.svg, kind: 'rose' });
     }
-    if (d.top10 && d.top10.length && window.buildTopBarsSVG) {
+    if (allowChart && d.top10 && d.top10.length && window.buildTopBarsSVG) {
       const T0 = window.buildTopBarsSVG(d, { embedStyle: true, fixedSize: true });
       if (T0) jobs.push({ name: nm, row: blockStart, svg: T0, kind: 'bars' });
     }
+    if (allowChart) charted++;
     (d.top10 || []).forEach((h, i) => {
       rows.push({ cells: [{ v: i + 1, s: 4 }, { v: nm, s: 4 }, { v: '前十大持仓', s: 4 }, { v: h.name || '', s: 4 }, n2(h.weight), { v: d.asOf || '', s: 4 }, { v: src3(d.src), s: 4 }] });
     });
@@ -1876,7 +1888,7 @@ window.buildHoldAllocSheet = async function (entries) {
   const images = [];
   for (const job of jobs) {
     const isRose = job.kind === 'rose';
-    const b64 = await window.svgStrToPng(job.svg, isRose ? 1280 : 1140, isRose ? 1100 : 1000);
+    const b64 = await window.svgStrToPng(job.svg, Math.round((isRose ? 1280 : 1140) * IMG), Math.round((isRose ? 1100 : 1000) * IMG));
     if (!b64) continue;
     images.push({
       data: b64, col: isRose ? 7 : 14, row: job.row, col2: isRose ? 13 : 20, row2: job.row + 16,
