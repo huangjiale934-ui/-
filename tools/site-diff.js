@@ -14,12 +14,26 @@
  */
 const https = require('https');
 
+/* 2026-11-12：WorkBuddy 站被平台切成「需要分享码」，不带 code 一律 403。
+   分享码放 data/wb-share.txt（git 忽略），没有就按公开链接走。 */
+let SHARE = process.env.MPF_SHARE || '';
+if (!SHARE) { try { SHARE = require('fs').readFileSync(require('path').join(__dirname, '..', 'data', 'wb-share.txt'), 'utf8').trim(); } catch (e) {} }
+function withShare(u) { return SHARE ? u + (u.indexOf('?') >= 0 ? '&' : '?') + 'sharecode=' + SHARE : u; }
 const A = process.env.MPF_SITE_A || 'https://mpf-data.app.workbuddy.host';
 const B = process.env.MPF_SITE_B || 'https://huangjiale934-ui.github.io/-';
 
+/* 2026-11-12：托管层给 A 站加了「分享码」门禁——不带 ?sharecode= 一律 403「链接不完整」。
+   用环境变量传入，避免把分享码硬编码进脚本。 */
+const CODE_A = process.env.MPF_SITE_A_CODE || '';
+const CODE_B = process.env.MPF_SITE_B_CODE || '';
+const withCode = (base, path) => {
+  const code = base === A ? CODE_A : CODE_B;
+  return base + path + (code ? (path.includes('?') ? '&' : '?') + 'sharecode=' + code : '');
+};
+
 function get(url) {
   return new Promise((resolve) => {
-    const req = https.get(url, { timeout: 25000, headers: { 'cache-control': 'no-store', 'user-agent': 'mpf-site-diff' } }, (res) => {
+    const req = https.get(withShare(url), { timeout: 25000, headers: { 'cache-control': 'no-store', 'user-agent': 'mpf-site-diff' } }, (res) => {
       let s = '';
       res.on('data', (d) => { s += d; });
       res.on('end', () => resolve({ status: res.statusCode, body: s }));
@@ -31,8 +45,8 @@ function get(url) {
 
 /* 静态站是 /api/x.json，动态站是 /api/x；两个都试 */
 async function api(base, name) {
-  const tries = base.includes('github.io') ? [`${base}/api/${name}.json`] : [`${base}/api/${name}`];
-  for (const u of tries.concat([`${base}/api/${name}.json`])) {
+  const tries = base.includes('github.io') ? [withCode(base, `/api/${name}.json`)] : [withCode(base, `/api/${name}`)];
+  for (const u of tries.concat([withCode(base, `/api/${name}.json`)])) {
     const r = await get(u);
     if (r.status === 200) {
       try { return { ok: true, data: JSON.parse(r.body) }; } catch (e) { return { ok: false, err: 'JSON 解析失败' }; }
@@ -118,12 +132,13 @@ function cmpDist(da, db, label, out) {
     la.forEach((x) => {
       const y = mapB.get(String(x.id));
       if (!y) return;
-      if (x.nav != null && y.nav != null && Math.abs(x.nav - y.nav) > 1e-6) {
+      /* 只有「同一天但数值不同」才算异常；日期不同是抓取时点差，已在净值日分布里体现 */
+      if (x.navAsOf && x.navAsOf === y.navAsOf && x.nav != null && y.nav != null && Math.abs(x.nav - y.nav) > 1e-6) {
         valueDiff++;
         if (sample.length < 5) sample.push(`${x.id}:${x.nav}≠${y.nav}`);
       }
     });
-    if (valueDiff) issues.push({ level: 'critical', field: '同一基金净值不一致', a: valueDiff + ' 只', b: sample.join(' ') });
+    if (valueDiff) issues.push({ level: 'critical', field: '同一天但净值不同', a: valueDiff + ' 只', b: sample.join(' ') });
   } else {
     issues.push({ level: 'critical', field: 'funds 接口', a: fa.ok ? 'ok' : fa.err, b: fb.ok ? 'ok' : fb.err });
   }
