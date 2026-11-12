@@ -1312,7 +1312,7 @@ function mountHeader(active) {
   /* 2026-10-31：合并页（资料库内含可视化对比板块）导航高亮按当前 hash 自判，
      避免语言切换重挂导航时回退到脚本加载时捕获的旧板块 */
   if (typeof document !== 'undefined' && document.getElementById('dbSec') && document.getElementById('anSec')) {
-    active = (location.hash || '') === '#cmp' ? 'an' : 'db';
+    active = ((location.hash || '') === '#cmp' || (location.hash || '') === '#an') ? 'an' : 'db';
   }
   /* 2026-10-26 修 Pages 子路径 404：全部改相对路径（WorkBuddy 根路径与 Pages /-/ 子路径两站通用） */
   const navs = [
@@ -2296,8 +2296,14 @@ function mountFD(x, alive) {
           if (old) old.remove();
           const el = document.createElement('span');
           el.className = 'gap-flag';
-          el.setAttribute('data-tip', TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）', { a: info.first, b: info.last, n: info.n }));
-          el.textContent = TT('ⓘ 早期为月度数据');
+          /* 2026-11-13（第三方核验 P1-1）：断档原因要分清——早年月频 vs 源侧近期断档（如新地 10 月） */
+          if (info.reason === 'monthly-early') {
+            el.setAttribute('data-tip', TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）', { a: info.first, b: info.last, n: info.n }));
+            el.textContent = TT('ⓘ 早期为月度数据');
+          } else {
+            el.setAttribute('data-tip', TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站未提供该段净值，非本站漏抓；走势图此处为断档）', { a: info.first, b: info.last, n: info.n }));
+            el.textContent = TT('ⓘ 有区间缺日');
+          }
           const bar = box.querySelector('.tr-adds') || box.querySelector('.tr-tools');
           if (bar) bar.appendChild(el);
         });

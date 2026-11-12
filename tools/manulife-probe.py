@@ -84,25 +84,79 @@ def fetch(code, retries=2):
 
 
 def append_records(rows):
+    """追加采样流水。
+    2026-11-13（复核发现）：原来只写一个 manulife-release.jsonl，云端每次 checkout 到的
+    基线可能比上一次提交旧（并发 rebase），追加后反而把已有记录「截短」——实测文件只剩
+    30 小时、早期记录全丢。现在改成「按天分文件 + 写前并集合并」，最坏只影响当天：
+      · 每天一个 manulife-release-YYYY-MM-DD.jsonl（可长期留存、互不影响）
+      · 同日文件按 (时间+代码) 去重后取并集再写回，重复跑不会丢数据
+    """
     os.makedirs(OUT_DIR, exist_ok=True)
-    with open(JSONL, "a", encoding="utf-8") as fh:
-        for row in rows:
-            fh.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+    by_day = {}
+    for row in rows:
+        d = str(row.get("t") or "")[:10] or "unknown"
+        by_day.setdefault(d, []).append(row)
+    for d, rs in by_day.items():
+        path = os.path.join(OUT_DIR, "manulife-release-%s.jsonl" % d) if d != "unknown" else JSONL
+        seen = set()
+        merged = []
+        if os.path.exists(path):
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    for line in fh:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            old = json.loads(line)
+                        except ValueError:
+                            continue
+                        k = (old.get("t"), old.get("code"), old.get("maxDate"))
+                        if k in seen:
+                            continue
+                        seen.add(k)
+                        merged.append(old)
+            except OSError:
+                pass
+        for row in rs:
+            k = (row.get("t"), row.get("code"), row.get("maxDate"))
+            if k in seen:
+                continue
+            seen.add(k)
+            merged.append(row)
+        merged.sort(key=lambda x: (str(x.get("t")), str(x.get("code"))))
+        with open(path, "w", encoding="utf-8") as fh:
+            for row in merged:
+                fh.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+
+
+def _all_record_paths():
+    import glob
+    return sorted(glob.glob(os.path.join(OUT_DIR, "manulife-release-*.jsonl")))
 
 
 def load_records():
-    if not os.path.exists(JSONL):
-        return []
+    """读全部按天文件（新格式）+ 旧的单文件（兼容）。"""
     rows = []
-    with open(JSONL, encoding="utf-8") as fh:
-        for line in fh:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                rows.append(json.loads(line))
-            except ValueError:
-                continue
+    paths = _all_record_paths()
+    if os.path.exists(JSONL):
+        paths = [JSONL] + paths
+    for p in paths:
+        with open(p, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rows.append(json.loads(line))
+                except ValueError:
+                    continue
+    # 同一个采样点可能同时存在于旧单文件与按天文件里，按 (时间,代码,净值日) 去重
+    uniq = {}
+    for r in rows:
+        uniq[(r.get("t"), r.get("code"), r.get("maxDate"))] = r
+    rows = list(uniq.values())
+    rows.sort(key=lambda x: (str(x.get("t")), str(x.get("code"))))
     return rows
 
 

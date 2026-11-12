@@ -186,6 +186,11 @@ step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js
 # 全算成缺日，每天报 55–244 只且从不真去补。新版判据 = 净值日 > 历史末点；
 # --fix 会先 merge-nav 追点、再按发行人重抓，幂等，可每天跑。
 soft_step "9.5/9 缺日检查 + 自动补抓" node tools/gap-check.js --fix
+# 2026-11-13（第三方核验 P1-2）：按来源的净值新鲜度闸门——新地那种「单渠道静默停 41 天」
+# 以前只有告警、照常发布；这里写出 data/freshness.json，predeploy 在严重停滞时禁止发布。
+soft_step "9.6/9 净值新鲜度闸门" node tools/freshness-guard.js
+# 2026-11-13：区间断档清单（前端详情页的「有区间缺日」提示靠它）——以前是 10-29 的一次性产物
+soft_step "9.65/9 区间断档清单" node tools/hist-gaps-build.js --quiet
 # 2026-10-29（5.0）：链接巡检——友链 href 为空曾导致「点宏利跳回本站」，此前无任何环节检查。
 # 结构问题（空 href / 缺官网地址 / undefined）会让退出码非 0；网络 403 只告警。
 soft_step "9.7/9 链接巡检" node tools/link-audit.js

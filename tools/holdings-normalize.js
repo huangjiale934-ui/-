@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const P = path.join(__dirname, '..', 'data', 'holdings.json');
 const j = JSON.parse(fs.readFileSync(P, 'utf8'));
-let t = 0, s = 0, d = 0, a = 0;
+let t = 0, s = 0, d = 0, a = 0, t0 = 0;
 
 const MONTH_END = (ym) => {
   const [y, m] = ym.split('-').map(Number);
@@ -18,6 +18,14 @@ const MONTH_END = (ym) => {
 
 Object.values(j.funds).forEach((x) => {
   if (!x) return;
+  /* 2026-11-13（第三方核验 P1-4）：bocpt_alloc_ingest.py 曾把标题写成简体（行业分布/地区分布），
+     与条目其余文案的繁体不一致（memory 里记过「中銀 allocTitle 变简体」的老毛病）。
+     统一在这里归一成繁体，解析器那边也改了，双保险。 */
+  if (x.allocTitle) {
+    const HANT = { '行业分布': '行業分布', '地区分布': '地區分布', '投资组合分布': '投資組合分布', '资产分布': '資產分布' };
+    const fixed = HANT[x.allocTitle];
+    if (fixed) { x.allocTitle = fixed; t0++; }
+  }
   if ((x.alloc || []).length && !x.allocTitle) { x.allocTitle = '投資組合分布'; t++; }
   if ((x.top10 || []).length) {
     const sorted = x.top10.slice().sort((a, b) => (b.weight || 0) - (a.weight || 0));
@@ -39,4 +47,4 @@ Object.values(j.funds).forEach((x) => {
   }
 });
 fs.writeFileSync(P, JSON.stringify(j));
-console.log('规范化：补口径标题', t, '| 排序', s, '| 日期归一', d, '| 补 allocSum', a);
+console.log('规范化：补口径标题', t, '| 简→繁', t0, '| 排序', s, '| 日期归一', d, '| 补 allocSum', a);

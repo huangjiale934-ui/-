@@ -71,26 +71,26 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
             <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
           </svg>
-          <input type="text" id="kw" data-i18n-ph="基金名称／计划名称" placeholder="基金名称／计划名称" aria-label="关键词搜索">
+          <input type="text" id="kw" data-i18n-ph="基金名称／计划名称" placeholder="基金名称／计划名称" aria-label="关键词搜索" data-i18n-aria="关键词搜索">
         </div>
       </div>
       <div class="f-item f-trustee">
         <label data-i18n-parts>受托人</label>
-        <select id="fTrustee"><option data-i18n-parts  value="">全部受托人</option></select>
+        <select id="fTrustee" aria-label="受托人筛选" data-i18n-aria="受托人筛选"><option data-i18n-parts  value="">全部受托人</option></select>
       </div>
       <div class="f-item f-type">
         <label data-i18n-parts>基金种类</label>
-        <select id="fType"><option data-i18n-parts  value="">全部种类</option></select>
+        <select id="fType" aria-label="基金种类筛选" data-i18n-aria="基金种类筛选"><option data-i18n-parts  value="">全部种类</option></select>
       </div>
       <div class="f-item f-sub">
         <label data-i18n-parts>基金细类</label>
-        <select id="fSub"><option data-i18n-parts  value="">全部细类</option></select>
+        <select id="fSub" aria-label="基金细类筛选" data-i18n-aria="基金细类筛选"><option data-i18n-parts  value="">全部细类</option></select>
       </div>
       <div class="tb-tail">
         <div class="tb-count"><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">0</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip" hidden></span></div>
         <div class="f-item tb-per">
           <label class="muted tb-per-label" for="perPage" data-i18n-parts>每页显示</label>
-          <select id="perPage">
+          <select id="perPage" aria-label="每页显示条数" data-i18n-aria="每页显示条数">
             <option data-i18n-parts  value="10" selected>10 条</option>
             <option data-i18n-parts  value="20">20 条</option>
             <option data-i18n-parts  value="50">50 条</option>
@@ -105,7 +105,7 @@
   <div class="card">
     <div class="m-sort">
       <label data-i18n-parts>排序</label>
-      <select id="mSortKey"></select>
+      <select id="mSortKey" aria-label="排序字段" data-i18n-aria="排序字段"></select>
       <button class="btn ghost sm" id="mSortDir">降序 ↓</button>
     </div>
 
@@ -170,7 +170,7 @@
     <div class="f-row f-row-main f-row-merged">
       <div class="f-item dim-item">
         <label for="rkDimSel" data-i18n="排名维度">排名维度</label>
-        <select id="rkDimSel"></select>
+        <select id="rkDimSel" aria-label="排名维度" data-i18n-aria="排名维度"></select>
       </div>
       <div class="f-item f-search">
         <label data-i18n="基金搜索">基金搜索</label>
@@ -178,26 +178,26 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
             <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
           </svg>
-          <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称" placeholder="基金名称／计划名称" aria-label="关键词搜索">
+          <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称" placeholder="基金名称／计划名称" aria-label="关键词搜索" data-i18n-aria="关键词搜索">
         </div>
       </div>
       <div class="f-item f-trustee">
         <label data-i18n-parts>受托人</label>
-        <select id="rkRTrustee"><option data-i18n-parts  value="">全部受托人</option></select>
+        <select id="rkRTrustee" aria-label="受托人筛选" data-i18n-aria="受托人筛选"><option data-i18n-parts  value="">全部受托人</option></select>
       </div>
       <div class="f-item f-type">
         <label data-i18n-parts>基金种类</label>
-        <select id="rkRType"><option data-i18n-parts  value="">全部种类</option></select>
+        <select id="rkRType" aria-label="基金种类筛选" data-i18n-aria="基金种类筛选"><option data-i18n-parts  value="">全部种类</option></select>
       </div>
       <div class="f-item f-sub">
         <label data-i18n-parts>基金细类</label>
-        <select id="rkRSub"><option data-i18n-parts  value="">全部细类</option></select>
+        <select id="rkRSub" aria-label="基金细类筛选" data-i18n-aria="基金细类筛选"><option data-i18n-parts  value="">全部细类</option></select>
       </div>
       <div class="tb-tail">
         <div class="tb-count"><span data-i18n="当前榜单共">当前榜单共</span> <b id="rkRcnt">0</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip"></span></div>
         <div class="f-item tb-per">
           <label class="muted tb-per-label" for="rkRTop" data-i18n-parts>每页显示</label>
-          <select id="rkRTop">
+          <select id="rkRTop" aria-label="显示名次范围" data-i18n-aria="显示名次范围">
             <option data-i18n-parts  value="10" selected>10 条</option>
             <option data-i18n-parts  value="20">20 条</option>
             <option data-i18n-parts  value="50">50 条</option>
@@ -219,7 +219,7 @@
   <div class="card">
 <div class="m-sort">
       <label data-i18n-parts>排序</label>
-      <select id="rkMSortKey"></select>
+      <select id="rkMSortKey" aria-label="排序字段" data-i18n-aria="排序字段"></select>
       <button class="btn ghost sm" id="rkMSortDir">降序 ↓</button>
     </div>
     <div class="scroll-x" id="rkTopScroll" aria-hidden="true"><div class="scroll-ghost" id="rkScrollGhost"></div></div>
@@ -381,7 +381,9 @@
   var BOARDS = /^(ann1|ann5|ann10|annLaunch|calYear|cum1|cum5|cum10|cumLaunch|mdd|risk|fer|size|launchTs|trusteeAgg|champion|selfW1|selfYtd|selfY1|selfMdd)$/;
   function wantTab() {
     if (qs.get('rk')) return 'rank';
-    if (hash0 === 'cmp') return 'cmp';
+    /* 2026-11-13（第三方核验 §7.5）：旧版分析页锚点是 #an，合并后只认 #cmp，
+       #an 会被当成未知 hash 静默改写成 #db（用户以为跳错页）。这里把 #an 当 #cmp 的同义词。 */
+    if (hash0 === 'cmp' || hash0 === 'an') return 'cmp';
     if (hash0 === 'rank' || BOARDS.test(hash0)) return 'rank';
     return 'db';
   }

@@ -59,6 +59,19 @@ if (funds && perf && idx && hld) {
   if (bad) fails.push('基金字段含 undefined/NaN：' + bad + ' 条');
 }
 
+/* 2026-11-13（第三方核验 P1-2）：净值新鲜度硬闸门。
+   freshness-guard.js 会写 data/freshness.json；这里只在「严重停滞」时阻断发布
+   （某个来源落后 >10 个净值日，或全站最新日距今 >7 天），避免新地那种 41 天静默发布。 */
+try {
+  const fr = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'data', 'freshness.json'), 'utf8'));
+  if (fr && fr.hard) {
+    const stuck = (fr.items || []).filter((x) => !x.exempt && x.lagDays > fr.hardLag).map((x) => x.trustee + '(' + x.lagDays + '日)');
+    fails.push('净值严重停滞：' + (stuck.length ? stuck.join('、') : '全站最新 ' + fr.latest + '（' + fr.globalAge + ' 天前）'));
+  } else if (fr) {
+    info.push('净值新鲜度：最新 ' + fr.latest + '，最慢来源落后 ' + Math.max.apply(null, (fr.items || []).map((x) => x.lagDays || 0)) + ' 个净值日');
+  }
+} catch (e) { /* 未生成时跳过（首次部署或尚未跑 guard） */ }
+
 info.forEach((s) => console.log('  · ' + s));
 if (fails.length) {
   fails.forEach((f) => console.log('  ✘ ' + f));

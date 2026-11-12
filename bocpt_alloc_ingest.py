@@ -56,7 +56,7 @@ def main():
             continue
         funds[fid]["alloc"] = [{"label": l, "weight": w} for l, w in arr]
         funds[fid]["allocKind"] = kind
-        funds[fid]["allocTitle"] = {"industry": "行业分布", "region": "地区分布"}.get(kind, "投资组合分布")
+        funds[fid]["allocTitle"] = {"industry": "行業分布", "region": "地區分布"}.get(kind, "投資組合分布")
         funds[fid]["asOf"] = ASOF
         funds[fid]["src"] = SRC
         n += 1
