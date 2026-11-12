@@ -49,7 +49,8 @@ function buildStamp() {
     walk(PUBLIC_DIR);
     const t = fs.statSync(path.join(__dirname, 'server.js')).mtimeMs;
     if (t > max) max = t;
-    __buildStamp = new Date(max).toISOString().slice(0, 10) + '-an';
+    /* 用香港时间取日期：本机/云端都在 UTC 深夜跑批，按 UTC 会显示成前一天 */
+    __buildStamp = new Date(max + 8 * 3600 * 1000).toISOString().slice(0, 10) + '-an';
   } catch (e) { __buildStamp = '2026-11-12-an'; }
   return __buildStamp;
 }
