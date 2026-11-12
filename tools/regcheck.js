@@ -6,6 +6,10 @@
 const fs = require('fs');
 /* 站点地址：node tmp/regcheck.js http://127.0.0.1:3072 或线上域名；接口断言需要它 */
 const BASE = (process.argv[2] || 'http://127.0.0.1:3012').replace(/\/$/, '');
+/* 2026-11-12：WorkBuddy 站托管层要求 ?sharecode=，裸域 /api/* 会 403。
+   仅当设置 MPF_SITE_A_CODE 时附加，GitHub Pages 与本地回归行为不变。 */
+const SITE_CODE = process.env.MPF_SITE_A_CODE || '';
+const withCode = (p) => p + (SITE_CODE ? (p.includes('?') ? '&' : '?') + 'sharecode=' + SITE_CODE : '');
 const path = require('path');
 const TMP = path.join(__dirname, '..', 'tmp', 'reg');   /* 2026-10-20：与 tmp/regdump.sh 输出目录对齐（此前指向 tools/reg，读的是旧快照） */
 
@@ -432,11 +436,11 @@ chk('翻译·本轮新键抽查在字典中', (function () {
      真正的文件是 /api/funds.json。这里统一做一次回退，两个站点都能跑同一套断言。 */
   const apiGet = async (path, init) => {
     try {
-      const r = await fetch(BASE + path, init);
+      const r = await fetch(BASE + withCode(path), init);
       const ct = r.headers.get('content-type') || '';
       if (r.ok && /json/.test(ct)) return r;
     } catch (e) { /* 落到 .json */ }
-    return fetch(BASE + path + '.json', init);
+    return fetch(BASE + withCode(path + '.json'), init);
   };
   try {
     let r;
