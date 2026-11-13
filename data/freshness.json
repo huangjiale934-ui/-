@@ -1,0 +1,88 @@
+{
+ "at": "2026-11-13T02:34:33.405Z",
+ "latest": "2026-11-11",
+ "globalAge": 2,
+ "maxLag": 4,
+ "hardLag": 10,
+ "warnCount": 0,
+ "hard": false,
+ "items": [
+  {
+   "trustee": "HSBC",
+   "count": 77,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "中國人壽",
+   "count": 10,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "中銀保誠",
+   "count": 34,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "交通",
+   "count": 14,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "友邦信託",
+   "count": 21,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "宏利",
+   "count": 28,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "東亞",
+   "count": 40,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "永明",
+   "count": 31,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "渣打信托",
+   "count": 10,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "萬通",
+   "count": 14,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  },
+  {
+   "trustee": "銀聯信託",
+   "count": 171,
+   "latest": "2026-11-11",
+   "lagDays": 0,
+   "exempt": null
+  }
+ ]
+}
