@@ -138,7 +138,12 @@ function fundDiffList(fa, fb, label, out) {
     Object.keys(ta.data.items || {}).forEach((k) => {
       const x = ta.data.items[k];
       const y = (tb.data.items || {})[k] || {};
-      if (x.last !== y.last) issues.push({ level: 'critical', field: 'ticker.' + k, a: `${x.last}@${x.asOf}`, b: `${y.last}@${y.asOf}` });
+      /* 2026-11-13：自算指数两站各自用当时抓到的 hist/size 计算，末值可能差 0.01 点
+         （相对 5e-6），属派生指标的时点差而非数据错误。相对差 < 0.01% 归 timing。 */
+      if (x.last !== y.last) {
+        const rel = (x.last && y.last) ? Math.abs(x.last - y.last) / Math.max(Math.abs(x.last), Math.abs(y.last)) : 1;
+        issues.push({ level: rel < 1e-4 ? 'timing' : 'critical', field: 'ticker.' + k, a: `${x.last}@${x.asOf}`, b: `${y.last}@${y.asOf}`, rel });
+      }
       if (x.asOf !== y.asOf) issues.push({ level: 'timing', field: 'ticker.' + k + '.asOf', a: x.asOf, b: y.asOf });
     });
   } else {

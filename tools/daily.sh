@@ -183,6 +183,9 @@ soft_step "8.3/9 净值异动检测" node tools/anomaly-check.js
 # 2026-10-29 修：merge-nav 只写 hist 文件、不更新 hist-index.json，索引会长期落后于实际序列
 # （10-28 本机 109 条、云端 25 条）。此处按文件对齐，幂等。
 step "8.4/9 历史索引对齐" node tools/hist-index-sync.js
+# 2026-11-13：funds.nav 是抓取原值（銀聯信託保留 6-7 位），hist 统一 4 位。
+# 两者不一致会让外部核验反复报「净值精度截断」，且表/图数字无法逐位对上。
+step "8.45/9 净值精度归一（表 = 历史末点，4 位）" node tools/nav-round4.js
 # 2026-10-24：链路末尾固化验收（不依赖 AI 纪律；核验 U01）
 step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js
 # 2026-11-03（第二十九轮）：缺日检查改成「真缺才补」的自动闭环 ——
