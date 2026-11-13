@@ -229,6 +229,38 @@ function fundDiffList(fa, fb, label, out) {
     const y = mb.data.mpfaMonthly || {};
     if (x.asOf !== y.asOf) issues.push({ level: 'critical', field: '积金局月度 asOf', a: x.asOf, b: y.asOf });
     if ((x.rows || []).length !== (y.rows || []).length) issues.push({ level: 'critical', field: '积金局月度行数', a: (x.rows || []).length, b: (y.rows || []).length });
+
+    /* 2026-11-13（用户要求「派生指标统一落盘、两站读同一份」）：
+       首页 KPI 全部来自 /api/market 这一个聚合接口（静态站抓成 market.json），
+       算法只有一套；但两站各自用自己的 funds 快照生成，输入差一天就会不同。
+       这里逐字段比对：标量差异 >0.01 才算异常，逐类/逐年同样。 */
+    const near = (a, b, tol) => (a == null && b == null) || (a != null && b != null && Math.abs(a - b) <= (tol || 0.01));
+    const scalars = ['count', 'trusteeCount', 'schemeCount', 'totalSize', 'avgAnn1', 'medianAnn1',
+      'minAnn1', 'maxAnn1', 'upCount', 'flatCount', 'downCount', 'upBase'];
+    scalars.forEach((k) => {
+      if (!near(ma.data[k], mb.data[k], k === 'totalSize' ? 1 : 0.01)) {
+        issues.push({ level: 'critical', field: 'market.' + k, a: ma.data[k], b: mb.data[k] });
+      }
+    });
+    /* 按类别：name 集合 + 每类 count/size/avgAnn1 */
+    const tA = new Map((ma.data.byType || []).map((r) => [r.name, r]));
+    const tB = new Map((mb.data.byType || []).map((r) => [r.name, r]));
+    tA.forEach((r, k) => {
+      const q = tB.get(k);
+      if (!q) { issues.push({ level: 'critical', field: 'market.byType 缺项', a: k, b: '—' }); return; }
+      if (r.count !== q.count) issues.push({ level: 'critical', field: 'market.byType[' + k + '].count', a: r.count, b: q.count });
+      if (!near(r.size, q.size, 1)) issues.push({ level: 'critical', field: 'market.byType[' + k + '].size', a: r.size, b: q.size });
+      if (!near(r.avgAnn1, q.avgAnn1)) issues.push({ level: 'critical', field: 'market.byType[' + k + '].avgAnn1', a: r.avgAnn1, b: q.avgAnn1 });
+    });
+    /* 逐年：只比最近 3 年（历史年份不会变，比对意义不大） */
+    const yA = (ma.data.byYear || []).slice(-3);
+    const yB = new Map((mb.data.byYear || []).map((r) => [r.year, r]));
+    yA.forEach((r) => {
+      const q = yB.get(r.year);
+      if (!q) { issues.push({ level: 'critical', field: 'market.byYear 缺年', a: r.year, b: '—' }); return; }
+      if (r.n !== q.n) issues.push({ level: 'critical', field: 'market.byYear[' + r.year + '].n', a: r.n, b: q.n });
+      if (!near(r.avg, q.avg)) issues.push({ level: 'critical', field: 'market.byYear[' + r.year + '].avg', a: r.avg, b: q.avg });
+    });
   }
 
   const na = pack.navperf[0];
