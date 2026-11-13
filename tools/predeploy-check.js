@@ -57,6 +57,29 @@ if (funds && perf && idx && hld) {
   /* 关键字段不得出现 NaN / undefined 字符串 */
   const bad = rows.filter((f) => [f.nav, f.selfY1, f.selfYtd].some((v) => typeof v === 'string' && /undefined|NaN/i.test(v))).length;
   if (bad) fails.push('基金字段含 undefined/NaN：' + bad + ' 条');
+
+  /* 2026-11-13（第三方复验 P2-2）：基金表 nav 必须与 hist 末点逐位相同。
+     抓取原值（銀聯信託 6-7 位）与 hist（4 位）混用时，两站会出现
+     「11.9906 vs 11.9905946」，外部核验每轮都报「同一天数值不同」。
+     nav-round4 负责归一，这里做回归闸门（漏跑即阻断）。 */
+  const fsx = require('fs');
+  const pathx = require('path');
+  let precBad = 0;
+  const precSample = [];
+  for (const f of rows) {
+    if (f.nav == null || !f.navAsOf) continue;
+    let ser;
+    try { ser = JSON.parse(fsx.readFileSync(pathx.join(__dirname, '..', 'data', 'hist', String(f.id) + '.json'), 'utf8')).series; } catch (e) { continue; }
+    if (!ser || !ser.length) continue;
+    const last = ser[ser.length - 1];
+    if (last[0] !== f.navAsOf) continue;   /* 日期不同由 freshness / gap-check 管 */
+    if (Math.abs(f.nav - last[1]) > 1e-9) {
+      precBad++;
+      if (precSample.length < 5) precSample.push(f.id + ' ' + f.nav + '≠' + last[1]);
+    }
+  }
+  if (precBad) fails.push('净值与历史末点不一致：' + precBad + ' 条（' + precSample.join('、') + '），请跑 tools/nav-round4.js');
+  else info.push('净值精度：与历史末点逐位一致');
 }
 
 /* 2026-11-13（第三方核验 P1-2）：净值新鲜度硬闸门。
