@@ -1,0 +1,90 @@
+{
+  "verifiedAt": "2026-11-13",
+  "reviewer": "强积金数据平台维护方（本机）",
+  "conclusion": "shared-nav",
+  "summary": "6 对（12 只）基金的历史净值序列逐点完全相同，经直接查询发行人官方接口确认：这是官方对部分单位类别采用同一净值，不是我方抓取串档。",
+  "method": "按单位类别分别向发行人接口取价，并与我方 hist 序列逐点比对；同时在同一计划内寻找「A/H 价格不同」的反证，以排除「整个计划都被抓成同一份」的可能。",
+  "pairs": [
+    {
+      "a": "1559",
+      "b": "1560",
+      "trustee": "銀聯信託",
+      "scheme": "BCT強積金策略計劃",
+      "fund": "景順65歲後基金",
+      "units": ["A", "H"],
+      "points": 2363,
+      "allEqual": true,
+      "official": "BCT fundInformation（schemaInfoId=strategic-mpf，2026-11-10）：A/H 两类均为 12.7232"
+    },
+    {
+      "a": "1557",
+      "b": "1558",
+      "trustee": "銀聯信託",
+      "scheme": "BCT強積金策略計劃",
+      "fund": "景順核心累積基金",
+      "units": ["A", "H"],
+      "points": 2363,
+      "allEqual": true,
+      "official": "同上接口：A/H 两类均为 19.6756（2026-11-10）"
+    },
+    {
+      "a": "2066",
+      "b": "2067",
+      "trustee": "銀聯信託",
+      "scheme": "BCT強積金策略計劃",
+      "fund": "景順環球追蹤指數基金",
+      "units": ["A", "H"],
+      "points": 841,
+      "allEqual": true,
+      "official": "同上接口：A/H 两类均为 16.1327（2026-11-10）"
+    },
+    {
+      "a": "2068",
+      "b": "2069",
+      "trustee": "銀聯信託",
+      "scheme": "BCT強積金策略計劃",
+      "fund": "景順美國追蹤指數基金",
+      "units": ["A", "H"],
+      "points": 841,
+      "allEqual": true,
+      "official": "同上接口：A/H 两类均为 16.3609（2026-11-10）"
+    },
+    {
+      "a": "1527",
+      "b": "1528",
+      "trustee": "銀聯信託",
+      "scheme": "宏利退休精選（強積金）計劃",
+      "fund": "安聯強積金65歲後基金",
+      "units": ["B", "T"],
+      "points": 1931,
+      "allEqual": true,
+      "official": "宏利 fundhistory（65DB / 65DT，overrideLocale=zh_Hant_HK）：两类各 1931 点，末点同为 12.3202（2026-11-10）"
+    },
+    {
+      "a": "1524",
+      "b": "1525",
+      "trustee": "銀聯信託",
+      "scheme": "宏利退休精選（強積金）計劃",
+      "fund": "安聯強積金核心累積基金",
+      "units": ["B", "T"],
+      "points": 1931,
+      "allEqual": true,
+      "official": "宏利 fundhistory（CADB / CADT）：两类各 1931 点，末点同为 18.9075（2026-11-10）"
+    }
+  ],
+  "counterExamples": [
+    {
+      "scheme": "BCT強積金策略計劃",
+      "note": "同一计划内 9 对 A/H 价格互不相同，证明抓取链路能区分单位类别",
+      "samples": [
+        "2026-11-10 A 15.5396 / H 15.5051",
+        "2026-11-10 A 13.3372 / H 13.4110",
+        "2026-11-10 A 34.5192 / H 36.0307",
+        "2026-11-10 A 23.4189 / H 24.4069",
+        "2026-11-10 A 15.4385 / H 15.9079",
+        "2026-11-10 A 11.5335 / H 11.7265"
+      ]
+    }
+  ],
+  "reproduce": "node tools/nav-shared-check.js  （逐对复核是否仍逐点相同；若某对出现差异，说明其中一只已被修正，需重新取证）"
+}

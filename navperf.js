@@ -114,6 +114,16 @@ function computeOne(obj) {
   /* 稀疏数据护栏：末尾两点相隔过远时，短周期指标（日/周/月）不可信 → 置 null
      （BCT 等来源早期为月频/周频，避免把月间隔误算成「日涨跌幅」） */
   const gap1 = Math.round((lastDate - new Date(s[endIdx - 1][0] + 'T00:00:00Z')) / 86400000);
+  /* 2026-11-13（第五十三轮，用户反馈两站「近 1 周」一个有一个没有）：
+     原来只看「末尾两点间隔 gap1」，不看**指标窗口两端**的实际跨度。
+     新地 10 只 10 月断档 26 个交易日：本机多一个 11-10 的点 → gap1=1 骗过护栏，
+     w1 实际取的是 09-30 的净值（41 天涨幅冒充一周）；云端没有 11-10 → gap1=42 被置 null。
+     现改为检查「最后一个点距窗口端点」的跨度，超过阈值即判不可比（显示「—」）。 */
+  const spanDays = (idx) => (idx < 0 ? Infinity
+    : Math.round((lastDate - new Date(s[idx][0] + 'T00:00:00Z')) / 86400000));
+  const iW1 = idxAt(s, iso(minusDays(lastDate, 7)));
+  const iM1 = idxAt(s, iso(minusMonths(lastDate, 1)));
+  const iM3 = idxAt(s, iso(minusMonths(lastDate, 3)));
 
   // 年初至今：上一个公历年最后一个点
   const prevYearEnd = iso(new Date(Date.UTC(lastDate.getUTCFullYear() - 1, 11, 31)));
@@ -131,12 +141,13 @@ function computeOne(obj) {
     nav: s[endIdx][1],
     days: s.length,
     first: s[0][0],
-    /* 2026-10-19：节假日/数据滞后不再留空——只要距今 ≤40 天就用「最新 vs 上一个有效交易日」算 */
-    d1: gap1 <= 40 ? growth(s, endIdx - 1, endIdx) : null,
-    w1: gap1 <= 20 ? growth(s, idxAt(s, iso(minusDays(lastDate, 7))), endIdx) : null,
-    m1: gap1 <= 60 ? growth(s, idxAt(s, iso(minusMonths(lastDate, 1))), endIdx) : null,
+    /* 2026-10-19：节假日/数据滞后不再留空——只要距今 ≤40 天就用「最新 vs 上一个有效交易日」算
+       2026-11-13：改为「窗口跨度」判据（见上），d1 容忍 11 天（含周末与公众假期） */
+    d1: (gap1 <= 11 && spanDays(endIdx - 1) <= 11) ? growth(s, endIdx - 1, endIdx) : null,
+    w1: spanDays(iW1) <= 11 ? growth(s, iW1, endIdx) : null,
+    m1: spanDays(iM1) <= 40 ? growth(s, iM1, endIdx) : null,
     /* 2026-10-20：补 3 个月与 3/5/10 年累积，供详情页「累计表现」完整区间使用 */
-    m3: gap1 <= 60 ? growth(s, idxAt(s, iso(minusMonths(lastDate, 3))), endIdx) : null,
+    m3: spanDays(iM3) <= 100 ? growth(s, iM3, endIdx) : null,
     ytd: growth(s, ytdIdx, endIdx),
     y1: growth(s, idxAt(s, iso(minusYears(lastDate, 1))), endIdx),
     y3: growth(s, idxAt(s, iso(minusYears(lastDate, 3))), endIdx),

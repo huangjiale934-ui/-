@@ -298,7 +298,9 @@ def main():
     date, url, html = find_release(only=a.date or None)
     if not date:
         print("SKIP 最近 20 天沒有新的「投資回報臨時數據」新聞稿（官網尚未發佈）")
-        return 2
+        # 2026-11-13（复验报告 E4）：SKIP 不是失败。原返回 2 会被 daily.sh 记成「!!! 失败」，
+        # 11-11 与 11-13 两次日志都留了假告警。改成 0，同时在输出里保留 SKIP 字样。
+        return 0
 
     asof_m = re.search(r"截至\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(?:底|(\d{1,2})\s*日)", html)
     if not asof_m:
@@ -313,7 +315,7 @@ def main():
 
     if old.get("asOf") and asof <= old["asOf"] and not a.dry:
         print("SKIP 官網最新一期 %s 不新於本地 %s" % (asof, old["asOf"]))
-        return 2
+        return 0   # 同上：无新数据不算失败
 
     png = a.png
     if not png:

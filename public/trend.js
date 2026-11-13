@@ -1131,6 +1131,15 @@ window.TREND = (function () {
           txtEl.textContent = single
             ? _t('单条对比时纵轴为实际数值（净值 / 指数点位），悬停显示当日净值与当日涨跌幅；再加入一条即切换为相对区间起点的累计涨跌幅对比。')
             : _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。');
+          /* 2026-11-13：单基金视图若该只有断档，补一句灰带含义（与图上的灰带对应） */
+          (function () {
+            if (!single) return;
+            const it0 = lines[0].it;
+            if (!it0 || it0.type !== 'fund' || !window.__histGaps) return;
+            const gi = window.__histGaps.funds && window.__histGaps.funds[String(it0.id)];
+            if (!gi || !gi.gaps || !gi.gaps.length) return;
+            txtEl.textContent += ' ' + _t('图中灰色竖带为该基金无净值记录的时段（源站未提供，非本站漏抓）。');
+          })();
         }
       }
       let ymin = Infinity, ymax = -Infinity;
@@ -1159,6 +1168,46 @@ window.TREND = (function () {
       const Y = (v) => PT + (1 - (v - ymin) / (ymax - ymin)) * (PB - PT);
 
       let g = '';
+      /* 2026-11-13（用户要求：断档提示画在图上，比角标直观）：
+         单条基金视图下，把 data/hist-gaps.json 里的断档区间画成灰色竖带。
+         近期（120 天内）源侧断档用较深灰并标「源站未提供」，早年月频期用极浅灰。
+         断档数据懒加载一次，到货后重绘（不阻塞首屏）。 */
+      (function gapBands() {
+        if (!single) return;
+        const it0 = lines[0].it;
+        if (!it0 || it0.type !== 'fund') return;
+        const gid = String(it0.id);
+        if (!window.__histGaps) {
+          if (!window.__histGapsLoading) {
+            window.__histGapsLoading = true;
+            fetch('/api/hist-gaps').then((r) => (r.ok ? r.json() : null)).then((j) => {
+              window.__histGaps = j;
+              window.__histGapsLoading = false;
+              try { drawSoon(); } catch (e) {}
+            }).catch(() => { window.__histGapsLoading = false; });
+          }
+          return;
+        }
+        const info = window.__histGaps.funds && window.__histGaps.funds[gid];
+        if (!info || !info.gaps || !info.gaps.length) return;
+        const nowMs = Date.now();
+        let marks = '';
+        info.gaps.forEach((seg) => {
+          const a = Date.parse(seg[0] + 'T00:00:00Z');
+          const b = Date.parse(seg[1] + 'T00:00:00Z');
+          if (!(b >= t0 && a <= t1)) return;
+          const x1 = Math.max(PL, X(Math.max(a, t0)));
+          const x2 = Math.min(PR, X(Math.min(b, t1)));
+          if (x2 - x1 < 1.5) return;
+          const fresh = (nowMs - b) / 864e5 < 120;
+          marks += '<rect x="' + x1.toFixed(1) + '" y="' + PT + '" width="' + (x2 - x1).toFixed(1) +
+            '" height="' + (PB - PT) + '" fill="' + (fresh ? '#64748b' : '#94a3b8') +
+            '" opacity="' + (fresh ? '0.16' : '0.07') + '"/>';
+          /* 2026-11-13：不在图内写字——「全部」窗口下断档只有 60–80px 宽，
+             文字会与右上角控件重叠。说明放到图例角标与下方注释里。 */
+        });
+        if (marks) g += '<g class="tr-gapbands">' + marks + '</g>';
+      })();
       /* 2026-11-02（第二十一轮，用户要求）：删除图内「累计涨跌幅（区间起点 = 0%）」说明文字 */
       /* 刻度条数随上下界与步长决定（保证 5%/10% 这种整齐值） */
       const NGY = Math.min(12, Math.max(2, Math.round((ymax - ymin) / (stepY || 1))));

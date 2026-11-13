@@ -742,83 +742,30 @@ const server = http.createServer(async (req, res) => {
 
   /* 2026-11-03（第三十一轮）：首屏「市场情绪」小卡的数据 ——
      近日上涨基金占比（nav-perf 的 d1）+ 最近 7 个交易日市场指数涨跌（迷你柱）。 */
-/* 2026-11-04（第三十五轮）：首屏卡要给「较上周」的方向感 ——
-   用同一套 7 日窗口口径，算「再往前一周」（last-14 → last-7）的上涨占比，
-   与本周占比相减即得百分点变化。读 450 份 hist 约 230ms，按 nav-perf 的 mtime 缓存。 */
-function breadthPrevPct(perf) {
-  try {
-    /* 2026-11-05（第三十九轮，用户选择）：回到「滚动对比」口径 ——
-       本周 = 每只基金最近 7 天的涨跌是否为正；
-       上周 = 同一个「7 天前的那一天」再往前 7 天的涨跌是否为正。
-       两个窗口同步前移，所以这个差值每天都会变——这是用户要的口径。 */
-    const cache = global.__mpfBreadthPrev || (global.__mpfBreadthPrev = { key: '', val: null });
-    const key = String(fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs);
-    if (cache.key === key) return cache.val;
-    const minusDays = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() - n); return x.toISOString().slice(0, 10); };
-    const idxAt = (s, d) => { let lo = 0, hi = s.length - 1, ans = -1;
-      while (lo <= hi) { const m = (lo + hi) >> 1; if (s[m][0] <= d) { ans = m; lo = m + 1; } else hi = m - 1; }
-      return ans; };
-    let n = 0, up = 0;
-    Object.keys(perf).forEach((id) => {
-      const x = perf[id];
-      if (!x || x.w1 == null) return;
-      let series;
-      try { series = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'hist', id + '.json'), 'utf8')).series; } catch (e) { return; }
-      if (!series || series.length < 2) return;
-      const last = series[series.length - 1][0];
-      const i7 = idxAt(series, minusDays(last, 7)), i14 = idxAt(series, minusDays(last, 14));
-      if (i7 < 0 || i14 < 0 || !series[i14][1]) return;
-      n++; if (series[i7][1] / series[i14][1] - 1 > 0) up++;
-    });
-    const val = { pct: n ? Math.round(up / n * 100) : null };
-    cache.key = key;
-    cache.val = val;
-    return val;
-  } catch (e) { return { pct: null }; }
-}
-
+/* 2026-11-13（第五十三轮）：原 breadthPrevPct（在 server 里手算上周占比）已删除，
+   上周/本周统一由 tools/breadth.js 一次算出并落盘，两站读同一份，避免两套口径相减。 */
   if (p === '/api/breadth') {
+    /* 2026-11-13（第五十三轮，用户反馈「两站 50% vs 49%、较上周 +1 vs -3」）：
+       原实现是「本周用 nav-perf.w1（有护栏）− 上周在 server 里另写一段读 hist 手算（无护栏）」，
+       两套口径相减、两个分母（WB 450 / GH 440），delta 天生不可比。
+       现改为唯一口径生成器 tools/breadth.js 算好落盘 data/breadth.json（本周与上周同函数、
+       同分母、同基准日），本接口只负责回读并补 7 日迷你柱，两站读同一份。 */
     try {
-      /* 2026-11-04：整份响应按两份数据的 mtime 缓存（首页每次加载都会取，避免重复解析 1MB 指数文件） */
-      const rk = fs.statSync(path.join(__dirname, 'data', 'nav-perf.json')).mtimeMs + ':' +
-                 fs.statSync(path.join(__dirname, 'data', 'index.json')).mtimeMs;
-      const rc = global.__mpfBreadthResp;
-      if (rc && rc.key === rk) return send(res, 200, rc.body);
-
-      const perf = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'nav-perf.json'), 'utf8')).funds || {};
-      const idx = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'index.json'), 'utf8'));
-      const mpf = (idx.items && idx.items.MPFAVG && idx.items.MPFAVG.series) || [];
-      const days = [];
-      for (let i = Math.max(1, mpf.length - 7); i < mpf.length; i++) {
-        const a = mpf[i - 1][1], b = mpf[i][1];
-        days.push({ d: mpf[i][0], chg: a ? Math.round((b / a - 1) * 10000) / 100 : 0 });
+      const bf = path.join(__dirname, 'data', 'breadth.json');
+      if (fs.existsSync(bf)) {
+        const st = fs.statSync(bf);
+        const rc = global.__mpfBreadthFile;
+        if (rc && rc.key === st.mtimeMs) return send(res, 200, rc.body);
+        const body = fs.readFileSync(bf, 'utf8');
+        global.__mpfBreadthFile = { key: st.mtimeMs, body };
+        return send(res, 200, body);
       }
-      /* 2026-11-03（第三十二轮）：占比改用「近一周」（w1）—— 迷你柱也是 7 个交易日，
-         首屏点进去筛选的也是「近 1 周」，三处口径必须一致（此前用的 d1 是单日）。 */
-      let up = 0, total = 0, asOf = '', upDay = 0;
-      Object.keys(perf).forEach((id) => {
-        const x = perf[id];
-        if (!x || x.w1 == null) return;
-        total++;
-        if (x.w1 > 0) up++;
-        if (x.d1 != null && x.d1 > 0) upDay++;
-        if (x.asOf && x.asOf > asOf) asOf = x.asOf;
-      });
-      const pct = total ? Math.round((up / total) * 100) : null;
-      const prev = breadthPrevPct(perf);
-      const pctPrev = prev.pct;
-      /* 仅供提示文案用：上一周窗口的右端（最新净值日 − 7 天） */
-      const prevAsOf = asOf ? new Date(new Date(asOf + 'T00:00:00Z').getTime() - 7 * 86400e3).toISOString().slice(0, 10) : null;
-      /* delta 单位为「个百分点」；上周无数据时为 null，前端只显示本周占比 */
-      const delta = (pct != null && pctPrev != null) ? pct - pctPrev : null;
-      const body = JSON.stringify({
-        asOf, total, up, pct, pctPrev, delta, prevAsOf,
-        pctDay: total ? Math.round((upDay / total) * 100) : null, days,
-      });
-      global.__mpfBreadthResp = { key: rk, body };
-      return send(res, 200, body);
+      /* 文件还没生成（首次部署中间态）：现场算一次，不落盘，行为与生成器一致 */
+      const b = require('./tools/breadth.js').compute();
+      return send(res, 200, JSON.stringify(b));
     } catch (e) { return send(res, 500, JSON.stringify({ error: e.message })); }
   }
+
 
   if (p === '/api/ticker') {
     return fs.readFile(path.join(__dirname, 'data', 'index.json'), (err, buf) => {
@@ -1239,7 +1186,12 @@ function breadthPrevPct(perf) {
     }
   }
 
-  if (p === '/api/status') {
+  /* 2026-11-13（复验报告 P3-1）：/api/status.json 作为 /api/status 的只读别名。
+     作用是让前端用「先问 status.json」判断自己跑在动态站还是静态站 ——
+     静态站构建产物里就有 status.json（无 mode 字段），动态站这里返回 mode:'live'。
+     这样两站都不必再故意请求一个 404 来探测（GH 站曾因此每次会话记一条 404）。 */
+  if (p === '/api/status' || p === '/api/status.json') {
+    const isJsonAlias = p === '/api/status.json';
     return send(
       res,
       200,
@@ -1247,6 +1199,7 @@ function breadthPrevPct(perf) {
         /* 2026-11-12：原来写死 '2026-10-13-an'，之后部署多少次都不变，无法判断「新代码是否生效」。
            改为取 public/ 下 js/css/html 与 server.js 的**最新** mtime（部署上传的是磁盘文件，
            mtime 即最后一次改代码的日期）；算一次缓存住，进程重启（= 每次部署）时重算。 */
+        mode: isJsonAlias ? 'live' : undefined, // 仅别名端点回传，静态站无此字段
         build: buildStamp(), // 部署版本标识（供验证「新代码是否已生效」）
         refreshing: refreshing,        // 诊断：是否有刷新在途
         /* 2026-10-26（用户要求）：更新进行中提示栏数据源（daily.sh 写盘） */

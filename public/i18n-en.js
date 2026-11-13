@@ -1064,6 +1064,8 @@
   '该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）': 'This fund has {n} date gaps between {a} and {b} (the provider only published monthly prices then; not a scraping miss).',
   'ⓘ 早期为月度数据': 'ⓘ Early data is monthly',
   '该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站未提供该段净值，非本站漏抓；走势图此处为断档）': 'This fund has {n} date gaps between {a} and {b} (the provider did not publish NAV for that period; the chart shows a break, not a scraping miss).',
+  '图中灰色竖带为该基金无净值记录的时段（源站未提供，非本站漏抓）。': 'Grey bands mark periods with no NAV record for this fund (not published by the provider; not a scraping gap on our side).',
+  '源站未提供': 'Not published by provider',
   'ⓘ 有区间缺日': 'ⓘ Has date gaps',
   '该基金 {m} 的净值尚未公布（月末价格还没出）': 'NAV for {m} has not been published yet',
   '其中 {n} 只缺期，见下表': '{n} fund(s) have missing periods, see table',
@@ -1433,8 +1435,8 @@
     'Net asset values refresh from 09:40 on trading days; it usually takes 20–30 minutes, and this banner disappears once done.',
   '每日 22:40 自动全量更新，完成后本提示自动消失':
     'A full refresh runs automatically at 22:40 daily; this banner disappears once it finishes.',
-  '上周（截至 {b}）近一周上涨占比 {p}%，本周 {c}%；本行 = 本周 − 上周（百分点）。':
-    'Last week (as of {b}): {p}% of funds up over the trailing week. This week: {c}%. The figure shown is this week minus last week, in percentage points.',
+  '上周（截至 {b}）近一周上涨占比 {p}%，本周 {c}%；本行 = 本周 − 上周（百分点）。本次统计 {n} 只基金，另有 {x} 只因净值断档或停更未参与。':
+    'Last week (as of {b}): {p}% of funds up over the trailing week. This week: {c}%. The figure shown is this week minus last week, in percentage points. {n} funds are included; {x} more are excluded because their NAV history has a gap or has stopped updating.',
   '筛选与排序': 'Filters & sorting',
   '共 {n} 条': '{n} funds',
   '全部指标': 'All metrics',

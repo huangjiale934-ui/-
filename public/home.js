@@ -788,8 +788,11 @@
       if (delta == null) { dEl.textContent = ''; dEl.removeAttribute('title'); return; }
       dEl.textContent = TQ('较上周 {d} 个百分点', { d: (delta > 0 ? '+' : '') + delta });
       if (basis && basis.prev != null) {
-        dEl.title = TQ('上周（截至 {b}）近一周上涨占比 {p}%，本周 {c}%；本行 = 本周 − 上周（百分点）。',
-          { b: basis.date || '—', p: basis.prev, c: basis.now });
+        /* 2026-11-13：写明入样只数与剔除原因 —— 451 条里有断档/停更的基金不参与，
+           否则用户会问「为什么不是 451 只」。剔除只数由接口回传。 */
+        var ex = basis.excluded || 0;
+        dEl.title = TQ('上周（截至 {b}）近一周上涨占比 {p}%，本周 {c}%；本行 = 本周 − 上周（百分点）。本次统计 {n} 只基金，另有 {x} 只因净值断档或停更未参与。',
+          { b: basis.date || '—', p: basis.prev, c: basis.now, n: basis.total || 0, x: ex });
       }
     }
     document.addEventListener('mpf:lang', paintDelta);
@@ -801,7 +804,11 @@
       if (pctEl) pctEl.textContent = pct + '%';
       if (j.delta != null) {
         delta = j.delta;
-        basis = { prev: j.pctPrev, now: pct, date: j.prevAsOf || '' };
+        basis = {
+          prev: j.pctPrev, now: pct, date: j.prevAsOf || '',
+          total: j.total || 0,
+          excluded: j.excluded ? Object.keys(j.excluded).reduce(function (a, k) { return a + (j.excluded[k] || 0); }, 0) : 0,
+        };
         paintDelta();
       }
       const card = document.getElementById('heroSent');

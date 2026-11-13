@@ -177,6 +177,9 @@ jobs:
           # 实测 10-28 云端 16 只 AMTD 的 asOf 停在 10-23（净值已 10-26），
           # 与 WorkBuddy 站相比「更新更少」就是这里造成的。追加后必须再算一遍。
           node navperf.js
+          # 2026-11-13：首屏涨跌占比单一口径落盘（本周/上周同函数、同分母），两站读同一份，
+          # 不再「本站 w1 − 本站手算」各算各的（曾出现 WB 50%/+1 与 GH 49%/-3）。
+          node tools/breadth.js || echo "!! 漲跌佔比生成失敗（接口会回退到即时计算）"
           # 2026-10-29 修：merge-nav 只写 hist 文件、不更新 hist-index.json，
           # 云端没有第二个人补索引 → 索引长期落后（10-28 有 25 只：AMTD 16 + 宏利退休精選 9）。
           node tools/hist-index-sync.js

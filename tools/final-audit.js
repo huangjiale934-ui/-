@@ -213,6 +213,23 @@ else ok('allstats 更新于 ' + new Date(asAt).toISOString().slice(0, 16) + 'Z')
 const gaps = read('hist-gaps.json', {});
 console.log('  缺口文件：' + (Array.isArray(gaps.gaps) ? gaps.gaps.length : Object.keys(gaps).length) + ' 项');
 
+console.log('== G 共用净值备案 ==');
+/* 2026-11-13（复验报告 P1-3）：6 对序列逐点相同曾被反复标为「疑似串档」。
+   已向发行人接口取证的 6 对记录在 data/nav-shared-verified.json，
+   这里逐对复核「是否仍逐点相同」——出现差异说明其中一只被改过，要重新定性。 */
+(function () {
+  const { execFileSync } = require('child_process');
+  try {
+    const out = execFileSync(process.execPath, [path.join(__dirname, 'nav-shared-check.js')], { encoding: 'utf8' });
+    out.split('\n').filter((l) => /✔ |✘ /.test(l)).forEach((l) => console.log('  ' + l.trim()));
+    ok('共用净值备案：6 对仍逐点相同（官方共用，非串档）');
+  } catch (e) {
+    const txt = (e.stdout || '') + (e.stderr || '');
+    txt.split('\n').filter((l) => /✘/.test(l)).forEach((l) => console.log('  ' + l.trim()));
+    bad('共用净值备案复核未通过：有一对已出现差异，需重新向发行人取证');
+  }
+})();
+
 console.log('\n== 结果 ==');
 console.log(fail ? ('FAIL ' + fail + ' 项 / warn ' + warn + ' 项') : ('全部通过（warn ' + warn + ' 项）'));
 process.exit(fail ? 1 : 0);

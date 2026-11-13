@@ -62,15 +62,25 @@ if (funds && perf && idx && hld) {
 /* 2026-11-13（第三方核验 P1-2）：净值新鲜度硬闸门。
    freshness-guard.js 会写 data/freshness.json；这里只在「严重停滞」时阻断发布
    （某个来源落后 >10 个净值日，或全站最新日距今 >7 天），避免新地那种 41 天静默发布。 */
+/* 2026-11-13（复验报告 P1-2 的绕过路径）：原来只读 data/freshness.json，
+   而它是随代码入库的静态快照 —— guard 没重跑时 hard 永远是 false，且文件缺失时
+   try-catch 静默放行。现改为**现场计算**（require 同一个 compute），文件只作留档。 */
 try {
-  const fr = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'data', 'freshness.json'), 'utf8'));
-  if (fr && fr.hard) {
-    const stuck = (fr.items || []).filter((x) => !x.exempt && x.lagDays > fr.hardLag).map((x) => x.trustee + '(' + x.lagDays + '日)');
-    fails.push('净值严重停滞：' + (stuck.length ? stuck.join('、') : '全站最新 ' + fr.latest + '（' + fr.globalAge + ' 天前）'));
+  const fr = require('./freshness-guard.js').compute();
+  if (fr && fr.error) {
+    fails.push('净值新鲜度无法判定：' + fr.error);
+  } else if (fr && fr.hard) {
+    const stuck = (fr.items || []).filter((x) => !x.exempt && x.lagDays > fr.hardLag).map((x) => x.trustee + '(' + x.lagDays + '个交易日)');
+    fails.push('净值严重停滞：' + (stuck.length ? stuck.join('、')
+      : '基金最新 ' + fr.latest + '，市场已到 ' + fr.marketLatest + '（落后 ' + fr.fundLag + ' 个交易日）'));
   } else if (fr) {
-    info.push('净值新鲜度：最新 ' + fr.latest + '，最慢来源落后 ' + Math.max.apply(null, (fr.items || []).map((x) => x.lagDays || 0)) + ' 个净值日');
+    info.push('净值新鲜度：基金最新 ' + fr.latest + ' / 市场最新交易日 ' + fr.marketLatest +
+      '（落后 ' + fr.fundLag + ' 个交易日），最慢来源落后 ' +
+      Math.max.apply(null, (fr.items || []).map((x) => x.lagDays || 0)) + ' 个交易日');
   }
-} catch (e) { /* 未生成时跳过（首次部署或尚未跑 guard） */ }
+} catch (e) {
+  fails.push('净值新鲜度检查异常：' + e.message);
+}
 
 info.forEach((s) => console.log('  · ' + s));
 if (fails.length) {
