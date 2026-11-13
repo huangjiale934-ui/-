@@ -166,6 +166,26 @@ function fundDiffList(fa, fb, label, out) {
     if (ba.data.delta !== bb.data.delta) {
       issues.push({ level: 'critical', field: 'breadth.较上周(pp)', a: ba.data.delta, b: bb.data.delta });
     }
+    /* 2026-11-13（用户要求「出问题直接对名单」）：数字一致但名单不同也要能看见 ——
+       两站同一百分比可能是由不同基金凑出来的（此消彼长），只看百分比会漏掉。 */
+    const setDiff = (arrA, arrB, label) => {
+      const A = new Set(arrA || []);
+      const B = new Set(arrB || []);
+      const onlyA = [...A].filter((x) => !B.has(x));
+      const onlyB = [...B].filter((x) => !A.has(x));
+      if (onlyA.length || onlyB.length) {
+        issues.push({
+          level: 'critical',
+          field: 'breadth.' + label + ' 名单',
+          a: onlyA.length + ' 只（' + onlyA.slice(0, 8).join(',') + '）',
+          b: onlyB.length + ' 只（' + onlyB.slice(0, 8).join(',') + '）',
+        });
+      }
+    };
+    if (ba.data.upIds && bb.data.upIds) {
+      setDiff(ba.data.upIds, bb.data.upIds, '本周上涨');
+      setDiff(ba.data.upPrevIds, bb.data.upPrevIds, '上周上涨');
+    }
   } else {
     issues.push({ level: 'critical', field: 'breadth 接口', a: ba.ok ? 'ok' : ba.err, b: bb.ok ? 'ok' : bb.err });
   }
