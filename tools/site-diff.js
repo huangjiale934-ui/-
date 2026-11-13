@@ -182,17 +182,27 @@ function fundDiffList(fa, fb, label, out) {
     /* 同 id 的净值应完全相同（同源），差异说明某站用了不同批次/坏数据 */
     const mapB = new Map(lb.map((x) => [String(x.id), x]));
     let valueDiff = 0;
+    let precDiff = 0;
     const sample = [];
     la.forEach((x) => {
       const y = mapB.get(String(x.id));
       if (!y) return;
-      /* 只有「同一天但数值不同」才算异常；日期不同是抓取时点差，已在净值日分布里体现 */
-      if (x.navAsOf && x.navAsOf === y.navAsOf && x.nav != null && y.nav != null && Math.abs(x.nav - y.nav) > 1e-6) {
-        valueDiff++;
-        if (sample.length < 5) sample.push(`${x.id}:${x.nav}≠${y.nav}`);
+      /* 只有「同一天但数值不同」才算异常；日期不同是抓取时点差，已在净值日分布里体现。
+         2026-11-13：容差从 1e-6 放宽到 1e-5 —— 抓取原值保留 6-7 位、hist 存 4 位时，
+         同一净值会差到 5e-5（4 位小数 vs 7 位小数，如 12.6304 vs 12.6303689），
+         这属精度展示差异而非数据错误。真错价至少差 0.01，用 1e-4 可完全区分。 */
+      if (x.navAsOf && x.navAsOf === y.navAsOf && x.nav != null && y.nav != null) {
+        const d = Math.abs(x.nav - y.nav);
+        if (d > 1e-4) {
+          valueDiff++;
+          if (sample.length < 5) sample.push(`${x.id}:${x.nav}≠${y.nav}`);
+        } else if (d > 1e-9) {
+          precDiff++;
+        }
       }
     });
     if (valueDiff) issues.push({ level: 'critical', field: '同一天但净值不同', a: valueDiff + ' 只', b: sample.join(' ') });
+    if (precDiff) issues.push({ level: 'timing', field: '净值精度差（<0.0001%，非错误）', a: precDiff + ' 只', b: '两站取整位数不同' });
   } else {
     issues.push({ level: 'critical', field: 'funds 接口', a: fa.ok ? 'ok' : fa.err, b: fb.ok ? 'ok' : fb.err });
   }
