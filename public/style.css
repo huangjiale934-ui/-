@@ -3104,3 +3104,11 @@ body { overflow-x: clip; }
   a[href^="http"]::after { content: ""; }  /* 不在纸面打印长 URL */
   .db-tablewrap, .scroll-ghost { overflow: visible !important; max-height: none !important; }
 }
+
+/* 2026-11-13：页头「复制完整链接」按钮（仅在带 sharecode 访问时由 common.js 注入） */
+.hdr-share { display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; margin-left: 6px; flex: 0 0 auto;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff;
+  cursor: pointer; font-size: 14px; line-height: 1; transition: all .15s; }
+.hdr-share:hover { background: var(--blue-50); border-color: var(--blue); }
+.hdr-share:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
