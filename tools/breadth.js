@@ -85,30 +85,41 @@ function compute(opts) {
   let upDay = 0;
   const excl = { noHist: 0, short: 0, gap: 0, stale: 0 };
   const staleness = [];
+  /* 2026-11-13（用户要求）：明细也落盘 —— 出问题时直接对名单，不用重算。
+     三组：本周上涨 / 本周下跌 / 上述两者之外的入样基金（持平），
+     以及被剔除的基金与原因。 */
+  const upIds = [];
+  const downIds = [];
+  const flatIds = [];
+  const upPrevIds = [];
+  const downPrevIds = [];
+  const exclIds = { noHist: [], short: [], gap: [], stale: [] };
 
   for (const id of ids) {
     const s = seriesOf.get(id);
-    if (!s) { excl.noHist++; continue; }
-    if (s.length < 3) { excl.short++; continue; }
+    if (!s) { excl.noHist++; exclIds.noHist.push(id); continue; }
+    if (s.length < 3) { excl.short++; exclIds.short.push(id); continue; }
     /* 基准日对齐：只取 ≤ asOf 的末点，避免某只基金多一天就自成一套窗口 */
     let e = s.length - 1;
     while (e >= 0 && s[e][0] > asOf) e--;
-    if (e < 0) { excl.noHist++; continue; }
+    if (e < 0) { excl.noHist++; exclIds.noHist.push(id); continue; }
     const lastDate = s[e][0];
     const d7 = minusDays(lastDate, 7);
     const d14 = minusDays(lastDate, 14);
     const i7 = idxAt(s, d7);
     const i14 = idxAt(s, d14);
-    if (i7 < 0 || i14 < 0 || !s[i7][1] || !s[i14][1]) { excl.short++; continue; }
+    if (i7 < 0 || i14 < 0 || !s[i7][1] || !s[i14][1]) { excl.short++; exclIds.short.push(id); continue; }
     const span1 = dayGap(lastDate, s[i7][0]);
     const span2 = dayGap(s[i7][0], s[i14][0]);
-    if (span1 > MAX_SPAN || span2 > MAX_SPAN) { excl.gap++; continue; }
+    if (span1 > MAX_SPAN || span2 > MAX_SPAN) { excl.gap++; exclIds.gap.push(id); continue; }
     /* 末日落后基准日太多（>7 天）视为停更，不参与，避免用陈旧值投票 */
-    if (dayGap(asOf, lastDate) > 7) { excl.stale++; staleness.push(id + '@' + lastDate); continue; }
+    if (dayGap(asOf, lastDate) > 7) { excl.stale++; exclIds.stale.push(id + '@' + lastDate); staleness.push(id + '@' + lastDate); continue; }
 
     total++;
-    if (s[e][1] / s[i7][1] - 1 > 0) up++;
-    if (s[i7][1] / s[i14][1] - 1 > 0) upPrev++;
+    const r1 = s[e][1] / s[i7][1] - 1;
+    const r0 = s[i7][1] / s[i14][1] - 1;
+    if (r1 > 0) { up++; upIds.push(id); } else if (r1 < 0) downIds.push(id); else flatIds.push(id);
+    if (r0 > 0) { upPrev++; upPrevIds.push(id); } else if (r0 < 0) downPrevIds.push(id);
     const x = perf[id];
     if (x && x.d1 != null && x.asOf === lastDate && x.d1 > 0) upDay++;
   }
@@ -139,6 +150,13 @@ function compute(opts) {
     prevAsOf: asOf ? minusDays(asOf, 7) : null,
     days,
     excluded: excl,
+    /* 明细名单（升序，便于 diff）：出问题时可直接对名单，不必重算 */
+    upIds: upIds.sort(),
+    downIds: downIds.sort(),
+    flatIds: flatIds.sort(),
+    upPrevIds: upPrevIds.sort(),
+    downPrevIds: downPrevIds.sort(),
+    excludedIds: exclIds,
     staleSample: staleness.slice(0, 5),
     generatedAt: new Date().toISOString(),
   };

@@ -158,6 +158,11 @@ soft_step "5.75/9 新地 HKET 兜底" "$PY" tools/shkp-hket.py
 if [ "$(date +%d)" -le 20 ]; then
   soft_step "5.85/9 積金局月度統計" "$PY" tools/mpfa-monthly-sync.py
 fi
+# 2026-11-13（用户要求）：两站各自抓取，个别来源（etnet 日度、HKET 当日快照）
+# 在不同时刻能抓到的最后一天不同。云端 02:26 可能已拿到今天、本机 09:40 只到昨天，
+# 于是两站 funds 分布不同、breadth 差 1 个百分点。这里从 GitHub 站补「本地缺、远端有」
+# 的点（严格校验：本地点必须与远端逐点相同，单只最多补 5 个点，否则跳过等人工）。
+soft_step "5.9/9 云端补点（历史对齐）" node tools/sync-hist-from-cloud.js
 step "6/9 重算自算指标" node navperf.js
 # 2026-11-11（自查发现）：allstats 是「走势图未选基金时」的统计表数据源，
 # 上次生成停在 10-28（两周前）→ 用户默认看到的是旧区间收益。6 秒可重算完。
