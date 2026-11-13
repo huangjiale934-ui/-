@@ -1,5 +1,5 @@
 {
- "updatedAt": 1794536905463,
+ "updatedAt": 1794548945012,
  "sources": [
   {
    "key": "AMTD",
@@ -3803,7 +3803,7 @@
    "unit": "",
    "nav": 12.2317,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3814,7 +3814,7 @@
    "unit": "",
    "nav": 32.535,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3825,7 +3825,7 @@
    "unit": "",
    "nav": 38.3303,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3847,7 +3847,7 @@
    "unit": "",
    "nav": 21.2179,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3858,7 +3858,7 @@
    "unit": "",
    "nav": 17.2405,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3869,7 +3869,7 @@
    "unit": "",
    "nav": 19.6326,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3880,7 +3880,7 @@
    "unit": "",
    "nav": 12.6057,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3891,7 +3891,7 @@
    "unit": "",
    "nav": 10.441,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -3902,7 +3902,7 @@
    "unit": "",
    "nav": 13.6169,
    "na": false,
-   "asOf": "2026-11-10",
+   "asOf": "2026-11-11",
    "src": "中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值",
    "srcUrl": "https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW"
   },
@@ -5259,5 +5259,5 @@
    "msg": "本次抓取失败，已保留上次数据（非官方未发布；月度来源请留意下轮）"
   }
  ],
- "alertsAt": 1794536905463
+ "alertsAt": 1794548945012
 }
