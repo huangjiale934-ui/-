@@ -295,6 +295,10 @@ jobs:
       # 会产出不同格式的数据（funds.nav 7 位 vs 4 位，site-diff 每轮都报 52 只不一致）。
       - name: 淨值精度歸一（與 hist 末點對齊，4 位）
         run: node tools/nav-round4.js
+      # 2026-11-13（第三轮自检发现）：breadth 原先只挂在抓取 job，
+      # push 触发的构建不重算 → 一旦有人改 hist/nav-perf，首屏占比会与数据脱节。
+      - name: 首屏漲跌佔比（單一口徑）
+        run: node tools/breadth.js || echo "!! 漲跌佔比失敗（接口回退即時計算）"
 
       - name: 重算自算指數（每次構建都用当前 hist 重算，避免任何触发方式留下舊值）
         run: |

@@ -58,7 +58,7 @@ def main():
         except Exception as e:  # noqa: BLE001
             # 2026-11-05：源站会返回 HTTP 999（拒绝服务），原来直接抛异常 → 整条链路记成失败。
             # 新地是月度发布，缺一天不影响；这里降级为警告并保留已有历史。
-            print("!! 新地 PDF 下载失败（%s）——保留已有历史，下次再试" % str(e)[:60], flush=True)
+            print("注意 新地官網 PDF 被源站 WAF 攔（HTTP 999，路徑含編碼空格 %20，已知）——改用 HKET 兜底；保留已有歷史（%s）" % str(e)[:40], flush=True)
             return 0
         os.makedirs(os.path.dirname(CACHE), exist_ok=True)
         open(CACHE, "wb").write(r.content)
