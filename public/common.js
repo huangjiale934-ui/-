@@ -2229,8 +2229,12 @@ window.openDetail = function (id) {
   const body = document.querySelector('#mBody');
   body.innerHTML = window.fundDetailHTML(x, { withTitle: false });
   const modalEl = document.querySelector('#modal');
+  /* 2026-11-13（可访问性体检）：弹窗打开后焦点要进入对话框，否则读屏用户不知道
+     弹窗已打开、Tab 仍在背后的表格里打转。关闭时（closeModal）焦点回到触发按钮。 */
+  try { window.__modalTrigger = document.activeElement; } catch (e) {}
   modalEl.classList.add('show');
   modalEl.scrollTop = 0;   /* 滚动容器是 .modal 本身（overflow:auto），不是 body */
+  try { modalEl.focus({ preventScroll: true }); } catch (e) {}
 
   const stillOpen = () => {
     const t = document.querySelector('#mTitle');
@@ -2364,6 +2368,12 @@ window.closeModal = function () {
   const m = document.querySelector('#modal');
   if (m) m.classList.remove('show');
   clearFundParam();
+  /* 焦点还原到打开弹窗的那个按钮（键盘用户不会「丢失位置」） */
+  try {
+    const t = window.__modalTrigger;
+    if (t && t.focus && document.body.contains(t)) t.focus({ preventScroll: true });
+    window.__modalTrigger = null;
+  } catch (e) {}
 };
 
 /* ======================= 可分享的基金深链（?fund=<id>） =======================

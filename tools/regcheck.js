@@ -2203,10 +2203,16 @@ chk('四十轮·持仓设计页已移出 public',
 
 /* ===== 2026-11-03 第三十二轮（6 条反馈）===== */
 chk('三十二轮·③情绪卡口径统一：近一周占比 + 跳「近 1 周」维度',
-  /const pct = total \? Math\.round\(\(up \/ total\) \* 100\) : null;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
-  /if \(!x \|\| x\.w1 == null\) return;/.test(fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8')) &&
-  /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
-  /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js')));
+  /* 2026-11-13（第五十三轮）：口径从 server.js 内联搬到 tools/breadth.js 单点生成，
+     断言随之指向新实现；仍要求「本周与上周同分母」这一关键性质。 */
+  (function () {
+    const b = fs.readFileSync(path.join(__dirname, '..', 'tools', 'breadth.js'), 'utf8');
+    return /const pct = total \? Math\.round\(\(up \/ total\) \* 100\) : null;/.test(b) &&
+      /pctPrev = total \?/.test(b) &&
+      /if \(span1 > MAX_SPAN \|\| span2 > MAX_SPAN\)/.test(b) &&
+      /index\.html\?dim=selfW1#db/.test(readSrc('home.html')) &&
+      /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js'));
+  })());
 chk('三十二轮·①源站名单：折叠块 + 每计划一行 + 可点击筛基金',
   /snote-more/.test(readSrc('common.js')) && /ns-list/.test(readSrc('common.js')) &&
   /class="ns-link" href="index\.html\?kw=/.test(readSrc('common.js')) &&
@@ -2318,8 +2324,11 @@ chk('三十九轮·资源版本号：?v= 与 &v= 都替换成同一版本（防�
 })());
 chk('三十五轮·④首屏卡改「较上周 ±N 个百分点」（接口给 delta）', (function () {
   const sv = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
-  /* 2026-11-05（第三十九轮，用户选定）：回到滚动口径（本周 vs 上一周，两个窗口同步前移） */
-  return /const prev = breadthPrevPct\(perf\);/.test(sv) && /prevAsOf/.test(sv) &&
-    /delta/.test(sv) && /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js')) &&
+  const b = fs.readFileSync(path.join(__dirname, '..', 'tools', 'breadth.js'), 'utf8');
+  /* 2026-11-13（第五十三轮）：接口只回读 data/breadth.json（单一口径），
+     delta = pct − pctPrev 由生成器算好，避免「本站 w1 − 本站手算」两套口径相减。 */
+  return /data', 'breadth\.json'/.test(sv) && /breadth\.js'\)\.compute/.test(sv) &&
+    /const delta = \(pct != null && pctPrev != null\)/.test(b) && /prevAsOf/.test(b) &&
+    /TQ\('较上周 \{d\} 个百分点'/.test(readSrc('home.js')) &&
     !/最近一周 · 每日更新/.test(readSrc('home.html'));
 })());

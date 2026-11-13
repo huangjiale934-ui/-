@@ -3082,3 +3082,25 @@ body { overflow-x: clip; }
   .foot-fold .ff-a { font-size: 12.5px; }
   .foot-fold .ff-arrow { margin-left: auto; }
 }
+
+/* ==========================================================
+   2026-11-13（第五十三轮，体检补项）：打印样式
+   —— 站内此前没有任何 @media print，用户按 Ctrl+P 会把顶部导航、
+      侧栏、悬浮按钮、筛选器一起印出来，表格还会被分页切成碎片。
+      这里只做「去掉导航与控件 + 表格按行分页 + 去阴影」，不改任何屏幕样式。
+   ========================================================== */
+@media print {
+  .hdr, .db-side, .mb-side, .db-filters, .tr-tools, .tr-head, .db-pager,
+  .mkt-ticker, .dca-fab, .dca-wrap, .cmp-bar, .modal, .toast, .mpf-toast,
+  .snote-more, .toolbar, .btn, button { display: none !important; }
+  html, body { background: #fff !important; }
+  .wrap, .db-main, main { padding: 0 !important; margin: 0 !important; max-width: none !important; }
+  .card, .panel, .box { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
+  table { border-collapse: collapse !important; width: 100% !important; font-size: 10px !important; }
+  th, td { border: 1px solid #bbb !important; padding: 3px 5px !important; }
+  thead { display: table-header-group; }   /* 跨页时重复表头 */
+  tr { break-inside: avoid; }
+  a { color: #000 !important; text-decoration: none !important; }
+  a[href^="http"]::after { content: ""; }  /* 不在纸面打印长 URL */
+  .db-tablewrap, .scroll-ghost { overflow: visible !important; max-height: none !important; }
+}

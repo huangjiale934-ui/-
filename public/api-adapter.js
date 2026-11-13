@@ -138,12 +138,25 @@
     if (MODE) return Promise.resolve(MODE);
     if (!probeP) {
       probeP = (async () => {
+        /* 2026-11-13（复验报告 P3-1）：原来故意请求 api/status?_probe=，在静态站必然 404，
+           每次会话都在控制台留一条 4xx（核验按「资源请求无 4xx」判定就不过）。
+           改为先问 api/status.json：
+             · 静态站：构建产物里就有这个文件，200 且**没有** mode 字段 → static
+             · 动态站：server.js 的同名别名返回 mode:'live' → live
+           两站都是 200，零 404。 */
         try {
-          /* 相对探测：WorkBuddy 根路径 → /api/status(200 JSON=live)；Pages /-/ → /-/api/status(404=static)。消除绝对路径在 Pages 上的 404 噪音（4-09） */
-          const r = await origFetch('api/status?_probe=' + Date.now(), { cache: 'no-store' });
-          const ct = (r.headers.get('content-type') || '');
-          if (r.ok && ct.indexOf('json') >= 0) { MODE = 'live'; return MODE; }
-        } catch (e) { /* Pages 上 /api/status 404 → 走静态 */ }
+          const r = await origFetch('api/status.json', { cache: 'no-store' });
+          if (r.ok) {
+            const j = await r.json().catch(() => ({}));
+            MODE = (j && j.mode === 'live') ? 'live' : 'static';
+            return MODE;
+          }
+        } catch (e) { /* 文件不存在（很旧的构建）→ 走下面的回退 */ }
+        try {
+          const r2 = await origFetch('api/status', { cache: 'no-store' });
+          const ct = (r2.headers.get('content-type') || '');
+          if (r2.ok && ct.indexOf('json') >= 0) { MODE = 'live'; return MODE; }
+        } catch (e) { /* 两个都拿不到 → 静态 */ }
         MODE = 'static';
         return MODE;
       })();

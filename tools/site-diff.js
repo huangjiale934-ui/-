@@ -107,7 +107,7 @@ function fundDiffList(fa, fb, label, out) {
   const rows = [];
 
   /* 6 个接口 × 2 站一次性并发：串行下载 3MB 要 100 秒，并发约 25 秒 */
-  const NAMES = ['status', 'ticker', 'funds', 'holdings', 'market', 'navperf'];
+  const NAMES = ['status', 'ticker', 'funds', 'holdings', 'market', 'navperf', 'breadth'];
   const pack = {};
   await Promise.all(NAMES.map(async (n) => {
     const [x, y] = await Promise.all([api(A, n), api(B, n)]);
@@ -143,6 +143,26 @@ function fundDiffList(fa, fb, label, out) {
     });
   } else {
     issues.push({ level: 'critical', field: 'ticker 接口', a: ta.ok ? 'ok' : ta.err, b: tb.ok ? 'ok' : tb.err });
+  }
+
+  /* 2026-11-13（用户反馈两站 50% vs 49%、较上周 +1 vs -3）：
+     首屏涨跌占比必须两站一致。它的输入是 hist + nav-perf，只要两边数据同步就应逐字段相同；
+     不同即说明生成链路（breadth.js 有没有在发布前跑过）或数据时点不一致，必须暴露出来。 */
+  const ba = pack.breadth[0];
+  const bb = pack.breadth[1];
+  if (ba.ok && bb.ok) {
+    ['asOf', 'total', 'pct', 'pctPrev', 'up', 'upPrev'].forEach((k) => {
+      const x = ba.data[k];
+      const y = bb.data[k];
+      if (x !== y) {
+        issues.push({ level: k === 'asOf' ? 'timing' : 'critical', field: 'breadth.' + k, a: x, b: y });
+      }
+    });
+    if (ba.data.delta !== bb.data.delta) {
+      issues.push({ level: 'critical', field: 'breadth.较上周(pp)', a: ba.data.delta, b: bb.data.delta });
+    }
+  } else {
+    issues.push({ level: 'critical', field: 'breadth 接口', a: ba.ok ? 'ok' : ba.err, b: bb.ok ? 'ok' : bb.err });
   }
 
   const fa = pack.funds[0];
