@@ -17,6 +17,13 @@ const PORT = 3977;
 function getJson(p) {
   return new Promise((resolve, reject) => {
     http.get({ host: '127.0.0.1', port: PORT, path: p, headers: { 'user-agent': 'build-static/1.0' } }, (res) => {
+      /* 2026-11-14（第三轮独立核验 D-01，P1）：原来是 let buf='' 然后 buf += c。
+         c 是 Buffer，隐式 toString('utf8') 是**逐块**解码；一个汉字的 3 个字节
+         被 TCP 分块切开时，两半各自解码失败 → 各变一个 U+FFFD（EF BF BD）。
+         静态站 funds/holdings/hist-index 里出现的 13–19 个替换字符就是这么来的
+         （每次构建分块边界不同，个数会变，仓库源文件为 0）。
+         setEncoding('utf8') 用 StringDecoder 保留跨块的半个字符，从根上消除。 */
+      res.setEncoding('utf8');
       let buf = '';
       res.on('data', (c) => (buf += c));
       res.on('end', () => {
@@ -101,6 +108,29 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     } catch (e) { miss++; }
   }
   console.log('hist: ' + n + ' 只落盘（无历史 ' + miss + '）');
+
+  /* 2026-11-14（第三轮独立核验 D-01）：构建闸门——静态接口不得含 U+FFFD。
+     以前只在发布后才发现「基金名变成 ���」，而每次构建的坏字符数还不一样。
+     现在只要有 1 个就构建失败，避免把损坏数据发到 Pages。 */
+  (function assertNoReplacementChar() {
+    const bad = [];
+    const walk = (dir) => {
+      fs.readdirSync(dir, { withFileTypes: true }).forEach((d) => {
+        const fp = path.join(dir, d.name);
+        if (d.isDirectory()) return walk(fp);
+        if (!/\.json$/.test(d.name)) return;
+        const s = fs.readFileSync(fp, 'utf8');
+        const c = (s.match(/\uFFFD/g) || []).length;
+        if (c) bad.push(path.relative(SITE, fp) + ':' + c);
+      });
+    };
+    walk(path.join(SITE, 'api'));
+    if (bad.length) {
+      throw new Error('构建断言失败：静态接口含 U+FFFD 替换字符（' + bad.slice(0, 6).join('、') +
+        '）。检查 getJson 是否按 Buffer 分块拼接字符串。');
+    }
+    console.log('U+FFFD 断言通过（api/*.json 无替换字符）');
+  })();
 
   /* 4) 拷贝 public/*（静态页与资源） */
   fs.cpSync(path.join(ROOT, 'public'), SITE, { recursive: true });

@@ -295,6 +295,22 @@ jobs:
       # 会产出不同格式的数据（funds.nav 7 位 vs 4 位，site-diff 每轮都报 52 只不一致）。
       - name: 淨值精度歸一（與 hist 末點對齊，4 位）
         run: node tools/nav-round4.js
+      # 2026-11-14（第三轮独立核验 D-02）：push 触发的构建只跑本 job，原先只有
+      # nav-round4/mpfindex 两个归一步骤 → 一旦有人直接提交 hist/funds 的修改，
+      # 静态站会用旧的派生数据（nav-perf / hist-index / allstats / hist-gaps）。
+      # 下列 4 步只读本地文件、结果确定、不联网、不改原始数据，因此两个 job 都跑。
+      # 仍只在抓取 job 跑的 4 个，理由不同：
+      #   indexbuild.js           需要联网取外部行情，放构建 job 会让 push 构建受网络影响；
+      #   merge-nav/fix-nulls/holdings-normalize  会改写 funds/holdings 原始数据，
+      #                           不应在「发布构建」里静默改数据（须经抓取 job 校验后提交）。
+      - name: 歷史索引對齊（由 hist 檔案重算 hist-index）
+        run: node tools/hist-index-sync.js
+      - name: 派生指標重算（navperf / allstats）
+        run: |
+          node navperf.js
+          node allstats.js
+      - name: 斷檔清單重算（hist-gaps）
+        run: node tools/hist-gaps-build.js
       # 2026-11-13（第三轮自检发现）：breadth 原先只挂在抓取 job，
       # push 触发的构建不重算 → 一旦有人改 hist/nav-perf，首屏占比会与数据脱节。
       - name: 首屏漲跌佔比（單一口徑）

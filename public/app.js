@@ -59,6 +59,8 @@
 
   function applyDims() {
     const a = window.__DIMSEL;
+    /* 2026-11-14：用户改用「排名维度」下拉时，清掉表头的「已取消」标记 */
+    S.cancelled = false;
     const first = a[0] || { k: 'size', d: 'desc' };
     S.key = first.k; S.dir = first.d;
     /* 联动放出：非默认列临时显示（不写 colSet，刷新后回到用户自己的列设置） */
@@ -801,7 +803,11 @@
   const CELL_FNS = {
     rank: (x, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' +
       (rk != null && rk <= 3 ? '<span class="medal g' + rk + '">' + rk + '</span>' : '<span class="rank-cell">' + (rk || '') + '</span>') + '</td>',
-    cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
+    /* 2026-11-14（第三轮独立核验 D-06）：行内对比勾选框原先没有任何可读名称，
+       屏幕阅读器只会念「复选框」。补 aria-label（含基金名）与 title。 */
+    cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) +
+      '" aria-label="' + esc(TT('加入对比') + '：' + (x.fundBase || x.fund || '')) +
+      '" title="' + esc(TT('加入对比')) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
     fund: (x) => {
       /* 2026-11-01（6.0，用户要求）：单位类别不再占一行，改悬浮在「A 类」标签上；标签简称「A 类」 */
       const utip = (x.groupSize > 1)

@@ -1221,9 +1221,14 @@ function makeSorter(thList, state, onSort, defaultSort) {
       if (a) a.textContent = '↕';
       if (o.hasAttribute('data-k')) o.setAttribute('aria-sort', 'none');
     });
-    const act = state.key || D0.key;
+    /* 2026-11-14（第三轮独立核验 D-04）：取消态要能被看见。
+       资料库默认列就是「规模降序」，第三下点击原来把状态复位成 size+desc，
+       与「正在按规模降序」完全一样 → 箭头永远 ↓、aria-sort 永远 descending，
+       用户无法判断排序到底生效还是已取消。用 cancelled 标记区分：
+       顺序仍回默认（D0），但所有表头回到 ↕ / aria-sort=none。 */
+    const act = state.cancelled ? null : (state.key || D0.key);
     thList.forEach((o) => {
-      if (o.dataset.k === act) {
+      if (act && o.dataset.k === act) {
         o.classList.add('sorted');
         const a = o.querySelector('.arrow');
         if (a) a.textContent = state.dir === 'asc' ? '↑' : '↓';
@@ -1250,14 +1255,16 @@ function makeSorter(thList, state, onSort, defaultSort) {
       if (!key) return;
       const first = th.dataset.defdir === 'asc' ? 'asc' : 'desc';
       const second = first === 'asc' ? 'desc' : 'asc';
-      if (state.key !== key) {
+      if (state.cancelled || state.key !== key) {
         state.key = key;
         state.dir = first;
+        state.cancelled = false;
       } else if (state.dir === first) {
         state.dir = second;
       } else {
         state.key = D0.key;      // ③ 取消：回默认顺序
         state.dir = D0.dir;
+        state.cancelled = true;  // 但表头不再显示「已按该列排序」
         paint();
         onSort();
         return;
