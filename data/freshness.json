@@ -1,10 +1,10 @@
 {
- "at": "2026-11-14T05:41:54.885Z",
+ "at": "2026-11-14T16:18:43.658Z",
  "latest": "2026-11-12",
  "marketLatest": "2026-11-13",
  "fundLag": 1,
- "marketAge": 1,
- "globalAge": 2,
+ "marketAge": 2,
+ "globalAge": 3,
  "maxLag": 4,
  "hardLag": 10,
  "warnCount": 0,
@@ -20,8 +20,8 @@
   {
    "trustee": "中國人壽",
    "count": 10,
-   "latest": "2026-11-11",
-   "lagDays": 2,
+   "latest": "2026-11-12",
+   "lagDays": 1,
    "exempt": null
   },
   {
@@ -83,8 +83,8 @@
   {
    "trustee": "銀聯信託",
    "count": 171,
-   "latest": "2026-11-11",
-   "lagDays": 2,
+   "latest": "2026-11-12",
+   "lagDays": 1,
    "exempt": null
   }
  ]
