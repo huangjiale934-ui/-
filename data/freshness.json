@@ -1,10 +1,10 @@
 {
- "at": "2026-11-14T20:11:01.799Z",
+ "at": "2026-11-15T20:42:06.148Z",
  "latest": "2026-11-12",
  "marketLatest": "2026-11-13",
  "fundLag": 1,
- "marketAge": 2,
- "globalAge": 3,
+ "marketAge": 3,
+ "globalAge": 4,
  "maxLag": 4,
  "hardLag": 10,
  "warnCount": 0,
