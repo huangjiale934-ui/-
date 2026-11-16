@@ -263,7 +263,16 @@ def main():
     ap.add_argument("--minutes", type=float, default=330, help="本次连续采样时长（分钟）")
     ap.add_argument("--interval", type=float, default=5, help="采样间隔（分钟）")
     ap.add_argument("--once", action="store_true", help="只采一次")
+    ap.add_argument("--codes", default="", help="只采这些代码（逗号分隔），如 SHK122")
     args = ap.parse_args()
+
+    targets = TARGETS
+    if args.codes:
+        want = {c.strip().upper() for c in args.codes.split(",") if c.strip()}
+        targets = [(c, l) for (c, l) in TARGETS if c.upper() in want]
+        if not targets:
+            print("!! --codes 未匹配任何目标：%s" % args.codes)
+            return 2
 
     signal.signal(signal.SIGTERM, _on_term)
     signal.signal(signal.SIGINT, _on_term)
@@ -284,7 +293,7 @@ def main():
         now = datetime.now(HKT)
         rows = []
         parts = []
-        for code, label in TARGETS:
+        for code, label in targets:
             res = fetch(code)
             row = {"t": now.isoformat(timespec="seconds"), "code": code, "label": label}
             row.update(res)

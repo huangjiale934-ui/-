@@ -2311,9 +2311,14 @@ function mountFD(x, alive) {
           /* 2026-11-16（用户反馈：工具栏本来就很挤，角标被压成「ⓘ 有区 / 间缺 / 日」三行）：
              图内只留一个 ⓘ 图标（保留黄底），完整说明放 data-tip 与 aria-label。
              详情见悬浮提示，视觉上不再占宽度。 */
-          const tip = (info.reason === 'monthly-early')
+          let tip = (info.reason === 'monthly-early')
             ? TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）', { a: info.first, b: info.last, n: info.n })
             : TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站未提供该段净值，非本站漏抓；走势图此处为断档）', { a: info.first, b: info.last, n: info.n });
+          /* 2026-11-16（用户要求）：若该段含非官方补值，明确标注来源，并说明官方数据恢复后会替换 */
+          if (info.prov && info.prov.count) {
+            tip += ' ' + TQ('其中 {k} 个点为非官方补值（来源：{s}），已标注，官方数据恢复后会自动替换。',
+              { k: info.prov.count, s: info.prov.src });
+          }
           el.setAttribute('data-tip', tip);
           el.setAttribute('aria-label', tip);
           el.textContent = 'ⓘ';

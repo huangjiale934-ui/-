@@ -11,9 +11,12 @@ on:
   # 2026-11-16：原来 5 段 × 4 小时 ≈ 20 小时/天，几乎占满定时队列，导致 deploy 被延迟数小时
   # （实测 11-14/15/16 夜间任务 03:26–04:58 才启动）。已有数据表明宏利在 01:30–02:15 上线，
   # 故收窄为：00:00–03:30（210 分钟，5 分钟一次）+ 09:00–10:00（60 分钟，查迟到发布）。
+  # 2026-11-16（用户要求）：改为全天、每 30 分钟一次、只测 SHK122。
+  # 原来的「5 段 × 4 小时」会长时间占用 runner，把 deploy 的定时任务挤到几小时后；
+  # 现在每次只跑约 40 秒，48 次/天总计约 30 分钟，既全天覆盖又不占队列。
+  # 本轮探测期到 2026-11-23，脚本内有日期闸门；到期后删除本 schedule 即可。
   schedule:
-    - cron: '0 16 * * *'   # 香港 00:00 起，采样 210 分钟（覆盖跨夜发布）
-    - cron: '0 3 * * *'    # 香港 11:00 起，采样 60 分钟（迟发兜底；避开 09:35 发布窗口）
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       minutes:
@@ -38,7 +41,7 @@ concurrency:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 260
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
 
@@ -53,15 +56,14 @@ jobs:
 
       - name: 採樣
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "自测模式：单点采样"
-            python tools/manulife-probe.py --once
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            python tools/manulife-probe.py --minutes "${{ inputs.minutes }}" --interval "${{ inputs.interval }}"
+          # 探测期：到 2026-11-23 为止（用户要求延长一周）
+          if [ "$(date -u +%Y%m%d)" -gt 20261123 ]; then
+            echo "探测期已结束（2026-11-23），跳过采样"; exit 0
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python tools/manulife-probe.py --minutes "${{ inputs.minutes }}" --interval "${{ inputs.interval }}" --codes SHK122
           else
-            MIN=210
-            if [ "${{ github.event.schedule }}" = "0 3 * * *" ]; then MIN=60; fi
-            python tools/manulife-probe.py --minutes "$MIN" --interval 5
+            python tools/manulife-probe.py --once --codes SHK122
           fi
 
       - name: 寫入運行摘要
@@ -84,7 +86,7 @@ jobs:
         with:
           name: manulife-probe-${{ github.run_id }}
           path: data/probe/
-          retention-days: 14
+          retention-days: 7
 
       - name: 提交探測記錄
         if: always()
@@ -93,8 +95,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config pull.rebase true
           git add data/probe 2>/dev/null || true
-          if git diff --cached --quiet; then
-            echo "无新增采样记录"
+          # 每 30 分钟一次会产生 48 条/天，没必要全部进 git：
+          # 只有「summary 出现新发布节点」或「当天还没有提交」时才提交，其余样本留在 artifact。
+          TODAY=$(date +%F)
+          LAST=$(git log -1 --format=%cs -- data/probe 2>/dev/null || echo none)
+          SUMMARY_CHANGED=1
+          git diff --cached --quiet -- data/probe/manulife-summary.json && SUMMARY_CHANGED=0
+          if [ "$SUMMARY_CHANGED" = "0" ] && [ "$LAST" = "$TODAY" ]; then
+            echo "无新发布节点，样本保留在 artifact（今日已提交过）"
             exit 0
           fi
           # [skip ci]：探测记录不触发 Pages 部署，避免每天多出两次无意义的站点构建

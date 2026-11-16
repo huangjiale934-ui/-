@@ -140,6 +140,8 @@ node tools/holdings-normalize.js || echo "!! 持仓字段归一失败（继续�
 # 这里逐只重抓、偏差 >0.2% 自动改正并写 data/nav-recheck.log，
 # 紧随其后的 navperf 会把修正结果重新算进自算指标。
 soft_step "5.5/9 近5交易日净值复核" "$PY" tools/nav-recheck.py --apply
+# 2026-11-16：宏利列表页对个别基金滞後（1525/1528），逐只查 fundhistory 补最新点。
+soft_step "5.55/9 宏利最新点补齐" "$PY" tools/manulife-latest.py
 # 2026-11-11（自查发现）：funds.json 的積金局字段（规模/年率化回报/风险/开支）
 # 从来没有进入每日链路，一直停在上次手工跑 build.js 的月份（实测 09-30 vs 官网 10-31）。
 # 新增外科式刷新：按 cfid 对齐，只覆盖積金局口径字段，保护 nav/navAsOf 等净值字段。

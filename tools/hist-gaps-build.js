@@ -27,6 +27,9 @@ const quiet = process.argv.includes('--quiet');
 
 function main() {
   const funds = JSON.parse(fs.readFileSync(FUNDS, 'utf8')).funds || [];
+  /* 2026-11-16：非官方补值登记表——补过的基金在角标提示里要写明来源与「待官方替换」 */
+  let provReg = { funds: {} };
+  try { provReg = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'hist-provisional.json'), 'utf8')); } catch (e) {}
   const ids = funds.map((f) => String(f.id)).filter((id) => fs.existsSync(path.join(HIST, id + '.json')));
 
   /* 先建市场日历 */
@@ -86,6 +89,11 @@ function main() {
       last: gaps[gaps.length - 1][1],
       gaps,
       reason: fresh ? 'source-outage' : 'monthly-early',
+      prov: (provReg.funds && provReg.funds[id]) ? {
+        count: (provReg.funds[id].points || []).length,
+        src: provReg.funds[id].src || '第三方',
+        appliedAt: provReg.funds[id].appliedAt || '',
+      } : undefined,
     };
   });
 

@@ -1,0 +1,5 @@
+{
+ "updatedAt": null,
+ "note": "非官方补值登记表。仅在官方源（发行人官网/积木局）无法取得某段净值时使用；导入后页面会以「非官方补值」标注，官方数据恢复后由 tools/apply-provisional.py --replace 覆盖替换。字段：funds[id] = { src, note, appliedAt, points: [[YYYY-MM-DD, nav], ...] }",
+ "funds": {}
+}

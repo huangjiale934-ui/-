@@ -135,6 +135,11 @@ jobs:
           python ht_daily.py || echo "!! 海通失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
 
+      # 2026-11-16（用户反馈 1525/1528 停在 11-10）：列表页对个别基金滞後，
+      # 逐只查 fundhistory（3 次重试，取最新节点），只在官方更晚时追加。
+      - name: 宏利最新點補齊（逐只 fundhistory）
+        run: python tools/manulife-latest.py || echo "!! 宏利補點失敗（不影響已抓到數據）"
+
       - name: 積金局基金資訊表（scraper；失敗保留舊 dataAsOf）
         if: steps.mode.outputs.light == '0'
         run: node scraper.js || echo "!! 積金局抓取失敗（保留舊 dataAsOf）"
@@ -232,6 +237,16 @@ jobs:
           if(carried > all/2){ console.error('!! 超過半數來源沿用舊數據：雲端渲染大面積失敗，GitHub 站淨值不會刷新'); process.exit(1); }
           "
 
+      # 2026-11-16：轻量任务当天无数据变化时不会提交，B 站横幅停在上一班（04:41）。
+      # 每次数据任务结束都打时间戳：funds.updatedAt + update-status.json。
+      - name: 打時間戳（數據更新時間 / 更新狀態）
+        run: |
+          if [ "${{ steps.mode.outputs.light }}" = "1" ]; then
+            node tools/stamp-run.js "早晨净值更新完成" github
+          else
+            node tools/stamp-run.js "全量更新完成" github
+          fi
+
       - name: 提交數據變更
         # 2026-10-28：本机每日 23:20 也会推一次数据，云端与本机同时提交同一批文件时 rebase 会冲突，
         # 曾导致整个 run 在「提交」这一步失败（10:41 的定时任务就是这样挂的，站点没发布）。
@@ -242,6 +257,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config pull.rebase true
           git add data/ 2>/dev/null || true
+          git add -f data/update-status.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "數據無變更"
             exit 0
