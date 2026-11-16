@@ -90,12 +90,21 @@ def local_recent(fid):
     return {d: float(v) for d, v in (obj.get("series") or []) if d in WINDOW_SET}
 
 
+QUERIED = set()      # 本次真正按代码逐只查询过的基金
+NO_CODE = set()      # 无代码、无法按代码查询的基金（必须单列，不能再静默跳过）
+
+
 def per_fund(metas, worker):
     """逐只并发抓取；每个线程自建 session（requests.Session 非线程安全）"""
     out = {}
 
     def run(item):
         fid, v = item
+        # 2026-11-16（用户要求「缺一只都能看见」）：无代码不再静默跳过，记入 NO_CODE
+        if not str(v.get("code") or "").strip():
+            NO_CODE.add(fid)
+            return []
+        QUERIED.add(fid)
         try:
             sess = cffi.Session(impersonate="chrome")
             return worker(sess, fid, v) or []
@@ -500,6 +509,7 @@ def main():
     diffs, checked, applied, errors = [], 0, 0, []
     missing = []      # 官网有、库里没有的日期（说明抓取链路漏了某天，供日志提示）
     per_src = {}
+    seen_fids = set()
     for name, fn in ad:
         t0 = time.time()
         try:
@@ -510,6 +520,7 @@ def main():
             continue
         n_src = 0
         for (fid, d), nav in got.items():
+            seen_fids.add(fid)
             loc = local_recent(fid)
             if d not in loc:
                 # 2026-11-04：官网有、库里没有 → 记录（--apply 时补进 hist）
@@ -574,6 +585,14 @@ def main():
         "missing": missing,
         "added": added,
         "errors": errors,
+        "coverage": {
+            "total": len(idx),
+            "queried": len(seen_fids),
+            "uncovered": max(0, len(idx) - len(seen_fids)),
+            "uncoveredIds": sorted(set(idx) - seen_fids)[:40],
+            "noCode": len(NO_CODE),
+            "noCodeIds": sorted(NO_CODE)[:60],
+        },
     }
     io.open(OUT, "w", encoding="utf-8", newline="").write(json.dumps(report, ensure_ascii=False, indent=1))
     # 2026-11-16（用户反馈「本次净值核对时间不更新」）：前端原来读 navStat.navUpdatedAt，
@@ -587,6 +606,7 @@ def main():
         st["navRecheckChecked"] = checked
         st["navRecheckDiffs"] = len(diffs)
         st["navRecheckApplied"] = applied
+        st["recheckCoverage"] = report.get("coverage") or {}
         with io.open(fp, "w", encoding="utf-8", newline="") as fh:
             fh.write(json.dumps(fd, ensure_ascii=False))
     except Exception as e:  # noqa: BLE001

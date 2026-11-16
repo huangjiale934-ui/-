@@ -649,6 +649,42 @@ function renderSrcNote() {
     const locale = (typeof window.getLang === 'function' && window.getLang() === 'en') ? 'en-GB' : 'zh-CN';
     nc.textContent = new Date(ncAt).toLocaleString(locale, { hour12: false });
   }
+  /* 2026-11-16（用户要求「缺一只都能看见」）：本次复核覆盖 X/Y 只 + 同计划内落后 N 只。
+     覆盖数由 nav-recheck 写入 navStat.recheckCoverage；落后数在此按 scheme 现算（不依赖新接口）。 */
+  const covEl = document.querySelector('#navCoverage');
+  if (covEl) {
+    const cv = DATA.navStat && DATA.navStat.recheckCoverage;
+    const tot = DATA.count || (DATA.funds || []).length;
+    if (cv && cv.queried != null) {
+      covEl.hidden = false;
+      covEl.textContent = '· ' + TQ('覆盖 {a}/{b} 只', { a: cv.queried, b: cv.total || tot }) +
+        (cv.noCode ? '（' + TQ('{c} 只无代码', { c: cv.noCode }) + '）' : '');
+      covEl.title = TQ('逐只回源核对的覆盖范围；无代码的基金无法按代码查询，已单列。');
+    }
+  }
+  const lagEl = document.querySelector('#planLagNote');
+  if (lagEl) {
+    const g = {};
+    (DATA.funds || []).forEach((f) => {
+      if (!f.navAsOf || f.navStatus === 'na') return;
+      const k = f.scheme || f.trustee || '';
+      (g[k] = g[k] || []).push(f);
+    });
+    const lag = [];
+    Object.keys(g).forEach((k) => {
+      const mx = g[k].map((x) => x.navAsOf).sort().pop();
+      g[k].forEach((f) => {
+        if (f.navAsOf < mx) lag.push(f.fund + '（' + f.navAsOf + '）');
+      });
+    });
+    if (lag.length) {
+      lagEl.hidden = false;
+      lagEl.textContent = '· ' + TQ('同计划内落后 {n} 只', { n: lag.length });
+      lagEl.title = lag.slice(0, 8).join('、') + (lag.length > 8 ? ' …' : '');
+    } else {
+      lagEl.hidden = true;
+    }
+  }
   const el = document.querySelector('#srcNote');
   if (!el || !DATA.count) return;
   const declared = DATA.declaredTotal || 382;

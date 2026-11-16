@@ -34,6 +34,7 @@ function main() {
   const files = fs.readdirSync(HIST).filter((f) => f.endsWith('.json'));
   let updated = 0;
   let added = 0;
+  let filled = 0;
   const changed = [];
 
   for (const file of files) {
@@ -70,6 +71,14 @@ function main() {
       continue;
     }
 
+    /* 2026-11-16（用户反馈：173 只缺 code 被复核静默跳过）：
+       原来只有「新增条目」才写 code/src/name/unit/scheme，已存在的条目永远不补，
+       导致 hist 文件里有 code（如 BCT 147=SMGEF）但索引里是空。这里按需补齐。 */
+    if (!e.code && obj.code) { e.code = obj.code; filled++; }
+    if (!e.src && obj.src) { e.src = obj.src; filled++; }
+    if (!e.name && obj.name) { e.name = obj.name; filled++; }
+    if (!e.unit && obj.unit) { e.unit = obj.unit; filled++; }
+    if (!e.scheme && obj.scheme) { e.scheme = obj.scheme; filled++; }
     if (e.asOf !== asOf || e.points !== points || e.last !== last || e.first !== first) {
       e.asOf = asOf;
       e.last = last;
@@ -81,18 +90,19 @@ function main() {
   }
 
   idx.count = Object.keys(idx.funds).length;
-  if (updated || added) {
+  if (updated || added || filled) {
     idx.updatedAt = Date.now();
     fs.writeFileSync(IDX, JSON.stringify(idx), 'utf8');
   }
 
   if (!QUIET) {
     console.log(
-      '[hist-index-sync] 索引 %d 只｜校正 %d 只｜新增 %d 只%s',
+      '[hist-index-sync] 索引 %d 只｜校正 %d 只｜新增 %d 只｜补字段 %d 只%s',
       idx.count,
       updated,
       added,
-      updated || added ? ' → ' + changed.slice(0, 6).join(' ') : '（已一致）'
+      filled,
+      updated || added || filled ? (changed.length ? ' → ' + changed.slice(0, 6).join(' ') : ' → 补齐 code/src 等字段') : '（已一致）'
     );
   }
 }

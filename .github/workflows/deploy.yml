@@ -139,6 +139,9 @@ jobs:
       # 逐只查 fundhistory（3 次重试，取最新节点），只在官方更晚时追加。
       - name: 宏利最新點補齊（逐只 fundhistory）
         run: python tools/manulife-latest.py || echo "!! 宏利補點失敗（不影響已抓到數據）"
+      # 2026-11-16：同计划内落后监控（按 scheme 取当天最大值，逐只比较）
+      - name: 同計劃內落後監控
+        run: node tools/plan-lag.js || echo "!! 落後監控失敗（不影響數據）"
 
       - name: 積金局基金資訊表（scraper；失敗保留舊 dataAsOf）
         if: steps.mode.outputs.light == '0'

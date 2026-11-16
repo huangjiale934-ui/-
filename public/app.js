@@ -225,6 +225,14 @@
           const q = (new URLSearchParams(location.search)).get('kw') || '';
           if (!q) return;
           window.mpfSetKw(q);
+          /* 2026-11-16（用户反馈：刷新后仍停在搜索筛选）：深链只在打开时生效一次，
+             随后把 kw 从地址栏移除。刷新即回到全量；链接本身仍可正常分享（对方打开时带 kw）。
+             保留 sharecode 等其它参数与 hash。 */
+          try {
+            const u = new URL(location.href);
+            u.searchParams.delete('kw');
+            history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+          } catch (e) {}
         } catch (e) {}
       })();
       (function applyUrlDim() {

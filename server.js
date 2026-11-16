@@ -1248,6 +1248,14 @@ const server = http.createServer(async (req, res) => {
             };
           } catch (e) { return null; }
         })(),
+        /* 2026-11-16（用户要求）：同计划内落后监控——按 scheme 取当天最大值，逐只比较。
+           解决「两站一致地错」发现不了的问题（1525/1528 就是这样漏掉的）。 */
+        planLag: (function () {
+          try {
+            const r = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'plan-lag.json'), 'utf8'));
+            return { maxDate: r.maxDate || '', lagging: r.lagging || 0, items: (r.items || []).slice(0, 10) };
+          } catch (e) { return null; }
+        })(),
         /* 2026-10-30（5.0）：季度便览哨兵结果摘要——有新季自动写回时，顶栏提示复核 */
         quarterly: (function () {
           try {
