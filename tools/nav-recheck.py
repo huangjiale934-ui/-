@@ -576,6 +576,21 @@ def main():
         "errors": errors,
     }
     io.open(OUT, "w", encoding="utf-8", newline="").write(json.dumps(report, ensure_ascii=False, indent=1))
+    # 2026-11-16（用户反馈「本次净值核对时间不更新」）：前端原来读 navStat.navUpdatedAt，
+    # 那是 navbuild 快照的构建时间，不是复核时间。这里把真实复核时间写进 navStat。
+    try:
+        fp = os.path.join(DATA, "funds.json")
+        with io.open(fp, encoding="utf-8") as fh:
+            fd = json.load(fh)
+        st = fd.setdefault("navStat", {})
+        st["navRecheckAt"] = int(time.time() * 1000)
+        st["navRecheckChecked"] = checked
+        st["navRecheckDiffs"] = len(diffs)
+        st["navRecheckApplied"] = applied
+        with io.open(fp, "w", encoding="utf-8", newline="") as fh:
+            fh.write(json.dumps(fd, ensure_ascii=False))
+    except Exception as e:  # noqa: BLE001
+        print("note: 写入 navRecheckAt 失败：%s" % e)
     line = "[%s] 窗口 %s~%s 比对 %d 点，偏差 %d 条%s" % (
         report["runAt"], WINDOW[0], WINDOW[-1], checked, len(diffs),
         "，已修正 %d 条" % applied if APPLY else "（未写入）")

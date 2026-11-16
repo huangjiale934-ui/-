@@ -643,9 +643,11 @@ function renderSrcNote() {
   /* 2026-10-31（用户要求）：风险图例移至折叠栏 summary 行（#ffRisk），折叠区内只留估值日分布 */
   if (elTop && DATA.count) elTop.innerHTML = navDateDistHTML();
   const nc = document.querySelector('#navCheckAt');
-  if (nc && DATA.navStat && DATA.navStat.navUpdatedAt) {
+  /* 2026-11-16：优先用真实复核时间（nav-recheck 写入），回退到净值构建时间 */
+  const ncAt = DATA.navStat && (DATA.navStat.navRecheckAt || DATA.navStat.navUpdatedAt);
+  if (nc && ncAt) {
     const locale = (typeof window.getLang === 'function' && window.getLang() === 'en') ? 'en-GB' : 'zh-CN';
-    nc.textContent = new Date(DATA.navStat.navUpdatedAt).toLocaleString(locale, { hour12: false });
+    nc.textContent = new Date(ncAt).toLocaleString(locale, { hour12: false });
   }
   const el = document.querySelector('#srcNote');
   if (!el || !DATA.count) return;
