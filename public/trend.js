@@ -1400,7 +1400,7 @@ window.TREND = (function () {
     /* 未选基金（仅指数线）→ 全量基金区间统计（2026-10-15）；弹窗内（hideGoto）不启用 */
     function renderAllFundsTable(wrap) {
       const key = { '1m': 'm1', '1y': 'y1', '3y': 'y3', '5y': 'y5', '10y': 'y10', 'all': 'all' }[S.range];
-      const head = '<thead><tr><th>' + esc0( _t('名称')) + '</th><th class="r">' + esc0( _t('最新点位')) + '</th><th class="r">' + esc0( _t('区间收益')) + '</th><th class="r">' + esc0( _t('区间最大回撤')) + '</th><th class="r">' + esc0( _t('最大回撤区间')) + '</th></tr></thead>';
+      const head = '<thead><tr><th scope="col">' + esc0( _t('名称')) + '</th><th scope="col" class="r">' + esc0( _t('最新点位')) + '</th><th scope="col" class="r">' + esc0( _t('区间收益')) + '</th><th scope="col" class="r">' + esc0( _t('区间最大回撤')) + '</th><th scope="col" class="r">' + esc0( _t('最大回撤区间')) + '</th></tr></thead>';
       if (!key) {
         wrap.innerHTML = '<div class="tr-allnote">' + esc0( _t('该区间为自定义日期——请先勾选基金，再查看逐只区间统计。')) + '</div>';
         return;
@@ -1494,14 +1494,14 @@ window.TREND = (function () {
       wrap.innerHTML =
         '<div class="tr-tbl-scroll"><table class="tr-tbl tr-center">' +
           '<thead><tr>' +
-            '<th>' + esc0(_t('名称')) + '</th>' +
-            '<th class="r">' + esc0(_t('区间最高')) + '</th>' +
-            '<th class="r">' + esc0(_t('区间最低')) + '</th>' +
+            '<th scope="col">' + esc0(_t('名称')) + '</th>' +
+            '<th scope="col" class="r">' + esc0(_t('区间最高')) + '</th>' +
+            '<th scope="col" class="r">' + esc0(_t('区间最低')) + '</th>' +
             /* 2026-11-03（第二十九轮，用户要求）：去掉四个列头的「?」悬浮提示（含义已够直白） */
-            '<th class="r">' + esc0(_t('区间收益')) + '</th>' +
-            '<th class="r">' + esc0(_t('年化波动率')) + '</th>' +
-            '<th class="r">' + esc0(_t('区间最大回撤')) + '</th>' +
-            '<th class="r">' + esc0(_t('最大回撤区间')) + '</th>' +
+            '<th scope="col" class="r">' + esc0(_t('区间收益')) + '</th>' +
+            '<th scope="col" class="r">' + esc0(_t('年化波动率')) + '</th>' +
+            '<th scope="col" class="r">' + esc0(_t('区间最大回撤')) + '</th>' +
+            '<th scope="col" class="r">' + esc0(_t('最大回撤区间')) + '</th>' +
           '</tr></thead><tbody>' + rows + '</tbody>' +
         '</table></div>';
       void endTs;

@@ -242,3 +242,7 @@ echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
 # 2026-10-26：更新结束状态（提示栏收起）
 UEND=$(date +%s)
 write_ustat done "全部完成" "" "$(date '+%H:%M')"
+
+# 2026-11-16（用户要求）：数据新鲜度看门狗——跑完立刻自检，异常时发邮件到指定邮箱。
+# 配置见 data/mail.json（QQ 邮箱 SMTP 授权码，勿提交到仓库）；未配置时只记录不发信。
+soft_step "10/10 新鲜度自检" node tools/freshness-watch.js --mail

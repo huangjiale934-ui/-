@@ -1818,8 +1818,9 @@ chk('三版·⑧页2筛选两行化（chips/重置按钮删除 + 搜索框并入
   (rawIdxHtml.match(/class="tb-search"/g) || []).length === 2 && ! /function renderChips/.test(readSrc('app.js')));
 chk('三版·⑨列名与筛选统一「受托人」口径',
   />受托人 <span class="arrow">↕<\/span><\/th>/.test(rawIdxHtml) &&
-  /trustee: '<th data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕<\/span><\/th>'/.test(readSrc('app.js')) &&
-  /trustee: '<th data-c="trustee" data-i18n-parts>受托人<\/th>'/.test(readSrc('rank.js')));
+  /* 2026-11-16：表头统一补 scope="col"（无障碍），断言兼容该属性 */
+  /trustee: '<th scope="col" data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕<\/span><\/th>'/.test(readSrc('app.js')) &&
+  /trustee: '<th scope="col" data-c="trustee" data-i18n-parts>受托人<\/th>'/.test(readSrc('rank.js')));
 chk('五版·⑩估值日分布行：卡框保留、顶部边线删除 + 上方通栏线删除', /#foldSpec \{ margin-top: 8px; border-top: 0; border-radius: 0 0 10px 10px; \}/.test(readSrc('style.css')) && /\.wrap \.foot \{ border-top: 0;/.test(readSrc('style.css')));
 chk('五版·⑪页脚折叠箭头 42px（用户要求 +100%）蓝色加粗 + 两行统一右内边距对齐（134px 避让悬浮钮）',
   /\.foot-fold \.ff-arrow \{ font-size: 42px; color: #0866bb/.test(readSrc('style.css')) && /\.foot-fold summary \{ padding-right: 134px; \}/.test(readSrc('style.css')));

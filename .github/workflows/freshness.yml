@@ -1,0 +1,38 @@
+name: freshness
+
+# 2026-11-16（用户要求）：数据新鲜度看门狗。
+# 工作日 11:00 / 19:00（HKT）各查一次：当天数据任务是否跑过、数据时间是否在 26 小时内、
+# 我方净值是否落后官方参考源（BCT）、两站是否一致。
+# 异常时：① 若配置了 MPF_SMTP_USER/PASS 则直接发邮件；② 任务失败，GitHub 另发失败通知。
+# 该工作流不修改任何数据，也不参与发布。
+
+on:
+  schedule:
+    - cron: '0 3 * * 1-5'    # 11:00 HKT
+    - cron: '0 11 * * 1-5'   # 19:00 HKT（兜底：白天漏了晚间还能发现）
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 数据新鲜度检查
+        env:
+          MPF_SMTP_USER: ${{ secrets.MPF_SMTP_USER }}
+          MPF_SMTP_PASS: ${{ secrets.MPF_SMTP_PASS }}
+          MPF_MAIL_TO: ${{ secrets.MPF_MAIL_TO }}
+        run: node tools/freshness-watch.js --mail
+      - name: 结果摘要
+        if: always()
+        run: |
+          if [ -f data/freshness.json ]; then
+            node -e "const j=require('./data/freshness.json');console.log('ok='+j.ok);(j.problems||[]).forEach(p=>console.log(' - '+p));"
+          fi

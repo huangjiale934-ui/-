@@ -35,6 +35,12 @@ return v;
 
 function applyI18n(root) {
 var r = root || document;
+/* 2026-11-16（补体检）：表头缺 scope="col"，读屏软件无法把「单元格 ↔ 列名」对应起来。
+   本函数几乎在每次表格重建后都会被调用，在这里统一补一次，覆盖资料库/榜单/详情弹窗。 */
+try {
+var _ths = r.querySelectorAll ? r.querySelectorAll('th:not([scope])') : [];
+for (var _i = 0; _i < _ths.length; _i++) _ths[_i].setAttribute('scope', 'col');
+} catch (e) {}
 var nodes = r.querySelectorAll('[data-i18n]');
 for (var i = 0; i < nodes.length; i++) {
 var k = nodes[i].getAttribute('data-i18n');

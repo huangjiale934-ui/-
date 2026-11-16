@@ -124,17 +124,17 @@
   /** 发行人实力榜列结构不同，切换榜单时整体替换表头。
       文案全部经过 TT()，切换语言后由 mpf:lang 监听重建即可跟随。 */
   const aggHead = () =>
-    '<th class="c" style="width:56px">' + TT('名次') + '</th>' +
-    '<th data-k="fund" data-defdir="asc" class="sortable fz">' + TT('受托人') + ' <span class="arrow">↕</span></th>' +
-    '<th data-k="count" data-defdir="desc" class="sortable r">' + TT('成分') + '<br>' + TT('基金数') + ' <span class="arrow">↕</span></th>' +
-    '<th data-k="sizeSum" data-defdir="desc" class="sortable r">' + TT('总规模') + '<br><small>' + TT('百万港元') + '</small> <span class="arrow">↕</span></th>' +
-    '<th data-k="ann1Avg" data-defdir="desc" class="sortable r">' + TT('平均近1年') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
-    '<th data-k="ann5Avg" data-defdir="desc" class="sortable r">' + TT('平均近5年') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
-    '<th data-k="ann10Avg" data-defdir="desc" class="sortable r">' + TT('平均近10年') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
-    '<th data-k="annLaunchAvg" data-defdir="desc" class="sortable r">' + TT('平均推出至今') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
-    '<th data-k="mgmtFee" data-defdir="asc" class="sortable r">' + TT('平均管理费') + '<br><small>% p.a.</small> <span class="arrow">↕</span></th>' +
-    '<th class="r" title="' + TT('已从该受托人官网核对到最新单位资产净值的基金数 / 旗下基金总数') + '">' + TT('净值') + '<br>' + TT('核实率') + '</th>' +
-    '<th class="c" style="width:86px">' + TT('详情') + '</th>';
+    '<th scope="col" class="c" style="width:56px">' + TT('名次') + '</th>' +
+    '<th scope="col" data-k="fund" data-defdir="asc" class="sortable fz">' + TT('受托人') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-k="count" data-defdir="desc" class="sortable r">' + TT('成分') + '<br>' + TT('基金数') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-k="sizeSum" data-defdir="desc" class="sortable r">' + TT('总规模') + '<br><small>' + TT('百万港元') + '</small> <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-k="ann1Avg" data-defdir="desc" class="sortable r">' + TT('平均近1年') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-k="ann5Avg" data-defdir="desc" class="sortable r">' + TT('平均近5年') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-k="ann10Avg" data-defdir="desc" class="sortable r">' + TT('平均近10年') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-k="annLaunchAvg" data-defdir="desc" class="sortable r">' + TT('平均推出至今') + '<br>' + TT('年率化') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-k="mgmtFee" data-defdir="asc" class="sortable r">' + TT('平均管理费') + '<br><small>% p.a.</small> <span class="arrow">↕</span></th>' +
+    '<th scope="col" class="r" title="' + TT('已从该受托人官网核对到最新单位资产净值的基金数 / 旗下基金总数') + '">' + TT('净值') + '<br>' + TT('核实率') + '</th>' +
+    '<th scope="col" class="c" style="width:86px">' + TT('详情') + '</th>';
 
   function applyHeader(b, isCal) {
     const mode = b.self ? 'self' : (b.agg === 'trustee' ? 'agg' : 'fund');
@@ -178,16 +178,16 @@
     ['selfMdd5', '近5年回撤', 'desc'],
   ];
   const selfHead = () =>
-    '<th data-i18n-parts class="c" style="width:56px">' + TT('名次') + '</th>' +
-    '<th data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">' + TT('基金名称') + ' <span class="arrow">↕</span></th>' +
-    '<th data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">' + TT('受托人') + ' <span class="arrow">↕</span></th>' +
-    '<th data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">' + TT('基金种类') + ' <span class="arrow">↕</span></th>' +
-    '<th data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">' + TT('风险') + ' <span class="arrow">↕</span></th>' +
-    '<th data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">' + TT('基金规模') + '<br><small>' + TT('百万港元') + '</small> <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-i18n-parts class="c" style="width:56px">' + TT('名次') + '</th>' +
+    '<th scope="col" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">' + TT('基金名称') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">' + TT('受托人') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">' + TT('基金种类') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">' + TT('风险') + ' <span class="arrow">↕</span></th>' +
+    '<th scope="col" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">' + TT('基金规模') + '<br><small>' + TT('百万港元') + '</small> <span class="arrow">↕</span></th>' +
     SELF_COLS.map(([k, n, d]) =>
-      '<th data-i18n-parts data-k="' + k + '" data-defdir="' + d + '" class="sortable r">' + TT(n) + ' <span class="arrow">↕</span></th>').join('') +
-    '<th data-i18n-parts class="c" style="width:56px">' + TT('对比') + '</th>' +
-    '<th data-i18n-parts class="c" style="width:86px">' + TT('详情') + '</th>';
+      '<th scope="col" data-i18n-parts data-k="' + k + '" data-defdir="' + d + '" class="sortable r">' + TT(n) + ' <span class="arrow">↕</span></th>').join('') +
+    '<th scope="col" data-i18n-parts class="c" style="width:56px">' + TT('对比') + '</th>' +
+    '<th scope="col" data-i18n-parts class="c" style="width:86px">' + TT('详情') + '</th>';
 
   function buildTabs() {
     /* 2026-10-31（用户要求）：榜单标签行删除，改为工具栏「排名维度」下拉（默认无=全部基金）。
@@ -546,33 +546,33 @@
     return '<td data-c="cal' + y + '" data-l="' + y + '" class="r num o-cal ' + cls(v) + '">' + pct(v) + '</td>';
   }
   const TH_FUND = {
-    rank: '<th data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
-    fund: '<th data-c="fund" data-i18n-parts class="f-main fz">基金名称</th>',
-    scheme: '<th data-c="scheme" data-i18n-parts>计划名称</th>',
-    trustee: '<th data-c="trustee" data-i18n-parts>受托人</th>',
-    type: '<th data-c="type" data-i18n-parts>基金种类</th>',
-    risk: '<th data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
-    ann1: '<th data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>',
-    ann5: '<th data-c="ann5" data-i18n-parts data-k="ann5" data-defdir="desc" class="sortable r">近5年<br>年率化 <span class="arrow">↕</span></th>',
-    ann10: '<th data-c="ann10" data-i18n-parts data-k="ann10" data-defdir="desc" class="sortable r">近10年<br>年率化 <span class="arrow">↕</span></th>',
-    annLaunch: '<th data-c="annLaunch" data-i18n-parts data-k="annLaunch" data-defdir="desc" class="sortable r">推出至今<br>年率化 <span class="arrow">↕</span></th>',
-    size: '<th data-c="size" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
-    worstYear: '<th data-c="worstYear" data-i18n-parts data-k="worstYear" data-defdir="desc" class="sortable r">近5年<br><small>最差年度</small> <span class="arrow">↕</span></th>',
-    fer: '<th data-c="fer" data-i18n-parts data-k="fer" data-defdir="asc" class="sortable r">总开支比率<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
-    launchTs: '<th data-c="launchTs" data-i18n-parts data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>',
-    mgmtFee: '<th data-c="mgmtFee" data-i18n-parts data-k="mgmtFee" data-defdir="asc" class="sortable r">管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
-    calYear: '<th data-c="calYear" data-i18n-parts id="rkThCalYear" data-k="calYear" data-defdir="desc" class="sortable r">历年<br>回报 <span class="arrow">↕</span></th>',
-    cum1: '<th data-c="cum1" data-i18n-parts data-k="cum1" data-defdir="desc" class="sortable r o-cum">近1年<br>累积 <span class="arrow">↕</span></th>',
-    cum5: '<th data-c="cum5" data-i18n-parts data-k="cum5" data-defdir="desc" class="sortable r o-cum">近5年<br>累积 <span class="arrow">↕</span></th>',
-    cum10: '<th data-c="cum10" data-i18n-parts data-k="cum10" data-defdir="desc" class="sortable r o-cum">近10年<br>累积 <span class="arrow">↕</span></th>',
-    cumLaunch: '<th data-c="cumLaunch" data-i18n-parts data-k="cumLaunch" data-defdir="desc" class="sortable r o-cum">推出至今<br>累积 <span class="arrow">↕</span></th>',
-    cal2021: '<th data-c="cal2021" data-i18n-parts data-k="cal2021" data-defdir="desc" class="sortable r o-cal">2021 <span class="arrow">↕</span></th>',
-    cal2022: '<th data-c="cal2022" data-i18n-parts data-k="cal2022" data-defdir="desc" class="sortable r o-cal">2022 <span class="arrow">↕</span></th>',
-    cal2023: '<th data-c="cal2023" data-i18n-parts data-k="cal2023" data-defdir="desc" class="sortable r o-cal">2023 <span class="arrow">↕</span></th>',
-    cal2024: '<th data-c="cal2024" data-i18n-parts data-k="cal2024" data-defdir="desc" class="sortable r o-cal">2024 <span class="arrow">↕</span></th>',
-    cal2025: '<th data-c="cal2025" data-i18n-parts data-k="cal2025" data-defdir="desc" class="sortable r o-cal">2025 <span class="arrow">↕</span></th>',
-    cmp: '<th data-c="cmp" data-i18n-parts class="c">对比</th>',
-    ops: '<th data-c="ops" data-i18n-parts class="c">详情</th>',
+    rank: '<th scope="col" data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
+    fund: '<th scope="col" data-c="fund" data-i18n-parts class="f-main fz">基金名称</th>',
+    scheme: '<th scope="col" data-c="scheme" data-i18n-parts>计划名称</th>',
+    trustee: '<th scope="col" data-c="trustee" data-i18n-parts>受托人</th>',
+    type: '<th scope="col" data-c="type" data-i18n-parts>基金种类</th>',
+    risk: '<th scope="col" data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
+    ann1: '<th scope="col" data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>',
+    ann5: '<th scope="col" data-c="ann5" data-i18n-parts data-k="ann5" data-defdir="desc" class="sortable r">近5年<br>年率化 <span class="arrow">↕</span></th>',
+    ann10: '<th scope="col" data-c="ann10" data-i18n-parts data-k="ann10" data-defdir="desc" class="sortable r">近10年<br>年率化 <span class="arrow">↕</span></th>',
+    annLaunch: '<th scope="col" data-c="annLaunch" data-i18n-parts data-k="annLaunch" data-defdir="desc" class="sortable r">推出至今<br>年率化 <span class="arrow">↕</span></th>',
+    size: '<th scope="col" data-c="size" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
+    worstYear: '<th scope="col" data-c="worstYear" data-i18n-parts data-k="worstYear" data-defdir="desc" class="sortable r">近5年<br><small>最差年度</small> <span class="arrow">↕</span></th>',
+    fer: '<th scope="col" data-c="fer" data-i18n-parts data-k="fer" data-defdir="asc" class="sortable r">总开支比率<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    launchTs: '<th scope="col" data-c="launchTs" data-i18n-parts data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>',
+    mgmtFee: '<th scope="col" data-c="mgmtFee" data-i18n-parts data-k="mgmtFee" data-defdir="asc" class="sortable r">管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    calYear: '<th scope="col" data-c="calYear" data-i18n-parts id="rkThCalYear" data-k="calYear" data-defdir="desc" class="sortable r">历年<br>回报 <span class="arrow">↕</span></th>',
+    cum1: '<th scope="col" data-c="cum1" data-i18n-parts data-k="cum1" data-defdir="desc" class="sortable r o-cum">近1年<br>累积 <span class="arrow">↕</span></th>',
+    cum5: '<th scope="col" data-c="cum5" data-i18n-parts data-k="cum5" data-defdir="desc" class="sortable r o-cum">近5年<br>累积 <span class="arrow">↕</span></th>',
+    cum10: '<th scope="col" data-c="cum10" data-i18n-parts data-k="cum10" data-defdir="desc" class="sortable r o-cum">近10年<br>累积 <span class="arrow">↕</span></th>',
+    cumLaunch: '<th scope="col" data-c="cumLaunch" data-i18n-parts data-k="cumLaunch" data-defdir="desc" class="sortable r o-cum">推出至今<br>累积 <span class="arrow">↕</span></th>',
+    cal2021: '<th scope="col" data-c="cal2021" data-i18n-parts data-k="cal2021" data-defdir="desc" class="sortable r o-cal">2021 <span class="arrow">↕</span></th>',
+    cal2022: '<th scope="col" data-c="cal2022" data-i18n-parts data-k="cal2022" data-defdir="desc" class="sortable r o-cal">2022 <span class="arrow">↕</span></th>',
+    cal2023: '<th scope="col" data-c="cal2023" data-i18n-parts data-k="cal2023" data-defdir="desc" class="sortable r o-cal">2023 <span class="arrow">↕</span></th>',
+    cal2024: '<th scope="col" data-c="cal2024" data-i18n-parts data-k="cal2024" data-defdir="desc" class="sortable r o-cal">2024 <span class="arrow">↕</span></th>',
+    cal2025: '<th scope="col" data-c="cal2025" data-i18n-parts data-k="cal2025" data-defdir="desc" class="sortable r o-cal">2025 <span class="arrow">↕</span></th>',
+    cmp: '<th scope="col" data-c="cmp" data-i18n-parts class="c">对比</th>',
+    ops: '<th scope="col" data-c="ops" data-i18n-parts class="c">详情</th>',
   };
 
   /* 可见列顺序：由列设置闭包实现（它掌握 FUND 定义与 off 隐藏集合），这里只做委派。

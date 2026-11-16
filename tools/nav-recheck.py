@@ -91,6 +91,7 @@ def local_recent(fid):
 
 
 QUERIED = set()      # 本次真正按代码逐只查询过的基金
+FAILED = set()       # 查询抛异常的基金（与「查了但窗口内无数据」区分）
 NO_CODE = set()      # 无代码、无法按代码查询的基金（必须单列，不能再静默跳过）
 
 
@@ -105,11 +106,18 @@ def per_fund(metas, worker):
             NO_CODE.add(fid)
             return []
         QUERIED.add(fid)
-        try:
-            sess = cffi.Session(impersonate="chrome")
-            return worker(sess, fid, v) or []
-        except Exception:  # noqa: BLE001
-            return []
+        # 2026-11-16：单次请求容易超时（宏利/交银尤甚），失败一次就白丢一只。
+        # 重试一次，并把仍失败的记入 ERRORS，便于在下游区分「真没有」与「没查成」。
+        for attempt in (1, 2):
+            try:
+                sess = cffi.Session(impersonate="chrome")
+                rows = worker(sess, fid, v) or []
+                FAILED.discard(fid)
+                return rows
+            except Exception:  # noqa: BLE001
+                if attempt == 2:
+                    FAILED.add(fid)
+        return []
 
     with ThreadPoolExecutor(max_workers=max(1, WORKERS)) as ex:
         for rows in ex.map(run, list(metas.items())):
@@ -119,12 +127,41 @@ def per_fund(metas, worker):
 
 
 # ---------------------------------------------------------------- adapters
+# BCT 计划代号 → 本站 scheme（两者数量一一对应：26/28/26/14/12/10）
+UNSUPPORTED_SRC = {"etnet", "shkp-hket"}   # 转载/无代码源，无法按代码逐只回源
+
+BCT_PLAN_SCHEME = {
+    "pro-choice": "BCT積金之選",
+    "series-800": "BCT強積金計劃800系列",
+    "strategic-mpf": "BCT強積金策略計劃",
+    "smart-plan": "BCT強積金—明智之選",
+    "industry-choice": "BCT（強積金）行業計劃",
+    "simple-plan": "BCT強積金—易富之選",
+}
+
+
 def fetch_bct(sess):
+    """2026-11-16（用户要求：把 BCT 116 只纳入逐只复核）：
+    原来用 `code + '-' + unit` 做键，但本站 hist-index 的 unit 全为空、
+    接口给的是 unitClass='A'，于是 116 只一个都对不上（复核 0 点）。
+    实测代码本身 116/116 全命中，只是需要按计划限定——BCGF 等代码
+    在 pro-choice 与 industry-choice 中重名（不同基金）。
+    故改为「(计划, 代码) → fid」精确匹配，另留「代码唯一时」的兜底。
+    """
     api = "https://www.bcthk.com/bin/servlet/fundInformation"
     plans = ["pro-choice", "series-800", "strategic-mpf", "smart-plan", "industry-choice", "simple-plan"]
-    key2fid = {}
+    by_plan = {p: {} for p in plans}
+    code_owner = {}
     for fid, v in pick("bct").items():
-        key2fid[(v.get("code") or "") + "-" + (v.get("unit") or "")] = fid
+        code = str(v.get("code") or "").strip().upper()
+        if not code:
+            continue
+        sch = str(v.get("scheme") or "")
+        for p, s2 in BCT_PLAN_SCHEME.items():
+            if sch == s2:
+                by_plan[p][code] = fid
+                break
+        code_owner.setdefault(code, set()).add(fid)
     out = {}
     for plan in plans:
         for d in WINDOW:
@@ -138,7 +175,11 @@ def fetch_bct(sess):
                 fpd = row.get("fundPerformanceDetail") or {}
                 if fpd.get("priceDate") != d:
                     continue
-                fid = key2fid.get((row.get("code") or "") + "-" + (row.get("unitClass") or ""))
+                code = str(row.get("code") or "").strip().upper()
+                fid = by_plan.get(plan, {}).get(code)
+                if not fid:
+                    owners = code_owner.get(code) or set()
+                    fid = next(iter(owners)) if len(owners) == 1 else None
                 if not fid:
                     continue
                 try:
@@ -391,14 +432,49 @@ def fetch_sunlife(sess):
     return out
 
 
+def fetch_bocom(sess):
+    """交通銀行（愉盈退休強積金計劃）：官網 pricedata.js 全量（約 5.4MB，含逐日價格）。
+    该源整包发布，一次请求覆盖全部 14 只；此前无适配器，长期未纳入逐只复核。"""
+    ours = pick("bocom")
+    if not ours:
+        return {}
+    url = "https://www.bocomtrust.com.hk/BankCommSite/shtml/trust/tw/trust/js/pricedata.js"
+    try:
+        r = sess.get(url, headers=UA, impersonate="chrome", timeout=150)
+        t = r.text
+    except Exception:  # noqa: BLE001
+        return {}
+    dates = re.findall(r'pricedate\[\d+\]\s*=\s*"([\d-]+)"', t)
+    prices = dict(re.findall(r'(?:bid|offer)price\["([\d-]+-[0-9A-Za-z]+)"\]\s*=\s*"([\d.]+)"', t))
+    out = {}
+    for fid, v in ours.items():
+        code = str(v.get("code") or "").strip()
+        if not code:
+            continue
+        for d in dates:
+            if d not in WINDOW_SET:
+                continue
+            val = prices.get(d + "-" + code)
+            if not val:
+                continue
+            try:
+                out[(fid, d)] = round(float(val), 4)
+            except (TypeError, ValueError):
+                pass
+    return out
+
+
 def fetch_hsbc(sess):
     """滙豐 / 恒生：下載「單位價格」CSV（一個計劃一次請求，含區間內全部日期）"""
     import csv as _csv
+    # 2026-11-16（覆盖率排查）：滙豐与恒生走的是**两个不同网关**（hbap / hase），
+    # 原来两者共用 hase 网关，导致滙豐 20 只全部返回「找不到紀錄」，长期未被比对。
     plats = [
-        {"key": "hsbc", "scheme": "滙豐強積金智選計劃", "code": "HB"},
-        {"key": "hangseng", "scheme": "恒生強積金智選計劃", "code": "HS"},
+        {"key": "hsbc", "scheme": "滙豐強積金智選計劃", "code": "HB",
+         "proxy": "wpb-gpbw-mmw-hk-hbap-pa-p-wpp-mpf-market-data-prod-proxy"},
+        {"key": "hangseng", "scheme": "恒生強積金智選計劃", "code": "HS",
+         "proxy": "wpb-gpbw-mmw-hk-hase-pa-p-wpp-mpf-market-data-prod-proxy"},
     ]
-    proxy = "wpb-gpbw-mmw-hk-hase-pa-p-wpp-mpf-market-data-prod-proxy"
     out = {}
     for plat in plats:
         ours = {}
@@ -408,7 +484,7 @@ def fetch_hsbc(sess):
         if not ours:
             continue
         try:
-            r = sess.get("https://rbwm-api.hsbc.com.hk/%s/v1/download-funds" % proxy,
+            r = sess.get("https://rbwm-api.hsbc.com.hk/%s/v1/download-funds" % plat["proxy"],
                          params={"schemeCodes": plat["code"], "fundPricePeriodFrom": WINDOW[0],
                                  "fundPricePeriodTo": WINDOW[-1], "language": "zh_HK"},
                          headers={"client_id": "5eca677638ab454086052a18da4e2cb0",
@@ -498,6 +574,7 @@ ADAPTERS = [
     ("yflife", fetch_yflife),
     ("haitong", fetch_haitong),
     ("sunlife", fetch_sunlife),
+    ("bocom", fetch_bocom),
     ("hsbc", fetch_hsbc),
     ("bocpt", fetch_bocpt),
 ]
@@ -589,7 +666,18 @@ def main():
             "total": len(idx),
             "queried": len(seen_fids),
             "uncovered": max(0, len(idx) - len(seen_fids)),
-            "uncoveredIds": sorted(set(idx) - seen_fids)[:40],
+            "uncoveredIds": sorted(set(idx) - seen_fids),
+            # 未比对原因分类（口径透明：不是「静默跳过」，而是逐类可解释）
+            "reasons": {
+                "noCode": sorted(f for f in set(idx) - seen_fids if not str((idx.get(f) or {}).get("code") or "").strip()),
+                "srcUnsupported": sorted(f for f in set(idx) - seen_fids
+                                         if str((idx.get(f) or {}).get("src") or "") in UNSUPPORTED_SRC),
+                "failed": sorted(set(idx) - seen_fids & FAILED),
+                "outOfWindow": sorted(f for f in set(idx) - seen_fids
+                                      if str((idx.get(f) or {}).get("code") or "").strip()
+                                      and str((idx.get(f) or {}).get("src") or "") not in UNSUPPORTED_SRC
+                                      and f not in FAILED),
+            },
             "noCode": len(NO_CODE),
             "noCodeIds": sorted(NO_CODE)[:60],
         },
