@@ -34,9 +34,9 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: manulife-probe
-  cancel-in-progress: false
+# 2026-11-16：去掉并发组。原来单班 4 小时，必须串行；现在每班约 40 秒，
+# 偶发重叠无副作用（两次都只是追加样本，提交有 3 次重试）。
+# 保留并发组反而会被「已取消但仍在收尾」的长作业自锁——11-16 11:50 那班就排队 25 分钟没启动。
 
 jobs:
   probe:
