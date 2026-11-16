@@ -33,6 +33,34 @@ INDEX = os.path.join(DATA, "hist-index.json")
 URL = "https://www.shkp.com/Html/MPF/Fund%20Price%20and%20FFS%20for%20SHKPESS.pdf"
 CACHE = os.path.join(BASE, "tmp", "shkp.pdf")
 SRC = "新地／渣打信託官網（SHKP ESS Fund Price PDF）"
+PROBE = os.path.join(DATA, "shkp-pdf-probe.json")
+
+
+def _write_probe(ok, note):
+    """记录每次探测结果：官方 PDF 是否放行。放行当天会走正常回填流程，缺口自然消失。"""
+    import json as _json
+    import datetime as _dt
+    try:
+        old = {}
+        if os.path.exists(PROBE):
+            with open(PROBE, encoding="utf-8") as fh:
+                old = _json.load(fh)
+        doc = {
+            "at": _dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+            "ok": bool(ok),
+            "note": note,
+            "lastOk": (old.get("lastOk") or None),
+            "blockedSince": (old.get("blockedSince") or None),
+        }
+        if ok:
+            doc["lastOk"] = doc["at"]
+            doc["blockedSince"] = None
+        else:
+            doc["blockedSince"] = doc["blockedSince"] or doc["at"]
+        with open(PROBE, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(_json.dumps(doc, ensure_ascii=False, indent=1))
+    except Exception as e:  # noqa: BLE001
+        print("note: 探测状态写入失败 %s" % e)
 
 # PDF 列序 → 我方基金名（跳过第 1 列「宏利在職平均回報」基准）
 COLS = [
@@ -58,10 +86,14 @@ def main():
         except Exception as e:  # noqa: BLE001
             # 2026-11-05：源站会返回 HTTP 999（拒绝服务），原来直接抛异常 → 整条链路记成失败。
             # 新地是月度发布，缺一天不影响；这里降级为警告并保留已有历史。
-            print("注意 新地官網 PDF 被源站 WAF 攔（HTTP 999，路徑含編碼空格 %20，已知）——改用 HKET 兜底；保留已有歷史（%s）" % str(e)[:40], flush=True)
+            print("注意 新地官網 PDF 被源站 WAF 攔（HTTP 999，路徑含編碼空格 %%20，已知）——改用 HKET 兜底；保留已有歷史（%s）" % str(e)[:40], flush=True)
+            # 2026-11-16（用户要求「时刻等待官方放行」）：每次探测都落盘，
+            # 放行当天能看到状态翻转，数据也会自动整段回填（本脚本正常流程）。
+            _write_probe(False, str(e)[:120])
             return 0
         os.makedirs(os.path.dirname(CACHE), exist_ok=True)
         open(CACHE, "wb").write(r.content)
+        _write_probe(True, "PDF 已可下载（%d 字节）" % len(r.content))
     reader = PdfReader(CACHE)
     series = {nm: {} for nm in COLS}
     n_rows = 0

@@ -155,6 +155,9 @@ soft_step "5.7/9 雅虎補空" node tools/yahoo-fill.js
 # 返回 HTTP 999（已用对照实验证明：给任何已知存在的 PDF 加 %20 也同样 999，不加则 200），
 # 不是文件被撤。发行人 PDF 内文指定的每日渠道是 HKET，那里 10 只基金都有当日净值。
 # 官网 PDF 恢复后仍由 fetch-shkp-hist.py 整段覆盖（含历史逐日），这里只补「当天」。
+# 2026-11-16（用户要求「时刻等待官方放行」）：每天探一次官方 PDF，放行即整段回填；
+# 结果写入 data/shkp-pdf-probe.json（ok / lastOk / blockedSince）。
+soft_step "5.7/9 新地官网 PDF 探测/回填" "$PY" fetch-shkp-hist.py
 soft_step "5.75/9 新地 HKET 兜底" "$PY" tools/shkp-hket.py
 # 2026-11-11（用户要求自动化）：積金局月度統計（新聞稿表格是圖片）—— 每月 1–12 日試抓，
 # 官方 6 日前後發佈；OCR 解析 + 三重校驗，官方未發佈或校驗不過就保留舊資料。

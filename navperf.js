@@ -196,6 +196,8 @@ function computeOne(obj) {
   let stitched = 0;
   const funds = {};
   let ok = 0, skip = 0;
+  /* 2026-11-16（体检）：收集各基金最后净值日，用于把恒指对齐到「多数基金共同的净值日」 */
+  const lastDates = [];
   for (const f of files) {
     try {
       const obj = JSON.parse(fs.readFileSync(path.join(HIST_DIR, f), 'utf8'));
@@ -210,6 +212,7 @@ function computeOne(obj) {
       }
       const perf = computeOne(obj);
       if (!perf) { skip++; continue; }
+      if (obj.series && obj.series.length) lastDates.push(obj.series[obj.series.length - 1][0]);
       const srcLabel = String(obj.src || '');
       const srcKey = obj.srcKey || (/BCT/i.test(srcLabel) ? 'bct'
         : (/宏利/.test(srcLabel) ? 'manulife'
@@ -220,17 +223,27 @@ function computeOne(obj) {
       ok++;
     } catch (e) { skip++; }
   }
-  /* 恒生指数近 1 年涨跌幅（供前端算「超额收益」） */
+  /* 恒生指数近 1 年涨跌幅（供前端算「超额收益」）
+     2026-11-16（体检修复）：原来直接用指数序列的最后一个交易日（如 11-13），
+     而基金净值普遍只到 11-12 →「超额收益」两侧跨了一天，波动大的日子偏差可达 1 个百分点。
+     改为取「多数基金共同的最后净值日」（众数），指数取 ≤ 该日的最后一个点。 */
   let hsi = null;
   try {
+    const cnt = {};
+    lastDates.forEach((d) => { cnt[d] = (cnt[d] || 0) + 1; });
+    let anchor = '';
+    Object.keys(cnt).sort().forEach((d) => { if (!anchor || cnt[d] >= cnt[anchor]) anchor = d; });
     const ix = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'index.json'), 'utf8')).items.HSI;
     const ser = ix.series || [];
     if (ser.length > 30) {
-      const lastD = new Date(ser[ser.length - 1][0] + 'T00:00:00Z');
+      let ptr = ser.length - 1;
+      if (anchor) { ptr = -1; for (let i = 0; i < ser.length; i++) { if (ser[i][0] <= anchor) ptr = i; else break; } }
+      if (ptr < 0) ptr = ser.length - 1;
+      const lastD = new Date(ser[ptr][0] + 'T00:00:00Z');
       const cut = iso(new Date(Date.UTC(lastD.getUTCFullYear() - 1, lastD.getUTCMonth(), lastD.getUTCDate())));
       let base = null;
       for (const [d, v] of ser) { if (d <= cut) base = v; else break; }
-      if (base > 0) hsi = { asOf: ser[ser.length - 1][0], y1: r2(ser[ser.length - 1][1] / base - 1) };
+      if (base > 0) hsi = { asOf: ser[ptr][0], y1: r2(ser[ptr][1] / base - 1), anchor: anchor || null };
     }
   } catch (e) { /* 无指数文件则忽略 */ }
   const out = {

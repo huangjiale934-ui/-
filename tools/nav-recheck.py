@@ -92,6 +92,7 @@ def local_recent(fid):
 
 QUERIED = set()      # 本次真正按代码逐只查询过的基金
 FAILED = set()       # 查询抛异常的基金（与「查了但窗口内无数据」区分）
+EMPTY = set()        # 查询成功、但窗口内没有任何数据行
 NO_CODE = set()      # 无代码、无法按代码查询的基金（必须单列，不能再静默跳过）
 
 
@@ -113,6 +114,10 @@ def per_fund(metas, worker):
                 sess = cffi.Session(impersonate="chrome")
                 rows = worker(sess, fid, v) or []
                 FAILED.discard(fid)
+                if rows:
+                    EMPTY.discard(fid)
+                else:
+                    EMPTY.add(fid)
                 return rows
             except Exception:  # noqa: BLE001
                 if attempt == 2:
@@ -128,7 +133,8 @@ def per_fund(metas, worker):
 
 # ---------------------------------------------------------------- adapters
 # BCT 计划代号 → 本站 scheme（两者数量一一对应：26/28/26/14/12/10）
-UNSUPPORTED_SRC = {"etnet", "shkp-hket"}   # 转载/无代码源，无法按代码逐只回源
+UNSUPPORTED_SRC = {"shkp-hket"}   # 新地：源站按基金名发布、无代码，无法按代码逐只回源
+READONLY_SRC = {"etnet"}          # 只有 2 位小数，仅核对、不回写 4 位净值
 
 BCT_PLAN_SCHEME = {
     "pro-choice": "BCT積金之選",
@@ -464,6 +470,38 @@ def fetch_bocom(sess):
     return out
 
 
+def fetch_etnet(sess):
+    """AMTD 16 只：etnet 转載（会德丰/etwealth 明细帧）。
+    官方 AMTD 站只有 PDF，无逐日接口；此前这 16 只从未纳入逐只比对。
+    2026-11-16：从 etnet 明细帧取「價格 (HKD) (截至 YYYY/MM/DD)」——
+    **只有 2 位小数**，因此仅作核对（READONLY_SRC），不写回我们的 4 位净值。
+    """
+    def one(s, fid, v):
+        code = str(v.get("code") or "").strip()
+        if not code:
+            return []
+        u = ("https://fc10.etwealth.com/wfc-etnet-hk/mpfDetail.do"
+             "?method=searchMpfDetail&locale=zh_TW&appId=etnet-hk&fd_id=%s&backUrl=" % code)
+        r = s.get(u, headers={
+            "Referer": "https://www.etnet.com.hk/www/tc/mpf/fund_detail.php?fund=%s" % code,
+            "Accept": "text/html,*/*",
+        }, impersonate="chrome", timeout=30)
+        t = re.sub(r"<script[\s\S]*?</script>", " ", r.text)
+        t = re.sub(r"<[^>]+>", " ", t)
+        t = re.sub(r"\s+", " ", t)
+        m = re.search(r"價格\s*\(HKD\)\s*\(截至\s*(\d{4})/(\d{2})/(\d{2})\)\s*([\d.]+)", t)
+        if not m:
+            return []
+        d = "%s-%s-%s" % (m.group(1), m.group(2), m.group(3))
+        if d not in WINDOW_SET:
+            return []
+        try:
+            return [(fid, d, round(float(m.group(4)), 4))]
+        except (TypeError, ValueError):
+            return []
+    return per_fund(pick("etnet"), one)
+
+
 def fetch_hsbc(sess):
     """滙豐 / 恒生：下載「單位價格」CSV（一個計劃一次請求，含區間內全部日期）"""
     import csv as _csv
@@ -574,6 +612,7 @@ ADAPTERS = [
     ("yflife", fetch_yflife),
     ("haitong", fetch_haitong),
     ("sunlife", fetch_sunlife),
+    ("etnet", fetch_etnet),
     ("bocom", fetch_bocom),
     ("hsbc", fetch_hsbc),
     ("bocpt", fetch_bocpt),
@@ -620,6 +659,9 @@ def main():
     added = 0
     if APPLY and missing:
         for m0 in missing:
+            # 只读源（etnet 2 位小数）不写回，避免把 4 位官方精度降级
+            if str(m0.get("src") or "") in READONLY_SRC:
+                continue
             obj, p = load_hist(m0["id"])
             if not obj:
                 continue
@@ -637,6 +679,8 @@ def main():
 
     if APPLY and diffs:
         for d0 in diffs:
+            if str(d0.get("src") or "") in READONLY_SRC:
+                continue
             obj, p = load_hist(d0["id"])
             if not obj:
                 continue
@@ -673,10 +717,13 @@ def main():
                 "srcUnsupported": sorted(f for f in set(idx) - seen_fids
                                          if str((idx.get(f) or {}).get("src") or "") in UNSUPPORTED_SRC),
                 "failed": sorted(set(idx) - seen_fids & FAILED),
-                "outOfWindow": sorted(f for f in set(idx) - seen_fids
-                                      if str((idx.get(f) or {}).get("code") or "").strip()
-                                      and str((idx.get(f) or {}).get("src") or "") not in UNSUPPORTED_SRC
-                                      and f not in FAILED),
+                # 查询成功但窗口内无数据（源站这几天没发这只）→ 明确列为 outOfWindow
+                "outOfWindow": sorted(f for f in (set(idx) - seen_fids) & EMPTY),
+                # 查了但既没数据也没异常，且不在上述分类里 → 需人工看的剩余项
+                "unclassified": sorted(f for f in set(idx) - seen_fids
+                                       if str((idx.get(f) or {}).get("code") or "").strip()
+                                       and str((idx.get(f) or {}).get("src") or "") not in UNSUPPORTED_SRC
+                                       and f not in FAILED and f not in EMPTY),
             },
             "noCode": len(NO_CODE),
             "noCodeIds": sorted(NO_CODE)[:60],

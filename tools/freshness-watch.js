@@ -199,6 +199,40 @@ function sendMail(cfg, subject, body) {
 }
 
 async function main() {
+  /* --test-mail：用看门狗自己的发信实现发一封测试信（验证通道，不依赖检查结果） */
+  if (arg('test-mail')) {
+    let cfg = null;
+    try {
+      cfg = JSON.parse(fs.readFileSync(MAIL_CFG, 'utf8'));
+    } catch (e) {}
+    if (!cfg && process.env.MPF_SMTP_USER && process.env.MPF_SMTP_PASS) {
+      cfg = {
+        user: process.env.MPF_SMTP_USER,
+        pass: process.env.MPF_SMTP_PASS,
+        to: (process.env.MPF_MAIL_TO || '1171800084@qq.com').split(','),
+        host: process.env.MPF_SMTP_HOST || 'smtp.qq.com',
+        port: Number(process.env.MPF_SMTP_PORT || 465),
+      };
+    }
+    if (!cfg) {
+      console.log('[freshness] 没有可用的邮件配置');
+      process.exit(2);
+    }
+    try {
+      const body = [
+        '这是看门狗发出的测试邮件。',
+        '',
+        '时间：' + new Date(Date.now() + 8 * 3600e3).toISOString().replace('T', ' ').slice(0, 19) + ' (HKT)',
+      ].join('\n');
+      await sendMail(cfg, '[强积金] 看门狗自检 · 收到即代表通道可用', body);
+      console.log('[freshness] 测试邮件已发送至 ' + (cfg.to || []).join(', '));
+      process.exit(0);
+    } catch (e) {
+      console.log('[freshness] 测试发信失败：' + e.message);
+      process.exit(1);
+    }
+  }
+
   const code = (fs.existsSync(path.join(ROOT, 'data', 'wb-share.txt'))
     ? fs.readFileSync(path.join(ROOT, 'data', 'wb-share.txt'), 'utf8').trim()
     : '');
