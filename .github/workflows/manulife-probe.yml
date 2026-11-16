@@ -13,7 +13,7 @@ on:
   # 故收窄为：00:00–03:30（210 分钟，5 分钟一次）+ 09:00–10:00（60 分钟，查迟到发布）。
   schedule:
     - cron: '0 16 * * *'   # 香港 00:00 起，采样 210 分钟（覆盖跨夜发布）
-    - cron: '0 1 * * *'    # 香港 09:00 起，采样 60 分钟（迟发兜底）
+    - cron: '0 3 * * *'    # 香港 11:00 起，采样 60 分钟（迟发兜底；避开 09:35 发布窗口）
   workflow_dispatch:
     inputs:
       minutes:
@@ -60,7 +60,7 @@ jobs:
             python tools/manulife-probe.py --minutes "${{ inputs.minutes }}" --interval "${{ inputs.interval }}"
           else
             MIN=210
-            if [ "${{ github.event.schedule }}" = "0 1 * * *" ]; then MIN=60; fi
+            if [ "${{ github.event.schedule }}" = "0 3 * * *" ]; then MIN=60; fi
             python tools/manulife-probe.py --minutes "$MIN" --interval 5
           fi
 
