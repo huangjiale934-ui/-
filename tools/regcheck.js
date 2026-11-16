@@ -235,7 +235,10 @@ chk('四版·原第三页已下线（analysis.html 为最小跳转占位 + index
     try {
       const st = fs.statSync(path.join(__dirname, '..', 'public', 'analysis.html'));
       const t = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.html'), 'utf8');
-      return st.size < 800 && t.indexOf('index.html#cmp') >= 0 && /id="anSec"/.test(rawHtml.index || '');
+      /* 2026-11-16：跳转需保留 query（analysis.html?open=<id> 旧深链），
+         文件从 790 增至 817 字节，阈值放宽到 1000；同时断言 location.search 被拼接。 */
+      return st.size < 1000 && t.indexOf('index.html#cmp') >= 0 &&
+        /location\.search/.test(t) && /id="anSec"/.test(rawHtml.index || '');
     } catch (e) { return false; }
   })());
 

@@ -2308,13 +2308,15 @@ function mountFD(x, alive) {
           const el = document.createElement('span');
           el.className = 'gap-flag';
           /* 2026-11-13（第三方核验 P1-1）：断档原因要分清——早年月频 vs 源侧近期断档（如新地 10 月） */
-          if (info.reason === 'monthly-early') {
-            el.setAttribute('data-tip', TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）', { a: info.first, b: info.last, n: info.n }));
-            el.textContent = TT('ⓘ 早期为月度数据');
-          } else {
-            el.setAttribute('data-tip', TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站未提供该段净值，非本站漏抓；走势图此处为断档）', { a: info.first, b: info.last, n: info.n }));
-            el.textContent = TT('ⓘ 有区间缺日');
-          }
+          /* 2026-11-16（用户反馈：工具栏本来就很挤，角标被压成「ⓘ 有区 / 间缺 / 日」三行）：
+             图内只留一个 ⓘ 图标（保留黄底），完整说明放 data-tip 与 aria-label。
+             详情见悬浮提示，视觉上不再占宽度。 */
+          const tip = (info.reason === 'monthly-early')
+            ? TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）', { a: info.first, b: info.last, n: info.n })
+            : TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站未提供该段净值，非本站漏抓；走势图此处为断档）', { a: info.first, b: info.last, n: info.n });
+          el.setAttribute('data-tip', tip);
+          el.setAttribute('aria-label', tip);
+          el.textContent = 'ⓘ';
           const bar = box.querySelector('.tr-adds') || box.querySelector('.tr-tools');
           if (bar) bar.appendChild(el);
         });

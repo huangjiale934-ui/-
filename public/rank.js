@@ -41,7 +41,10 @@
   const QSB = (new URLSearchParams(location.search)).get('rk') || '';
   /* 2026-10-24（核验报告 v3 #12）：自算榜单 2026-10-19 已迁至「基金最新数据」的资料库，
      旧 ?rk=selfX 深链不再落默认 ann1 榜，直接把用户带到资料库（榜单所在页） */
-  if (/^self/i.test(QSB) && !/index\.html$/.test(location.pathname)) {
+  /* 2026-11-16（补体检）：原来多加了一个「当前不在 index.html」的条件，
+     导致旧链接 /index.html?rk=selfW1 被静默忽略——页面停在榜单页、显示近 1 年榜，
+     与 URL 表达的意思相反。改为无条件跳到资料库；目标 URL 不带 rk，不会循环。 */
+  if (/^self/i.test(QSB)) {
     location.replace('index.html#db');
   }
   const S = {

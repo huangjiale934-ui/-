@@ -539,9 +539,12 @@
 .an-listcard .an-table td.f-main { white-space: normal; min-width: 0; }
 
 /* 走势图工具条（导出 / 分享，2026-10-14） */
-.tr-tools { display: flex; gap: 8px; }
+/* 2026-11-16（用户反馈工具栏拥挤）：.tr-tools 原来 nowrap 且可被压缩，
+   弹窗内（765px）被挤到 77px → 「导出 / 分享」变成竖排两行。
+   改为整组不压缩（放不下时由 .tr-head 换行），按钮文字不换行。 */
+.tr-tools { display: flex; gap: 8px; flex: 0 0 auto; flex-wrap: wrap; }
 .tr-tool { border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font: inherit; font-size: 12.5px;
-  padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+  padding: 6px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; flex: 0 0 auto; }
 .tr-tool:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
 
 /* 「选择基金」分级面板（2026-10-14）：发行人 → 类型 → 基金 */
@@ -1112,7 +1115,7 @@
 
 /* 2026-10-21：历史缺口悬浮提示（光标移到才显示说明） */
 .gap-flag { display: inline-flex; align-items: center; margin-left: 8px; font-size: 11.5px; color: #b7791f;
-  background: #fff8e6; border: 1px solid #f2d38a; border-radius: 999px; padding: 2px 8px; cursor: pointer;
+  background: #fff8e6; border: 1px solid #f2d38a; border-radius: 999px; padding: 0 6px; min-width: 22px; height: 22px; justify-content: center; line-height: 1; cursor: pointer;
   /* 2026-11-13：容器变窄时被 flex 压成三行（「ⓘ 有区 / 间缺 / 日」），强制不换行 */
   white-space: nowrap; flex: 0 0 auto; }
 

@@ -8,12 +8,12 @@ name: manulife-probe
 # 2026-11-11：原 330 分钟窗口 + 350 分钟超时，实测会卡到超时来不及提交（11-11 07:27 那班）。
 # 缩短为 180 分钟 + 240 分钟超时，保证每班都能把采样记录提交回来。
 on:
+  # 2026-11-16：原来 5 段 × 4 小时 ≈ 20 小时/天，几乎占满定时队列，导致 deploy 被延迟数小时
+  # （实测 11-14/15/16 夜间任务 03:26–04:58 才启动）。已有数据表明宏利在 01:30–02:15 上线，
+  # 故收窄为：00:00–03:30（210 分钟，5 分钟一次）+ 09:00–10:00（60 分钟，查迟到发布）。
   schedule:
-    - cron: '0 15 * * *'   # 北京/香港 23:00 起，跑 4 小时（跨夜段）
-    - cron: '0 19 * * *'   # 北京/香港 03:00 起，跑 4 小时（跨夜段）
-    - cron: '0 23 * * *'   # 北京/香港 07:00 起，跑 4 小时
-    - cron: '0 5 * * *'    # 北京/香港 13:00 起，跑 4 小时
-    - cron: '0 10 * * *'   # 北京/香港 18:00 起，跑 4 小时（覆盖用户提到的晚上 8 点）
+    - cron: '0 16 * * *'   # 香港 00:00 起，采样 210 分钟（覆盖跨夜发布）
+    - cron: '0 1 * * *'    # 香港 09:00 起，采样 60 分钟（迟发兜底）
   workflow_dispatch:
     inputs:
       minutes:
@@ -38,7 +38,7 @@ concurrency:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 260
     steps:
       - uses: actions/checkout@v4
 
@@ -59,7 +59,9 @@ jobs:
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             python tools/manulife-probe.py --minutes "${{ inputs.minutes }}" --interval "${{ inputs.interval }}"
           else
-            python tools/manulife-probe.py --minutes 240 --interval 5
+            MIN=210
+            if [ "${{ github.event.schedule }}" = "0 1 * * *" ]; then MIN=60; fi
+            python tools/manulife-probe.py --minutes "$MIN" --interval 5
           fi
 
       - name: 寫入運行摘要
@@ -73,6 +75,16 @@ jobs:
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # 2026-11-16：并发/推送被拒时样本只留在日志里（11-15、11-16 两班即如此）。
+      # 增加 artifact 兜底：无论回写是否成功，采样文件都可下载，不会再丢。
+      - name: 保存採樣記錄（artifact 兜底）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manulife-probe-${{ github.run_id }}
+          path: data/probe/
+          retention-days: 14
 
       - name: 提交探測記錄
         if: always()
