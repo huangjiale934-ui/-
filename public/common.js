@@ -658,7 +658,7 @@ function renderSrcNote() {
     if (cv && cv.queried != null) {
       covEl.hidden = false;
       covEl.textContent = '· ' + TQ('覆盖 {a}/{b} 只', { a: cv.queried, b: cv.total || tot }) +
-        (cv.noCode ? '（' + TQ('{c} 只无代码', { c: cv.noCode }) + '）' : '');
+        (cv.uncovered ? '（' + TQ('{c} 只未比对', { c: cv.uncovered }) + '）' : '');
       covEl.title = TQ('逐只回源核对的覆盖范围；无代码的基金无法按代码查询，已单列。');
     }
   }
