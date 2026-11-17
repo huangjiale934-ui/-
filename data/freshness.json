@@ -1,5 +1,5 @@
 {
- "at": "2026-11-17T17:25:17.560Z",
+ "at": "2026-11-17T23:29:14.158Z",
  "latest": "2026-11-16",
  "marketLatest": "2026-11-17",
  "fundLag": 1,
@@ -41,15 +41,15 @@
   {
    "trustee": "友邦信託",
    "count": 21,
-   "latest": "2026-11-13",
-   "lagDays": 2,
+   "latest": "2026-11-16",
+   "lagDays": 1,
    "exempt": null
   },
   {
    "trustee": "宏利",
    "count": 28,
-   "latest": "2026-11-13",
-   "lagDays": 2,
+   "latest": "2026-11-16",
+   "lagDays": 1,
    "exempt": null
   },
   {
@@ -83,8 +83,8 @@
   {
    "trustee": "銀聯信託",
    "count": 171,
-   "latest": "2026-11-13",
-   "lagDays": 2,
+   "latest": "2026-11-16",
+   "lagDays": 1,
    "exempt": null
   }
  ]
