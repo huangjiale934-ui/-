@@ -1118,14 +1118,15 @@ chk('晚批·③同类型对比修复（?set= 深链 + showCompareView，无 anB
     return seg.indexOf("u.searchParams.set('set', setStr)") >= 0 && seg.indexOf('showCompareView()') >= 0 && seg.indexOf('window.anBack()') < 0;
   } catch (e) { return false; }
 })());
-chk('晚批·④持仓行情补全（holdquote.py + 有代码行 ≥400 + 有价格行 ≥400）', (function () {
+/* 2026-11-17（外部核验 A3-a）：持仓 top10 的 code/price/chg/date 与标的错配（Apple→AAPL22 等），
+   已整体移除该组字段（页面从未渲染，热度条也未挂载）。断言改为「不得再出现错配字段」。 */
+chk('晚批·④持仓行情字段已移除（避免错配行情）', (function () {
   try {
     const fs2 = require('fs');
-    const hq = fs2.readFileSync(path.join(__dirname, '..', 'holdquote.py'), 'utf8');
     const h = JSON.parse(fs2.readFileSync(path.join(__dirname, '..', 'data', 'holdings.json'), 'utf8'));
     let code = 0, price = 0;
     Object.values(h.funds).forEach((f) => (f.top10 || []).forEach((t) => { if (t.code) code++; if (t.price != null) price++; }));
-    return hq.indexOf('GEN_MKT') >= 0 && hq.indexOf('BAD_WORDS') >= 0 && hq.indexOf('PIN') >= 0 && code >= 400 && price >= 400;
+    return code === 0 && price === 0;
   } catch (e) { return false; }
 })());
 chk('2026-10-30·⑤投资分布=南丁格尔玫瑰图（角度均分/半径映射/蓝8阶/中心真实合计）', (function () {
@@ -1168,14 +1169,15 @@ chk('晚批·③同类型对比修复（?set= 深链 + showCompareView，无 anB
     return seg.indexOf("u.searchParams.set('set', setStr)") >= 0 && seg.indexOf('showCompareView()') >= 0 && seg.indexOf('window.anBack()') < 0;
   } catch (e) { return false; }
 })());
-chk('晚批·④持仓行情补全（holdquote.py + 有代码行 ≥400 + 有价格行 ≥400）', (function () {
+/* 2026-11-17（外部核验 A3-a）：持仓 top10 的 code/price/chg/date 与标的错配（Apple→AAPL22 等），
+   已整体移除该组字段（页面从未渲染，热度条也未挂载）。断言改为「不得再出现错配字段」。 */
+chk('晚批·④持仓行情字段已移除（避免错配行情）', (function () {
   try {
     const fs2 = require('fs');
-    const hq = fs2.readFileSync(path.join(__dirname, '..', 'holdquote.py'), 'utf8');
     const h = JSON.parse(fs2.readFileSync(path.join(__dirname, '..', 'data', 'holdings.json'), 'utf8'));
     let code = 0, price = 0;
     Object.values(h.funds).forEach((f) => (f.top10 || []).forEach((t) => { if (t.code) code++; if (t.price != null) price++; }));
-    return hq.indexOf('GEN_MKT') >= 0 && hq.indexOf('BAD_WORDS') >= 0 && hq.indexOf('PIN') >= 0 && code >= 400 && price >= 400;
+    return code === 0 && price === 0;
   } catch (e) { return false; }
 })());
 chk('2026-10-30·⑤投资分布=南丁格尔玫瑰图（角度均分/半径映射/蓝8阶/中心真实合计）', (function () {

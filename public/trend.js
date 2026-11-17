@@ -830,7 +830,7 @@ window.TREND = (function () {
           '<button type="button" class="tr-r" data-r="custom">' + esc0( _t('选择日期')) + '</button>' +
         '</div>' +
         '<div class="tr-daterow" hidden>' +
-          '<input type="date" class="tr-d1"><span>~</span><input type="date" class="tr-d2">' +
+          '<input type="date" class="tr-d1" aria-label="' + _t('起始日期') + '"><span>~</span><input type="date" class="tr-d2" aria-label="' + _t('结束日期') + '">' +
           '<button type="button" class="btn sm tr-dgo">' + esc0( _t('确定')) + '</button>' +
         '</div>' +
       '</div>';

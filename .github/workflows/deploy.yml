@@ -308,6 +308,26 @@ jobs:
         with:
           node-version: '22'
 
+      # 2026-11-17（用户要求）：无论成功失败都要写终态，否则站点会永远显示「更新进行中」。
+      - name: 收尾寫入終態（always）
+        if: always()
+        continue-on-error: true
+        run: |
+          node -e '
+            const fs=require("fs");
+            const p="data/update-status.json";
+            let j={};
+            try{j=JSON.parse(fs.readFileSync(p,"utf8"))}catch(e){}
+            if(j.phase==="running"){
+              j.phase=process.env.MPF_JOB_OK==="1"?"done":"error";
+              j.finishedAt=new Date(Date.now()+8*3600e3).toISOString().slice(11,16);
+              fs.writeFileSync(p,JSON.stringify(j));
+              console.log("已写终态:", j.phase);
+            }
+          '
+        env:
+          MPF_JOB_OK: ${{ job.status == 'success' && '1' || '0' }}
+
       - name: 必需檔案自檢（防止核心腳本被 .gitignore 漏掉）
         # 2026-11-12（核驗發現）：mpfindex.js 一直在 .gitignore 裡，雲端 `node mpfindex.js`
         # 每次都是 MODULE_NOT_FOUND，被後面的 `|| echo` 吞掉 → 自算指數的最後一個點

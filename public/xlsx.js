@@ -302,8 +302,12 @@ window.MPFXLSX = (function () {
            Excel 会把图片拉伸填满「col..col2 / row..row2」这个矩形，列宽一变就变形。
            改为 oneCellAnchor + 显式 ext：按 PNG 原始宽高比、只缩放到目标宽度，永不变形。 */
         var dim = pngSize(im.data);
-        var targetW = im.fitW || 560;                    /* 目标显示宽度（px） */
-        var sc = dim && dim.w ? (targetW / dim.w) : 1;
+        /* 2026-11-17：优先按目标高度（fitH）等比缩放——块高随内容变化时，图不会溢出 */
+        var targetW = im.fitW || 560;
+        var targetH = im.fitH || 0;
+        var sc = 1;
+        if (dim && dim.h && targetH) sc = targetH / dim.h;
+        else if (dim && dim.w) sc = targetW / dim.w;
         var cx = Math.round((dim ? dim.w : targetW) * sc * 9525);   /* 1px = 9525 EMU */
         var cy = Math.round((dim ? dim.h : targetW * 0.86) * sc * 9525);
         return '<xdr:oneCellAnchor>' +

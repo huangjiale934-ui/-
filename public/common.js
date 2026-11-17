@@ -368,7 +368,10 @@ function initUpdateBanner() {
         const staleRun = !!(u && u.phase === 'running' && u.day && u.day !== hk().toISOString().slice(0, 10));
         if (u && u.phase === 'running' && !staleRun) {
           phase = 'running'; clearTimeout(doneTimer);
-          paint('run', TT('数据更新进行中'), (u.step ? u.step.replace(/node\s+\S+/g, '').trim() : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · ' + TT('更新完成后本页提示，无需手动刷新'), true);
+          /* 2026-11-17：不要把内部命令（node tools/...）显示给用户，只保留「第 N/M 步」 */
+          const sm = String(u.step || '').match(/^(\d+\/\d+)/);
+          const stepTxt = sm ? TQ('正在执行第 {n} 步', { n: sm[1] }) : '';
+          paint('run', TT('数据更新进行中'), stepTxt, shown + ' · ' + TT('更新完成后本页提示，无需手动刷新'), true);
           return;
         }
         if (j && j.refreshing) {
@@ -1916,6 +1919,7 @@ window.buildHoldAllocSheet = async function (entries, opts) {
   const n2 = (v) => (v == null || !isFinite(+v) ? '' : +v);
   const rows = [];
   const jobs = [];   /* {name, row, svg, span, kind}——kind: rose | bars */
+  const blocks = []; /* 每只基金的数据块行区间，用于按「实际行高」给图表留足空间 */
   rows.push({ h: 26, cells: [{ v: '前十大持仓与投资组合分布（来源：各发行人官网「基金便览」；占基金资产净值 %）', s: 1 }] });
   rows.push({ h: 30, cells: ['序号', '成分基金', '数据类型', '名称 / 类别', '占基金资产净值(%)', '报告期', '数据来源'].map((v) => ({ v, s: 2 })) });
   if (chartLimit !== Infinity && list.length > chartLimit) {
@@ -1966,8 +1970,23 @@ window.buildHoldAllocSheet = async function (entries, opts) {
     const MIN_BLOCK = 22;
     while (rows.length - blockStart < MIN_BLOCK) rows.push({ cells: [] });
     rows.push({ cells: [] });
+    blocks.push({ start: blockStart, end: rows.length });
   });
   /* 2026-10-30（用户要求）：嵌入两张图——投资组合分布玫瑰图 + 前十大持仓柱状图（各 6 列并排） */
+  /* 2026-11-17（用户反馈：数据来源两行高时图仍压表）：块内行高并不固定，
+     之前按固定 22 行留位，遇到换行就溢出。这里按**实际行高累加**算出块高（pt→px），
+     再把图高度限制在块高之内，行高怎么变都不会压到下一块。 */
+  const rowPx = (i) => {
+    const h = rows[i] && typeof rows[i].h === 'number' ? rows[i].h : 22;
+    return h * 4 / 3;
+  };
+  const blockPx = (startRow) => {
+    const b = blocks.find((x) => x.start === startRow);
+    if (!b) return 0;
+    let sum = 0;
+    for (let i = b.start; i < b.end; i++) sum += rowPx(i);
+    return sum;
+  };
   const images = [];
   for (const job of jobs) {
     const isRose = job.kind === 'rose';
@@ -1975,8 +1994,8 @@ window.buildHoldAllocSheet = async function (entries, opts) {
     if (!b64) continue;
     images.push({
       data: b64, col: isRose ? 7 : 14, row: job.row, col2: isRose ? 13 : 20, row2: job.row + 20,
-      /* 2026-11-17：图宽收到 420px（原 560），给表格与下一块留出安全间距 */
-      fitW: 420,
+      /* 图高 = 块高 - 6px 余量（至少 140px），宽度由图片比例决定，绝不溢出到下一块 */
+      fitH: Math.max(140, Math.min(520, blockPx(job.row) - 6)),
       name: job.name + (isRose ? ' 投资组合分布' : ' 前十大持仓柱状图'),
     });
   }
@@ -3146,12 +3165,12 @@ function initDCABuild() {
           '<input type="number" id="dcaAmt" aria-label="' + TT('每月供款金额（港元）') + '" min="100" step="100" value="2000">' +
           '<label>' + TT('第一次定投') + '</label>' +
           '<div class="dca-ym" id="dcaYm">' +
-            '<button type="button" class="dca-ym-btn" id="dcaYmBtn" aria-expanded="false">' +
+            '<button type="button" class="dca-ym-btn" id="dcaYmBtn" aria-expanded="false" aria-label="' + TT('开始月份') + '">' +
               '<span id="dcaYmText">2020 年 1 月</span><em>▾</em></button>' +
           '</div>' +
           '<label>' + TT('最后一次定投') + '</label>' +
           '<div class="dca-ym" id="dcaYmEnd">' +
-            '<button type="button" class="dca-ym-btn" id="dcaYmEndBtn" aria-expanded="false">' +
+            '<button type="button" class="dca-ym-btn" id="dcaYmEndBtn" aria-expanded="false" aria-label="' + TT('结束月份') + '">' +
               '<span id="dcaYmEndText">—</span><em>▾</em></button>' +
           '</div>' +
         '</div>' +

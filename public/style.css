@@ -1705,9 +1705,10 @@ body { background: #ffffff; }
 .upd-bar .x { border: 0; background: transparent; color: inherit; font-size: 18px; line-height: 1;
   cursor: pointer; padding: 0 2px; opacity: .6; }
 .upd-bar .x:hover { opacity: 1; }
-.upd-bar.run { background: linear-gradient(90deg, #0b5ea8 0%, #1a86d6 55%, #3aa0e6 100%); color: #fff; border-bottom-color: #0b5ea8; }
-.upd-bar.run .dot { background: #fff; box-shadow: 0 0 0 0 rgba(255,255,255,.85); animation: updp 1.5s infinite; }
-.upd-bar.run .meta { opacity: .9; }
+/* 2026-11-17（用户要求）：更新进行中改成与「更新窗口」同款的浅蓝，不再用深蓝渐变 */
+.upd-bar.run { background: #eaf4fd; color: #12466f; border-bottom-color: #cfe4f7; }
+.upd-bar.run .dot { background: #0a6cbf; animation: updp 1.5s infinite; }
+.upd-bar.run .meta { opacity: .8; }
 .upd-bar.ok { background: #e9f8ee; border-bottom-color: #bfe6cb; color: #14622c; }
 .upd-bar.ok .dot { background: #22a04a; }
 .upd-bar.err { background: #fdeeee; border-bottom-color: #f0c9c9; color: #8b1a1a; }
