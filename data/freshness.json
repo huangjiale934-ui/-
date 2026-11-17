@@ -1,5 +1,5 @@
 {
- "at": "2026-11-17T13:36:22.713Z",
+ "at": "2026-11-17T15:13:21.314Z",
  "latest": "2026-11-16",
  "marketLatest": "2026-11-17",
  "fundLag": 1,
@@ -27,15 +27,15 @@
   {
    "trustee": "中銀保誠",
    "count": 34,
-   "latest": "2026-11-13",
-   "lagDays": 2,
+   "latest": "2026-11-16",
+   "lagDays": 1,
    "exempt": null
   },
   {
    "trustee": "交通",
    "count": 14,
-   "latest": "2026-11-13",
-   "lagDays": 2,
+   "latest": "2026-11-16",
+   "lagDays": 1,
    "exempt": null
   },
   {
@@ -55,15 +55,15 @@
   {
    "trustee": "東亞",
    "count": 40,
-   "latest": "2026-11-13",
-   "lagDays": 2,
+   "latest": "2026-11-16",
+   "lagDays": 1,
    "exempt": null
   },
   {
    "trustee": "永明",
    "count": 31,
-   "latest": "2026-11-13",
-   "lagDays": 2,
+   "latest": "2026-11-16",
+   "lagDays": 1,
    "exempt": null
   },
   {
