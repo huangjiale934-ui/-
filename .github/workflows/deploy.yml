@@ -17,7 +17,11 @@ on:
     - cron: '35 1 * * 1-5'
     # 2026-11-16（用户要求「确保能保持更新」）：白天第二班兜底。
     # 09:35 若被 GitHub 队列拖掉，10:30 这班会补上；两班都是「仅净值」模式。
-    - cron: '30 2 * * 1-5'
+    # 2026-11-17（排查：GitHub 实测会丢弃/延迟定时触发，3 个 cron 只成 1 个）：
+    # 改为「多点小票」——同一份轻量任务多铺几个时点，任一个跑成即可；
+    # 每个时点都是「仅净值」模式，重复执行无害（幂等）。
+    - cron: '0 4 * * 1-5'    # 12:00 HKT
+    - cron: '0 8 * * *'      # 16:00 HKT
   workflow_dispatch: {}
 
 permissions:
@@ -73,7 +77,8 @@ jobs:
       - name: 判定更新模式（全量 / 仅净值）
         id: mode
         run: |
-          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.schedule }}" = "35 1 * * 1-5" ] || [ "${{ github.event.schedule }}" = "30 2 * * 1-5" ]; then
+          # 2026-11-17：除了 22:40（14:40 UTC）的全量班，其余定时/推送一律走「仅净值」
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.schedule }}" != "40 14 * * *" ]; then
             echo "light=1" >> "$GITHUB_OUTPUT"
             echo "本次为「仅净值」模式（北京时间交易日 09:35）"
           else
@@ -169,6 +174,9 @@ jobs:
 
       - name: 雅虎補空（官網未發布時先用雅虎同源淨值）
         run: node tools/yahoo-fill.js || echo "!! 雅虎補空失敗（不影響已抓到的最新值）"
+
+      - name: 歷史淨值統一 4 位（2026-11-17）
+        run: node tools/hist-round4.js
 
       - name: 重算指標與校驗
         run: |
@@ -355,3 +363,29 @@ jobs:
           path: site
 
       - uses: actions/deploy-pages@v4
+
+  # 2026-11-17（用户要求）：数据任务失败/被跳过 → 直接发邮件，不再等人发现。
+  # 依赖 Secrets：MPF_SMTP_USER / MPF_SMTP_PASS / MPF_MAIL_TO（已在仓库设置）。
+  notify-failure:
+    needs: [update-data, build-deploy]
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 发送失败告警
+        env:
+          MPF_SMTP_USER: ${{ secrets.MPF_SMTP_USER }}
+          MPF_SMTP_PASS: ${{ secrets.MPF_SMTP_PASS }}
+          MPF_MAIL_TO: ${{ secrets.MPF_MAIL_TO }}
+        run: |
+          node tools/notify-mail.js \
+            --subject "[强积金] 云端更新失败 · $(date -u +%m-%d\ %H:%M)Z" \
+            --body "工作流 deploy 失败
+          时间（UTC）：$(date -u +%F\ %T)
+          触发方式：${{ github.event_name }}
+          提交：${{ github.sha }}
+          查看：${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" || true

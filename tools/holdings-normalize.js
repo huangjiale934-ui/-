@@ -41,9 +41,13 @@ Object.values(j.funds).forEach((x) => {
   /* 2026-11-05（第四十轮）：BCT 便览解析只写 allocLabel + alloc，没有 allocSum，
      health-check 的字段完整性哨兵会报「缺失 83 只」（页面不受影响，因为前端自己求和）。
      这里按逐项 weight 补上；已有值一律不动。 */
-  if ((x.alloc || []).length && x.allocSum == null) {
-    x.allocSum = Math.round(x.alloc.reduce((q, b) => q + (Number(b.weight) || 0), 0) * 100) / 100;
-    a++;
+  if ((x.alloc || []).length) {
+    const sum = Math.round(x.alloc.reduce((q, b) => q + (Number(b.weight) || 0), 0) * 100) / 100;
+    if (x.allocSum == null) { x.allocSum = sum; a++; }
+    /* 2026-11-17（外部核验 A3/P1）：原始披露逐项四舍五入会略超 100（≤100.5 属正常）；
+       超过 100.5 的属实质超限（如 102.43），标记出来由前端归一显示并说明。 */
+    if (sum > 100.5) x.allocOverflow = sum;
+    else if (x.allocOverflow != null) delete x.allocOverflow;
   }
 });
 fs.writeFileSync(P, JSON.stringify(j));

@@ -1132,7 +1132,7 @@ chk('2026-10-30·⑤投资分布=南丁格尔玫瑰图（角度均分/半径映�
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     return c.indexOf('alr3-seg') >= 0 && c.indexOf('alr3-lead') >= 0 && c.indexOf('alr3-total') >= 0 &&
       c.indexOf('0.56 + 0.44') >= 0 && c.indexOf('#0A3D91') >= 0 && c.indexOf('#C3D7F5') >= 0 &&
-      c.indexOf('合計超過 100%') >= 0 && c.indexOf('RAMP.length - 1 - k') >= 0 &&
+      (c.indexOf('合計超過 100%') >= 0 || c.indexOf('原始披露合计') >= 0) && c.indexOf('RAMP.length - 1 - k') >= 0 &&
       c.indexOf('alr-legend') < 0 && c.indexOf('alr2-svg') < 0 && st.indexOf('.alr3-svg') >= 0;
   } catch (e) { return false; }
 })());
@@ -1182,7 +1182,7 @@ chk('2026-10-30·⑤投资分布=南丁格尔玫瑰图（角度均分/半径映�
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.css'), 'utf8');
     return c.indexOf('alr3-seg') >= 0 && c.indexOf('alr3-lead') >= 0 && c.indexOf('alr3-total') >= 0 &&
       c.indexOf('0.56 + 0.44') >= 0 && c.indexOf('#0A3D91') >= 0 && c.indexOf('#C3D7F5') >= 0 &&
-      c.indexOf('合計超過 100%') >= 0 && c.indexOf('RAMP.length - 1 - k') >= 0 &&
+      (c.indexOf('合計超過 100%') >= 0 || c.indexOf('原始披露合计') >= 0) && c.indexOf('RAMP.length - 1 - k') >= 0 &&
       c.indexOf('alr-legend') < 0 && c.indexOf('alr2-svg') < 0 && st.indexOf('.alr3-svg') >= 0;
   } catch (e) { return false; }
 })());

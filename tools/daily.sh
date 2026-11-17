@@ -197,7 +197,8 @@ soft_step "8.3/9 净值异动检测" node tools/anomaly-check.js
 step "8.4/9 历史索引对齐" node tools/hist-index-sync.js
 # 2026-11-13：funds.nav 是抓取原值（銀聯信託保留 6-7 位），hist 统一 4 位。
 # 两者不一致会让外部核验反复报「净值精度截断」，且表/图数字无法逐位对上。
-step "8.45/9 净值精度归一（表 = 历史末点，4 位）" node tools/nav-round4.js
+step "8.45/9 净值精度归一（表 = 历史末点，4 位）" node tools/hist-round4.js
+node tools/nav-round4.js
 # 2026-10-24：链路末尾固化验收（不依赖 AI 纪律；核验 U01）
 step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js
 # 2026-11-03（第二十九轮）：缺日检查改成「真缺才补」的自动闭环 ——
@@ -230,18 +231,19 @@ fi
 # GitHub 侧由云端 22:40 全量 / 09:40 仅净值自行抓取并发布；两边各写各的，避免同时写
 # data/*.json 造成 rebase 冲突（10-28 早上 10:41 的云端任务就是这样挂的）。
 # 需要人工兜底推送时显式加 --sync。
-# 2026-11-17（用户反馈：云端定时任务被延迟 8–10 小时，B 站整晚不更新）：
-# 改为**默认从本机推**——本机跑完即把 data 推给 GitHub，B 站与本机同步；
-# 推送前 sync-github.sh 会比对远端净值日，远端更新时自动跳过，不会倒退。
-# 需要保持「只更新 A 站」时加 --no-sync。
-if [ "${1:-}" = "--no-sync" ]; then
-  echo "（--no-sync：不推 GitHub，仅更新 WorkBuddy 站）"
-else
+# 2026-11-17（用户明确要求）：**GitHub 站必须自己抓、自己更新**，不依赖本机推送。
+# 因此默认不推；只有显式 `--sync` 才推（用于人工纠错）。
+if [ "${1:-}" = "--sync" ]; then
   soft_step "10/10 同步数据到 GitHub" bash tools/sync-github.sh
+else
+  echo "（不推 GitHub：B 站由云端定时任务独立抓取；需人工纠错时加 --sync）"
 fi
 # 2026-11-05（第三十八轮）：发布前清一次临时文件。抓取过程的 PDF/渲染快照可达 130MB+，
 # 而发布平台对项目包有 268MB 上限（曾因此发布被拒）。这些都是可再生中间产物，清掉不损失数据。
 soft_step "10/10 清理临时文件" bash tools/clean-scratch.sh
+# 2026-11-17：plan-lag 原来在 5.6 步跑（早于 funds 更新），清单里的 asOf 会滞后一天。
+# 在派生数据全部重算后再跑一次，保证 status 里的计划内落后清单是当前值。
+soft_step "9.9/9 同计划落后（末次）" node tools/plan-lag.js
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致（如新 funds 配旧 nav-perf）时禁止发布
 step "10/10 发布前一致性" node tools/predeploy-check.js
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
