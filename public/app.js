@@ -834,7 +834,7 @@
       (rk != null && rk <= 3 ? '<span class="medal g' + rk + '">' + rk + '</span>' : '<span class="rank-cell">' + (rk || '') + '</span>') + '</td>',
     /* 2026-11-14（第三轮独立核验 D-06）：行内对比勾选框原先没有任何可读名称，
        屏幕阅读器只会念「复选框」。补 aria-label（含基金名）与 title。 */
-    cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" data-cmp="' + esc(x.id) +
+    cmp: (x) => '<td data-c="cmp" class="c" data-l="' + TT('对比') + '"><input type="checkbox" aria-label="' + esc(TT('加入对比') + '：' + (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund))) + '" data-cmp="' + esc(x.id) +
       '" aria-label="' + esc(TT('加入对比') + '：' + (x.fundBase || x.fund || '')) +
       '" title="' + esc(TT('加入对比')) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
     fund: (x) => {

@@ -567,7 +567,9 @@ function sendRaw(req, res, code, body, type, opt) {
   const buf = Buffer.isBuffer(body) ? body : Buffer.from(String(body), 'utf8');
   const t = type || 'application/json; charset=utf-8';
   const headers = Object.assign(
-    { 'Content-Type': t, 'Cache-Control': (opt && opt.cache) || 'no-store', 'Access-Control-Allow-Origin': '*' },
+    /* 2026-11-17（用户要求）：默认给 60 秒缓存，重复打开不再回源；数据更新最慢 1 分钟可见。
+       需要绝对实时的接口（状态/上传）仍显式传 no-store。 */
+    { 'Content-Type': t, 'Cache-Control': (opt && opt.cache) || 'public, max-age=60, stale-while-revalidate=300', 'Access-Control-Allow-Origin': '*' },
     (opt && opt.headers) || {}
   );
   /* ETag：正文 md5 前 16 位 + 长度（1–2MB 计算约 3–5ms，可忽略） */

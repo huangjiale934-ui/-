@@ -1518,6 +1518,9 @@
   '净值日 <b>{d}</b>': 'NAV date <b>{d}</b>',
   '本站自算：（年化回报 − 无风险利率）÷ 年化波动率；年化波动率低于 0.5% 的基金（多为保守／货币市场）比值失真，显示 n.a.': 'Calculated by us: (annualised return − risk-free rate) ÷ annualised volatility. Funds with volatility below 0.5% (mostly conservative/money-market) produce a meaningless ratio, shown as n.a.',
   '夏普比率显示 n.a. 表示该基金近 1 年年化波动率低于 0.5%（多为保守／货币市场基金），比值会被极小的分母放大而失真，故不提供。': 'Sharpe ratio shows n.a. when one-year annualised volatility is below 0.5% (mostly conservative and money-market funds); a near-zero denominator would inflate the ratio, so it is not provided.',
+  '加入对比：': 'Add to comparison: ',
+  '每月供款金额（港元）': 'Monthly contribution (HKD)',
+  '现金权重为负表示报告期末存在透支／应付款项（净负债），是发行人按净额披露的口径，非数据错误。': 'A negative cash weight means an overdraft or payable (net liability) at the reporting date; it reflects the issuer net-basis disclosure, not a data error.',
 
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }

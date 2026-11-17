@@ -1430,8 +1430,11 @@ window.ensurePerf = function () {
     return window.TREND.ensurePerf().then((j) => { window.__PERF = j; return j; }).catch(() => null);
   }
   if (!__perfReq) {
-    __perfReq = fetch('/api/navperf', { cache: 'default' })
-      .then((r) => (r.ok ? r.json() : null))
+    /* 2026-11-17（用户要求）：这里原来直接用 fetch，与别处的 fetchJSON('/api/navperf')
+       各发一次（首屏重复 46KB）。改走同一缓存入口，命中即复用。 */
+    __perfReq = (typeof window.fetchJSON === 'function'
+      ? window.fetchJSON('/api/navperf', 'navperf')
+      : fetch('/api/navperf', { cache: 'default' }).then((r) => (r.ok ? r.json() : null)))
       .then((j) => { window.__PERF = j; return j; })
       .catch(() => null);
   }
@@ -2255,6 +2258,10 @@ window.allocBlockHTML = function (id) {
   const overNote = allocSum > 100.05
     ? '<div class="hl-note hl-warn">' + TQ('原始披露合计 {s}%：部分资产同时计入多个类别，或含衍生工具／杠杆敞口，故合计可超过 100%（非计算错误，本站不归一化）', { s: nf(allocSum, 2) }) + '</div>'
     : '';
+  /* 2026-11-17（外部核验 A3-c）：个别基金现金权重为负（透支/应付），属正常会计口径，需说明 */
+  const negCash = (d.alloc || []).some((a) => /現金|现金/.test(String(a.label || '')) && Number(a.weight) < 0)
+    ? '<div class="hl-note">' + TT('现金权重为负表示报告期末存在透支／应付款项（净负债），是发行人按净额披露的口径，非数据错误。') + '</div>'
+    : '';
   const gapNote = allocSum < 99.5
     ? '<div class="hl-note hl-warn">' + TQ('便览只列出主要类别，已披露合计 {s}%；其余 {g}% 在源文件中未单列，图中以灰色「其他／未列明」表示，本站不对其做类别拆分或数值推算。', { s: nf(allocSum, 2), g: nf(100 - allocSum, 2) }) + '</div>'
     : '';
@@ -2263,7 +2270,7 @@ window.allocBlockHTML = function (id) {
     overNote +
     '<ul class="alr2-list">' + mob + '</ul>' +
     '<div class="alr2-note hl-note">' + TQ('數據來源：{s} · 佔基金資產淨值百分比', { s: srcName }) + (d.asOf ? ' · ' + TQ('截至 {d}', { d: d.asOf }) : '') + '</div>' +
-    dSrcNote + gapNote + '</div>';
+    dSrcNote + negCash + gapNote + '</div>';
 };
 
 /* 玫瑰图 hover/focus：扇形加深描边，同步高亮对应引线与标签（事件委托，只绑定一次） */
@@ -3128,7 +3135,7 @@ function initDCABuild() {
       '<div class="dca-body">' +
         '<div class="dca-row">' +
           '<label>' + TT('每月供款（港元）') + '</label>' +
-          '<input type="number" id="dcaAmt" min="100" step="100" value="2000">' +
+          '<input type="number" id="dcaAmt" aria-label="' + TT('每月供款金额（港元）') + '" min="100" step="100" value="2000">' +
           '<label>' + TT('第一次定投') + '</label>' +
           '<div class="dca-ym" id="dcaYm">' +
             '<button type="button" class="dca-ym-btn" id="dcaYmBtn" aria-expanded="false">' +

@@ -8,8 +8,8 @@ name: freshness
 
 on:
   schedule:
-    - cron: '0 3 * * 1-5'    # 11:00 HKT
-    - cron: '0 11 * * 1-5'   # 19:00 HKT（兜底：白天漏了晚间还能发现）
+    # 2026-11-17（用户要求）：工作日中午 12:00（HKT）检查一次即可，不再一天两次。
+    - cron: '0 4 * * 1-5'    # 12:00 HKT
   workflow_dispatch:
 
 permissions:

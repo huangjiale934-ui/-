@@ -40,6 +40,10 @@ const THRESHOLD = 10;
 function get(url) {
   return new Promise((resolve) => {
     const req = https.get(withShare(url), { timeout: 30000, headers: { 'cache-control': 'no-store' } }, (res) => {
+      /* 2026-11-17：原来是 s += d（Buffer 隐式转字符串），多字节汉字跨 TCP 分块时会被切成
+         U+FFFD（实测把「富達退休集成信託」写成「退��集成信託」，并被 build-static 的
+         编码断言拦下）。改为 setEncoding，由 Node 负责跨块拼接。 */
+      res.setEncoding('utf8');
       let s = '';
       res.on('data', (d) => { s += d; });
       res.on('end', () => { try { resolve(JSON.parse(s)); } catch (e) { resolve(null); } });

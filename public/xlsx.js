@@ -282,7 +282,10 @@ window.MPFXLSX = (function () {
       /* 2026-11-17：从 PNG 头读原始宽高，用于按比例插入（避免被 Excel 拉伸变形） */
       function pngSize(b64) {
         try {
-          var bin = (typeof atob === 'function') ? atob(b64) : '';
+          /* 传进来的可能是 data URL（data:image/png;base64,....），必须先剥前缀，
+             否则 atob 抛错 → 拿不到尺寸 → 退回默认比例 → 图仍会被拉伸。 */
+          var raw = String(b64 || '').replace(/^data:[^,]*,/, '');
+          var bin = (typeof atob === 'function') ? atob(raw) : '';
           if (!bin || bin.length < 24) return null;
           var w = 0, h = 0;
           for (var k = 0; k < 4; k++) {
