@@ -83,11 +83,16 @@ function fundDiffList(fa, fb, label, out) {
   const onlyA = [];
   const onlyB = [];
   const valDiff = [];
+  let precOnly = 0;
   fa.forEach((x) => {
     const y = mb.get(String(x.id));
     if (!y) { onlyA.push(x); return; }
     if (x.navAsOf !== y.navAsOf) valDiff.push([x, y]);
-    else if (x.nav != null && y.nav != null && Math.abs(x.nav - y.nav) > 1e-6) valDiff.push([x, y]);
+    /* 2026-11-17：hist 原值保留 7 位（銀聯信託等），B 站构建会归到 4 位。
+       5e-5 级别的差是展示精度，不是数据错误（真错价至少 0.01）。阈值改 1e-4 并把这类单独计数。 */
+    else if (x.nav != null && y.nav != null && Math.abs(x.nav - y.nav) > 1e-4) valDiff.push([x, y]);
+    else if (x.nav != null && y.nav != null && Math.abs(x.nav - y.nav) > 1e-9) precOnly++;
+
   });
   const ida = new Set(fa.map((x) => String(x.id)));
   fb.forEach((y) => { if (!ida.has(String(y.id))) onlyB.push(y); });

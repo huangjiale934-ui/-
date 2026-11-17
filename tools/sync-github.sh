@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
-# 数据推送 GitHub（2026-10-26 新增）
-# 背景：GitHub Actions 的 schedule（每日 22:40）自建仓以来一次都没触发过（近 30 次运行全部是 push 事件），
-#       导致 GitHub 站长期停在上一次手工推送的数据（10-26 实测仍为 navLatest=10-22，本机已到 10-23）。
-#       这里给本机链路一个兜底：每日数据跑完就提交 data/ 并推送，push 事件本身会触发 Pages 构建。
+# 数据推送 GitHub
+# ================
+# 2026-10-26：GitHub schedule 长期不触发 / 严重延迟，本机跑完就推一份，push 事件会触发 Pages 构建。
+# 2026-11-17：改为「默认推送」，并加两道保险：
+#   ① 逐只守卫：远端任一只基金比本地新 → 拒绝推送（fail-closed），防止用旧数据覆盖云端；
+#   ② 不再 `pull --rebase`（大 JSON 必冲突，会把工作区搞成 UU，甚至回滚未提交的脚本）→
+#      用 commit-tree 基于 origin/main 直接构建提交，天然快进。
 # 用法：bash tools/sync-github.sh [--dry]
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 DRY=0; [ "${1:-}" = "--dry" ] && DRY=1
 
-# 2026-11-17（用户反馈「云端定时被延迟 8+ 小时」）：本机跑完直接把数据推给 GitHub，
-# 让 B 站与本机同步。但必须先比对远端，避免用较旧的本地数据覆盖云端较新的抓取结果
-# （2026-11-14 就发生过：本机 11-12:196 只 覆盖了云端 11-12:248 只）。
 git fetch origin main >/dev/null 2>&1 || true
-# 逐只比较：远端有任何一只比本地新 → 不推（避免倒退），交由 site-reconcile 处理
+
+# ---------- 守卫：远端是否有更新的基金 ----------
 GUARD=$(git show origin/main:data/funds.json 2>/dev/null | node -e "
 let s='';process.stdin.setEncoding('utf8');
 process.stdin.on('data',d=>s+=d).on('end',()=>{
@@ -38,36 +39,36 @@ case "$GUARD" in
     exit 0 ;;
 esac
 
-git add -A data/ 2>/dev/null || true
+# ---------- 构建提交：索引 = origin/main + 工作区改动 ----------
+git read-tree origin/main || { echo "read-tree 失败"; exit 1; }
+git add --ignore-removal data/ 2>/dev/null || true
+git add --ignore-removal tools/ .github/ 2>/dev/null || true
 
-# 顺手把自动化脚本/工作流的改动也带上（不含 public/ 前端，前端改动需人工确认后单独提交）
-git add tools/ .github/ 2>/dev/null || true
-
-if git diff --cached --quiet; then
-  echo "无数据变更，跳过推送"
+# 比较基准必须是 origin/main（比 HEAD 会误判「无变更」）
+if git diff --cached --quiet origin/main; then
+  echo "无变更，跳过推送"
   exit 0
 fi
-echo "待提交：" $(git diff --cached --name-only | wc -l) "个文件"
+echo "待提交：" $(git diff --cached --name-only origin/main | wc -l) "个文件"
 if [ "$DRY" = "1" ]; then
-  git diff --cached --stat | tail -3
+  git diff --cached --stat origin/main | tail -3
   echo "（--dry：不提交不推送）"
   exit 0
 fi
 
-git commit -q -m "data: daily sync $(date +%F)" || { echo "提交失败"; exit 1; }
-LOCAL=$(git rev-parse HEAD)
-for i in 1 2 3; do
-  if git push origin main 2>&1 | tail -2; then
-    REMOTE=$(git ls-remote origin refs/heads/main 2>/dev/null | cut -f1)
-    if [ "$REMOTE" = "$LOCAL" ]; then
-      echo "✔ 已推送 GitHub：${LOCAL:0:7}（push 事件将触发 Pages 构建）"
+TREE=$(git write-tree) || { echo "write-tree 失败"; exit 1; }
+for i in 1 2 3 4 5; do
+  PARENT=$(git rev-parse origin/main)
+  COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "data: daily sync $(date +%F)") || { echo "commit-tree 失败"; exit 1; }
+  if git push origin "$COMMIT:main" 2>&1 | tail -2; then
+    if git ls-remote origin refs/heads/main 2>/dev/null | grep -q "$COMMIT"; then
+      echo "✔ 已推送 GitHub：${COMMIT:0:7}（push 事件将触发 Pages 构建）"
       exit 0
     fi
   fi
-  echo "推送未生效（第 $i 次），尝试对齐远端后重试…"
-  git pull --rebase --autostash origin main >/dev/null 2>&1 || true
-  LOCAL=$(git rev-parse HEAD)
-  sleep 3
+  echo "推送未生效（第 $i 次），重新取远端后重试…"
+  sleep 4
+  git fetch origin main >/dev/null 2>&1 || true
 done
-echo "!!! 推送 GitHub 失败（3 次），请检查 SSH 443 通道或手动执行 git push"
+echo "!!! 推送 GitHub 失败（5 次），请检查 SSH 通道；本地数据未受影响"
 exit 1
