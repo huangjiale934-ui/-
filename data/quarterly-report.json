@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-11-17T11:08:52",
+  "proxy": false,
+  "groups": [
+    {
+      "name": "AMTD",
+      "currentAsOf": "2026-06-30",
+      "slugs": 16,
+      "updated": false,
+      "action": "样张下载失败（网络或代理）"
+    },
+    {
+      "name": "滙豐",
+      "currentAsOf": "2026-06-30",
+      "updated": false,
+      "latestPeriod": "2026-06-30",
+      "action": "官方尚未发布新季"
+    },
+    {
+      "name": "恒生",
+      "currentAsOf": "2026-06-30",
+      "updated": false,
+      "latestPeriod": "2026-06-30",
+      "action": "官方尚未发布新季"
+    }
+  ],
+  "review": []
+}

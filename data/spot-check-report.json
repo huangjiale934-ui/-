@@ -1,0 +1,448 @@
+{
+  "generatedAt": "2026-10-29T16:06:27.018Z",
+  "samples": [
+    {
+      "id": "1520",
+      "name": "65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 1.21,
+        "recalc": 1.21
+      },
+      "allocSum": 100,
+      "top10Sum": 23.85,
+      "source": "友邦官網價格搜尋（aia-pt API，逐日）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "878",
+      "name": "美洲基金",
+      "checks": [],
+      "y1": {
+        "perf": 12.58,
+        "recalc": 12.58
+      },
+      "allocSum": 100,
+      "top10Sum": 37.45,
+      "source": "友邦官網價格搜尋（aia-pt API，逐日）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "772",
+      "name": "AMTD 安聯精選均衡基金",
+      "checks": [],
+      "y1": {
+        "perf": 3.26,
+        "recalc": 3.26
+      },
+      "allocSum": 100,
+      "top10Sum": 18.11,
+      "source": "etnet 環富通（逐日累積回報，按當前淨值錨定）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "770",
+      "name": "AMTD 安聯精選穩定資本基金",
+      "checks": [],
+      "y1": {
+        "perf": 0.15,
+        "recalc": 0.15
+      },
+      "allocSum": 100,
+      "top10Sum": 17.08,
+      "source": "etnet 環富通（逐日累積回報，按當前淨值錨定）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "1522",
+      "name": "交通銀行65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 1.61,
+        "recalc": 1.61
+      },
+      "allocSum": 100,
+      "top10Sum": 34.6,
+      "source": "交通銀行信託官網（愉盈退休強積金計劃）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "210",
+      "name": "交通銀行亞洲動力股票成分基金",
+      "checks": [],
+      "y1": {
+        "perf": 13.71,
+        "recalc": 13.71
+      },
+      "allocSum": 100,
+      "top10Sum": 45.9,
+      "source": "交通銀行信託官網（愉盈退休強積金計劃）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "1532",
+      "name": "BCT（行業）65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 1.66,
+        "recalc": 1.66
+      },
+      "allocSum": 100,
+      "top10Sum": 34.6,
+      "source": "BCT官網（bcthk.com）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "178",
+      "name": "BCT（行業）亞洲股票基金",
+      "checks": [],
+      "y1": {
+        "perf": 10.53,
+        "recalc": 10.53
+      },
+      "allocSum": 100,
+      "top10Sum": 36,
+      "source": "BCT官網（bcthk.com）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "1536",
+      "name": "東亞 (行業計劃) 65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 0.75,
+        "recalc": 0.75
+      },
+      "allocSum": 100,
+      "top10Sum": 14.07,
+      "source": "東亞銀行官網（GetMPFData 全量日度單位價格）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "899",
+      "name": "東亞 (行業計劃) 亞洲股票基金",
+      "checks": [],
+      "y1": {
+        "perf": 23.8,
+        "recalc": 23.8
+      },
+      "allocSum": 100.1,
+      "top10Sum": 41.14,
+      "source": "東亞銀行官網（GetMPFData 全量日度單位價格）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "1542",
+      "name": "中銀保誠65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 0.8,
+        "recalc": 0.8
+      },
+      "allocSum": 100,
+      "top10Sum": 7.4,
+      "source": "中銀保誠官網（基金價格查詢）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "234",
+      "name": "中銀保誠亞洲股票基金",
+      "checks": [],
+      "y1": {
+        "perf": 14.93,
+        "recalc": 14.93
+      },
+      "allocSum": 100,
+      "top10Sum": 35.3,
+      "source": "中銀保誠官網（基金價格查詢）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "1546",
+      "name": "中國人壽65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 1.67,
+        "recalc": 1.67
+      },
+      "allocSum": 100,
+      "top10Sum": 34.57,
+      "source": "中國人壽信託官網（OnePartner API）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "236",
+      "name": "中國人壽平衡基金",
+      "checks": [],
+      "y1": {
+        "perf": 2.21,
+        "recalc": 2.21
+      },
+      "allocSum": 100,
+      "top10Sum": 38,
+      "source": "中國人壽信託官網（OnePartner API）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "1552",
+      "name": "65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 0.74,
+        "recalc": 0.74
+      },
+      "allocSum": 100,
+      "top10Sum": 7.42,
+      "source": "富達退休集成信託官網 NavChartData API（逐日單位資產淨值）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "2079",
+      "name": "美洲股票基金",
+      "checks": [],
+      "y1": {
+        "perf": 10.8,
+        "recalc": 10.8
+      },
+      "allocSum": 100,
+      "top10Sum": 38.15,
+      "source": "富達退休集成信託官網 NavChartData API（逐日單位資產淨值）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "1555",
+      "name": "海通65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 4.69,
+        "recalc": 4.69
+      },
+      "allocSum": 100.01,
+      "top10Sum": 24.45,
+      "source": "海通國際官網 PerformanceChart API（逐日單位價格）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "1556",
+      "name": "海通65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 4.69,
+        "recalc": 4.69
+      },
+      "allocSum": 100.01,
+      "top10Sum": 24.45,
+      "source": "海通國際官網 PerformanceChart API（逐日單位價格）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "806",
+      "name": "65 歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 1.12,
+        "recalc": 1.12
+      },
+      "allocSum": 100,
+      "top10Sum": 16,
+      "source": "恒生官網（rbwm-api）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "303",
+      "name": "亞太股票基金",
+      "checks": [],
+      "y1": {
+        "perf": 8.98,
+        "recalc": 8.98
+      },
+      "allocSum": 99.7,
+      "top10Sum": 40.6,
+      "source": "恒生官網（rbwm-api）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "802",
+      "name": "65歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 1.13,
+        "recalc": 1.13
+      },
+      "allocSum": 100,
+      "top10Sum": 16,
+      "source": "滙豐官網（rbwm-api）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "324",
+      "name": "亞太股票基金",
+      "checks": [],
+      "y1": {
+        "perf": 8.99,
+        "recalc": 8.99
+      },
+      "allocSum": 99.7,
+      "top10Sum": 40.6,
+      "source": "滙豐官網（rbwm-api）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "844",
+      "name": "宏利MPF 2025退休基金",
+      "checks": [],
+      "y1": {
+        "perf": 3.16,
+        "recalc": 3.16
+      },
+      "allocSum": 99.9,
+      "top10Sum": 15.75,
+      "source": "宏利官网（www.manulife.com.hk）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "845",
+      "name": "宏利MPF 2030退休基金",
+      "checks": [],
+      "y1": {
+        "perf": 5.01,
+        "recalc": 5.01
+      },
+      "allocSum": 100.1,
+      "top10Sum": 16.78,
+      "source": "宏利官网（www.manulife.com.hk）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "365",
+      "name": "宏利MPF利息基金",
+      "checks": [],
+      "allocSum": 99.99,
+      "top10Sum": 12.18,
+      "source": "宏利環球精選（強積金）計劃（宏利）",
+      "asOf": ""
+    },
+    {
+      "id": "1488",
+      "name": "65 歲後基金",
+      "checks": [],
+      "y1": {
+        "perf": 1.77,
+        "recalc": 1.77
+      },
+      "allocSum": 100.1,
+      "top10Sum": 33.68,
+      "source": "萬通信託官網基金價格歷史 API（逐日單位價格）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "384",
+      "name": "亞洲債券基金",
+      "checks": [],
+      "y1": {
+        "perf": -1.73,
+        "recalc": -1.73
+      },
+      "allocSum": 100.2,
+      "top10Sum": 13.06,
+      "source": "萬通信託官網基金價格歷史 API（逐日單位價格）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "815",
+      "name": "安聯精選均衡基金",
+      "checks": [],
+      "allocSum": 100,
+      "top10Sum": 18.11,
+      "source": "新地／渣打信託官網（SHKP ESS Fund Price PDF）",
+      "asOf": "2026-09-30"
+    },
+    {
+      "id": "464",
+      "name": "安聯精選穩定增長基金",
+      "checks": [],
+      "allocSum": 100,
+      "top10Sum": 14.76,
+      "source": "新地／渣打信託官網（SHKP ESS Fund Price PDF）",
+      "asOf": "2026-09-30"
+    },
+    {
+      "id": "1199",
+      "name": "永明富時強積金香港指數基金",
+      "checks": [],
+      "y1": {
+        "perf": -13.59,
+        "recalc": -13.59
+      },
+      "allocSum": 100,
+      "top10Sum": 43.8,
+      "source": "永明官網（彩虹強積金計劃）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "1200",
+      "name": "永明富時強積金香港指數基金",
+      "checks": [],
+      "y1": {
+        "perf": -13.58,
+        "recalc": -13.58
+      },
+      "allocSum": 100,
+      "top10Sum": 43.8,
+      "source": "永明官網（彩虹強積金計劃）",
+      "asOf": "2026-10-28"
+    },
+    {
+      "id": "2379",
+      "name": "退休收益基金",
+      "checks": [],
+      "allocSum": 100,
+      "top10Sum": 15.61,
+      "source": "友邦官網價格搜尋（aia-pt API，逐日）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "2066",
+      "name": "景順環球追蹤指數基金",
+      "checks": [],
+      "y1": {
+        "perf": 12.96,
+        "recalc": 12.96
+      },
+      "allocSum": 100,
+      "top10Sum": 25.4,
+      "source": "BCT官網（bcthk.com）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "2067",
+      "name": "景順環球追蹤指數基金",
+      "checks": [],
+      "y1": {
+        "perf": 12.96,
+        "recalc": 12.96
+      },
+      "allocSum": 100,
+      "top10Sum": 25.4,
+      "source": "BCT官網（bcthk.com）",
+      "asOf": "2026-10-27"
+    },
+    {
+      "id": "875",
+      "name": "亞洲債券基金",
+      "checks": [],
+      "y1": {
+        "perf": -1.25,
+        "recalc": -1.25
+      },
+      "allocSum": 100,
+      "top10Sum": 16.05,
+      "source": "友邦官網價格搜尋（aia-pt API，逐日）",
+      "asOf": "2026-10-27"
+    }
+  ],
+  "failCount": 0,
+  "warnCount": 0,
+  "fails": [],
+  "warns": []
+}

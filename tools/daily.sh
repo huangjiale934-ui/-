@@ -230,10 +230,14 @@ fi
 # GitHub 侧由云端 22:40 全量 / 09:40 仅净值自行抓取并发布；两边各写各的，避免同时写
 # data/*.json 造成 rebase 冲突（10-28 早上 10:41 的云端任务就是这样挂的）。
 # 需要人工兜底推送时显式加 --sync。
-if [ "${1:-}" = "--sync" ]; then
-  soft_step "10/10 同步数据到 GitHub" bash tools/sync-github.sh
+# 2026-11-17（用户反馈：云端定时任务被延迟 8–10 小时，B 站整晚不更新）：
+# 改为**默认从本机推**——本机跑完即把 data 推给 GitHub，B 站与本机同步；
+# 推送前 sync-github.sh 会比对远端净值日，远端更新时自动跳过，不会倒退。
+# 需要保持「只更新 A 站」时加 --no-sync。
+if [ "${1:-}" = "--no-sync" ]; then
+  echo "（--no-sync：不推 GitHub，仅更新 WorkBuddy 站）"
 else
-  echo "（已跳过 GitHub 推送：两站独立更新；确需推送加 --sync）"
+  soft_step "10/10 同步数据到 GitHub" bash tools/sync-github.sh
 fi
 # 2026-11-05（第三十八轮）：发布前清一次临时文件。抓取过程的 PDF/渲染快照可达 130MB+，
 # 而发布平台对项目包有 268MB 上限（曾因此发布被拒）。这些都是可再生中间产物，清掉不损失数据。

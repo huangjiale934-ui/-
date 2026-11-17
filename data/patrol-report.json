@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-11-17T03:08:49.909Z",
+  "tool": "link-audit",
+  "ok": true,
+  "fails": [],
+  "warns": [],
+  "sourceCount": 15,
+  "externalCount": 2,
+  "networkChecked": false,
+  "note": "fails 为结构性错误（必须修）；warns 为可达性或超期提示（需判断是否为发行人未发布）"
+}

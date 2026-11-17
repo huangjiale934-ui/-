@@ -8,6 +8,36 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 DRY=0; [ "${1:-}" = "--dry" ] && DRY=1
 
+# 2026-11-17（用户反馈「云端定时被延迟 8+ 小时」）：本机跑完直接把数据推给 GitHub，
+# 让 B 站与本机同步。但必须先比对远端，避免用较旧的本地数据覆盖云端较新的抓取结果
+# （2026-11-14 就发生过：本机 11-12:196 只 覆盖了云端 11-12:248 只）。
+git fetch origin main >/dev/null 2>&1 || true
+# 逐只比较：远端有任何一只比本地新 → 不推（避免倒退），交由 site-reconcile 处理
+GUARD=$(git show origin/main:data/funds.json 2>/dev/null | node -e "
+let s='';process.stdin.setEncoding('utf8');
+process.stdin.on('data',d=>s+=d).on('end',()=>{
+  let remote=[];
+  try{remote=JSON.parse(s).funds||[];}catch(e){console.log('UNKNOWN');return;}
+  const loc=require('./data/funds.json').funds||[];
+  const m=new Map(loc.map(f=>[String(f.id),f.navAsOf||'']));
+  let ahead=0, sample=[];
+  for(const f of remote){
+    const l=m.get(String(f.id));
+    if(l===undefined) continue;
+    if((f.navAsOf||'')>(l||'')){ahead++; if(sample.length<3) sample.push(f.id+':'+l+'→'+f.navAsOf);}
+  }
+  console.log(ahead?('AHEAD '+ahead+' '+sample.join(',')):'OK');
+});" 2>/dev/null)
+case "$GUARD" in
+  OK) : ;;
+  AHEAD*)
+    echo "远端有更新的基金（$GUARD）→ 跳过推送，请先跑 site-reconcile --apply"
+    exit 0 ;;
+  *)
+    echo "无法确认远端数据新旧（$GUARD）→ 为安全起见跳过推送"
+    exit 0 ;;
+esac
+
 git add -A data/ 2>/dev/null || true
 
 # 顺手把自动化脚本/工作流的改动也带上（不含 public/ 前端，前端改动需人工确认后单独提交）

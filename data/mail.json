@@ -1,0 +1,10 @@
+{
+ "host": "smtp.qq.com",
+ "port": 465,
+ "user": "1171800084@qq.com",
+ "pass": "xnqclxnirujlfjif",
+ "to": [
+  "1171800084@qq.com"
+ ],
+ "fromName": "强积金数据平台监控"
+}

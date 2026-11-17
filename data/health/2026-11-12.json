@@ -1,0 +1,49 @@
+{
+ "at": "2026-11-12 15:28",
+ "site": "https://mpf-data.app.workbuddy.host",
+ "count": 451,
+ "checks": {
+  "valBad": 0,
+  "dateBad": 0,
+  "checked": 450,
+  "noAlloc": 0,
+  "noAllocData": 0,
+  "shortTop": 8,
+  "unsorted": 0,
+  "noDate": 0,
+  "emptyName": 0,
+  "statRow": 0,
+  "overSum": 0,
+  "ctrlChar": 0
+ },
+ "issues": [
+  {
+   "level": "ok",
+   "msg": "--local 模式：已跳过站点可达/净值日滞后/计算器线上抽样"
+  },
+  {
+   "level": "ok",
+   "msg": "无真缺日（净值与历史末点全部对齐）"
+  },
+  {
+   "level": "warn",
+   "msg": "源站滞后：宏利退休精選（強積金）計劃 39 只，最新 2026-11-09（滞后 2 个交易日）"
+  },
+  {
+   "level": "warn",
+   "msg": "源站滞后：新地強積金僱主營辦計劃 10 只，最新 2026-09-30（滞后 28 个交易日）"
+  },
+  {
+   "level": "ok",
+   "msg": "计算器抽样回归：--local 模式跳过（依赖线上 API 对照，Actions 内不可用；全量验证由独立核验承担）"
+  },
+  {
+   "level": "warn",
+   "msg": "十大持仓不足 10 条 8 只"
+  },
+  {
+   "level": "ok",
+   "msg": "--local：跳过页面可达检查（Actions 构建期站点尚未发布）"
+  }
+ ]
+}

@@ -59,7 +59,10 @@ def fetch_html():
         return get(None)
     except Exception as e:  # noqa: BLE001
         last = e
-    for prox in (os.environ.get("HTTPS_PROXY"), os.environ.get("https_proxy"), "http://127.0.0.1:7877"):
+    # 2026-11-17（本机 5.75 步持续失败）：本机系统代理已改为 65532，旧 7877 无监听，
+    # 直连又全部被拒 → HKET 永远不可达。改为按 65532 → 7877 顺序尝试。
+    for prox in (os.environ.get("HTTPS_PROXY"), os.environ.get("https_proxy"),
+                 "http://127.0.0.1:65532", "http://127.0.0.1:7877"):
         if not prox:
             continue
         try:

@@ -1,0 +1,39 @@
+{
+ "at": "2026-11-01 23:30",
+ "site": "https://mpf-data.app.workbuddy.host",
+ "navLatest": "2026-10-29",
+ "dataAsOf": "2026-09-30",
+ "count": 451,
+ "checks": {
+  "valBad": 0,
+  "dateBad": 0,
+  "checked": 450,
+  "noAlloc": 0,
+  "noAllocData": 0,
+  "shortTop": 8,
+  "unsorted": 0,
+  "noDate": 0,
+  "emptyName": 0,
+  "statRow": 0,
+  "overSum": 0,
+  "ctrlChar": 0
+ },
+ "issues": [
+  {
+   "level": "warn",
+   "msg": "近端缺日 76 只（2026-10-29）"
+  },
+  {
+   "level": "ok",
+   "msg": "计算器抽样回归 33 组一致"
+  },
+  {
+   "level": "warn",
+   "msg": "十大持仓不足 10 条 8 只"
+  },
+  {
+   "level": "warn",
+   "msg": "页面内容异常短 /analysis.html"
+  }
+ ]
+}

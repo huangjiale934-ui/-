@@ -73,13 +73,57 @@ if (funds && perf && idx && hld) {
     if (!ser || !ser.length) continue;
     const last = ser[ser.length - 1];
     if (last[0] !== f.navAsOf) continue;   /* 日期不同由 freshness / gap-check 管 */
-    if (Math.abs(f.nav - last[1]) > 1e-9) {
+    /* 2026-11-17：源头有 7 位小数的发行人（銀聯信託等），hist 保留原值、funds 归一到 4 位。
+       闸门比的是「4 位是否一致」，故两侧都先 round 到 4 位再比（原实现逐位严格相等会误报 52 只）。 */
+    const r4 = (v) => Math.round(v * 10000) / 10000;
+    if (Math.abs(r4(f.nav) - r4(last[1])) > 1e-9) {
       precBad++;
       if (precSample.length < 5) precSample.push(f.id + ' ' + f.nav + '≠' + last[1]);
     }
   }
   if (precBad) fails.push('净值与历史末点不一致：' + precBad + ' 条（' + precSample.join('、') + '），请跑 tools/nav-round4.js');
   else info.push('净值精度：与历史末点逐位一致');
+
+  /* 2026-11-17（用户要求）：跨资产比较必须同日 —— 构建期断言。
+     背景：navperf 曾用指数序列末点（11-13）减基金末点（11-12）算「超额收益」，
+     每只基金偏差近 2pp。此处以「多数基金共同的净值日」为锚，独立复算恒指近 1 年回报，
+     与 nav-perf 里存的值比对；不一致即阻断发布，避免同类问题再次上线。 */
+  try {
+    const cnt = {};
+    rows.forEach((f) => { if (f.navAsOf) cnt[f.navAsOf] = (cnt[f.navAsOf] || 0) + 1; });
+    let anchor = '';
+    Object.keys(cnt).sort().forEach((d) => { if (!anchor || cnt[d] >= cnt[anchor]) anchor = d; });
+    const hsi = (perf.meta && perf.meta.hsi) || null;
+    if (!anchor) {
+      fails.push('跨资产同日断言：无法确定基金净值锚点（navAsOf 全空）');
+    } else if (!hsi || !hsi.asOf) {
+      fails.push('跨资产同日断言：nav-perf 缺少 meta.hsi（前端「超额收益」将无基准）');
+    } else if (hsi.asOf !== anchor) {
+      fails.push('跨资产比较跨日：超额收益基准 ' + hsi.asOf + ' ≠ 基金净值锚点 ' + anchor + '（请重跑 navperf.js）');
+    } else {
+      const ix = JSON.parse(fsx.readFileSync(pathx.join(__dirname, '..', 'data', 'index.json'), 'utf8')).items.HSI;
+      const ser = ix.series || [];
+      let ptr = -1;
+      for (let i = 0; i < ser.length; i++) { if (ser[i][0] <= anchor) ptr = i; else break; }
+      if (ptr < 0) {
+        fails.push('跨资产同日断言：指数序列没有 ≤ ' + anchor + ' 的点');
+      } else {
+        const lastD = new Date(ser[ptr][0] + 'T00:00:00Z');
+        const cut = new Date(Date.UTC(lastD.getUTCFullYear() - 1, lastD.getUTCMonth(), lastD.getUTCDate())).toISOString().slice(0, 10);
+        let base = null;
+        for (const [d, v] of ser) { if (d <= cut) base = v; else break; }
+        const mine = base > 0 ? Math.round((ser[ptr][1] / base - 1) * 10000) / 100 : null;
+        if (mine == null) fails.push('跨资产同日断言：无法计算恒指近 1 年回报（基准点缺失）');
+        else if (Math.abs(mine - hsi.y1) > 0.02) {
+          fails.push('超额收益基准不符：nav-perf ' + hsi.y1 + '% vs 按 ' + anchor + ' 复算 ' + mine + '%（请重跑 navperf.js）');
+        } else {
+          info.push('跨资产同日：恒指基准 ' + anchor + '，近 1 年 ' + mine + '%（与 nav-perf 一致）');
+        }
+      }
+    }
+  } catch (e) {
+    fails.push('跨资产同日断言异常：' + e.message);
+  }
 }
 
 /* 2026-11-13（第三方核验 P1-2）：净值新鲜度硬闸门。

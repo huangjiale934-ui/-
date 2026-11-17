@@ -108,7 +108,10 @@ async function main() {
     let mismatch = null;
     for (const [d, v] of ls) {
       if (!mg.has(d)) { mismatch = d + '（远端缺）'; break; }
-      if (Math.abs(mg.get(d) - v) > 1e-9) { mismatch = d + ' ' + v + '≠' + mg.get(d); break; }
+      /* 2026-11-17（本机追不上云端 11-13 的根因）：云端 JSON 的净值是 float32 精度
+         （376.83 存成 376.829987），原阈值 1e-9 会把每一只都判成「口径不同」→ 全部跳过。
+         净值最小单位是 1e-4，故以 1e-4 为等值阈值（仍能挡住 2 位小数的降级）。 */
+      if (Math.abs(mg.get(d) - v) > 1e-4) { mismatch = d + ' ' + v + '≠' + mg.get(d); break; }
     }
     if (mismatch) {
       skippedMismatch++;
