@@ -258,8 +258,15 @@
       }
       bindNavDateDist();
       bindTrusteeMenu();
-      /* 2026-11-01（6.0）：空闲时预取持仓（约 0.5MB），详情弹窗打开即用，不再等 3 秒 */
-      setTimeout(() => { if (window.ensureHoldings) window.ensureHoldings(null).catch(() => {}); }, 2500);
+      /* 2026-11-17（用户要求懒加载）：原来加载后 2.5 秒就预取全部持仓（76KB gzip / 546KB 原文），
+         首屏白等。改为「用户真的要看持仓时再取」——详情弹窗自己会按 id 拉取（更小），
+         列表页不再预取。 */
+      document.addEventListener('mouseover', function prefetchHld(e) {
+        if (!e.target || !e.target.closest) return;
+        if (!e.target.closest('.btn-detail, .m-detail, [data-detail]')) return;
+        document.removeEventListener('mouseover', prefetchHld);
+        if (window.ensureHoldings) window.ensureHoldings(null).catch(() => {});
+      }, { passive: true });
     });
     // 语言切换后重绘整表（表头 data-l 标签、详情按钮、净值悬浮说明等）
     /* 2026-11-01（6.0）：下拉 option 是 JS 生成的，必须在语言切换时一并重建，
@@ -534,7 +541,9 @@
               name: TT('基金数据'), rows: rows, merges: merges,
               /* 2026-11-17（用户要求）：单位类别 / 基金细类 / 强积金计划默认隐藏（列宽 0 + hidden），
                  需要时在 Excel 里取消隐藏即可，不影响筛选与排序 */
-              cols: COLS.map((c) => (HIDDEN_COLS.indexOf(c[0]) >= 0 ? 0 : c[3])),
+              /* 2026-11-17（用户反馈取消隐藏后仍截断）：隐藏列**不能把宽度设成 0**，
+                 Excel 取消隐藏时会保持 0 宽 → 永远显示不全。保留真实列宽，只打 hidden 标记。 */
+              cols: COLS.map((c) => c[3]),
               hiddenCols: COLS.map((c, i) => (HIDDEN_COLS.indexOf(c[0]) >= 0 ? i : -1)).filter((i) => i >= 0),
               /* 2026-11-17（用户要求）：第一列是名次，冻结到「基金名称」之后才有意义 */
               freeze: { x: 2, y: 2, top: 'C3' },

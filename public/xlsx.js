@@ -175,7 +175,9 @@ window.MPFXLSX = (function () {
       var hid = sheet.hiddenCols || [];
       x += '<cols>' + sheet.cols.map(function (w, i) {
         var isHidden = hid.indexOf(i) >= 0;
-        return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + (isHidden ? 0 : w) +
+        /* 2026-11-17：隐藏列必须保留真实列宽 —— 设成 0 时，Excel 取消隐藏后仍是 0 宽，
+           文字永远显示不全（用户实测截断）。只打 hidden 标记，宽度照旧。 */
+        return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w +
           '" customWidth="1"' + (isHidden ? ' hidden="1"' : '') + '/>';
       }).join('') + '</cols>';
     }
@@ -277,6 +279,19 @@ window.MPFXLSX = (function () {
         '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing' + drawingNo + '.xml"/>' +
         '</Relationships>');
       /* drawing XML：每图一个 anchor */
+      /* 2026-11-17：从 PNG 头读原始宽高，用于按比例插入（避免被 Excel 拉伸变形） */
+      function pngSize(b64) {
+        try {
+          var bin = (typeof atob === 'function') ? atob(b64) : '';
+          if (!bin || bin.length < 24) return null;
+          var w = 0, h = 0;
+          for (var k = 0; k < 4; k++) {
+            w = (w << 8) | bin.charCodeAt(16 + k);
+            h = (h << 8) | bin.charCodeAt(20 + k);
+          }
+          return (w > 0 && h > 0) ? { w: w, h: h } : null;
+        } catch (e) { return null; }
+      }
       var anchors = plan.images.map(function (im, mi) {
         var rid = 'rId' + (mi + 1);
         var nm = xesc(im.name || ('图' + (mi + 1)));

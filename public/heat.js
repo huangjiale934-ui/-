@@ -57,12 +57,27 @@
       '<div class="hh-wide"><div class="hh-wl">持有最广重仓</div><div class="hh-chips">' + wide + '</div></div>';
   }
 
+  /* 2026-11-17（用户要求）：/api/holdings 有 76KB，原来首屏就拉。
+     改为「进入视口才加载」（懒加载），首屏少一个请求、少 76KB。 */
   function init() {
     const box = document.getElementById('hhBox');
     if (!box) return;
-    fetch('/api/holdings').then((r) => r.json()).then((hld) => render(box, hld)).catch(() => {
-      box.innerHTML = '<div class="hh-empty">持仓行情加载失败</div>';
-    });
+    let done = false;
+    const load = () => {
+      if (done) return;
+      done = true;
+      fetch('/api/holdings').then((r) => r.json()).then((hld) => render(box, hld)).catch(() => {
+        box.innerHTML = '<div class="hh-empty">持仓行情加载失败</div>';
+      });
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => {
+        if (es.some((e) => e.isIntersecting)) { io.disconnect(); load(); }
+      }, { rootMargin: '240px' });
+      io.observe(box);
+    } else {
+      setTimeout(load, 1500);
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
