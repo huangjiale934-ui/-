@@ -1521,6 +1521,7 @@
   '加入对比：': 'Add to comparison: ',
   '每月供款金额（港元）': 'Monthly contribution (HKD)',
   '现金权重为负表示报告期末存在透支／应付款项（净负债），是发行人按净额披露的口径，非数据错误。': 'A negative cash weight means an overdraft or payable (net liability) at the reporting date; it reflects the issuer net-basis disclosure, not a data error.',
+  '更新完成后本页提示，无需手动刷新': 'This page will update automatically when the run finishes; no manual refresh needed',
 
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }

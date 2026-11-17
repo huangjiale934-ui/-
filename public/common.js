@@ -362,9 +362,13 @@ function initUpdateBanner() {
            刷新会看到「部分新、部分旧」。等 done 之后再刷。 */
         if (j && j.updatedAt && DATA && DATA.updatedAt && Number(j.updatedAt) > Number(DATA.updatedAt)
             && (!u || u.phase !== 'running')) autoSync();
-        if (u && u.phase === 'running') {
+        /* 2026-11-17（用户反馈）：云端某次运行中断后 phase 会永远停在 running，
+           B 站因此长期挂着一条不可关闭的蓝条。现在：跨天的 running 视为过期，直接不显示；
+           当天的 running 也可以手动关闭（X）。 */
+        const staleRun = !!(u && u.phase === 'running' && u.day && u.day !== hk().toISOString().slice(0, 10));
+        if (u && u.phase === 'running' && !staleRun) {
           phase = 'running'; clearTimeout(doneTimer);
-          paint('run', TT('数据更新进行中'), (u.step ? u.step : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · 更新完成后本页提示，无需手动刷新', false);
+          paint('run', TT('数据更新进行中'), (u.step ? u.step.replace(/node\s+\S+/g, '').trim() : '') + (u.startedAt ? '（' + u.startedAt + ' 开始）' : ''), shown + ' · ' + TT('更新完成后本页提示，无需手动刷新'), true);
           return;
         }
         if (j && j.refreshing) {
@@ -1957,7 +1961,9 @@ window.buildHoldAllocSheet = async function (entries, opts) {
     }
     /* 2026-10-30（用户反馈）：多基金时图与下一块挤压难看——块尾 pad 空行，
        保证每块 ≥19 行（图 16 行高 + 3 行缓冲），块与块之间留 1 行空行 */
-    const MIN_BLOCK = 19;
+    /* 2026-11-17（用户反馈图表压住表格）：图高约 420/1.16≈362px ≈ 14 行（22pt），
+       原来只留 19 行、图从块首开始，遇上行高变化就压到下一块。留 22 行更稳。 */
+    const MIN_BLOCK = 22;
     while (rows.length - blockStart < MIN_BLOCK) rows.push({ cells: [] });
     rows.push({ cells: [] });
   });
@@ -1968,7 +1974,9 @@ window.buildHoldAllocSheet = async function (entries, opts) {
     const b64 = await window.svgStrToPng(job.svg, Math.round((isRose ? 1280 : 1140) * IMG), Math.round((isRose ? 1100 : 1000) * IMG));
     if (!b64) continue;
     images.push({
-      data: b64, col: isRose ? 7 : 14, row: job.row, col2: isRose ? 13 : 20, row2: job.row + 16,
+      data: b64, col: isRose ? 7 : 14, row: job.row, col2: isRose ? 13 : 20, row2: job.row + 20,
+      /* 2026-11-17：图宽收到 420px（原 560），给表格与下一块留出安全间距 */
+      fitW: 420,
       name: job.name + (isRose ? ' 投资组合分布' : ' 前十大持仓柱状图'),
     });
   }

@@ -222,6 +222,16 @@
       /* 2026-11-03（第三十二轮）：数据说明里的计划名深链 ?kw=<计划名> */
       (function applyUrlKw() {
         try {
+          /* 2026-11-17（用户要求）：按 F5 刷新时要回到「全部基金」，不保留上次的筛选。
+             共享链接（navigate 进来）仍保留参数；自动同步触发的 reload 也不清（见 mpf-auto-reload）。 */
+          try {
+            const navT = (performance.getEntriesByType('navigation')[0] || {}).type;
+            const auto = sessionStorage.getItem('mpf-auto-reload');
+            if (navT === 'reload' && !auto && location.search) {
+              history.replaceState(null, '', location.pathname + location.hash);
+            }
+            if (auto) sessionStorage.removeItem('mpf-auto-reload');
+          } catch (e) {}
           const q = (new URLSearchParams(location.search)).get('kw') || '';
           if (!q) return;
           window.mpfSetKw(q);
