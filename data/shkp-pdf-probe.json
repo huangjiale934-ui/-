@@ -1,7 +1,7 @@
 {
- "at": "2026-11-17T10:51:44+08:00",
+ "at": "2026-11-17T11:37:43+08:00",
  "ok": false,
- "note": "Failed to perform, curl: (56) Connection closed abruptly. See https://curl.se/libcurl/c/libcurl-errors.html first for mo",
+ "note": "HTTP Error 999: ",
  "lastOk": null,
  "blockedSince": "2026-11-16T14:37:16+08:00"
 }
