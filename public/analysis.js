@@ -308,8 +308,13 @@
         vol1: pf.vol1, sharpe1: pf.sharpe1, posM12: pf.posM12,
       };
       if (k === 'excess1') {
+        /* 2026-11-17（外部核验 A6/P0）：直接用服务端按同日算好的 excess1；
+           仅当缺失时才回退到「同日」校验后相减，绝不允许跨日相减。 */
+        if (pf.excess1 != null) return pf.excess1;
         const hy = PERF.meta && PERF.meta.hsi ? PERF.meta.hsi.y1 : null;
-        return (pf.y1 != null && hy != null) ? Math.round((pf.y1 - hy) * 100) / 100 : null;
+        const hyDate = PERF.meta && PERF.meta.hsi ? PERF.meta.hsi.asOf : null;
+        return (pf.y1 != null && hy != null && pf.asOf && pf.asOf === hyDate)
+          ? Math.round((pf.y1 - hy) * 100) / 100 : null;
       }
       if (m[k] !== undefined) return m[k];
     }

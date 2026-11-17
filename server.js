@@ -156,6 +156,8 @@ function buildMarketStat(c) {
     sizeSum += size;
     if (f.ann1 != null) a1All.push(f.ann1);
 
+    /* 2026-11-17：分类改为严格两级（貨幣市場基金 + 细类）。图表按一级类别分组；
+       保守/非保守的区分保留在表格「基金细类」列与详情页，不在环图里拆分（避免繁体值混入简体页面）。 */
     const tk = f.type || '其他';
     byType[tk] = byType[tk] || { name: tk, count: 0, size: 0, a1: [], a5: [], a10: [] };
     byType[tk].count += 1;
@@ -291,6 +293,8 @@ function buildMarketStat(c) {
 
   return {
     updatedAt: c.updatedAt,
+    /* 2026-11-17（用户反馈首页「数据更新」只写同步时间，易被误读为数据只到那天）：一并给出净值日 */
+    navLatest: funds.reduce((m, f) => (f.navAsOf && f.navAsOf > m ? f.navAsOf : m), ''),
     dataAsOf: c.dataAsOf || '',
     years: c.years || [],
     count: c.count || funds.length,
@@ -544,6 +548,21 @@ const COMPRESSIBLE = /^(text\/|application\/(javascript|json|xml|manifest)|image
 
 /** 统一出口：大于 1KB 的可压缩内容自动 gzip（移动端首屏体积可降 ~80%）
  *  2026-10-20：加 ETag + 协商缓存 —— 二次访问命中 304，避免重复下载 1.6MB JSON。 */
+
+/* 2026-11-17（用户反馈打开慢）：/api/funds 每次请求都重新 attachUnits + JSON.stringify(521KB)，
+   单次 0.7–1.0s。数据只在 reloadIfChanged 时变，故按「数据版本」缓存序列化结果与 ETag。 */
+const __JSON_MEMO = new Map();
+function sendJsonMemo(req, res, key, build, opt) {
+  const hit = __JSON_MEMO.get(key);
+  if (hit) return sendRaw(req, res, 200, hit.body, 'application/json; charset=utf-8', Object.assign({ etag: hit.etag }, opt || {}));
+  const body = JSON.stringify(build());
+  const etag = '"' + Buffer.byteLength(body).toString(16) + '-' +
+    crypto.createHash('md5').update(body).digest('hex').slice(0, 16) + '"';
+  __JSON_MEMO.set(key, { body, etag });
+  if (__JSON_MEMO.size > 12) { const k0 = __JSON_MEMO.keys().next().value; __JSON_MEMO.delete(k0); }
+  return sendRaw(req, res, 200, body, 'application/json; charset=utf-8', Object.assign({ etag }, opt || {}));
+}
+
 function sendRaw(req, res, code, body, type, opt) {
   const buf = Buffer.isBuffer(body) ? body : Buffer.from(String(body), 'utf8');
   const t = type || 'application/json; charset=utf-8';
@@ -660,10 +679,7 @@ const server = http.createServer(async (req, res) => {
     /* 2026-10-24：自抓关闭时不再触发后退刷新，只读快照 */
     if (SELF_FETCH) { if (cache) { refresh(false).catch(() => {}); } else { await refresh(false); } }
     if (!cache) return send(res, 503, JSON.stringify({ error: '数据暂不可用', detail: lastError }));
-    return send(
-      res,
-      200,
-      JSON.stringify({
+    return sendJsonMemo(req, res, 'funds|' + DATA_MTIME, () => ({
         updatedAt: cache.updatedAt,
         updatedAtText: new Date(cache.updatedAt).toLocaleString('zh-CN', { hour12: false, timeZone: 'Asia/Hong_Kong' }),
         source: cache.source,
@@ -681,8 +697,7 @@ const server = http.createServer(async (req, res) => {
         funds: attachUnits(cache.funds).map((f) => Object.assign({}, f, {
           navStale: !!(f.navAsOf && Math.round((Date.now() - new Date(f.navAsOf + 'T00:00:00').getTime()) / 864e5) > 7),
         })),
-      })
-    );
+    }));
   }
 
   // 首页市场概览：服务端聚合好，避免首页下载全量 451 条明细
@@ -1253,7 +1268,10 @@ const server = http.createServer(async (req, res) => {
         planLag: (function () {
           try {
             const r = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'plan-lag.json'), 'utf8'));
-            return { maxDate: r.maxDate || '', lagging: r.lagging || 0, items: (r.items || []).slice(0, 10) };
+            /* 2026-11-17（外部核验 planLag/P1）：原来 items 截断到 10 条、lagging 却用文件里的 12，
+               自相矛盾。清单本身很小（通常 <20 条），不截断，且 lagging 由清单长度推导。 */
+            const items = r.items || [];
+            return { maxDate: r.maxDate || '', lagging: items.length, items };
           } catch (e) { return null; }
         })(),
         /* 2026-10-30（5.0）：季度便览哨兵结果摘要——有新季自动写回时，顶栏提示复核 */

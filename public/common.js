@@ -94,14 +94,48 @@ function cacheClear() {
   } catch (e) {}
 }
 
+/* 2026-11-17（外部核验 C2 / P1）：接口挂掉时页面会永远停在骨架 + 「加载中」。
+   现在统一加 20 秒超时，并在失败时显示明确提示与「重试」按钮，而不是静默卡死。 */
+window.showDataError = function (msg) {
+  try {
+    document.querySelectorAll('.sk').forEach((e) => { e.style.display = 'none'; });
+    ['tbody', 'rkTbody'].forEach((id) => {
+      const t = document.getElementById(id);
+      if (t && t.querySelector('.sk')) {
+        t.innerHTML = '<tr><td colspan="99" class="data-err-row">' + TT('数据暂时无法加载，请稍后重试（点上方「重试」）') + '</td></tr>';
+      }
+    });
+    if (document.getElementById('dataErrBar')) return;
+    const b = document.createElement('div');
+    b.id = 'dataErrBar';
+    b.className = 'data-err';
+    b.innerHTML = '<b>' + TT('数据暂时无法加载') + '</b><span>' + String(msg || '') +
+      '</span><button type="button" class="btn sm" id="dataErrRetry">' + TT('重试') + '</button>';
+    document.body.insertBefore(b, document.body.firstChild);
+    const btn = document.getElementById('dataErrRetry');
+    if (btn) btn.onclick = () => location.reload();
+  } catch (e) {}
+};
+
 function fetchJSON(url, key, force, onFresh) {
   const hit = cacheGet(key);
   if (hit && !force && Date.now() - hit.at < CACHE_TTL) return Promise.resolve(hit.data);
   /* 2026-10-20：force 刷新时给 URL 加时间戳，绕开 ETag 304（否则「更新数据」仍拿到旧响应体） */
   const reqUrl = force ? url + (url.indexOf('?') >= 0 ? '&' : '?') + '_t=' + Date.now() : url;
-  const req = fetch(reqUrl, { cache: 'default' })
+  const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => { try { ctrl.abort(); } catch (e) {} }, 20000) : null;
+  const opts = ctrl ? { cache: 'default', signal: ctrl.signal } : { cache: 'default' };
+  const req = fetch(reqUrl, opts)
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
-    .then((j) => { cacheSet(key, j); return j; });
+    .then((j) => { if (timer) clearTimeout(timer); cacheSet(key, j); return j; })
+    .catch((e) => {
+      if (timer) clearTimeout(timer);
+      /* 有旧缓存时不打扰（旧数据仍可用）；没有缓存才提示 */
+      if (!hit && typeof window.showDataError === 'function') {
+        window.showDataError((e && e.name === 'AbortError') ? TT('请求超时（20 秒）') : String((e && e.message) || e));
+      }
+      throw e;
+    });
   /* 2026-11-10（用户反馈）：旧数据先上屏之后，后台拿到的「新版本」必须回灌到页面。
      此前这里只写缓存不通知调用方，于是页面停在上一版数据，用户必须手动刷新才看到新值
      —— 典型表现：早上打开仍是昨天净值，F5 后才变成今天。onFresh 由 loadData 传入。 */
@@ -162,7 +196,11 @@ function decorateSelfPerf(funds, perf) {
     x.selfMdd5 = p.mdd5 != null ? p.mdd5 : null;
     x.selfMdd = p.mdd1 != null ? p.mdd1 : p.mdd;
     x.vol1 = p.vol1; x.vol3 = p.vol3; x.sharpe1 = p.sharpe1; x.posM12 = p.posM12;
-    x.excess1 = (p.y1 != null && hy != null) ? Math.round((p.y1 - hy) * 100) / 100 : null;
+    /* 2026-11-17（外部核验 A6/P0）：超额收益由服务端按「该基金自己的估值日」算好并落盘，
+       前端不再用全站锚点相减（那会让 asOf 较早的基金系统性高估 1.2–1.5pp）。 */
+    x.excess1 = (p.excess1 != null) ? p.excess1
+      : ((p.y1 != null && hy != null && p.asOf === (window.__HSI_ASOF || p.asOf))
+        ? Math.round((p.y1 - hy) * 100) / 100 : null);
   });
 }
 window.decorateSelfPerf = decorateSelfPerf;
@@ -664,6 +702,8 @@ function renderSrcNote() {
      信息一条不少（核实率、非单位化基金、口径差异、公布较晚的计划都保留），但不再堆成一段。 */
   const ns0 = DATA.navStat || {};
   const naN = ns0.na || 0;
+  /* 2026-11-17（外部核验 A8/P0）：第三方行情补值的条数，必须在「核对」说明里如实交代 */
+  const provN = (DATA.funds || []).filter((f) => f.navSrcYahoo || f.navProvisional).length;
   const pct1 = ns0.total ? ((ns0.verified / ns0.total) * 100).toFixed(1) : '—';
   el.innerHTML =
     '<div class="snote">' +
@@ -678,6 +718,8 @@ function renderSrcNote() {
       '<div class="snote-r"><b>' + TT('核对') + '</b><span>' +
         TQ('本次已逐条核实 {v} / {t} 条（{p}%）', { v: ns0.verified != null ? ns0.verified : '—', t: ns0.total || DATA.count, p: pct1 }) +
         (naN ? TQ('；另有 {n} 条为非单位化基金，官方不提供单位价格，显示「不适用」。', { n: naN }) : '。') +
+        (provN ? TQ('其中 {n} 条的近期净值为第三方行情补值（Yahoo），官方源发布后自动替换，悬浮净值可辨。', { n: provN }) +
+          ((window.getLang && window.getLang() === 'en') ? ' ' : '') : '') +
         /* 英文句子之间要有空格，否则会出现 …N/A".Blank = … 的粘连 */
         ((window.getLang && window.getLang() === 'en') ? ' ' : '') +
         TT('空白＝当日官网未披露净值，本站不插值、不前值填充。') +
@@ -718,9 +760,11 @@ function staleNote() {
   const lagOf = {};
   dates.forEach((d, i) => { lagOf[d] = i; });
   const m = {};
+  let lag1 = 0;   /* 2026-11-17（外部核验 A2/P2）：落后 1 个估值日的数量（多为 T+1 正常节奏） */
   all.forEach((f) => {
     if (!f.navAsOf) return;
     const lag = lagOf[f.navAsOf];
+    if (lag === 1) { lag1++; return; }
     if (lag == null || lag < 2) return;
     const k = f.scheme || f.trustee || '—';
     if (!m[k]) m[k] = { n: 0, d: f.navAsOf };
@@ -729,7 +773,10 @@ function staleNote() {
   });
   const list = Object.keys(m).map((k) => ({ s: k, n: m[k].n, d: m[k].d }))
     .sort((a, b) => (a.d < b.d ? 1 : -1));
-  if (!list.length) return '';
+  const lag1Note = lag1
+    ? '<div class="ns-lag1">' + TQ('另有 {n} 只落后 1 个估值日（多为发行人 T+1 公布，属正常节奏）', { n: lag1 }) + '</div>'
+    : '';
+  if (!list.length) return lag1Note;
   /* 2026-11-03（第三十二轮，用户要求）：一句话讲完，每个计划单独一行；计划名可点，点了直接筛出该计划的基金 */
   /* 2026-11-04：计划名走 schemeDisplay（英文名表按基金 id 索引，取该计划任意一只即可） */
   const schemeId = {};
@@ -921,9 +968,15 @@ function navCell(x, noDate) {
     // 显示保留 4 位小数；官网原值小数位更多时，在悬浮说明里给出原值（透明、可核对）
     const rawStr = String(x.nav);
     const rawTip = (rawStr.split('.')[1] || '').length > 4 ? '　' + TQ('官网原值 {v}', { v: rawStr }) : '';
-    const tip = (x.navAsOf
-      ? TQ('已核对官方来源：{s}　净值截至 {d}', { s: x.navSource || '', d: x.navAsOf })
-      : TQ('已核对官方来源：{s}　该基金官网未静态公布估值日', { s: x.navSource || '' })) + rawTip + dynTip;
+    /* 2026-11-17（外部核验 A8 / P0）：60 只净值其实是第三方行情（Yahoo）补值，
+       却被写成「已核对官方来源」，属于来源误导。此处按 navSrcYahoo/navProvisional 明确标注。 */
+    const provTip = (x.navSrcYahoo || x.navProvisional)
+      ? TQ('第三方行情补值（Yahoo），待官方源发布后替换；计划来源：{s}', { s: x.navSource || '' })
+      : '';
+    const tip = provTip ? (provTip + (x.navAsOf ? '　' + TQ('补值截至 {d}', { d: x.navAsOf }) : ''))
+      : ((x.navAsOf
+        ? TQ('已核对官方来源：{s}　净值截至 {d}', { s: x.navSource || '', d: x.navAsOf })
+        : TQ('已核对官方来源：{s}　该基金官网未静态公布估值日', { s: x.navSource || '' })) + rawTip + dynTip);
     // 有净值、但官网未静态公布估值日：加「?」标记 + 悬浮解释（客户最常问「为什么这只没日期」）
     const q = x.navAsOf ? ''
       : '<span class="nav-q" data-tip="' + esc(Q_TIP) + '" aria-label="' + esc(Q_TIP) + '">?</span>';
@@ -1487,7 +1540,10 @@ function fdNavSrc(x) {
   return '<div class="nav-srcnote">' +
     (x.navStatus === 'na'
       ? TQ('该基金为官方注明不提供单位资产净值的保证基金／非单位化基金（来源：{s}），可前往官方页面核对。', { s: esc(x.navSource || TT('发行方官网')) })
-      : (x.navAsOf
+      : ((x.navSrcYahoo || x.navProvisional)
+        ? '<span class="hl-src hl-prov">' + TQ('第三方行情补值（Yahoo），待官方源发布后替换（计划来源：{s}）。', { s: esc(x.navSource || TT('发行方官网')) }) + '</span>'
+        : '') +
+      (x.navAsOf
         ? TQ('该净值取自<b>{s}</b>，估值日 <b>{d}</b>；页面其余各项指标取自积金局基金资讯表（资料截至 {a}）。', { s: esc(x.navSource || TT('发行方官网')), d: esc(x.navAsOf), a: esc((DATA && DATA.dataAsOf) || TT('官网最新公布日')) })
         : TQ('该净值取自<b>{s}</b>，其官网未静态公布估值日；页面其余各项指标取自积金局基金资讯表（资料截至 {a}）。', { s: esc(x.navSource || TT('发行方官网')), a: esc((DATA && DATA.dataAsOf) || TT('官网最新公布日')) }))) +
     (x.navSourceUrl ? '<a class="srcbtn" href="' + esc(x.navSourceUrl) + '" target="_blank" rel="noopener"' +
@@ -1520,8 +1576,8 @@ function fdBasic(x) {
     '<div class="an-col">' +
       '<div class="ac-title">' + TT('投资目标与类别') + '</div>' +
       '<div class="ac-kv">' +
-        kv(TT('基金类别'), esc(typeLabel(x.typeFull))) +
-        kv(TT('细类'), esc(x.subtype || '—')) +
+        kv(TT('基金类别'), esc(typeLabel((window.splitFundType(x) || {}).cat || x.type))) +
+        kv(TT('细类'), esc(typeLabel((window.splitFundType(x) || {}).sub || '') || '—')) +
         kv(TT('风险级别'), (x.risk == null ? riskTag(null) : riskTag(x.risk) + ' <span class="rk-lbl">' + MPF_RISK.label(x.risk) + '</span>')) +
       '</div>' +
       '<p class="ac-note">' + TT('各成分基金的投资目标与投资政策以计划说明书及官方基金页面为准；本页类别描述取自积金局基金资讯表。') + '</p>' +
@@ -2188,8 +2244,9 @@ window.allocBlockHTML = function (id) {
   /* 该基金条目自带的口径提示（注意：不能引用全局 srcNote——id="srcNote" 的 DOM 会被暴露为 window.srcNote） */
   const dSrcNote = (d && d.srcNote) ? '<div class="hl-note hl-note-warn">' + esc(TT(d.srcNote)) + '</div>' : '';
   /* 合计口径说明：>100% 为真实敞口，非 bug；<100% 照实显示不补齐（沿用缺口说明） */
+  /* 2026-11-17（外部核验 A3）：说明里补上具体合计值，避免用户只看到「超过 100%」而不知多少 */
   const overNote = allocSum > 100.05
-    ? '<div class="hl-note hl-warn">合計超過 100%：部分資產同時計入多個類別／含衍生工具或槓桿敞口</div>'
+    ? '<div class="hl-note hl-warn">' + TQ('原始披露合计 {s}%：部分资产同时计入多个类别，或含衍生工具／杠杆敞口，故合计可超过 100%（非计算错误，本站不归一化）', { s: nf(allocSum, 2) }) + '</div>'
     : '';
   const gapNote = allocSum < 99.5
     ? '<div class="hl-note hl-warn">' + TQ('便览只列出主要类别，已披露合计 {s}%；其余 {g}% 在源文件中未单列，图中以灰色「其他／未列明」表示，本站不对其做类别拆分或数值推算。', { s: nf(allocSum, 2), g: nf(100 - allocSum, 2) }) + '</div>'
@@ -2538,6 +2595,10 @@ function csvSourceNote(opt) {
     rows.push(['# 历史序列如实呈现发行人官网发布：部分发行人早期历史含周末或休市日价格（官方即如此发布），本站以官网为准、不做过滤或插值']);
     return rows;
   }
+  /* 2026-11-17（用户要求）：单只基金导出也要有与 Excel「数据说明」同一组时间口径 */
+  rows.push(['# 净值截至：' + ((DATA && DATA.funds) ? (DATA.funds.reduce((m, f) => (f.navAsOf && f.navAsOf > m ? f.navAsOf : m), '') || '—') : '—')]);
+  rows.push(['# 积金局字段截至：' + ((DATA && DATA.dataAsOf) || '—') + '；本站同步时间：' + fmtDT(DATA && DATA.updatedAt)]);
+  rows.push(['# 导出时间：' + new Date().toLocaleString('zh-CN', { hour12: false })]);
   rows.push(['# 数据来源：香港积金局「強積金基金平台」' + (DATA.source ? '（' + DATA.source + '）' : '') + '；单位资产净值来源：各计划受托人官网']);
   rows.push(['# 积金局资料截至：' + (DATA.dataAsOf || '—') + '；本站同步时间：' + fmtDT(DATA.updatedAt)]);
   const navDates = (DATA.funds || []).filter((f) => f.navStatus === 'verified' && f.navAsOf).map((f) => f.navAsOf).sort();

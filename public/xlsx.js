@@ -123,7 +123,7 @@ window.MPFXLSX = (function () {
       '<top style="thin"><color rgb="FFCFDCEA"/></top><bottom style="thin"><color rgb="FFCFDCEA"/></bottom><diagonal/></border>' +
     '</borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-    '<cellXfs count="20">' +
+    '<cellXfs count="21">' +
       /* 0 默认 */ '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
       /* 1 标题 */ '<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 2 表头 */ '<xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
@@ -143,6 +143,8 @@ window.MPFXLSX = (function () {
       /* 16 封面公司名（14 号蓝、居中、无框） */ '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 17 封面副标题（居中、无框） */ '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 18 封面网址（11 号蓝、居中、无框） */ '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
+      /* 20 整数（风险级别 1–7：不要显示 5.00） */
+      '<xf numFmtId="1" fontId="4" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 19 灰色小字居中（免责） */ '<xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
     '</cellXfs>' +
     /* 2026-11-04：补 cellStyles —— 缺这一段时 Excel/openpyxl 会报「没有默认样式」 */
@@ -166,8 +168,12 @@ window.MPFXLSX = (function () {
       x += '<sheetViews><sheetView workbookViewId="0" tabSelected="1"/></sheetViews>';
     }
     if (sheet.cols && sheet.cols.length) {
+      /* 2026-11-17（用户要求）：支持默认隐藏列 —— sheet.hiddenCols = [列索引...] */
+      var hid = sheet.hiddenCols || [];
       x += '<cols>' + sheet.cols.map(function (w, i) {
-        return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>';
+        var isHidden = hid.indexOf(i) >= 0;
+        return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + (isHidden ? 0 : w) +
+          '" customWidth="1"' + (isHidden ? ' hidden="1"' : '') + '/>';
       }).join('') + '</cols>';
     }
     x += '<sheetData>';

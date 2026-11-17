@@ -189,6 +189,16 @@ window.TYPE_I18N = {
 '貨幣非保守': { s: '货币（非保守）', e: 'MMF (Non-cons.)' },
 };
 
+/* 2026-11-17（用户要求）：积金局是两级分类（类别 - 细类），
+   全站统一用这个函数拆开，别再拿 typeFull 当「类别」直接展示。 */
+window.splitFundType = function (x) {
+  var full = (x && (x.typeFull || x.type)) || '';
+  /* 2026-11-17：积金局「基金资讯表」里货币市场基金用的是全角破折号「—」
+     （如「貨幣市場基金 — 強積金保守基金」），只认 " - " 会把它当成一级类别。 */
+  var m = full.match(/^(.+?)\s*[—–-]\s*(.+)$/);
+  if (m) return { cat: m[1].trim(), sub: m[2].trim() };
+  return { cat: full, sub: (x && (x.subtype || '')) || '' };
+};
 window.typeLabel = function (v) {
 if (v == null) return '';
 var lang = (typeof window.getLang === 'function') ? window.getLang() : 'zh-Hans';

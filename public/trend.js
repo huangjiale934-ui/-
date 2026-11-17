@@ -539,10 +539,11 @@ window.TREND = (function () {
           ['回撤区间', (x, i) => tCell(stat[i].from ? dstr(stat[i].from) + ' — ' + dstr(stat[i].to) : '—')],
           ['发行人（受托人）', (x) => tCell(x.trustee)],
           ['强积金计划', (x) => tCell(x.scheme)],
-          ['基金种类', (x) => tCell(x.typeFull || x.type)],
+          ['基金类别', (x) => tCell((window.splitFundType ? window.splitFundType(x).cat : '') || x.type)],
+          ['基金细类', (x) => tCell(window.splitFundType ? window.splitFundType(x).sub : '')],
           ['推出日期', (x) => tCell(x.launch)],
           ['基金规模（百万港元）', (x) => n2(x.size)],
-          ['风险级别', (x) => (x.risk == null || !isFinite(x.risk) ? { v: '—', s: 4 } : { v: Number(x.risk), s: 7 })],
+          ['风险级别', (x) => (x.risk == null || !isFinite(x.risk) ? { v: '—', s: 4 } : { v: Number(x.risk), s: 20 })],
           ['单位资产净值', (x) => (x.nav == null ? { v: '—', s: 4 } : { v: Math.round(x.nav * 1e4) / 1e4, s: 6 })],
           ['近1年年率化回报', (x) => pCell(x.ann1)],
           ['近3年年率化回报', (x) => {
@@ -590,6 +591,15 @@ window.TREND = (function () {
           page: _t('基金对比'),
           title: _t('数据说明'),
           meta: [
+            /* 2026-11-17（用户反馈详情页导出缺溯源）：与「基金数据」导出同一组时间口径 */
+            [_t('净值截至'), (function () {
+              let d = '';
+              (DATA && DATA.funds || []).forEach((f) => { if (f.navAsOf && f.navAsOf > d) d = f.navAsOf; });
+              return d || '—';
+            })()],
+            [_t('积金局字段截至'), (DATA && DATA.dataAsOf) || '—'],
+            [_t('本站同步时间'), (typeof fmtDT === 'function' ? fmtDT(DATA && DATA.updatedAt) : new Date((DATA && DATA.updatedAt) || Date.now()).toLocaleString('zh-CN', { hour12: false }))],
+            [_t('导出时间'), new Date().toLocaleString('zh-CN', { hour12: false })],
             [_t('来源'), _t('广州精研数据有限公司 · 香港强积金数据平台') + '（' + location.host + '）'],
             [_t('净值来源'), _t('各计划受托人／保荐人官网公布的单位资产净值；指数为收市点位。')],
             [_t('口径'), _t('涨跌幅 = 当日数值 ÷ 区间起点数值 − 1，区间起点当天记为 0%。')],

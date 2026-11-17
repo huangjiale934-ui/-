@@ -343,7 +343,9 @@ chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排
   chk('首页·四榜均显示数值（无空缺）', bad.length === 0, bad.join(' / '));
 })();
 chk('首页·占比图面板已标记 pie-panel', (home.match(/class="mk-panel pie-panel"/g) || []).length === 2);
-chk('首页·基金种类图例名称完整（2026-11-04 起缩为「货币（保守）/货币（非保守）」避免截断）', /货币（非保守）/.test(home) && /货币（保守）/.test(home));
+/* 2026-11-17：分类改为严格两级后，环图按一级类别分组（货币市场基金不再拆保守/非保守），
+   因此断言改为「图例含五个一级类别的中文名」 */
+chk('首页·基金种类图例名称完整（一级类别五项）', /货币市场基金/.test(home) && /股票基金/.test(home) && /混合资产基金/.test(home));
 chk('首页·风险级别图例名称完整', /低至中风险/.test(home) && /最高风险/.test(home));
 chk('首页·CSS 已含桌面三列布局调优', (function () {
   try { return /min-width: 1181px/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'home.css'), 'utf8')); } catch (e) { return false; }

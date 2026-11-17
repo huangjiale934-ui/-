@@ -436,7 +436,9 @@
       [TT('名次'), (x, i) => i + 1, 'rank', 6, TT('按当前排名维度排出的名次（1 = 排在最前）')],
       [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 44, TT('成分基金名称；单位类别在下一列单列')],
       [TT('单位类别'), (x) => x.unit || '', 'txt', 9, TT('同一基金的不同单位类别（A / T / B 等），净值与回报各自独立')],
-      [TT('基金种类'), (x) => typeLabel(x.type) + (x.subtype ? ' / ' + typeLabel(x.subtype) : ''), 'txtL', 26, TT('积金局的基金类别与细类')],
+      /* 2026-11-17（用户要求）：积金局是两级分类，拆成两列，不再用「/」挤在一格里 */
+      [TT('基金种类'), (x) => typeLabel((window.splitFundType(x) || {}).cat || x.type), 'txtL', 16, TT('积金局基金类别（第一级）')],
+      [TT('基金细类'), (x) => typeLabel((window.splitFundType(x) || {}).sub || ''), 'txtL', 26, TT('积金局基金细类（第二级，属于上一列类别）')],
       [TT('强积金计划'), (x) => x.scheme || '', 'txtL', 40, TT('所属强积金计划（受托人／保荐人）')],
       [TT('受托人'), (x) => (window.trusteeDisplay ? window.trusteeDisplay(x.trustee) : x.trustee), 'txtL', 14, TT('受托人／保荐人')],
       [TT('风险级别'), (x) => x.risk, 'int', 8, TT('积金局按近三年波幅评定的 1–7 级（1 最低、7 最高）')],
@@ -453,7 +455,7 @@
       [TT('近5年最大回撤'), (x) => x.selfMdd5, 'pct', 11, TT('本站自算：近 5 年区间内自高点回落的最大幅度')],
       [TT('年化波动率（近1年）'), (x) => x.vol1, 'pct', 11, TT('本站自算：日收益标准差 × √252')],
       [TT('3年波幅'), (x) => x.vol3, 'pct', 9, TT('本站自算：近 3 年年化波动率')],
-      [TT('夏普比率（近1年）'), (x) => x.sharpe1, 'num2', 10, TT('本站自算：（年化回报 − 无风险利率）÷ 年化波动率')],
+      [TT('夏普比率（近1年）'), (x) => x.sharpe1, 'sharpe', 10, TT('本站自算：（年化回报 − 无风险利率）÷ 年化波动率；年化波动率低于 0.5% 的基金（多为保守／货币市场）比值失真，显示 n.a.')],
       [TT('超额收益（对恒指·近1年）'), (x) => x.excess1, 'pct', 13, TT('本站自算：近 1 年回报 − 恒生指数同期回报')],
       [TT('正收益月份占比'), (x) => x.posM12, 'pct0', 11, TT('近 12 个月中录得正回报的月份占比')],
       [TQ('基金规模（{u}）', { u: TT('百万港元') }), (x) => x.size, 'num2', 12, TT('积金局公布的最新基金规模，按月更新')],
@@ -468,11 +470,13 @@
         case 'rank': return { v: i + 1, s: 3 };
         case 'txtL': return txt(v, 4);
         case 'txt': return txt(v);
-        case 'int': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Number(v), s: 7 };
+        case 'int': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Number(v), s: 20 };
         case 'nav': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e4, s: 6 };
         case 'pct': return pct(v);
         case 'pct0': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 100) / 1e4, s: 5 };
         case 'num2': return num(v, 7);
+        /* 2026-11-17（用户反馈「夏普有缺失」）：null 不能留空，写 n.a. 才看得出是「不适用」而不是漏算 */
+        case 'sharpe': return v == null || !isFinite(v) ? { v: 'n.a.', s: 4 } : { v: Math.round(v * 100) / 100, s: 7 };
         default: return txt(v);
       }
     };
@@ -491,12 +495,14 @@
     body.forEach((r) => {
       const lines = Math.max(
         Math.ceil(cjkLen(r[1] && r[1].v) / 44),
-        Math.ceil(cjkLen(r[4] && r[4].v) / 40),
-        Math.ceil(cjkLen(r[3] && r[3].v) / 26), 1);
+        Math.ceil(cjkLen(r[5] && r[5].v) / 40),
+        Math.ceil(cjkLen(r[3] && r[3].v) / 16), 1);
       rows.push({ h: 20 + Math.max(0, lines - 1) * 15, cells: r });
     });
 
     const merges = ['A1:' + lastCol + '1'];
+    /* 默认隐藏的列（用户指定：低频列不占版面） */
+    const HIDDEN_COLS = [TT('单位类别'), TT('基金细类'), TT('强积金计划')];
 
     setTimeout(() => {
       Promise.resolve(null).then((logo) => {
@@ -515,6 +521,7 @@
           notes: [
             TT('净值来源：各计划受托人／保荐人官网每日公布的单位资产净值；风险级别、基金规模、历年回报、基金开支比率等字段取自积金局「强积金基金平台」（按月更新，通常滞后 1–2 个月）。'),
             TT('自算指标（日涨跌 / 近1周 / 近1个月 / 年初至今 / 近1年 / 近3年 / 近5年年化 / 最大回撤 / 波动率 / 夏普 / 超额收益）由本站按发行人官网净值直接计算，不含分红再投资与费用调整；与积金局公布的同名指标口径不同，不可直接相减。'),
+            TT('夏普比率显示 n.a. 表示该基金近 1 年年化波动率低于 0.5%（多为保守／货币市场基金），比值会被极小的分母放大而失真，故不提供。'),
             TT('空白单元格＝该基金当日无官方净值（周末、香港公众假期、非估值日，或该基金尚未推出／已终止），或积金局未公布该字段；本站不插值、不使用前值填充。'),
           ],
           columns: COLS.map((c) => [c[0], c[4]]),
@@ -524,8 +531,12 @@
             cover,
             {
               name: TT('基金数据'), rows: rows, merges: merges,
-              cols: COLS.map((c) => c[3]),
-              freeze: { x: 1, y: 2, top: 'B3' },
+              /* 2026-11-17（用户要求）：单位类别 / 基金细类 / 强积金计划默认隐藏（列宽 0 + hidden），
+                 需要时在 Excel 里取消隐藏即可，不影响筛选与排序 */
+              cols: COLS.map((c) => (HIDDEN_COLS.indexOf(c[0]) >= 0 ? 0 : c[3])),
+              hiddenCols: COLS.map((c, i) => (HIDDEN_COLS.indexOf(c[0]) >= 0 ? i : -1)).filter((i) => i >= 0),
+              /* 2026-11-17（用户要求）：第一列是名次，冻结到「基金名称」之后才有意义 */
+              freeze: { x: 2, y: 2, top: 'C3' },
               autoFilter: 'A2:' + lastCol + rows.length,
             },
           ],

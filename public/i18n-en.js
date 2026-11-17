@@ -1503,6 +1503,21 @@
   '列名': 'Column',
   '含义 / 口径': 'Meaning / basis',
   '本文件由本站程序自动生成，数据来自各发行人官网与积金局公开资料，仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。': 'Generated automatically from issuer websites and MPFA public data. For research reference only, not investment advice. Past performance is not indicative of future results; investment involves risk.',
+  '数据暂时无法加载': 'Data temporarily unavailable',
+  '数据暂时无法加载，请稍后重试（点上方「重试」）': 'Data temporarily unavailable. Please try again (use the Retry button above).',
+  '请求超时（20 秒）': 'Request timed out (20 s)',
+  '第三方行情补值（Yahoo），待官方源发布后替换；计划来源：{s}': 'Provisionally filled from a third-party quote (Yahoo); to be replaced once the issuer publishes. Intended source: {s}',
+  '补值截至 {d}': 'Provisional value as of {d}',
+  '其中 {n} 条的近期净值为第三方行情补值（Yahoo），官方源发布后自动替换，悬浮净值可辨。': 'For {n} of them the latest NAV is provisionally filled from a third-party quote (Yahoo) and will be replaced once the issuer publishes; hover the value to see which.',
+  '另有 {n} 只落后 1 个估值日（多为发行人 T+1 公布，属正常节奏）': '{n} more are one valuation day behind (usually T+1 publication, which is normal).',
+  '原始披露合计 {s}%：部分资产同时计入多个类别，或含衍生工具／杠杆敞口，故合计可超过 100%（非计算错误，本站不归一化）': 'Disclosed total {s}%: some assets count under more than one category, or the fund uses derivatives/leverage, so the total can exceed 100% (not a calculation error; we do not normalise).',
+  '第三方行情补值（Yahoo），待官方源发布后替换（计划来源：{s}）。': 'Provisionally filled from a third-party quote (Yahoo); to be replaced once the issuer publishes (intended source: {s}).',
+  '积金局基金类别（第一级）': 'MPFA fund category (level 1)',
+  '积金局基金细类（第二级，属于上一列类别）': 'MPFA fund sub-category (level 2, within the category on the left)',
+  '基金细类': 'Fund sub-category',
+  '净值日 <b>{d}</b>': 'NAV date <b>{d}</b>',
+  '本站自算：（年化回报 − 无风险利率）÷ 年化波动率；年化波动率低于 0.5% 的基金（多为保守／货币市场）比值失真，显示 n.a.': 'Calculated by us: (annualised return − risk-free rate) ÷ annualised volatility. Funds with volatility below 0.5% (mostly conservative/money-market) produce a meaningless ratio, shown as n.a.',
+  '夏普比率显示 n.a. 表示该基金近 1 年年化波动率低于 0.5%（多为保守／货币市场基金），比值会被极小的分母放大而失真，故不提供。': 'Sharpe ratio shows n.a. when one-year annualised volatility is below 0.5% (mostly conservative and money-market funds); a near-zero denominator would inflate the ratio, so it is not provided.',
 
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }

@@ -3104,3 +3104,14 @@ body { overflow-x: clip; }
   a[href^="http"]::after { content: ""; }  /* 不在纸面打印长 URL */
   .db-tablewrap, .scroll-ghost { overflow: visible !important; max-height: none !important; }
 }
+
+/* 2026-11-17（外部核验 C2/P1）：接口失败时的明确提示条 —— 替代「无限骨架 + 加载中」 */
+.data-err{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:10px 16px;background:#fff4e5;border-bottom:1px solid #ffd8a8;color:#8a5300;font-size:13px}
+.data-err b{font-weight:700;color:#a35b00}
+.data-err span{flex:1;min-width:200px;word-break:break-all}
+.data-err .btn{background:#fff;border:1px solid #ffc078;color:#8a5300}
+.data-err-row{text-align:center;padding:30px 0;color:#8a94a6;font-size:13px}
+
+/* 2026-11-17：落后 1 个估值日的汇总提示（与「公布较晚」清单同区） */
+.ns-lag1{margin-top:6px;font-size:12px;color:#7a8698}

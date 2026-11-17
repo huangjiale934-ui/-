@@ -228,6 +228,7 @@ function computeOne(obj) {
      而基金净值普遍只到 11-12 →「超额收益」两侧跨了一天，波动大的日子偏差可达 1 个百分点。
      改为取「多数基金共同的最后净值日」（众数），指数取 ≤ 该日的最后一个点。 */
   let hsi = null;
+  let hsiSer = null;
   try {
     const cnt = {};
     lastDates.forEach((d) => { cnt[d] = (cnt[d] || 0) + 1; });
@@ -235,6 +236,7 @@ function computeOne(obj) {
     Object.keys(cnt).sort().forEach((d) => { if (!anchor || cnt[d] >= cnt[anchor]) anchor = d; });
     const ix = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'index.json'), 'utf8')).items.HSI;
     const ser = ix.series || [];
+    hsiSer = ser;
     if (ser.length > 30) {
       let ptr = ser.length - 1;
       if (anchor) { ptr = -1; for (let i = 0; i < ser.length; i++) { if (ser[i][0] <= anchor) ptr = i; else break; } }
@@ -246,6 +248,42 @@ function computeOne(obj) {
       if (base > 0) hsi = { asOf: ser[ptr][0], y1: r2(ser[ptr][1] / base - 1), anchor: anchor || null };
     }
   } catch (e) { /* 无指数文件则忽略 */ }
+
+  /* 2026-11-17（外部核验 A6 / P0）：超额收益必须「同日」相减。
+     原来前端统一用 meta.hsi.y1（全站一个锚点），但仍有 51/55 只基金的 asOf 早于锚点，
+     等于拿旧净值比新恒指，系统性高估 1.2–1.5pp。这里按**每只基金自己的 asOf**
+     取恒指同窗口的近 1 年回报，算好 excess1 落盘（前端直接读，不再自己相减）。 */
+  let excessFixed = 0;
+  if (Array.isArray(hsiSer) && hsiSer.length > 30) {
+    const cache = {};
+    const y1At = (dateIso) => {
+      if (!dateIso) return null;
+      if (Object.prototype.hasOwnProperty.call(cache, dateIso)) return cache[dateIso];
+      let ptr = -1;
+      for (let i = 0; i < hsiSer.length; i++) { if (hsiSer[i][0] <= dateIso) ptr = i; else break; }
+      let v = null;
+      if (ptr > 0) {
+        const d0 = new Date(hsiSer[ptr][0] + 'T00:00:00Z');
+        const cut = iso(new Date(Date.UTC(d0.getUTCFullYear() - 1, d0.getUTCMonth(), d0.getUTCDate())));
+        let base = null;
+        for (const [d, val] of hsiSer) { if (d <= cut) base = val; else break; }
+        if (base > 0) v = r2(hsiSer[ptr][1] / base - 1);
+      }
+      cache[dateIso] = v;
+      return v;
+    };
+    Object.keys(funds).forEach((id) => {
+      const p = funds[id];
+      if (!p || p.y1 == null) { if (p) p.excess1 = null; return; }
+      const hy = y1At(p.asOf);
+      /* y1 与 hsi.y1 都已是百分数，r2() 会再乘 100，这里用普通保留 2 位 */
+      p.excess1 = hy == null ? null : Math.round((p.y1 - hy) * 100) / 100;
+      if (hy != null && hsi && p.asOf !== hsi.asOf) excessFixed++;
+    });
+  } else {
+    Object.keys(funds).forEach((id) => { if (funds[id]) funds[id].excess1 = null; });
+  }
+
   const out = {
     updatedAt: Date.now(),
     meta: { hsi },
