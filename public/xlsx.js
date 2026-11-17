@@ -97,7 +97,8 @@ window.MPFXLSX = (function () {
   /* ---------- styles ---------- */
   var STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
-    '<numFmts count="4">' +
+    '<numFmts count="5">' +
+      '<numFmt numFmtId="168" formatCode="0.00&quot;%&quot;"/>' +   /* 19.47 显示为 19.47% */
       '<numFmt numFmtId="164" formatCode="+0.00%;-0.00%;0.00%"/>' +
       '<numFmt numFmtId="165" formatCode="0.0000"/>' +
       '<numFmt numFmtId="166" formatCode="0.00"/>' +
@@ -123,7 +124,7 @@ window.MPFXLSX = (function () {
       '<top style="thin"><color rgb="FFCFDCEA"/></top><bottom style="thin"><color rgb="FFCFDCEA"/></bottom><diagonal/></border>' +
     '</borders>' +
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
-    '<cellXfs count="21">' +
+    '<cellXfs count="22">' +
       /* 0 默认 */ '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
       /* 1 标题 */ '<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 2 表头 */ '<xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
@@ -146,6 +147,8 @@ window.MPFXLSX = (function () {
       /* 20 整数（风险级别 1–7：不要显示 5.00） */
       '<xf numFmtId="1" fontId="4" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
       /* 19 灰色小字居中（免责） */ '<xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>' +
+      /* 21 百分数（存 19.47，显示 19.47%；注意 19=整数、20=灰色小字） */
+      '<xf numFmtId="168" fontId="4" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>' +
     '</cellXfs>' +
     /* 2026-11-04：补 cellStyles —— 缺这一段时 Excel/openpyxl 会报「没有默认样式」 */
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
@@ -277,14 +280,22 @@ window.MPFXLSX = (function () {
       var anchors = plan.images.map(function (im, mi) {
         var rid = 'rId' + (mi + 1);
         var nm = xesc(im.name || ('图' + (mi + 1)));
-        return '<xdr:twoCellAnchor editAs="oneCell">' +
+        /* 2026-11-17（用户反馈图表变形）：原来是 twoCellAnchor + <a:stretch>，
+           Excel 会把图片拉伸填满「col..col2 / row..row2」这个矩形，列宽一变就变形。
+           改为 oneCellAnchor + 显式 ext：按 PNG 原始宽高比、只缩放到目标宽度，永不变形。 */
+        var dim = pngSize(im.data);
+        var targetW = im.fitW || 560;                    /* 目标显示宽度（px） */
+        var sc = dim && dim.w ? (targetW / dim.w) : 1;
+        var cx = Math.round((dim ? dim.w : targetW) * sc * 9525);   /* 1px = 9525 EMU */
+        var cy = Math.round((dim ? dim.h : targetW * 0.86) * sc * 9525);
+        return '<xdr:oneCellAnchor>' +
           '<xdr:from><xdr:col>' + im.col + '</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>' + im.row + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>' +
-          '<xdr:to><xdr:col>' + im.col2 + '</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>' + im.row2 + '</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>' +
+          '<xdr:ext cx="' + cx + '" cy="' + cy + '"/>' +
           '<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="' + (mediaSeq + mi + 1) + '" name="' + nm + '"/><xdr:cNvPicPr/></xdr:nvPicPr>' +
           '<xdr:blipFill><a:blip r:embed="' + rid + '"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>' +
-          '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></a:xfrm>' +
+          '<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cx + '" cy="' + cy + '"/></a:xfrm>' +
           '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic>' +
-          '<xdr:clientData/></xdr:twoCellAnchor>';
+          '<xdr:clientData/></xdr:oneCellAnchor>';
       }).join('');
       add('xl/drawings/drawing' + drawingNo + '.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
         '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" ' +

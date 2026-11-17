@@ -434,12 +434,12 @@
     /* [表头, 取值, 类型, 列宽, 列说明] */
     const COLS = [
       [TT('名次'), (x, i) => i + 1, 'rank', 6, TT('按当前排名维度排出的名次（1 = 排在最前）')],
-      [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 44, TT('成分基金名称；单位类别在下一列单列')],
-      [TT('单位类别'), (x) => x.unit || '', 'txt', 9, TT('同一基金的不同单位类别（A / T / B 等），净值与回报各自独立')],
+      [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 34, TT('成分基金名称；单位类别在下一列单列')],
+      [TT('单位类别'), (x) => x.unit || '', 'txt', 12, TT('同一基金的不同单位类别（A / T / B 等），净值与回报各自独立')],
       /* 2026-11-17（用户要求）：积金局是两级分类，拆成两列，不再用「/」挤在一格里 */
       [TT('基金种类'), (x) => typeLabel((window.splitFundType(x) || {}).cat || x.type), 'txtL', 16, TT('积金局基金类别（第一级）')],
-      [TT('基金细类'), (x) => typeLabel((window.splitFundType(x) || {}).sub || ''), 'txtL', 26, TT('积金局基金细类（第二级，属于上一列类别）')],
-      [TT('强积金计划'), (x) => x.scheme || '', 'txtL', 40, TT('所属强积金计划（受托人／保荐人）')],
+      [TT('基金细类'), (x) => typeLabel((window.splitFundType(x) || {}).sub || ''), 'txtL', 34, TT('积金局基金细类（第二级，属于上一列类别）')],
+      [TT('强积金计划'), (x) => x.scheme || '', 'txtL', 46, TT('所属强积金计划（受托人／保荐人）')],
       [TT('受托人'), (x) => (window.trusteeDisplay ? window.trusteeDisplay(x.trustee) : x.trustee), 'txtL', 14, TT('受托人／保荐人')],
       [TT('风险级别'), (x) => x.risk, 'int', 8, TT('积金局按近三年波幅评定的 1–7 级（1 最低、7 最高）')],
       [TT('单位资产净值'), (x) => x.nav, 'nav', 12, TT('发行人官网公布的单位资产净值（NAV），估值日见下一列')],
@@ -470,9 +470,10 @@
         case 'rank': return { v: i + 1, s: 3 };
         case 'txtL': return txt(v, 4);
         case 'txt': return txt(v);
-        case 'int': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Number(v), s: 20 };
+        case 'int': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Number(v), s: 19 };
         case 'nav': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e4, s: 6 };
-        case 'pct': return pct(v);
+        /* 2026-11-17：百分比存百分数（19.47）+ 自定义格式，复制到别处不会差 100 倍 */
+        case 'pct': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 100) / 100, s: 21 };
         case 'pct0': return v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 100) / 1e4, s: 5 };
         case 'num2': return num(v, 7);
         /* 2026-11-17（用户反馈「夏普有缺失」）：null 不能留空，写 n.a. 才看得出是「不适用」而不是漏算 */

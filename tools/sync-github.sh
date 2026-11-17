@@ -10,6 +10,9 @@
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 DRY=0; [ "${1:-}" = "--dry" ] && DRY=1
+# 2026-11-17（用户要求）：--code-only 只推前端与脚本，不带数据。
+# 用于「界面改了、但数据还是旧的」时单独发一版，避免把半成品数据一起推上去。
+CODE_ONLY=0; for a in "$@"; do [ "$a" = "--code-only" ] && CODE_ONLY=1; done
 
 git fetch origin main >/dev/null 2>&1 || true
 
@@ -29,6 +32,7 @@ process.stdin.on('data',d=>s+=d).on('end',()=>{
   }
   console.log(ahead?('AHEAD '+ahead+' '+sample.join(',')):'OK');
 });" 2>/dev/null)
+[ "$CODE_ONLY" = "1" ] && GUARD="OK"
 case "$GUARD" in
   OK) : ;;
   AHEAD*)
@@ -41,7 +45,11 @@ esac
 
 # ---------- 构建提交：索引 = origin/main + 工作区改动 ----------
 git read-tree origin/main || { echo "read-tree 失败"; exit 1; }
-git add --ignore-removal data/ 2>/dev/null || true
+if [ "$CODE_ONLY" = "1" ]; then
+  echo "（--code-only：只推前端与脚本，不推 data/）"
+else
+  git add --ignore-removal data/ 2>/dev/null || true
+fi
 git add --ignore-removal tools/ .github/ 2>/dev/null || true
 # 2026-11-17（用户反馈）：原来只推 data/tools/.github，**前端 public/ 从未推送** →
 # 两站界面长期不一致（导出、分类、提示都在 A 站改了、B 站还是旧的）。这里一并推。

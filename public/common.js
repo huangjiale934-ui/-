@@ -117,19 +117,25 @@ window.showDataError = function (msg) {
   } catch (e) {}
 };
 
+/* 2026-11-17（用户反馈仍卡）：同一接口在首屏被并发请求多次（实测 /api/funds 3 次、
+   /api/navperf 2 次），每次 50KB+。这里做「进行中请求复用」：同 key 的并发调用共享同一个 Promise。 */
+const __INFLIGHT = new Map();
+
 function fetchJSON(url, key, force, onFresh) {
   const hit = cacheGet(key);
   if (hit && !force && Date.now() - hit.at < CACHE_TTL) return Promise.resolve(hit.data);
   /* 2026-10-20：force 刷新时给 URL 加时间戳，绕开 ETag 304（否则「更新数据」仍拿到旧响应体） */
   const reqUrl = force ? url + (url.indexOf('?') >= 0 ? '&' : '?') + '_t=' + Date.now() : url;
+  if (!force && __INFLIGHT.has(key)) return __INFLIGHT.get(key);
   const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
   const timer = ctrl ? setTimeout(() => { try { ctrl.abort(); } catch (e) {} }, 20000) : null;
   const opts = ctrl ? { cache: 'default', signal: ctrl.signal } : { cache: 'default' };
   const req = fetch(reqUrl, opts)
     .then((r) => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
-    .then((j) => { if (timer) clearTimeout(timer); cacheSet(key, j); return j; })
+    .then((j) => { if (timer) clearTimeout(timer); cacheSet(key, j); __INFLIGHT.delete(key); return j; })
     .catch((e) => {
       if (timer) clearTimeout(timer);
+      __INFLIGHT.delete(key);
       /* 有旧缓存时不打扰（旧数据仍可用）；没有缓存才提示 */
       if (!hit && typeof window.showDataError === 'function') {
         window.showDataError((e && e.name === 'AbortError') ? TT('请求超时（20 秒）') : String((e && e.message) || e));
@@ -143,6 +149,7 @@ function fetchJSON(url, key, force, onFresh) {
     req.then((j) => { try { if (onFresh) onFresh(j, hit.data); } catch (e) {} }).catch(() => {});
     return Promise.resolve(hit.data); // 旧数据先上屏，后台更新
   }
+  if (!force) __INFLIGHT.set(key, req);
   return req;
 }
 window.fetchJSON = fetchJSON;
@@ -1962,7 +1969,7 @@ window.buildHoldAllocSheet = async function (entries, opts) {
       name: job.name + (isRose ? ' 投资组合分布' : ' 前十大持仓柱状图'),
     });
   }
-  return { rows: rows, merges: ['A1:G1'], cols: [7, 26, 14, 34, 18, 12, 16], images: images };
+  return { rows: rows, merges: ['A1:G1'], cols: [7, 26, 16, 30, 12, 14, 22], images: images };
 };
 
 window.holdBlockHTML = function (id) {

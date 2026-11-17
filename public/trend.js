@@ -543,7 +543,7 @@ window.TREND = (function () {
           ['基金细类', (x) => tCell(window.splitFundType ? window.splitFundType(x).sub : '')],
           ['推出日期', (x) => tCell(x.launch)],
           ['基金规模（百万港元）', (x) => n2(x.size)],
-          ['风险级别', (x) => (x.risk == null || !isFinite(x.risk) ? { v: '—', s: 4 } : { v: Number(x.risk), s: 20 })],
+          ['风险级别', (x) => (x.risk == null || !isFinite(x.risk) ? { v: '—', s: 4 } : { v: Number(x.risk), s: 19 })],
           ['单位资产净值', (x) => (x.nav == null ? { v: '—', s: 4 } : { v: Math.round(x.nav * 1e4) / 1e4, s: 6 })],
           ['近1年年率化回报', (x) => pCell(x.ann1)],
           ['近3年年率化回报', (x) => {
