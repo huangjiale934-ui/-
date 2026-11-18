@@ -1,91 +1,37 @@
 {
- "at": "2026-11-18T02:42:40.150Z",
- "latest": "2026-11-16",
- "marketLatest": "2026-11-17",
- "fundLag": 1,
- "marketAge": 1,
- "globalAge": 2,
- "maxLag": 4,
- "hardLag": 10,
- "warnCount": 0,
- "hard": false,
- "items": [
-  {
-   "trustee": "HSBC",
-   "count": 77,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
+ "checkedAt": "2026-11-18T09:15:17.987Z",
+ "checkedAtHKT": "2026-11-18 17:15:17",
+ "ok": true,
+ "problems": [],
+ "detail": {
+  "A": {
+   "navLatest": "2026-11-16",
+   "count": 451,
+   "updatedAt": 1794971140993,
+   "build": "2026-11-18-an",
+   "status": {
+    "phase": "done",
+    "step": "两站对账拉齐/顶部仅进行中/指数一位小数",
+    "finishedAt": "11:05",
+    "day": "2026-11-18",
+    "host": "workbuddy"
+   }
   },
-  {
-   "trustee": "中國人壽",
-   "count": 10,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
+  "B": {
+   "navLatest": "2026-11-16",
+   "count": 451,
+   "updatedAt": 1794969761850,
+   "build": "2026-11-18-an",
+   "status": {
+    "phase": "done",
+    "step": "两站对账拉齐/顶部仅进行中/指数一位小数",
+    "finishedAt": "11:05",
+    "day": "2026-11-18",
+    "host": "workbuddy"
+   }
   },
-  {
-   "trustee": "中銀保誠",
-   "count": 34,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "交通",
-   "count": 14,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "友邦信託",
-   "count": 21,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "宏利",
-   "count": 28,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "東亞",
-   "count": 40,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "永明",
-   "count": 31,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "渣打信托",
-   "count": 10,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "萬通",
-   "count": 14,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  },
-  {
-   "trustee": "銀聯信託",
-   "count": 171,
-   "latest": "2026-11-16",
-   "lagDays": 1,
-   "exempt": null
-  }
- ]
+  "referenceLatest": "2026-11-16",
+  "today": "2026-11-18",
+  "WorkBuddy 站_planLag": 12
+ }
 }

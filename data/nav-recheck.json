@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-18 02:42:02",
+ "runAt": "2026-11-18 09:14:24",
  "window": [
   "2026-11-13",
   "2026-11-18"
@@ -7,61 +7,134 @@
  "sources": {
   "bct": {
    "checked": 232,
-   "secs": 58.3
+   "secs": 60.9
   },
   "bea": {
    "checked": 80,
-   "secs": 2.0
+   "secs": 2.7
   },
   "manulife": {
    "checked": 95,
-   "secs": 6.1
+   "secs": 5.9
   },
   "fidelity": {
-   "checked": 46,
-   "secs": 3.4
+   "checked": 69,
+   "secs": 1.3
   },
   "aia": {
    "checked": 42,
-   "secs": 11.5
+   "secs": 12.4
   },
   "chinalife": {
    "checked": 20,
-   "secs": 6.7
+   "secs": 2.1
   },
   "yflife": {
    "checked": 28,
-   "secs": 2.0
+   "secs": 1.9
   },
   "haitong": {
-   "checked": 28,
-   "secs": 28.0
+   "checked": 42,
+   "secs": 10.0
   },
   "sunlife": {
    "checked": 62,
-   "secs": 5.9
+   "secs": 6.1
   },
   "etnet": {
-   "checked": 16,
-   "secs": 4.3
+   "checked": 4,
+   "secs": 5.1
   },
   "bocom": {
    "checked": 28,
-   "secs": 20.3
+   "secs": 19.2
   },
   "hsbc": {
-   "checked": 80,
-   "secs": 1.3
+   "checked": 120,
+   "secs": 1.8
   },
   "bocpt": {
    "checked": 68,
    "secs": 4.8
   }
  },
- "checked": 825,
+ "checked": 890,
  "applied": 0,
  "diffs": [],
- "missing": [],
+ "missing": [
+  {
+   "id": "771",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 18.04
+  },
+  {
+   "id": "773",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 27.79
+  },
+  {
+   "id": "774",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 14.94
+  },
+  {
+   "id": "775",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 17.09
+  },
+  {
+   "id": "776",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 20.38
+  },
+  {
+   "id": "777",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 22.86
+  },
+  {
+   "id": "778",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 21.99
+  },
+  {
+   "id": "779",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 28.09
+  },
+  {
+   "id": "780",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 13.04
+  },
+  {
+   "id": "782",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 10.62
+  },
+  {
+   "id": "1529",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 19.14
+  },
+  {
+   "id": "1530",
+   "date": "2026-11-16",
+   "src": "etnet",
+   "nav": 12.44
+  }
+ ],
  "added": 0,
  "errors": [],
  "coverage": {
