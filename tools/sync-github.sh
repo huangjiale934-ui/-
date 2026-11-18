@@ -13,6 +13,15 @@ DRY=0; [ "${1:-}" = "--dry" ] && DRY=1
 # 2026-11-17（用户要求）：--code-only 只推前端与脚本，不带数据。
 # 用于「界面改了、但数据还是旧的」时单独发一版，避免把半成品数据一起推上去。
 CODE_ONLY=0; for a in "$@"; do [ "$a" = "--code-only" ] && CODE_ONLY=1; done
+# 2026-11-18（用户明确要求）：除用户明确要求外，本机不再向 GitHub 推**数据**。
+# 代码改动仍可推（--code-only），否则 B 站永远拿不到前端修复。
+ALLOW_DATA=0; for a in "$@"; do [ "$a" = "--allow-data" ] && ALLOW_DATA=1; done
+if [ "$CODE_ONLY" = "0" ] && [ "$ALLOW_DATA" = "0" ]; then
+  echo "已阻止：默认不向 GitHub 推送数据（两站各自更新）。"
+  echo "  只推代码：bash tools/sync-github.sh --code-only"
+  echo "  确实要推数据请显式加：--allow-data"
+  exit 2
+fi
 
 git fetch origin main >/dev/null 2>&1 || true
 

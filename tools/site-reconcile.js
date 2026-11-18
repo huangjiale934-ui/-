@@ -34,6 +34,9 @@ function withShare(u) { return SHARE ? u + (u.indexOf('?') >= 0 ? '&' : '?') + '
 const A = process.env.MPF_SITE_A || 'https://mpf-data.app.workbuddy.host';
 const B = process.env.MPF_SITE_B || 'https://huangjiale934-ui.github.io/-';
 const APPLY = process.argv.includes('--apply');
+/* 2026-11-18（用户要求两站数值必须完全一致）：只要对方有更新的净值就拉齐，
+   不再用「差异太小算时点差」的阈值放过（4 只差异也会让温度计差 1 个百分点）。 */
+const FORCE = process.argv.includes('--force');
 const NO_PUSH = process.argv.includes('--no-push');
 const THRESHOLD = 10;
 
@@ -95,7 +98,7 @@ function sh(cmd, args, opts) {
   if (onlyB.length) console.log(`  仅 GitHub 有 ${onlyB.length} 只：${onlyB.slice(0, 6).join(',')}`);
   conflicts.slice(0, 5).forEach((c) => console.log(`  ! ${c.id} @${c.date} 本机 ${c.a} / GH ${c.b}`));
 
-  const pull = ghBetter.length >= THRESHOLD && ghBetter.length > localBetter.length * 2;
+  const pull = FORCE ? ghBetter.length > localBetter.length : (ghBetter.length >= THRESHOLD && ghBetter.length > localBetter.length * 2);
   const push = localBetter.length >= THRESHOLD && localBetter.length > ghBetter.length * 2;
 
   if (!pull && !push) {
