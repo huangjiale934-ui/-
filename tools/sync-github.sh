@@ -73,7 +73,15 @@ fi
 TREE=$(git write-tree) || { echo "write-tree 失败"; exit 1; }
 for i in 1 2 3 4 5; do
   PARENT=$(git rev-parse origin/main)
-  COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "data: daily sync $(date +%F)") || { echo "commit-tree 失败"; exit 1; }
+  # 2026-11-18（用户要求）：只有「探测样本/工具脚本」变化的提交不需要重新构建站点，
+  # 用 [skip ci] 省掉一次 build（每天十几次空构建会挤掉定时队列）。
+  # 注意：只要涉及 data/（除 data/probe）或 public/，就必须构建，不能加 skip。
+  CHANGED=$(git diff --name-only "$PARENT" "$TREE" | grep -v '^data/probe/' || true)
+  NEED_BUILD=$(printf '%s
+' "$CHANGED" | grep -E '^(data/|public/|server\.js|navperf\.js|indexbuild\.js)' | head -1 || true)
+  SKIP=""
+  [ -z "$NEED_BUILD" ] && SKIP=" [skip ci]"
+  COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "data: daily sync $(date +%F)$SKIP") || { echo "commit-tree 失败"; exit 1; }
   if git push origin "$COMMIT:main" 2>&1 | tail -2; then
     if git ls-remote origin refs/heads/main 2>/dev/null | grep -q "$COMMIT"; then
       echo "✔ 已推送 GitHub：${COMMIT:0:7}（push 事件将触发 Pages 构建）"

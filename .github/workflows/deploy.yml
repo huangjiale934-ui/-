@@ -20,8 +20,8 @@ on:
     # 2026-11-17（排查：GitHub 实测会丢弃/延迟定时触发，3 个 cron 只成 1 个）：
     # 改为「多点小票」——同一份轻量任务多铺几个时点，任一个跑成即可；
     # 每个时点都是「仅净值」模式，重复执行无害（幂等）。
-    - cron: '0 4 * * 1-5'    # 12:00 HKT
-    - cron: '0 8 * * *'      # 16:00 HKT
+    # 2026-11-18（用户要求）：只保留两班——22:40 全量、09:35 轻量。
+    # 时点越多，GitHub 队列越容易互相挤压（实测 4 个时点只成 1–2 个）。
   workflow_dispatch: {}
 
 permissions:
@@ -233,6 +233,16 @@ jobs:
           # 2026-10-26 修 4-05：补齐本机 health-check 覆盖的四类哨兵（缺日/渠道一致/allocSum/三处一致本地版）
           node tools/gap-check.js || echo "!! gap-check 有缺口（不影响发布）"
           node tools/health-check.js --local || echo "!! health-check 有告警（不影响发布）"
+
+      # 2026-11-18（用户要求）：跑完立刻自检新鲜度，落后就发邮件（仅定时/手动数据班次）
+      - name: 新鮮度自檢（落後發郵件）
+        if: github.event_name == 'schedule' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[run-data]'))
+        continue-on-error: true
+        env:
+          MPF_SMTP_USER: ${{ secrets.MPF_SMTP_USER }}
+          MPF_SMTP_PASS: ${{ secrets.MPF_SMTP_PASS }}
+          MPF_MAIL_TO: ${{ secrets.MPF_MAIL_TO }}
+        run: node tools/freshness-watch.js --mail || true
 
       - name: 官網快照自檢（雲端必須真的抓到頁面）
         continue-on-error: true

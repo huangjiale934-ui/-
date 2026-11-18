@@ -389,25 +389,15 @@ function initUpdateBanner() {
         }
         /* 2026-11-05（第三十八轮，用户反馈）：今天的更新已经跑完，就不该再显示「更新窗口」。
            只有本页亲历过 running 时才给 12 秒绿色完成提示，其余情况直接收起。 */
-        if (u && u.phase === 'done' && (!u.day || u.day === hk().toISOString().slice(0, 10))) {
-          if (phase === 'running') {
-            phase = 'done';
-            paint('ok', TT('数据更新完成'), (u.finishedAt ? u.finishedAt + ' ' : '') + TT('全部步骤已完成'),
-              shown + ' · ' + TT('本页已自动同步，无需手动刷新'), true);
-            doneTimer = setTimeout(hide, 12000);
-          } else {
-            phase = '';
-            hide();
-          }
+        /* 2026-11-18（用户要求）：顶部只显示「正在更新」。完成/失败都不再打扰客户；
+           失败由看门狗发邮件给管理员。 */
+        if (u && u.phase === 'done') {
+          phase = '';
+          hide();
           return;
         }
-        /* 失败状态只在窗口内或本页亲历过 running 时展示，避免上一轮的红条挂一整天 */
-        if (u && u.phase === 'error' && (phase === 'running' || inWindow())) {
-          phase = 'error';
-          paint('err', TT('本次更新未全部完成'), (u.step || ''), TT('已保留上一次的完整数据'), true);
-          return;
-        }
-        if (paintWindow(shown)) return;
+        /* 失败不展示（改由看门狗邮件通知）；也不再显示「更新窗口」提示条 */
+        if (u && u.phase === 'error') { phase = ''; hide(); return; }
         phase = '';
         hide();
       })
@@ -3645,8 +3635,11 @@ document.addEventListener('mpf:lang', () => {
     return '<svg class="tk-spark" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" aria-hidden="true">' +
       '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + c + '" stroke-width="1.6"/></svg>';
   }
+  /* 2026-11-18（用户要求）：指数点位统一四舍五入保留 1 位小数，两站口径一致 */
   function fmt(v) {
-    return v >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : (Math.round(v * 100) / 100).toFixed(2);
+    if (v == null || !isFinite(v)) return '—';
+    const x = Math.round(v * 10) / 10;
+    return x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   }
 
   function render(j) {

@@ -943,7 +943,8 @@
     let lo = Math.floor(mn / step) * step;
     if (RAWV && lo < 0) lo = 0;
     const hi = Math.ceil(mx / step) * step;
-    const fmtTick = (v) => RAWV ? Math.round(v).toLocaleString('en-US') : String(Math.round(v));
+    /* 2026-11-18：指数点位统一 1 位小数（与顶部行情栏一致） */
+    const fmtTick = (v) => (Math.round(v * 10) / 10).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     /* 2026-11-01（6.0，用户反馈）：横轴原按「第几个周点」等距，4 周月与 5 周月宽度差 ~25%，
        同一段数据里月份间隔忽大忽小。改成「月份等宽」时间轴：x = 连续月序号（含日/当月天数），
        每个月占完全相同的宽度，月刻度落在每月 1 号边界上。 */
