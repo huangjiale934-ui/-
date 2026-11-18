@@ -289,7 +289,11 @@ async function main() {
   check(sb, 'GitHub 站');
 
   if (sa && sb) {
-    if (sa.navLatest !== sb.navLatest) problems.push('两站净值日不一致：' + sa.navLatest + ' vs ' + sb.navLatest);
+    /* 2026-11-18（用户反馈）：B 站比 A 站先拿到新净值，不算本站异常——
+       本站只要不落后官方参考源就正常；晚间全量班会把两站拉齐。 */
+    if (sa.navLatest !== sb.navLatest && ref && sa.navLatest < ref) {
+      problems.push('两站净值日不一致（本站落后参考源）：' + sa.navLatest + ' vs ' + sb.navLatest);
+    }
     if (sa.count !== sb.count) problems.push('两站基金数不一致：' + sa.count + ' vs ' + sb.count);
     /* 2026-11-18：两站同步时间差 8 小时属正常（云端定时被延迟），只要净值日相同就不该报。
        真正要盯的是「超过 24 小时未更新」。 */
@@ -312,7 +316,14 @@ async function main() {
     problems.forEach((p) => console.log('  · ' + p));
   }
 
-  if (!doc.ok && arg('mail')) {
+  /* 2026-11-18（用户要求）：提醒只在「早班更新之后」发一次——
+     窗口 10:00–12:30 HKT。其它时段即使异常也不发信（避免晚上再收到一次）。 */
+  const HKT_HOUR = new Date(Date.now() + 8 * 3600e3).getUTCHours();
+  const inMailWindow = HKT_HOUR >= 10 && HKT_HOUR < 12;
+  if (!doc.ok && arg('mail') && !inMailWindow && !arg('mail-anytime')) {
+    if (!QUIET) console.log('  （当前 ' + HKT_HOUR + ' 时，不在 10:00–12:30 发信窗口内，本次不发邮件）');
+    doc.mailSkipped = true;
+  } else if (!doc.ok && arg('mail')) {
     let cfg = null;
     try {
       cfg = JSON.parse(fs.readFileSync(MAIL_CFG, 'utf8'));
