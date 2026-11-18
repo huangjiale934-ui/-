@@ -29,16 +29,11 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  # 2026-10-27 修：原来 cancel-in-progress: true 且所有事件共用 pages 组 ——
-  # 只要定时任务与 push 触发的构建撞在一起，定时任务会被直接取消。
-  # 实测：2026-10-26 15:50:48Z 的 schedule 运行结论就是 cancelled（当时正好有一次 push 构建）。
-  # 改为不取消、排队执行：push 构建最多多等几分钟，但定时数据更新不会再被吃掉。
-  group: pages
-  cancel-in-progress: false
-
 jobs:
   update-data:
+    concurrency:
+      group: mpf-data
+      cancel-in-progress: false
     # 排程 / 手动触发才抓数据；push 触发的构建跳过（数据已在 commit 里）。
     # 例外：提交信息带 [run-data] 时也跑一次，用于手动验证云端抓取链路。
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[run-data]'))
@@ -305,6 +300,9 @@ jobs:
           fi
 
   build-deploy:
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     needs: [update-data]
     if: always() && !failure() && !cancelled()
