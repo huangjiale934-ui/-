@@ -63,9 +63,12 @@ git add --ignore-removal tools/ .github/ 2>/dev/null || true
 # 2026-11-17（用户反馈）：原来只推 data/tools/.github，**前端 public/ 从未推送** →
 # 两站界面长期不一致（导出、分类、提示都在 A 站改了、B 站还是旧的）。这里一并推。
 git add --ignore-removal public/ server.js navperf.js indexbuild.js 2>/dev/null || true
-# 2026-11-17（用户反馈 B 站提示条关不掉）：update-status.json 被 .gitignore 忽略，
-# 普通 add 不会带上，B 站永远停在上一次的 phase=running。这里强制加入。
-git add -f data/update-status.json 2>/dev/null || true
+# 2026-11-17（用户反馈 B 站提示条关不掉）：update-status.json 被 .gitignore 忽略，普通 add 不会带上。
+# 2026-11-18 修正：只在**推数据**时携带；只推代码时绝不带，否则 B 站会显示 host=workbuddy
+# （用户会以为 GitHub 站的数据是本机推的）。
+if [ "${ALLOW_DATA:-0}" = "1" ]; then
+  git add -f data/update-status.json 2>/dev/null || true
+fi
 
 # 比较基准必须是 origin/main（比 HEAD 会误判「无变更」）
 if git diff --cached --quiet origin/main; then
