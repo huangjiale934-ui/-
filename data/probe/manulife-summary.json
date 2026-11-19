@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-11-19T15:14:12+08:00",
- "samples": 596,
+ "generatedAt": "2026-11-20T07:47:32+08:00",
+ "samples": 597,
  "funds": {
   "SHK122": {
    "label": "宏利環球精選 · 宏利MPF穩健基金",
@@ -40,14 +40,20 @@
      "prevSample": "11-18 15:13:18",
      "detectedAt": "11-19 07:33:42",
      "windowMinutes": 980.4
+    },
+    {
+     "date": "2026-11-18",
+     "prevSample": "11-19 15:14:11",
+     "detectedAt": "11-20 07:47:30",
+     "windowMinutes": 993.3
     }
    ],
    "stats": {
-    "days": 6,
+    "days": 7,
     "medianDetectedAt": "12:30",
     "earliest": "01:37",
     "latest": "12:30",
-    "medianWindowMinutes": 1165.6
+    "medianWindowMinutes": 993.3
    }
   },
   "RBIA": {
