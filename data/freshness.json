@@ -1,37 +1,35 @@
 {
- "checkedAt": "2026-11-19T09:37:46.559Z",
- "checkedAtHKT": "2026-11-19 17:37:46",
+ "checkedAt": "2026-11-19T15:57:25.013Z",
+ "checkedAtHKT": "2026-11-19 23:57:25",
  "ok": true,
  "problems": [],
  "detail": {
   "A": {
-   "navLatest": "2026-11-17",
+   "navLatest": "2026-11-18",
    "count": 451,
-   "updatedAt": 1795070448018,
+   "updatedAt": 1795099296200,
    "build": "2026-11-19-an",
    "status": {
-    "phase": "done",
-    "step": "全部完成",
+    "phase": "running",
+    "step": "10/10 新鲜度自检 node tools/freshness-watch.js --mail",
     "day": "2026-11-19",
-    "finishedAt": "12:05",
     "host": "workbuddy"
    }
   },
   "B": {
-   "navLatest": "2026-11-17",
+   "navLatest": "2026-11-18",
    "count": 451,
-   "updatedAt": 1795060330729,
+   "updatedAt": 1795081066660,
    "build": "2026-11-19-an",
    "status": {
     "phase": "done",
     "step": "早晨净值更新完成",
-    "finishedAt": "11:52",
+    "finishedAt": "17:37",
     "day": "2026-11-19",
     "host": "github"
    }
   },
   "referenceLatest": "2026-11-17",
-  "today": "2026-11-19",
-  "WorkBuddy 站_planLag": 9
+  "today": "2026-11-19"
  }
 }

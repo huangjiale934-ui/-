@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-19 09:37:00",
+ "runAt": "2026-11-19 15:55:49",
  "window": [
   "2026-11-14",
   "2026-11-19"
@@ -7,58 +7,58 @@
  "sources": {
   "bct": {
    "checked": 232,
-   "secs": 49.9
+   "secs": 60.3
   },
   "bea": {
-   "checked": 80,
-   "secs": 1.7
+   "checked": 120,
+   "secs": 2.8
   },
   "manulife": {
-   "checked": 95,
+   "checked": 133,
    "secs": 6.9
   },
   "fidelity": {
    "checked": 69,
-   "secs": 2.5
+   "secs": 1.9
   },
   "aia": {
    "checked": 42,
-   "secs": 9.7
+   "secs": 11.6
   },
   "chinalife": {
    "checked": 20,
-   "secs": 1.7
+   "secs": 2.3
   },
   "yflife": {
    "checked": 28,
-   "secs": 1.5
+   "secs": 1.8
   },
   "haitong": {
-   "checked": 42,
-   "secs": 8.2
+   "checked": 0,
+   "secs": 180.0
   },
   "sunlife": {
-   "checked": 62,
-   "secs": 6.4
+   "checked": 93,
+   "secs": 6.7
   },
   "etnet": {
    "checked": 16,
-   "secs": 4.9
+   "secs": 3.4
   },
   "bocom": {
-   "checked": 28,
-   "secs": 15.6
+   "checked": 42,
+   "secs": 16.5
   },
   "hsbc": {
    "checked": 120,
    "secs": 1.7
   },
   "bocpt": {
-   "checked": 68,
-   "secs": 3.5
+   "checked": 102,
+   "secs": 4.9
   }
  },
- "checked": 902,
+ "checked": 1017,
  "applied": 0,
  "diffs": [],
  "missing": [],
@@ -66,12 +66,26 @@
  "errors": [],
  "coverage": {
   "total": 450,
-  "queried": 440,
-  "uncovered": 10,
+  "queried": 426,
+  "uncovered": 24,
   "uncoveredIds": [
    "1399",
    "1497",
    "1498",
+   "1553",
+   "1554",
+   "1555",
+   "1556",
+   "282",
+   "283",
+   "284",
+   "285",
+   "286",
+   "287",
+   "288",
+   "289",
+   "290",
+   "291",
    "459",
    "460",
    "462",
@@ -105,7 +119,22 @@
     "466",
     "815"
    ],
-   "failed": [],
+   "failed": [
+    "1553",
+    "1554",
+    "1555",
+    "1556",
+    "282",
+    "283",
+    "284",
+    "285",
+    "286",
+    "287",
+    "288",
+    "289",
+    "290",
+    "291"
+   ],
    "outOfWindow": [],
    "unclassified": []
   },
