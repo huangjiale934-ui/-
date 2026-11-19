@@ -3121,7 +3121,7 @@ body { overflow-x: clip; }
 .ec-entry{margin-top:14px}
 .ec-modal{position:fixed;inset:0;z-index:900;display:none;background:rgba(12,24,44,.42);padding:4vh 16px}
 .ec-modal.show{display:flex;align-items:flex-start;justify-content:center}
-.ec-box{width:min(1000px,96vw);max-height:88vh;display:flex;flex-direction:column;background:#fff;border-radius:14px;
+.ec-box{width:min(900px,92vw);max-height:83.5vh;display:flex;flex-direction:column;background:#fff;border-radius:14px;
   box-shadow:0 18px 50px rgba(12,32,64,.22);overflow:hidden}
 .ec-head{display:flex;align-items:baseline;gap:10px;padding:16px 20px;border-bottom:1px solid #e8eef6}
 .ec-head b{font-size:17px;color:#0f2a4a}

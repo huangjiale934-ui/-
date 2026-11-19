@@ -396,8 +396,10 @@ window.TREND = (function () {
         return;
       }
       const inputs = dr.querySelectorAll('input');
-      const a = inputs[0].value, b2 = inputs[1].value;
-      if (!a || !b2 || a >= b2) { if (window.mpfToast) mpfToast( _t('请选择有效的起止日期')); return; }
+      const nd = window.mpfNormDate || function (v) { return String(v || '').trim(); };
+      const a = nd(inputs[0].value), b2 = nd(inputs[1].value);
+      inputs[0].value = a; inputs[1].value = b2;
+      if (!a || !b2 || a >= b2) { if (window.mpfToast) mpfToast( _t('请填写有效的起止日期（YYYY-MM-DD）')); return; }
       /* 2026-10-23 修：允许选到未来日期会导致图表永远"数据加载中"、且残留旧提示框 */
       const todayStr = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
       if (a > todayStr || b2 > todayStr) { if (window.mpfToast) mpfToast( _t('日期不能晚于今天')); return; }
@@ -830,7 +832,7 @@ window.TREND = (function () {
           '<button type="button" class="tr-r" data-r="custom">' + esc0( _t('选择日期')) + '</button>' +
         '</div>' +
         '<div class="tr-daterow" hidden>' +
-          '<input type="date" class="tr-d1" aria-label="' + _t('起始日期') + '"><span>~</span><input type="date" class="tr-d2" aria-label="' + _t('结束日期') + '">' +
+          '<input type="text" class="tr-d1" data-date placeholder="2026-01-19" inputmode="numeric" maxlength="10" aria-label="' + _t('起始日期') + '"><span>~</span><input type="text" class="tr-d2" data-date placeholder="2026-11-17" inputmode="numeric" maxlength="10" aria-label="' + _t('结束日期') + '">' +
           '<button type="button" class="btn sm tr-dgo">' + esc0( _t('确定')) + '</button>' +
         '</div>' +
       '</div>';

@@ -23,7 +23,9 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
    空时仅允许本机回环推送（见 /api/upload 分支），保证 GitHub public repo 安全。 */
 const UPLOAD_TOKEN = process.env.MPF_UPLOAD_TOKEN
   || (() => { try { return require('fs').readFileSync(require('path').join(__dirname, 'data', 'upload-token.txt'), 'utf8').trim() || ''; } catch (e) { return ''; } })();
-const ANALYTICS_FILE = path.join(__dirname, 'data', 'analytics.json'); // 匿名访问统计（按日聚合，保留最近 90 天）
+const ANALYTICS_FILE = path.join(__dirname, 'data', 'analytics.json');
+const ERR_FILE = path.join(__dirname, 'data', 'err-log.json');
+const errRate = new Map();   /* 前端错误上报限流：ip → {n, t} */ // 匿名访问统计（按日聚合，保留最近 90 天）
 
 let cache = null; // { updatedAt, years, funds, source, count, origin }
 let lastError = null;
@@ -1329,6 +1331,43 @@ const server = http.createServer(async (req, res) => {
         };
         writeJsonAtomic(path.join(__dirname, 'data', 'update-status.json'), st);
         return send(res, 200, JSON.stringify({ ok: true, phase: st.phase }));
+      } catch (e) {
+        return send(res, 400, JSON.stringify({ error: 'bad json' }));
+      }
+    });
+    return;
+  }
+
+  /* 2026-11-19（用户建议）：前端异常上报。只收 4KB 以内、每 IP 每小时 60 条，落 data/err-log.json（保留 200 条）。
+     目的是线上渲染/脚本异常能被动发现，不必等用户截图。 */
+  if (p === '/api/err' && req.method === 'POST') {
+    const ip = req.socket.remoteAddress || '';
+    const now = Date.now();
+    const rec0 = errRate.get(ip) || { n: 0, t: now };
+    if (now - rec0.t > 3600e3) { rec0.n = 0; rec0.t = now; }
+    rec0.n += 1; errRate.set(ip, rec0);
+    if (rec0.n > 60) return send(res, 429, JSON.stringify({ error: 'too many' }));
+    const chunks = []; let size = 0;
+    req.on('data', (c) => { chunks.push(c); size += c.length; if (size > 4096) req.destroy(); });
+    req.on('end', () => {
+      try {
+        const j = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        const rec = {
+          at: new Date().toISOString(),
+          page: String(j.page || '').slice(0, 80),
+          msg: String(j.msg || '').slice(0, 300),
+          src: String(j.src || '').slice(0, 160),
+          line: Number(j.line) || 0,
+          stack: String(j.stack || '').slice(0, 400),
+          ua: String(req.headers['user-agent'] || '').slice(0, 120),
+        };
+        let arr = [];
+        try { arr = JSON.parse(fs.readFileSync(ERR_FILE, 'utf8')); } catch (e) { arr = []; }
+        if (!Array.isArray(arr)) arr = [];
+        arr.push(rec);
+        if (arr.length > 200) arr = arr.slice(-200);
+        writeJsonAtomic(ERR_FILE, arr);
+        return send(res, 200, JSON.stringify({ ok: true }));
       } catch (e) {
         return send(res, 400, JSON.stringify({ error: 'bad json' }));
       }

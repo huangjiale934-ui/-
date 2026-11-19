@@ -983,7 +983,7 @@
     ];
     const MODES = { fund: FUND, agg: AGG, self: SELF };
     /* 2026-11-02（用户要求）：基金种类列默认显示（与「基金最新数据」一致）；受托人保持显示 */
-    const DEFAULT_OFF = ['cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee', 'worstYear', 'launchTs',
+    const DEFAULT_OFF = ['sub', 'cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee', 'worstYear', 'launchTs',
       'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025', 'scheme'];
     const SLIM_OFF = ['trustee', 'type', 'scheme', 'risk', 'size', 'ann5', 'ann10', 'annLaunch', 'mgmtFee',
       'worstYear', 'fer', 'launchTs',

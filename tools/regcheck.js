@@ -2222,7 +2222,9 @@ chk('导出中心·⑥附加表三模块 + 右侧二级筛选 + 榜单细类列'
   try {
     const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
     const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
-    return /function modRow/.test(e) && /data-panel=/.test(e) && /\[\['hld'/.test(e) === false &&
-      /sub: '<th scope="col" data-c="sub"/.test(r) && /\['sub', '基金细类', 0\]/.test(r);
+    return /function modRow/.test(e) && /ec-mod-p/.test(e) && /on \? '' : ' hidden'/.test(e) &&
+      !/data-panel=/.test(e) &&
+      /sub: '<th scope="col" data-c="sub"/.test(r) && /\['sub', '基金细类', 0\]/.test(r) &&
+      /DEFAULT_OFF = \['sub'/.test(r);
   } catch (err) { return false; }
 })());

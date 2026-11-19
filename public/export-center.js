@@ -220,7 +220,7 @@
        避免日历控件翻年份；确定后给出明确的已选区间提示。 */
     const RANGES = [['1y', '1年'], ['3y', '3年'], ['5y', '5年'], ['10y', '10年'], ['all', '全部'], ['custom', '选择日期']];
     const rangeSel = '<div class="ec-subcard">' +
-      '<div class="ec-sub-h">' + esc(TT('时间范围')) + '</div>' +
+      '<div class="ec-sub-h">' + esc(TT('时间区间')) + '</div>' +
       '<div class="ec-range"><span class="ec-range-lab">' + esc(TT('区间')) + '</span>' +
       '<div class="tr-ranges" role="group" aria-label="' + esc(TT('区间')) + '">' +
       RANGES.map((o) => '<button type="button" class="tr-r' + (ST.histRange === o[0] ? ' on' : '') + '" data-range="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
@@ -244,7 +244,7 @@
         '<div class="ec-g-b">' + cells(g) + '</div></div>';
     }).join('') +
       (isMpfa ? '' : '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b>' +
-      '<span>' + esc(TT('勾选后点右侧「筛选」展开二级设置')) + '</span></div>' +
+      '<span>' + esc(TT('勾选后在右侧展开设置')) + '</span></div>' +
       '<div class="ec-mods">' +
       modRow('hld', '持仓与分布', '前十大 + 资产分布', '') +
       modRow('trend', '净值走势图', '合并对比 / 每只单独', trendSel) +
@@ -252,17 +252,14 @@
       '</div></div>');
   }
 
-  /* 2026-11-19（用户要求）：三个附加表上下排列；二级筛选放右侧，点「筛选」才展开 */
+  /* 2026-11-19（用户要求 v2）：三个附加表上下排列；勾选即在右侧展开二级设置，取消勾选即收起 */
   function modRow(key, title, sub, panel) {
     const on = ST.extra.has(key);
-    const open = ST.panels.has(key);
     return '<div class="ec-mod' + (on ? ' on' : '') + '">' +
       '<div class="ec-mod-l"><label><input type="checkbox" data-x="' + key + '"' + (on ? ' checked' : '') + '>' +
       '<span class="ec-mod-t">' + esc(TT(title)) + '</span>' +
-      '<span class="ec-mod-s">' + esc(TT(sub)) + '</span></label>' +
-      (panel ? '<button type="button" class="ec-mod-btn' + (open ? ' on' : '') + '" data-panel="' + key + '">' + esc(TT('筛选')) + ' ▾</button>' : '') +
-      '</div>' +
-      (panel ? '<div class="ec-mod-p"' + (open ? '' : ' hidden') + '>' + panel + '</div>' : '') +
+      '<span class="ec-mod-s">' + esc(TT(sub)) + '</span></label></div>' +
+      (panel ? '<div class="ec-mod-p"' + (on ? '' : ' hidden') + '>' + panel + '</div>' : '') +
       '</div>';
   }
 
@@ -670,20 +667,11 @@
       }
       const tb = t.closest('[data-tmode]');
       if (tb) { ST.trendMode = tb.getAttribute('data-tmode'); renderTree(); paintCounts(); persist(); return; }
-      const pb = t.closest('[data-panel]');
-      if (pb) {
-        const k = pb.getAttribute('data-panel');
-        if (ST.panels.has(k)) ST.panels.delete(k); else ST.panels.add(k);
-        renderTree(); return;
-      }
       if (t.id === 'ecDateGo') {
-        const norm = (v) => {
-          const d = String(v || '').trim();
-          if (/^\d{8}$/.test(d)) return d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8);
-          return d;
-        };
+        const norm = (v) => (window.mpfNormDate ? window.mpfNormDate(v) : String(v || '').trim());
         const f = $('#ecDateFrom'), e2 = $('#ecDateTo');
         let a = norm(f && f.value), b = norm(e2 && e2.value);
+        if (f) f.value = a; if (e2) e2.value = b;
         if (!/^\d{4}-\d{2}-\d{2}$/.test(a) || !/^\d{4}-\d{2}-\d{2}$/.test(b)) {
           ST.dateMsg = TT('请按 YYYY-MM-DD 填写起止日期');
           if (window.mpfToast) mpfToast(ST.dateMsg);
@@ -725,7 +713,7 @@
       }
       if (t.matches('#ecTree input[data-x]')) {
         const k = t.getAttribute('data-x');
-        if (t.checked) ST.extra.add(k); else ST.extra.delete(k);
+        if (t.checked) { ST.extra.add(k); ST.panels.add(k); } else { ST.extra.delete(k); ST.panels.delete(k); }
         renderTree(); paintCounts(); persist(); return;
       }
       if (t.matches('#ecTree input[data-g]')) {

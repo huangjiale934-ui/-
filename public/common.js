@@ -154,6 +154,50 @@ function fetchJSON(url, key, force, onFresh) {
 }
 window.fetchJSON = fetchJSON;
 
+/* 2026-11-19：日期输入统一容错——接受 2026-1-5 / 2026/1/5 / 2026.1.5 / 20260105 / 2026年1月5日 */
+window.mpfNormDate = function (v) {
+  var s = String(v == null ? '' : v).trim();
+  if (!s) return '';
+  s = s.replace(/年|月/g, '-').replace(/日/g, '').replace(/[./]/g, '-').replace(/\s+/g, '');
+  if (/^\d{8}$/.test(s)) return s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8);
+  var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (!m) return '';
+  var y = +m[1], mo = +m[2], d = +m[3];
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return '';
+  return y + '-' + (mo < 10 ? '0' : '') + mo + '-' + (d < 10 ? '0' : '') + d;
+};
+/* 输入框失焦时把日期规范成 YYYY-MM-DD（不在本地/测试环境上报） */
+document.addEventListener('blur', function (e) {
+  var t = e.target;
+  if (!t || !t.matches || !t.matches('input[data-date]')) return;
+  var v = window.mpfNormDate(t.value);
+  if (v) t.value = v;
+}, true);
+
+/* 2026-11-19（用户建议）：前端异常上报——线上不用等用户截图。
+   只上报到同源 /api/err，失败静默；本地开发不上报。 */
+(function () {
+  var host = location.hostname;
+  if (host === '127.0.0.1' || host === 'localhost' || host === '') return;
+  var sent = 0;
+  window.mpfReportErr = function (msg, extra) {
+    if (sent++ > 12) return;
+    try {
+      fetch('/api/err', {
+        method: 'POST', keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ page: location.pathname, msg: String(msg || '').slice(0, 300) }, extra || {})),
+      }).catch(function () {});
+    } catch (e) {}
+  };
+  window.addEventListener('error', function (e) {
+    window.mpfReportErr(e.message || 'error', { src: String(e.filename || '').slice(0, 160), line: e.lineno || 0 });
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    window.mpfReportErr('REJ ' + String((e.reason && e.reason.message) || e.reason || ''));
+  });
+})();
+
 /* ======================= 新版本回灌（2026-11-10） =======================
  * 统一入口：拿到比当前 DATA 更新的 funds 快照时，原地更新内存并重绘全部已注册视图。
  * 与「更新数据」按钮走同一套钩子（window.__onRefresh），因此各板块表现一致；
@@ -238,6 +282,7 @@ async function loadData(onDone, attempt, force) {
       try { onDone(DATA); }
       catch (err) {
         console.error('[loadData] 页面渲染回调异常：', err);
+        if (window.mpfReportErr) window.mpfReportErr('render: ' + (err && err.message), { stack: String(err && err.stack || '').slice(0, 400) });
         const box = document.querySelector('.loading');
         if (box) box.innerHTML = '<div style="color:#a8432a">页面渲染失败：' + String(err && err.message || err) + '</div>';
         return;   /* 渲染错误不再触发「服务唤醒中」重试 */
