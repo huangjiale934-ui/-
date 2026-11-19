@@ -9,6 +9,8 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const SITE = (process.env.MPF_SITE || 'https://mpf-data.app.workbuddy.host').replace(/\/$/, '');
 const TOKEN = (() => { try { return fs.readFileSync(path.join(ROOT, 'data', 'upload-token.txt'), 'utf8').trim(); } catch (e) { return ''; } })();
+/* A 站托管层要求所有请求携带分享码（裸 /api/* 会被平台 403，走不到应用） */
+const SHARE = (() => { try { return fs.readFileSync(path.join(ROOT, 'data', 'wb-share.txt'), 'utf8').trim(); } catch (e) { return ''; } })();
 
 (async () => {
   if (!TOKEN) return;
@@ -26,7 +28,7 @@ const TOKEN = (() => { try { return fs.readFileSync(path.join(ROOT, 'data', 'upl
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), 8000);
   try {
-    await fetch(SITE + '/api/status-push?token=' + encodeURIComponent(TOKEN), {
+    await fetch(SITE + '/api/status-push?token=' + encodeURIComponent(TOKEN) + (SHARE ? '&sharecode=' + encodeURIComponent(SHARE) : ''), {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, signal: ac.signal,
     });
   } catch (e) { /* 静默 */ }
