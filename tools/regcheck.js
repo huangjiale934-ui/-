@@ -2205,3 +2205,11 @@ chk('多选筛选·②导出中心三级联动 + 分组卡片 + 自定义区间'
       /\.ec-card \{/.test(st) && /\.ec-daterow \{/.test(st);
   } catch (err) { return false; }
 })());
+
+/* ================= 2026-11-19 对账派生清单 ================= */
+chk('对账·①派生重算包含 breadth（防温度计长期差 1）', (function () {
+  try {
+    const s = fs.readFileSync(path.join(__dirname, 'site-reconcile.js'), 'utf8');
+    return /tools\/breadth\.js/.test(s) && s.indexOf('tools/breadth.js') < s.indexOf('tools/build-static.js');
+  } catch (err) { return false; }
+})());

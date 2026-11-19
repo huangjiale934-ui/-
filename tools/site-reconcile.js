@@ -139,7 +139,9 @@ function sh(cmd, args, opts) {
     fs.writeFileSync(fundsPath, JSON.stringify(j));
     console.log(`  已补 ${ok} 只（失败 ${fail}），开始重算派生文件`);
     const run = (f) => { try { sh(process.execPath, [f]); } catch (e) { console.log('  WARN ' + f + ' ' + e.message.slice(0, 60)); } };
-    ['navperf.js', 'mpfindex.js', 'allstats.js', 'indexbuild.js', 'tools/hist-index-sync.js', 'tools/build-static.js'].forEach(run);
+    /* 2026-11-19：补 breadth.js —— 此前清单漏了它，对账后「涨跌温度计」仍按旧名单落盘，
+   两站 up/upPrev 长期差 1（779 实际下跌却被算成上涨）。breadth 必须在 build-static 之前重算。 */
+    ['navperf.js', 'mpfindex.js', 'allstats.js', 'indexbuild.js', 'tools/hist-index-sync.js', 'tools/breadth.js', 'tools/build-static.js'].forEach(run);
     console.log('  完成：本机已对齐，请重新发布 WorkBuddy 站');
     process.exit(0);
   }
