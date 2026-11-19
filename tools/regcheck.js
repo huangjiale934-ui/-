@@ -2166,7 +2166,8 @@ chk('导出中心·③按受托人筛选口径（宏利条数 = funds.json 实�
 chk('导出中心·④逐日净值不限只数且带区间选择', (function () {
   try {
     const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
-    return e.indexOf('限选 10 只') < 0 && /ecHistRange/.test(e) && /histRange:\s*'1y'/.test(e) && /rangeStart\(/.test(e);
+    return e.indexOf('限选 10 只') < 0 && /data-range=/.test(e) && /histRange:\s*'1y'/.test(e)
+      && /rangeStart\(/.test(e) && /ecDateFrom/.test(e);
   } catch (err) { return false; }
 })());
 chk('导出中心·⑤支持走势图（合并对比 / 每只单独）', (function () {
@@ -2182,5 +2183,25 @@ chk('更新提示栏·⑥静态站按班次时间窗兜底（动态站仍只认 
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     return /api\/status\.json/.test(c) && /isStatic = !\(j && j\.mode === 'live'\)/.test(c) &&
       /if \(isStatic && paintWindow\(shown\)\) return;/.test(c);
+  } catch (err) { return false; }
+})());
+
+/* ================= 2026-11-19 多选筛选（表格 + 导出中心） ================= */
+chk('多选筛选·①资料库三个筛选已换成共用多选组件', (function () {
+  try {
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
+    return /<span class="mf" id="fTrustee"/.test(h) && /<span class="mf" id="fType"/.test(h) &&
+      /<span class="mf" id="fSub"/.test(h) && /window\.MPFMulti/.test(a) &&
+      /F\.trustee\.indexOf\(x\.trustee\)/.test(a) && /multifilter\.js/.test(h);
+  } catch (err) { return false; }
+})());
+chk('多选筛选·②导出中心三级联动 + 分组卡片 + 自定义区间', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
+    return /function rebuildLinked/.test(e) && /linkedRows\('scheme'\)/.test(e) &&
+      /ec-card/.test(e) && /data-range=/.test(e) && /ecDateGo/.test(e) &&
+      /\.ec-card \{/.test(st) && /\.ec-daterow \{/.test(st);
   } catch (err) { return false; }
 })());

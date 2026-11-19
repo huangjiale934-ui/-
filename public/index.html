@@ -76,15 +76,15 @@
       </div>
       <div class="f-item f-trustee">
         <label data-i18n-parts>受托人</label>
-        <select id="fTrustee" aria-label="受托人筛选" data-i18n-aria="受托人筛选"><option data-i18n-parts  value="">全部受托人</option></select>
+        <span class="mf" id="fTrustee" data-all="全部受托人" aria-label="受托人筛选"></span>
       </div>
       <div class="f-item f-type">
         <label data-i18n-parts>基金种类</label>
-        <select id="fType" aria-label="基金种类筛选" data-i18n-aria="基金种类筛选"><option data-i18n-parts  value="">全部种类</option></select>
+        <span class="mf" id="fType" data-all="全部种类" aria-label="基金种类筛选"></span>
       </div>
       <div class="f-item f-sub">
         <label data-i18n-parts>基金细类</label>
-        <select id="fSub" aria-label="基金细类筛选" data-i18n-aria="基金细类筛选"><option data-i18n-parts  value="">全部细类</option></select>
+        <span class="mf" id="fSub" data-all="全部细类" aria-label="基金细类筛选"></span>
       </div>
       <div class="tb-tail">
         <div class="tb-count"><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">0</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip" hidden></span></div>
@@ -370,7 +370,8 @@
 
 <script src="b.js?p=index&v=20261110a"></script>
 <script src="app.js?v=20261110a"></script>
-<script src="export-center.js?v=20261119a"></script>
+<script src="multifilter.js?v=20261119b"></script>
+<script src="export-center.js?v=20261119b"></script>
 <script src="rank.js?v=20261110a"></script>
 <script src="analysis.js?v=20261110a"></script>
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部" data-i18n-title="回到顶部"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg><span class="tt-txt" data-i18n="回到顶部">回到顶部</span></button>

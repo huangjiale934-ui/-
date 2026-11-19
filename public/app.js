@@ -8,7 +8,8 @@
      不能把 makeSorter 绑定时的 state 当默认——表头每次重绘都会重绑，
      D0 会跟着当前列漂移，第三下点击等于什么也没复位。 */
   const DEF_SORT = { key: 'size', dir: 'desc' };
-  const F = { kw: '', type: '', sub: '', trustee: '', risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' };
+  /* 2026-11-19（8.0）：种类/细类/受托人改为多选（数组），支持同时筛多个 */
+  const F = { kw: '', type: [], sub: [], trustee: [], risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' };
   let ROWS = [];
   let YEARS = [];
 
@@ -321,17 +322,49 @@
     });
   }
 
+  /* 2026-11-19：三个筛选统一换成共用多选组件（与导出中心同一套） */
+  let MF_TY = null, MF_S = null, MF_T = null;
+  function ensureMF() {
+    if (MF_TY) return;
+    MF_TY = window.MPFMulti('#fType', {
+      allLabel: TT('全部种类'),
+      onChange: (arr) => { F.type = arr; F.sub = []; S.page = 1; fillSub(); render(); },
+    });
+    MF_S = window.MPFMulti('#fSub', {
+      allLabel: TT('全部细类'),
+      onChange: (arr) => { F.sub = arr; S.page = 1; render(); },
+    });
+    MF_T = window.MPFMulti('#fTrustee', {
+      allLabel: TT('全部受托人'),
+      onChange: (arr) => {
+        F.trustee = arr; S.page = 1; render();
+        if (typeof window.__anSetTrustee === 'function') { try { window.__anSetTrustee(arr[0] || ''); } catch (e) {} }
+      },
+    });
+  }
+
   function buildFilters() {
+    ensureMF();
     const f = DATA.funds;
-    fill('#fType', uniq(f.map((x) => x.type)), (v) => typeLabel(v));
-    fill('#fTrustee', uniq(f.map((x) => x.trustee)), (v) => (window.trusteeDisplay ? window.trusteeDisplay(v) : v));
+    MF_TY.setOptions(uniq(f.map((x) => x.type)).map((v) => ({ v, label: typeLabel(v) })));
+    MF_T.setOptions(uniq(f.map((x) => x.trustee)).map((v) => ({
+      v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
+      n: f.filter((y) => y.trustee === v).length,
+    })));
+    MF_TY.setAllLabel(TT('全部种类'));
+    MF_T.setAllLabel(TT('全部受托人'));
     fillSub();
   }
 
   function fillSub() {
-    const f = DATA.funds.filter((x) => !F.type || x.type === F.type);
-    fill('#fSub', uniq(f.map((x) => x.subtype)), (v) => typeLabel(v));
-    $('#fSub').value = F.sub;
+    ensureMF();
+    const f = DATA.funds.filter((x) => !F.type.length || F.type.indexOf(x.type) >= 0);
+    const vals = uniq(f.map((x) => x.subtype));
+    MF_S.setOptions(vals.map((v) => ({ v, label: typeLabel(v) })));
+    MF_S.setAllLabel(TT('全部细类'));
+    const valid = new Set(vals);
+    F.sub = F.sub.filter((v) => valid.has(v));
+    MF_S.setSelected(F.sub, true);
   }
 
   /* 2026-11-01（6.0）：option 文案统一出口——类别走 typeLabel（繁/简/英三态），
@@ -401,13 +434,8 @@
     });
   }
   function pickTrustee(t) {
-    const sel = document.getElementById('fTrustee');
-    if (sel) {
-      sel.value = t;
-      /* 2026-11-02（第二十六轮）：同步自绘下拉的按钮文案，否则侧栏点了「宏利」但筛选栏还写「全部受托人」 */
-      if (sel.__mpfselSync) sel.__mpfselSync();
-    }
-    F.trustee = t;
+    F.trustee = t ? [t] : [];
+    if (MF_T) MF_T.setSelected(F.trustee, true);
     S.page = 1;
     render();
     /* 两个板块共用一个发行人筛选：切到可视化对比时数字要一致 */
@@ -417,11 +445,11 @@
     const nav = document.getElementById('anProv');
     if (!nav) return;
     Array.prototype.forEach.call(nav.querySelectorAll('.an-pitem'), (b) => {
-      b.classList.toggle('on', (b.getAttribute('data-t') || '') === (F.trustee || ''));
+      b.classList.toggle('on', F.trustee.indexOf(b.getAttribute('data-t') || '') >= 0);
     });
   }
   window.syncTrusteeMenu = syncTrusteeMenu;
-  window.__getDbTrustee = function () { return F.trustee || ''; };
+  window.__getDbTrustee = function () { return F.trustee.length === 1 ? F.trustee[0] : ''; };
 
   /** 导出当前筛选结果（全部行，非仅当前页）→ xlsx 工作簿
       2026-11-04（第三十六轮，用户要求）：
@@ -434,9 +462,9 @@
     const dirTxt = (d) => (d === 'asc' ? TT('由小到大') : TT('由大到小'));
     const filterBits = [];
     if (F.kw) filterBits.push(TQ('关键词「{v}」', { v: F.kw }));
-    if (F.type) filterBits.push(TQ('种类：{v}', { v: typeLabel(F.type) }));
-    if (F.sub) filterBits.push(TQ('细类：{v}', { v: typeLabel(F.sub) }));
-    if (F.trustee) filterBits.push(TQ('受托人：{v}', { v: window.trusteeDisplay ? window.trusteeDisplay(F.trustee) : F.trustee }));
+    if (F.type.length) filterBits.push(TQ('种类：{v}', { v: F.type.map((v) => typeLabel(v)).join('、') }));
+    if (F.sub.length) filterBits.push(TQ('细类：{v}', { v: F.sub.map((v) => typeLabel(v)).join('、') }));
+    if (F.trustee.length) filterBits.push(TQ('受托人：{v}', { v: F.trustee.map((v) => (window.trusteeDisplay ? window.trusteeDisplay(v) : v)).join('、') }));
     if (F.navDate) filterBits.push(TQ('净值估值日：{v}', { v: F.navDate }));
 
     const pct = (v) => (v == null || !isFinite(v) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e6, s: 5 });
@@ -581,8 +609,9 @@
 
   /** 重置全部筛选（含估值日标签，2026-10-14） */
   function resetAll() {
-    Object.assign(F, { kw: '', type: '', sub: '', trustee: '', risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' });
-    ['#kw', '#fType', '#fTrustee', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
+    Object.assign(F, { kw: '', type: [], sub: [], trustee: [], risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' });
+    if (MF_TY) { MF_TY.setSelected([], true); MF_S.setSelected([], true); MF_T.setSelected([], true); }
+    ['#kw', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
     /* 2026-10-31（用户要求）：涨跌幅/回撤/费率第二行筛选已下线 */
     document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
     fillSub(); S.page = 1; render();
@@ -702,13 +731,6 @@
       /* 首次输入时懒加载英文名，到货后自动重绘（简繁英互通） */
       ensureNamesEn().then(() => render());
     }, 200));
-    $('#fType').addEventListener('change', () => { F.type = $('#fType').value; F.sub = ''; fillSub(); S.page = 1; render(); });
-    $('#fSub').addEventListener('change', () => { F.sub = $('#fSub').value; S.page = 1; render(); });
-    $('#fTrustee').addEventListener('change', () => {
-      F.trustee = $('#fTrustee').value; S.page = 1; render();
-      /* 2026-11-02：下拉与左侧发行人列表保持同步（两个板块共用） */
-      if (typeof window.__anSetTrustee === 'function') { try { window.__anSetTrustee(F.trustee); } catch (e) {} }
-    });
     /* 2026-10-31（用户要求）：第二行筛选（涨跌幅/回撤/管理费）与「重置条件」按钮已删除；重置走空态「一键清除」 */
     const bReset = $('#btnReset');
     if (bReset) bReset.addEventListener('click', resetAll);
@@ -732,9 +754,9 @@
   function filtered() {
     const kw = toSimp(F.kw).toLowerCase();
     return DATA.funds.filter((x) => {
-      if (F.type && x.type !== F.type) return false;
-      if (F.sub && x.subtype !== F.sub) return false;
-      if (F.trustee && x.trustee !== F.trustee) return false;
+      if (F.type.length && F.type.indexOf(x.type) < 0) return false;
+      if (F.sub.length && F.sub.indexOf(x.subtype) < 0) return false;
+      if (F.trustee.length && F.trustee.indexOf(x.trustee) < 0) return false;
       if (F.retMin !== '' && !(x[F.retDim] != null && x[F.retDim] >= parseFloat(F.retMin))) return false;
       if (F.retMax !== '' && !(x[F.retDim] != null && x[F.retDim] <= parseFloat(F.retMax))) return false;
       /* 2026-10-19：与参考版式一致——「最大回撤区间」按近5年最差年度（worstYear）筛 */

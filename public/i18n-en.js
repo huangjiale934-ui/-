@@ -1562,6 +1562,8 @@
   '已导出 {n} 只基金、{c} 个字段': 'Exported {n} funds, {c} fields',
   '导出失败，请稍后重试': 'Export failed, please try again',
   '批量导出数据': 'Batch export',
+  /* 2026-11-19 多选筛选 */
+  '全部计划': 'All schemes',
   /* 2026-11-19 导出中心：区间 / 走势图 */
   '区间': 'Range',
   '方式': 'Mode',

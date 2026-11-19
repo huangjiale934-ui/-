@@ -3736,7 +3736,8 @@ document.addEventListener('mpf:lang', () => {
  * 原生 <select> 的弹层由系统绘制，灰白底无法跟随站点设计语言（用户反馈）。
  * 这里保留原生 select 负责取值与 change 事件，外层用按钮 + 自绘 listbox 显示。 */
 (function () {
-  const IDS = ['#fType', '#fSub', '#fTrustee', '#fRisk', '#perPage', '#rkRType', '#rkRSub',
+  /* 2026-11-19：#fType/#fSub/#fTrustee 已改为多选组件（multifilter.js），不再走单选自绘下拉 */
+  const IDS = ['#fRisk', '#perPage', '#rkRType', '#rkRSub',
     '#rkRTrustee', '#rkRRisk', '#rkRTop', '#rkDimSel', '#rkRRetDim'];
   const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   function enhance(sel) {

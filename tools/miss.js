@@ -11,7 +11,7 @@ const cand=new Set();
 const rj=fs.readFileSync(P('rank.js'),'utf8');
 {const i=rj.indexOf('const BOARDS = [');const j=rj.indexOf('];',i);
  rj.slice(i,j).replace(/\{ g: '([^']+)', id: '[^']+', name: '([^']+)',[^}]*desc: '([^']+)'/g,(mm,g,n,d)=>{cand.add(g);cand.add(n);cand.add(d);return mm;});}
-['common.js','rank.js','home.js','app.js','export-center.js'].forEach((f)=>{const t=fs.readFileSync(P(f),'utf8');
+['common.js','rank.js','home.js','app.js','export-center.js','multifilter.js'].forEach((f)=>{const t=fs.readFileSync(P(f),'utf8');
  t.replace(/(?:TT|TQ|t)\(\s*'((?:[^'\\]|\\.)*)'/g,(m,k)=>{const key=k.replace(/\\'/g,"'");if(/[\u4e00-\u9fff]/.test(key))cand.add(key);return m;});});
 ['home.html','index.html','ranking.html'].forEach((f)=>{const t=fs.readFileSync(P(f),'utf8');
  t.replace(/data-i18n(?:-ph|-title|-parts)?="([^"]+)"/g,(m,k)=>{cand.add(k);return m;});});

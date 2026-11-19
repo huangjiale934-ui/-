@@ -3128,8 +3128,10 @@ body { overflow-x: clip; }
 .ec-sub{font-size:12px;color:#7a8698}
 .ec-x{margin-left:auto;border:0;background:none;font-size:22px;line-height:1;color:#8a94a6;cursor:pointer;padding:2px 6px}
 .ec-x:hover{color:#0f2a4a}
-.ec-cols{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:0;flex:1;min-height:0}
+.ec-cols{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:0;flex:1;min-height:0}
 .ec-left,.ec-right{display:flex;flex-direction:column;min-height:0;padding:14px 16px}
+.ec-left{padding-right:12px}
+.ec-right{padding-left:12px}
 .ec-left{border-right:1px solid #eef2f7}
 .ec-cap{font-size:13px;font-weight:700;color:#0f2a4a;margin-bottom:8px;display:flex;gap:8px;align-items:baseline}
 .ec-cap span{font-weight:400;font-size:12px;color:#7a8698}
@@ -3183,3 +3185,34 @@ body { overflow-x: clip; }
   .ec-left{border-right:0;border-bottom:1px solid #eef2f7}
   .ec-row .ec-mt{display:none}
 }
+
+/* ===== 多选筛选（2026-11-19，8.0）：表格筛选栏与导出中心共用 ===== */
+.mf { position: relative; display: block; width: 100%; }
+.mf .mpfsel-btn { height: 34px; }
+.mf .mpfsel-pop { max-height: 320px; overflow: auto; }
+.mf-all { display: block; width: 100%; text-align: left; padding: 8px 10px; border: 0; background: none;
+  border-radius: 7px; font: inherit; font-size: 12.5px; color: #1a5fa8; cursor: pointer; }
+.mf-all:hover { background: #f3f8fe; }
+.mf-all.on { background: #eef6ff; font-weight: 700; }
+.mf-opt { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 7px;
+  font-size: 12.5px; color: #33475f; cursor: pointer; }
+.mf-opt:hover { background: #f3f8fe; }
+.mf-opt.on { background: #eef6ff; color: #12466f; }
+.mf-opt span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mf-opt b { font-weight: 400; color: #93a0b3; font-size: 11px; }
+.mf-empty { padding: 10px; text-align: center; color: #93a0b3; font-size: 12px; }
+
+/* 导出中心：分组卡片 / 区间胶囊 / 自定义日期（2026-11-19） */
+.ec-card { border: 1px solid #e8eef6; border-radius: 10px; padding: 6px 10px 8px; margin-bottom: 10px; background: #fbfdff; }
+.ec-card .ec-g-h { border-bottom: 1px dashed #e6edf6; padding: 5px 2px 7px; margin-bottom: 6px; }
+.ec-card .ec-g-h b { font-size: 13px; color: #0f2a4a; }
+.ec-range { display: flex; align-items: center; gap: 10px; margin: 6px 0 8px; flex-wrap: wrap; }
+.ec-range-lab { font-size: 12px; color: #7a8698; flex: none; min-width: 28px; }
+.ec-range .tr-ranges { background: #f4f8fd; }
+.ec-range .tr-r { padding: 4px 10px; font-size: 12px; }
+.ec-daterow { display: flex; align-items: center; gap: 8px; margin: 0 0 10px 38px; flex-wrap: wrap; }
+.ec-daterow[hidden] { display: none; }
+.ec-daterow input { height: 30px; border: 1px solid #dbe3ee; border-radius: 8px; padding: 0 8px; font-size: 12px; color: #33475f; background: #fff; }
+.ec-daterow span { color: #93a0b3; }
+.ec-range-mode .tr-r { white-space: nowrap; }
+.mf .mpfsel-pop{min-width:200px}

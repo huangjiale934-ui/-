@@ -26,7 +26,8 @@
     sel: new Set(),
     fields: new Set(),      /* 列下标 */
     extra: new Set(),       /* 'hld' | 'hist' | 'trend' */
-    histRange: '1y',        /* 逐日净值区间：1y/3y/5y/all */
+    histRange: '1y',        /* 逐日净值区间：1y/3y/5y/10y/all/custom */
+    histFrom: '', histTo: '',
     trendMode: 'merge',     /* 走势图：merge 合并对比 / one 每只单独 */
     kw: '',
     trustee: new Set(),
@@ -66,9 +67,9 @@
   }
 
   /* ---------- 多选下拉 ---------- */
-  function msValues(key) {
+  function msValues(key, rows) {
     const m = new Map();
-    rowsAll().forEach((x) => {
+    (rows || rowsAll()).forEach((x) => {
       const v = key === 'trustee' ? x.trustee : key === 'cat' ? catOf(x) : x.scheme;
       if (!v) return;
       m.set(v, (m.get(v) || 0) + 1);
@@ -77,20 +78,60 @@
     return Array.from(m.entries()).sort((a, b) => b[1] - a[1]).map(([v, n]) => ({ v, n, label: label(v) }));
   }
 
-  function renderMS() {
-    document.querySelectorAll('.ec-ms').forEach((host) => {
-      const key = host.getAttribute('data-k');
-      const set = ST[key];
-      const vals = msValues(key);
-      const label = key === 'trustee' ? '受托人' : key === 'cat' ? '基金种类' : '强积金计划';
-      const txt = set.size ? TQ('已选 {n} 项', { n: set.size }) : TT('全部');
-      host.innerHTML = '<button type="button" class="ec-ms-btn' + (set.size ? ' on' : '') + '">' + esc(TT(label)) +
-        '<span class="ec-ms-t">' + esc(txt) + '</span><i>▾</i></button>' +
-        '<div class="ec-ms-panel">' + vals.map((o) =>
-          '<label class="ec-ms-i"><input type="checkbox" value="' + esc(o.v) + '"' + (set.has(o.v) ? ' checked' : '') + '>' +
-          '<span>' + esc(o.label) + '</span><b>' + o.n + '</b></label>').join('') +
-        '<div class="ec-ms-f"><button type="button" data-a="clear">' + esc(TT('清空')) + '</button></div></div>';
+  /* 2026-11-19（用户反馈）：改用与资料库表头同一套多选组件，并做三级联动——
+     选受托人后，种类/计划只列该受托人下存在的值；选种类后再收窄计划。 */
+  let MS_T = null, MS_C = null, MS_S = null;
+
+  function ensureMS() {
+    if (MS_T) return;
+    MS_T = window.MPFMulti('#ecMSTrustee', {
+      allLabel: TT('全部受托人'),
+      onChange: (arr) => { ST.trustee = new Set(arr); rebuildLinked('trustee'); },
     });
+    MS_C = window.MPFMulti('#ecMSCat', {
+      allLabel: TT('全部种类'),
+      onChange: (arr) => { ST.cat = new Set(arr); rebuildLinked('cat'); },
+    });
+    MS_S = window.MPFMulti('#ecMSScheme', {
+      allLabel: TT('全部计划'),
+      onChange: (arr) => { ST.scheme = new Set(arr); renderList(); },
+    });
+  }
+
+  /* 依当前更上层的选择，重算下面两级可选项并剔除失效选择 */
+  function linkedRows(level) {
+    return rowsAll().filter((x) => {
+      if (level !== 'trustee' && ST.trustee.size && !ST.trustee.has(x.trustee)) return false;
+      if (level === 'scheme' && ST.cat.size && !ST.cat.has(catOf(x))) return false;
+      return true;
+    });
+  }
+
+  function rebuildLinked(from) {
+    ensureMS();
+    const cats = msValues('cat', linkedRows('cat'));
+    MS_C.setOptions(cats.map((o) => ({ v: o.v, label: o.label, n: o.n })));
+    MS_C.setAllLabel(TT('全部种类'));
+    const validCat = new Set(cats.map((o) => o.v));
+    ST.cat = new Set(Array.from(ST.cat).filter((v) => validCat.has(v)));
+    MS_C.setSelected(Array.from(ST.cat), true);
+
+    const sch = msValues('scheme', linkedRows('scheme'));
+    MS_S.setOptions(sch.map((o) => ({ v: o.v, label: o.label, n: o.n })));
+    MS_S.setAllLabel(TT('全部计划'));
+    const validSch = new Set(sch.map((o) => o.v));
+    ST.scheme = new Set(Array.from(ST.scheme).filter((v) => validSch.has(v)));
+    MS_S.setSelected(Array.from(ST.scheme), true);
+    renderList();
+  }
+
+  function renderMS() {
+    ensureMS();
+    const tr = msValues('trustee');
+    MS_T.setOptions(tr.map((o) => ({ v: o.v, label: o.label, n: o.n })));
+    MS_T.setAllLabel(TT('全部受托人'));
+    MS_T.setSelected(Array.from(ST.trustee), true);
+    rebuildLinked('trustee');
   }
 
   /* ---------- 列表 ---------- */
@@ -105,7 +146,7 @@
       return '<label class="ec-row' + (on ? ' on' : '') + '">' +
         '<input type="checkbox" data-id="' + esc(id) + '"' + (on ? ' checked' : '') + '>' +
         '<span class="ec-nm">' + esc(nameOf(x)) + (x.unit ? ' <i>' + esc(x.unit) + '</i>' : '') + '</span>' +
-        '<span class="ec-mt">' + esc(x.scheme || '') + ' · ' + esc(x.navAsOf === latest ? TT('最新') : (x.navAsOf || '—')) + '</span>' +
+        '<span class="ec-mt"> · ' + esc(x.navAsOf === latest ? TT('最新') : (x.navAsOf || '—')) + '</span>' +
         '</label>';
     }).join('') || '<div class="ec-empty">' + esc(TT('没有符合条件的基金')) + '</div>';
     paintCounts(list.length);
@@ -138,27 +179,34 @@
     const cells = (g) => g.idx.map((i) => '<label class="ec-f" title="' + esc(COLS[i][4] || '') + '">' +
       '<input type="checkbox" data-i="' + i + '"' + (ST.fields.has(i) ? ' checked' : '') + '>' +
       '<span>' + esc(COLS[i][0]) + '</span></label>').join('');
-    const rangeSel = '<div class="ec-sub-opt"><span>' + esc(TT('区间')) + '</span><select id="ecHistRange">' +
-      [['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['all', '全部历史']].map((o) =>
-        '<option value="' + o[0] + '"' + (ST.histRange === o[0] ? ' selected' : '') + '>' + esc(TT(o[1])) + '</option>').join('') +
-      '</select></div>';
-    const trendSel = '<div class="ec-sub-opt"><span>' + esc(TT('方式')) + '</span><select id="ecTrendMode">' +
+    /* 2026-11-19（用户反馈）：区间改成站内走势图同款的胶囊按钮，并支持自定义起止日期 */
+    const RANGES = [['1y', '1年'], ['3y', '3年'], ['5y', '5年'], ['10y', '10年'], ['all', '全部'], ['custom', '选择日期']];
+    const rangeSel = '<div class="ec-range"><span class="ec-range-lab">' + esc(TT('区间')) + '</span>' +
+      '<div class="tr-ranges" role="group" aria-label="' + esc(TT('区间')) + '">' +
+      RANGES.map((o) => '<button type="button" class="tr-r' + (ST.histRange === o[0] ? ' on' : '') + '" data-range="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
+      '</div></div>' +
+      '<div class="ec-daterow"' + (ST.histRange === 'custom' ? '' : ' hidden') + '>' +
+      '<input type="date" id="ecDateFrom" aria-label="' + esc(TT('起始日期')) + '" value="' + esc(ST.histFrom || '') + '">' +
+      '<span>~</span><input type="date" id="ecDateTo" aria-label="' + esc(TT('结束日期')) + '" value="' + esc(ST.histTo || '') + '">' +
+      '<button type="button" class="btn sm" id="ecDateGo">' + esc(TT('确定')) + '</button></div>';
+    const trendSel = '<div class="ec-range ec-range-mode"><span class="ec-range-lab">' + esc(TT('方式')) + '</span>' +
+      '<div class="tr-ranges" role="group">' +
       [['merge', '合并走势对比图'], ['one', '每只基金单独一张']].map((o) =>
-        '<option value="' + o[0] + '"' + (ST.trendMode === o[0] ? ' selected' : '') + '>' + esc(TT(o[1])) + '</option>').join('') +
-      '</select></div>';
+        '<button type="button" class="tr-r' + (ST.trendMode === o[0] ? ' on' : '') + '" data-tmode="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
+      '</div></div>';
     box.innerHTML = GROUPS.map((g) => {
       const on = g.idx.filter((i) => ST.fields.has(i)).length;
-      return '<div class="ec-g">' +
+      return '<div class="ec-g ec-card">' +
         '<label class="ec-g-h"><input type="checkbox" data-g="' + g.k + '"' + (on === g.idx.length ? ' checked' : '') + '>' +
         '<b>' + esc(TT(g.n)) + '</b><span>' + on + '/' + g.idx.length + '</span></label>' +
         '<div class="ec-g-b">' + cells(g) + '</div></div>';
     }).join('') +
-      '<div class="ec-g"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b></div><div class="ec-g-b">' +
+      '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b></div><div class="ec-g-b">' +
       '<label class="ec-f"><input type="checkbox" data-x="hld"' + (ST.extra.has('hld') ? ' checked' : '') + '><span>' + esc(TT('持仓与分布（前十大 + 资产分布）')) + '</span></label>' +
       '<label class="ec-f"><input type="checkbox" data-x="hist"' + (ST.extra.has('hist') ? ' checked' : '') + '><span>' + esc(TT('逐日净值（长表）')) + '</span></label>' +
       '<label class="ec-f"><input type="checkbox" data-x="trend"' + (ST.extra.has('trend') ? ' checked' : '') + '><span>' + esc(TT('净值走势图')) + '</span></label>' +
       '</div>' +
-      (ST.extra.has('hist') ? rangeSel : '') +
+      (ST.extra.has('hist') || ST.extra.has('trend') ? rangeSel : '') +
       (ST.extra.has('trend') ? trendSel : '') +
       '</div>';
   }
@@ -177,7 +225,7 @@
       '<div class="ec-cols">' +
       '<section class="ec-left"><div class="ec-cap">① ' + esc(TT('选基金')) + ' <span id="ecSelCount"></span></div>' +
       '<input id="ecKw" class="ec-kw" type="search" placeholder="' + esc(TT('搜索基金名称 / 计划 / 受托人')) + '" autocomplete="off">' +
-      '<div class="ec-ms" data-k="trustee"></div><div class="ec-ms" data-k="cat"></div><div class="ec-ms" data-k="scheme"></div>' +
+      '<span class="mf" id="ecMSTrustee"></span><span class="mf" id="ecMSCat"></span><span class="mf" id="ecMSScheme"></span>' +
       '<label class="ec-only"><input type="checkbox" id="ecNavOnly">' + esc(TT('仅最新净值日')) + '</label>' +
       '<div class="ec-btns"><button type="button" data-a="all">' + esc(TT('全选')) + '</button>' +
       '<button type="button" data-a="inv">' + esc(TT('反选')) + '</button>' +
@@ -233,11 +281,13 @@
   /* 区间以「最新净值日」为锚，保证同一天导出的截止日一致 */
   function rangeStart(range) {
     if (range === 'all') return '';
-    const days = range === '3y' ? 1095 : range === '5y' ? 1825 : 365;
+    if (range === 'custom') return ST.histFrom || '';
+    const days = range === '3y' ? 1095 : range === '5y' ? 1825 : range === '10y' ? 3653 : 365;
     const base = latestNav() ? new Date(latestNav() + 'T00:00:00') : new Date();
     base.setDate(base.getDate() - days);
     return isoDay(base);
   }
+  function rangeEnd() { return ST.histRange === 'custom' ? (ST.histTo || '') : ''; }
 
   async function loadSeries(list, onProgress) {
     const out = new Map();
@@ -416,6 +466,7 @@
         seriesMap = await loadSeries(rowsSel, (n, t) => tick(TQ('正在读取逐日净值 {n}/{t}…', { n, t })));
       }
       const from = rangeStart(ST.histRange);
+      const to = rangeEnd();
 
       if (ST.extra.has('hist')) {
         ST.stage = 'hist';
@@ -424,7 +475,7 @@
         rowsSel.forEach((x) => {
           /* 名称含繁转简：必须在行循环外只算一次，否则每行一次转换会把主线程卡死 */
           const nm = nameOf(x);
-          const ser = (seriesMap.get(String(x.id)) || []).filter((p) => !from || p[0] >= from);
+          const ser = (seriesMap.get(String(x.id)) || []).filter((p) => (!from || p[0] >= from) && (!to || p[0] <= to));
           let prev = null;
           ser.forEach((p) => {
             const d = p[0], v = Number(p[1]);
@@ -444,7 +495,7 @@
         ST.stage = 'trend';
         const lines = rowsSel.map((x, i) => ({
           name: nameOf(x), color: PALETTE[i % PALETTE.length],
-          pts: (seriesMap.get(String(x.id)) || []).filter((p) => !from || p[0] >= from),
+          pts: (seriesMap.get(String(x.id)) || []).filter((p) => (!from || p[0] >= from) && (!to || p[0] <= to)),
         })).filter((l) => l.pts.length > 1);
         if (!lines.length) {
           mpfToast(TT('所选区间内没有可画图的净值'));
@@ -501,27 +552,27 @@
       const t = ev.target;
       if (!t || !t.closest) return;
       const modal = t.closest('#ecModal');
-      /* 多选下拉：开合 */
-      const msBtn = t.closest('.ec-ms-btn');
-      if (msBtn) {
-        const host = msBtn.parentNode;
-        document.querySelectorAll('.ec-ms.open').forEach((h) => { if (h !== host) h.classList.remove('open'); });
-        host.classList.toggle('open');
-        ev.stopPropagation();
-        return;
-      }
-      /* 点面板内不关闭 */
-      if (t.closest('.ec-ms-panel')) {
-        const clr = t.closest('button[data-a="clear"]');
-        if (clr) {
-          const key = clr.closest('.ec-ms').getAttribute('data-k');
-          ST[key].clear(); renderMS(); renderList(); ev.preventDefault();
+      if (!modal) return;
+      /* 区间胶囊 */
+      const rb = t.closest('[data-range]');
+      if (rb) {
+        ST.histRange = rb.getAttribute('data-range');
+        /* 选「自定义」但还没填日期时，预置「最近 1 年」，避免静默按全部历史导出 */
+        if (ST.histRange === 'custom' && (!ST.histFrom || !ST.histTo)) {
+          const end = latestNav() || isoDay(new Date());
+          const d0 = new Date(end + 'T00:00:00'); d0.setFullYear(d0.getFullYear() - 1);
+          ST.histFrom = ST.histFrom || isoDay(d0);
+          ST.histTo = ST.histTo || end;
         }
-        return;
+        renderTree(); paintCounts(); return;
       }
-      if (!modal) {
-        document.querySelectorAll('.ec-ms.open').forEach((h) => h.classList.remove('open'));
-        return;
+      const tb = t.closest('[data-tmode]');
+      if (tb) { ST.trendMode = tb.getAttribute('data-tmode'); renderTree(); paintCounts(); return; }
+      if (t.id === 'ecDateGo') {
+        const f = $('#ecDateFrom'), e2 = $('#ecDateTo');
+        ST.histFrom = f ? f.value : ''; ST.histTo = e2 ? e2.value : '';
+        if (ST.histFrom && ST.histTo && ST.histFrom > ST.histTo) { const tmp = ST.histFrom; ST.histFrom = ST.histTo; ST.histTo = tmp; }
+        renderTree(); paintCounts(); return;
       }
       if (t.closest('.ec-x') || t.closest('#ecCancel') || t === modal) { close(); return; }
       if (t.closest('#ecGo')) { exportNow(); return; }
@@ -545,17 +596,7 @@
         t.closest('.ec-row').classList.toggle('on', t.checked);
         paintCounts(); return;
       }
-      if (t.matches('#ecModal .ec-ms-i input')) {
-        const key = t.closest('.ec-ms').getAttribute('data-k');
-        if (t.checked) ST[key].add(t.value); else ST[key].delete(t.value);
-        renderList(); syncSel();
-        const host = t.closest('.ec-ms');
-        if (host) host.querySelector('.ec-ms-btn').classList.toggle('on', ST[key].size > 0);
-        return;
-      }
       if (t.matches('#ecNavOnly')) { ST.navOnly = t.checked; renderList(); syncSel(); return; }
-      if (t.id === 'ecHistRange') { ST.histRange = t.value; paintCounts(); return; }
-      if (t.id === 'ecTrendMode') { ST.trendMode = t.value; paintCounts(); return; }
       if (t.matches('#ecTree input[data-i]')) {
         const i = +t.getAttribute('data-i');
         if (t.checked) ST.fields.add(i); else ST.fields.delete(i);
