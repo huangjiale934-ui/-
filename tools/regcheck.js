@@ -2251,3 +2251,24 @@ chk('榜单·①筛选写入 URL 并可还原（rty/rsb/rtr/rrisk/rkw）', (func
       /render\(\); syncRkUrl\(\);/.test(r);
   } catch (err) { return false; }
 })());
+
+/* ================= 2026-11-19 双口径导出 + 排序 URL（第九轮） ================= */
+chk('导出中心·⑧支持两种口径同簿导出（both → 追加积金局工作表）', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    return /data-mode="both"/.test(e) && /两者都导出/.test(e) &&
+      /const bothMode = ST\.mode === 'both'/.test(e) &&
+      /if \(bothMode\) \{[\s\S]{0,600}name: TT\('积金局月度数据'\)/.test(e) &&
+      /bothMode \? \[BOTH_NOTE\]/.test(e) &&
+      /ST\.mode = \(o\.mode === 'mpfa' \|\| o\.mode === 'both'\)/.test(e) &&
+      e.indexOf("esc(TT('仅最新净值日'))") < 0 && /仅选择最新净值日的基金/.test(e);
+  } catch (err) { return false; }
+})());
+chk('榜单·②排序写入 URL（rsk/rsd，表头点选后同步）', (function () {
+  try {
+    const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
+    return /q\.set\('rsk', S\.sortKey\)/.test(r) && /S\.sortDir \|\| 'desc'/.test(r) &&
+      /q\.get\('rsk'\)/.test(r) && /S\.sortDir = q\.get\('rsd'\)/.test(r) &&
+      /S\.sortKey = null; S\.sortDir = null; \}\s*\/\* ③ 取消 \*\/\s*render\(\); syncRkUrl\(\);/.test(r);
+  } catch (err) { return false; }
+})());

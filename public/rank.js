@@ -118,7 +118,7 @@
         if (S.sortKey !== k) { S.sortKey = k; S.sortDir = d0; }
         else if (S.sortDir === d0) { S.sortDir = d0 === 'asc' ? 'desc' : 'asc'; }
         else { S.sortKey = null; S.sortDir = null; }   /* ③ 取消 */
-        render();
+        render(); syncRkUrl();
       });
     });
   }
@@ -215,7 +215,7 @@
           S.sortKey = null; S.sortDir = null;
           if (history.replaceState) history.replaceState(null, '', S.board ? '#' + S.board : '#');
           renderYearSwitch();
-          render();
+          render(); syncRkUrl();
         });
       }
     }
@@ -243,7 +243,7 @@
       S.sortKey = null; S.sortDir = null;
       $$('#rkYearSwitch .ytab').forEach((o) => o.classList.remove('on'));
       t.classList.add('on');
-      render();
+      render(); syncRkUrl();
     }));
   }
 
@@ -259,6 +259,9 @@
       if (S.kw) q.set('rkw', S.kw); else q.delete('rkw');
       if (S.retDim && S.retDim !== 'ann1') q.set('rdim', S.retDim); else q.delete('rdim');
       if (S.top && S.top !== 10) q.set('rtop', String(S.top)); else q.delete('rtop');
+      /* 2026-11-19（用户建议）：排序字段一并写入，分享「按近5年排序」的链接也能还原 */
+      if (S.sortKey) { q.set('rsk', S.sortKey); q.set('rsd', S.sortDir || 'desc'); }
+      else { q.delete('rsk'); q.delete('rsd'); }
       const s2 = q.toString();
       history.replaceState(history.state, '', location.pathname + (s2 ? '?' + s2 : '') + location.hash);
     } catch (e) {}
@@ -269,12 +272,13 @@
       const q = new URLSearchParams(location.search);
       const arr = (k) => (q.get(k) || '').split(',').map((v) => v.trim()).filter(Boolean);
       const ty = arr('rty'), tr = arr('rtr'), sb = arr('rsb');
-      if (!ty.length && !tr.length && !sb.length && !q.get('rrisk') && !q.get('rkw') && !q.get('rdim')) return false;
+      if (!ty.length && !tr.length && !sb.length && !q.get('rrisk') && !q.get('rkw') && !q.get('rdim') && !q.get('rsk')) return false;
       S.type = ty; S.trustee = tr; S.sub = sb;
       if (q.get('rrisk')) S.risk = q.get('rrisk');
       if (q.get('rkw')) S.kw = q.get('rkw');
       if (q.get('rdim')) S.retDim = q.get('rdim');
       if (q.get('rtop')) { const n = parseInt(q.get('rtop'), 10); if (n > 0) S.top = n; }
+      if (q.get('rsk')) { S.sortKey = q.get('rsk'); S.sortDir = q.get('rsd') === 'asc' ? 'asc' : 'desc'; }
       return true;
     } catch (e) { return false; }
   }
@@ -375,11 +379,11 @@
     const keys = { ann1: '近1年年率化', ann5: '近5年年率化', ann10: '近10年年率化', annLaunch: '推出至今年率化', worstYear: '近5年最差年度', mgmtFee: '基金管理费', size: '基金规模', risk: '风险级别', nav: '单位资产净值', calYear: '历年回报' };
     const el = $('#rkMSortKey');
     el.innerHTML = Object.keys(keys).map((k) => '<option value="' + k + '">' + TT(keys[k]) + '</option>').join('');
-    el.addEventListener('change', () => { S.sortKey = el.value; S.sortDir = 'desc'; render(); });
+    el.addEventListener('change', () => { S.sortKey = el.value; S.sortDir = 'desc'; render(); syncRkUrl(); });
     $('#rkMSortDir').addEventListener('click', () => {
       S.sortDir = flip(S.sortDir || 'desc');
       $('#rkMSortDir').textContent = S.sortDir === 'asc' ? '升序 ↑' : '降序 ↓';
-      render();
+      render(); syncRkUrl();
     });
   }
 
