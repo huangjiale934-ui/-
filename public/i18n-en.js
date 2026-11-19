@@ -1562,6 +1562,24 @@
   '已导出 {n} 只基金、{c} 个字段': 'Exported {n} funds, {c} fields',
   '导出失败，请稍后重试': 'Export failed, please try again',
   '批量导出数据': 'Batch export',
+  /* 2026-11-19 导出中心：区间 / 走势图 */
+  '区间': 'Range',
+  '方式': 'Mode',
+  '近 1 年': '1 year',
+  '近 3 年': '3 years',
+  '近 5 年': '5 years',
+  '全部历史': 'All history',
+  '合并走势对比图': 'Combined comparison',
+  '每只基金单独一张': 'One chart per fund',
+  '净值走势图': 'NAV charts',
+  '逐日净值（长表）': 'Daily NAV (long table)',
+  '净值走势对比（起点 = 100）': 'NAV comparison (start = 100)',
+  '各基金净值走势（起点 = 100）': 'NAV charts by fund (start = 100)',
+  '正在绘制走势对比图…': 'Drawing comparison chart…',
+  '正在绘制走势图 {n}/{t}…': 'Drawing charts {n}/{t}…',
+  '所选区间内没有可画图的净值': 'No NAV data in the selected range',
+  '走势对比图': 'NAV comparison',
+  '走势图': 'NAV charts',
 
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }

@@ -93,7 +93,11 @@ for i in 1 2 3 4 5; do
 ' "$CHANGED" | grep -E '^(data/|public/|server\.js|navperf\.js|indexbuild\.js)' | head -1 || true)
   SKIP=""
   [ -z "$NEED_BUILD" ] && SKIP=" [skip ci]"
-  COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "data: daily sync $(date +%F)$SKIP") || { echo "commit-tree 失败"; exit 1; }
+  # 2026-11-19：MPF_RUN_DATA=1 时在提交信息里带 [run-data]，手动催一次云端数据班
+  # （GitHub schedule 实测会被丢弃/延迟数小时；deploy.yml 只在 schedule 或 [run-data] 时抓数据）
+  TAG=""
+  if [ "${MPF_RUN_DATA:-0}" = "1" ]; then TAG=" [run-data]"; SKIP=""; fi
+  COMMIT=$(git commit-tree "$TREE" -p "$PARENT" -m "data: daily sync $(date +%F)$TAG$SKIP") || { echo "commit-tree 失败"; exit 1; }
   if git push origin "$COMMIT:main" 2>&1 | tail -2; then
     if git ls-remote origin refs/heads/main 2>/dev/null | grep -q "$COMMIT"; then
       echo "✔ 已推送 GitHub：${COMMIT:0:7}（push 事件将触发 Pages 构建）"

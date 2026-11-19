@@ -4,7 +4,7 @@
         （预置当前筛选结果，字段默认全选 = 与旧导出一致）。
    设计：先筛基金 → 再选字段 → 导出 xlsx。字段注册表复用 app.js 的 buildExportSchema()，
         保证列名、百分比口径（存百分数 + 0.00"%"）、隐藏列与旧导出完全一致。
-   约束：纯前端生成（A/B 两站同代码）；逐日净值限 ≤10 只；持仓图只画前 30 只。 */
+   约束：纯前端生成（A/B 两站同代码）；逐日净值不限只数（按区间控制体积）；持仓图只画前 30 只。 */
 (function () {
   if (window.__ecInit) return;
   window.__ecInit = 1;
@@ -25,7 +25,9 @@
     open: false,
     sel: new Set(),
     fields: new Set(),      /* 列下标 */
-    extra: new Set(),       /* 'hld' | 'hist' */
+    extra: new Set(),       /* 'hld' | 'hist' | 'trend' */
+    histRange: '1y',        /* 逐日净值区间：1y/3y/5y/all */
+    trendMode: 'merge',     /* 走势图：merge 合并对比 / one 每只单独 */
     kw: '',
     trustee: new Set(),
     cat: new Set(),
@@ -119,33 +121,45 @@
     if (fc) fc.textContent = TQ('已选 {n} 项', { n: fcnt });
     const est = $('#ecEst');
     if (est) {
-      const sheets = 2 + (ST.extra.has('hld') ? 1 : 0) + (ST.extra.has('hist') ? 1 : 0);
+      const sheets = 2 + (ST.extra.has('hld') ? 1 : 0) + (ST.extra.has('hist') ? 1 : 0) + (ST.extra.has('trend') ? 1 : 0);
       est.textContent = TQ('预计输出：{s} 个工作表 · {r} 行 × {c} 列', { s: sheets, r: sel + 2, c: fcnt });
     }
     const go = $('#ecGo');
     if (go) go.disabled = ST.busy || !sel || !fcnt;
   }
 
-  /* ---------- 字段树 ---------- */
+  /* 2026-11-19（用户反馈）：字段树改为双列排布，右栏不再留大片空白 */
   function renderTree() {
     const box = $('#ecTree');
     if (!box) return;
     const schema = window.mpfExportSchema ? window.mpfExportSchema() : null;
     if (!schema) { box.innerHTML = '<div class="ec-empty">' + esc(TT('导出组件未加载，请刷新页面')) + '</div>'; return; }
     const COLS = schema.COLS;
+    const cells = (g) => g.idx.map((i) => '<label class="ec-f" title="' + esc(COLS[i][4] || '') + '">' +
+      '<input type="checkbox" data-i="' + i + '"' + (ST.fields.has(i) ? ' checked' : '') + '>' +
+      '<span>' + esc(COLS[i][0]) + '</span></label>').join('');
+    const rangeSel = '<div class="ec-sub-opt"><span>' + esc(TT('区间')) + '</span><select id="ecHistRange">' +
+      [['1y', '近 1 年'], ['3y', '近 3 年'], ['5y', '近 5 年'], ['all', '全部历史']].map((o) =>
+        '<option value="' + o[0] + '"' + (ST.histRange === o[0] ? ' selected' : '') + '>' + esc(TT(o[1])) + '</option>').join('') +
+      '</select></div>';
+    const trendSel = '<div class="ec-sub-opt"><span>' + esc(TT('方式')) + '</span><select id="ecTrendMode">' +
+      [['merge', '合并走势对比图'], ['one', '每只基金单独一张']].map((o) =>
+        '<option value="' + o[0] + '"' + (ST.trendMode === o[0] ? ' selected' : '') + '>' + esc(TT(o[1])) + '</option>').join('') +
+      '</select></div>';
     box.innerHTML = GROUPS.map((g) => {
       const on = g.idx.filter((i) => ST.fields.has(i)).length;
       return '<div class="ec-g">' +
         '<label class="ec-g-h"><input type="checkbox" data-g="' + g.k + '"' + (on === g.idx.length ? ' checked' : '') + '>' +
         '<b>' + esc(TT(g.n)) + '</b><span>' + on + '/' + g.idx.length + '</span></label>' +
-        g.idx.map((i) => '<label class="ec-f" title="' + esc(COLS[i][4] || '') + '">' +
-          '<input type="checkbox" data-i="' + i + '"' + (ST.fields.has(i) ? ' checked' : '') + '>' +
-          '<span>' + esc(COLS[i][0]) + '</span></label>').join('') +
-        '</div>';
+        '<div class="ec-g-b">' + cells(g) + '</div></div>';
     }).join('') +
-      '<div class="ec-g"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b></div>' +
+      '<div class="ec-g"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b></div><div class="ec-g-b">' +
       '<label class="ec-f"><input type="checkbox" data-x="hld"' + (ST.extra.has('hld') ? ' checked' : '') + '><span>' + esc(TT('持仓与分布（前十大 + 资产分布）')) + '</span></label>' +
-      '<label class="ec-f"><input type="checkbox" data-x="hist"' + (ST.extra.has('hist') ? ' checked' : '') + '><span>' + esc(TT('逐日净值（长表，限 10 只）')) + '</span></label>' +
+      '<label class="ec-f"><input type="checkbox" data-x="hist"' + (ST.extra.has('hist') ? ' checked' : '') + '><span>' + esc(TT('逐日净值（长表）')) + '</span></label>' +
+      '<label class="ec-f"><input type="checkbox" data-x="trend"' + (ST.extra.has('trend') ? ' checked' : '') + '><span>' + esc(TT('净值走势图')) + '</span></label>' +
+      '</div>' +
+      (ST.extra.has('hist') ? rangeSel : '') +
+      (ST.extra.has('trend') ? trendSel : '') +
       '</div>';
   }
 
@@ -211,11 +225,124 @@
   /* ---------- 导出 ---------- */
   function colLetter(n) { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
 
+  /* ---------- 净值序列（逐日表与走势图共用） ---------- */
+  const PALETTE = ['#0a6cbf', '#d9534f', '#2e9e5b', '#e08b1a', '#7a5cc6', '#0f9b9b', '#c2477d', '#5b6b7f', '#8a6d3b', '#1f7ae0'];
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const isoDay = (d) => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+
+  /* 区间以「最新净值日」为锚，保证同一天导出的截止日一致 */
+  function rangeStart(range) {
+    if (range === 'all') return '';
+    const days = range === '3y' ? 1095 : range === '5y' ? 1825 : 365;
+    const base = latestNav() ? new Date(latestNav() + 'T00:00:00') : new Date();
+    base.setDate(base.getDate() - days);
+    return isoDay(base);
+  }
+
+  async function loadSeries(list, onProgress) {
+    const out = new Map();
+    const queue = list.slice();
+    let done = 0;
+    const workers = Array.from({ length: Math.min(6, queue.length) }, async () => {
+      while (queue.length) {
+        const x = queue.shift();
+        try {
+          const r = await fetch('/api/hist/' + encodeURIComponent(String(x.id)), { cache: 'default' });
+          if (r.ok) {
+            const h = await r.json();
+            const ser = Array.isArray(h.series) ? h.series : [];
+            out.set(String(x.id), ser.filter((p) => Array.isArray(p) && p.length >= 2));
+          }
+        } catch (e) { /* 单只失败不阻断 */ }
+        done += 1;
+        if (onProgress) onProgress(done, list.length);
+      }
+    });
+    await Promise.all(workers);
+    return out;
+  }
+
+  /* 走势对比图（起点 = 100）。纯 SVG 字符串，便于直接光栅化成 PNG 塞进 xlsx。 */
+  function trendSVG(lines) {
+    const W = 980, H = 400, L = 64, R = 16, T = 14, B = 34;
+    const dates = Array.from(new Set(lines.flatMap((l) => l.pts.map((p) => p[0])))).sort();
+    const xi = new Map(dates.map((d, i) => [d, i]));
+    const series = lines.map((l, i) => {
+      const base = l.pts[0] && l.pts[0][1];
+      return {
+        name: l.name, color: l.color || PALETTE[i % PALETTE.length],
+        data: l.pts.map((p) => [xi.get(p[0]), base ? (p[1] / base) * 100 : 100]).filter((d) => d[1] != null && isFinite(d[1])),
+      };
+    });
+    let min = Infinity, max = -Infinity;
+    series.forEach((s) => s.data.forEach((d) => { if (d[1] < min) min = d[1]; if (d[1] > max) max = d[1]; }));
+    if (!isFinite(min) || !isFinite(max)) { min = 90; max = 110; }
+    const pad = (max - min) * 0.08 || 1;
+    min -= pad; max += pad;
+    const X = (i) => L + (W - L - R) * (dates.length > 1 ? i / (dates.length - 1) : 0);
+    const Y = (v) => T + (H - T - B) * (1 - (v - min) / (max - min));
+    let g = '';
+    for (let k = 0; k <= 4; k++) {
+      const v = min + ((max - min) * k) / 4;
+      const y = Y(v);
+      g += '<line x1="' + L + '" y1="' + y.toFixed(1) + '" x2="' + (W - R) + '" y2="' + y.toFixed(1) + '" stroke="#e6eef7" stroke-width="1"/>' +
+        '<text x="' + (L - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" fill="#8195a9" font-size="11">' + v.toFixed(0) + '</text>';
+    }
+    const step = Math.max(1, Math.ceil(dates.length / 6));
+    for (let i = 0; i < dates.length; i += step) {
+      g += '<text x="' + X(i).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle" fill="#8195a9" font-size="11">' + dates[i].slice(0, 7) + '</text>';
+    }
+    series.forEach((s) => {
+      const pts = s.data.map((d) => X(d[0]).toFixed(1) + ',' + Y(d[1]).toFixed(1)).join(' ');
+      g += '<polyline fill="none" stroke="' + s.color + '" stroke-width="1.8" stroke-linejoin="round" points="' + pts + '"/>';
+    });
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' +
+      '<rect width="' + W + '" height="' + H + '" fill="#fff"/>' +
+      '<style>text{font-family:"Microsoft YaHei",sans-serif}</style>' + g + '</svg>';
+  }
+
+  /* SVG 字符串 → PNG dataURL（2 倍分辨率；图例画在底部，避免压住曲线） */
+  function svgPng(svg, w, h, legend) {
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+        img.onload = () => {
+          const items = legend || [];
+          const perRow = 3;
+          const rows = items.length ? Math.ceil(items.length / perRow) : 0;
+          const legendH = rows ? rows * 26 + 8 : 0;
+          const cv = document.createElement('canvas');
+          cv.width = w * 2; cv.height = (h + legendH) * 2;
+          const ctx = cv.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+          ctx.drawImage(img, 0, 0, w * 2, h * 2);
+          /* 画布是 2 倍分辨率，图例也按 2 倍行距绘制，否则下半部会留大片空白 */
+          ctx.font = '600 30px "Microsoft YaHei", sans-serif';
+          ctx.textBaseline = 'middle';
+          items.forEach((it, i) => {
+            const col = i % perRow, row = Math.floor(i / perRow);
+            const x = 22 + col * ((w * 2 - 40) / perRow);
+            const y = h * 2 + 42 + row * 52;
+            ctx.strokeStyle = it.color; ctx.lineWidth = 8; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 56, y); ctx.stroke();
+            ctx.fillStyle = '#142846';
+            ctx.fillText(String(it.name).slice(0, 26), x + 66, y + 2);
+          });
+          URL.revokeObjectURL(url);
+          resolve(cv.toDataURL('image/png'));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(''); };
+        img.src = url;
+      } catch (e) { resolve(''); }
+    });
+  }
+
   async function exportNow() {
     if (ST.busy) return;
     if (!ST.sel.size) { mpfToast(TT('请至少选择一只基金')); return; }
     if (!ST.fields.size) { mpfToast(TT('请至少选择一个字段')); return; }
-    if (ST.extra.has('hist') && ST.sel.size > 10) { mpfToast(TT('逐日净值限选 10 只以内')); return; }
+    /* 2026-11-19（用户要求）：逐日净值不再限制只数；体积由「区间」控制（默认近 1 年） */
     if (!window.MPFXLSX) { mpfToast(TT('导出组件未加载，请刷新页面')); return; }
 
     const schema = window.mpfExportSchema();
@@ -280,35 +407,73 @@
         }
       }
 
+      /* 2026-11-19：逐日表与走势图共用一次抓取（6 路并发），避免重复请求 400+ 次 */
+      const needSeries = ST.extra.has('hist') || ST.extra.has('trend');
+      let seriesMap = null;
+      if (needSeries) {
+        ST.stage = 'series';
+        tick(TQ('正在读取逐日净值 {n}/{t}…', { n: 0, t: rowsSel.length }));
+        seriesMap = await loadSeries(rowsSel, (n, t) => tick(TQ('正在读取逐日净值 {n}/{t}…', { n, t })));
+      }
+      const from = rangeStart(ST.histRange);
+
       if (ST.extra.has('hist')) {
         ST.stage = 'hist';
-        const list = rowsSel.slice(0, 10);
         const out = [{ h: 30, cells: [{ v: TT('逐日净值（每行一个交易日）'), s: 1 }] },
           { h: 30, cells: [TT('基金名称'), TT('日期'), TT('单位资产净值'), TT('日涨跌')].map((v) => ({ v, s: 2 })) }];
-        for (let k = 0; k < list.length; k++) {
-          const x = list[k];
-          const nm = nameOf(x);   /* 2026-11-19：名称含繁转简，必须在行循环外只算一次，
-                                     否则 1 万行 × 每行一次转换会把主线程卡死（实测 3 只即超时） */
-          tick(TQ('正在读取逐日净值 {n}/{t}…', { n: k + 1, t: list.length }));
-          try {
-            const r = await fetch('/api/hist/' + encodeURIComponent(String(x.id)), { cache: 'default' });
-            if (!r.ok) continue;
-            const h = await r.json();
-            const ser = h.series || h.points || [];
-            let prev = null;
-            ser.forEach((p) => {
-              const d = p[0], v = Number(p[1]);
-              const chg = prev ? Math.round((v / prev - 1) * 1e4) / 100 : '';
-              out.push({ cells: [
-                { v: nm, s: 4 }, { v: d, s: 4 },
-                { v: isFinite(v) ? Math.round(v * 1e4) / 1e4 : '', s: 6 },
-                chg === '' ? { v: '', s: 4 } : { v: chg, s: 21 },
-              ] });
-              prev = v;
-            });
-          } catch (e) { /* 单只失败不阻断 */ }
-        }
+        rowsSel.forEach((x) => {
+          /* 名称含繁转简：必须在行循环外只算一次，否则每行一次转换会把主线程卡死 */
+          const nm = nameOf(x);
+          const ser = (seriesMap.get(String(x.id)) || []).filter((p) => !from || p[0] >= from);
+          let prev = null;
+          ser.forEach((p) => {
+            const d = p[0], v = Number(p[1]);
+            const chg = prev ? Math.round((v / prev - 1) * 1e4) / 100 : '';
+            out.push({ cells: [
+              { v: nm, s: 4 }, { v: d, s: 4 },
+              { v: isFinite(v) ? Math.round(v * 1e4) / 1e4 : '', s: 6 },
+              chg === '' ? { v: '', s: 4 } : { v: chg, s: 21 },
+            ] });
+            prev = v;
+          });
+        });
         sheets.push({ name: TT('逐日净值'), rows: out, cols: [30, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
+      }
+
+      if (ST.extra.has('trend')) {
+        ST.stage = 'trend';
+        const lines = rowsSel.map((x, i) => ({
+          name: nameOf(x), color: PALETTE[i % PALETTE.length],
+          pts: (seriesMap.get(String(x.id)) || []).filter((p) => !from || p[0] >= from),
+        })).filter((l) => l.pts.length > 1);
+        if (!lines.length) {
+          mpfToast(TT('所选区间内没有可画图的净值'));
+        } else if (ST.trendMode === 'merge' || lines.length === 1) {
+          tick(TT('正在绘制走势对比图…'));
+          const legendH = Math.ceil(lines.length / 3) * 26 + 8;
+          const png = await svgPng(trendSVG(lines), 980, 400, lines.map((l) => ({ name: l.name, color: l.color })));
+          if (png) {
+            sheets.push({
+              name: TT('走势对比图'),
+              rows: [{ h: 30, cells: [{ v: TT('净值走势对比（起点 = 100）'), s: 1 }] }, { h: 16, cells: [{ v: '', s: 4 }] }],
+              cols: Array(16).fill(16),
+              images: [{ data: png, col: 0, row: 1, fitW: 900, fitH: 400 + legendH, name: TT('走势对比图') }],
+            });
+          }
+        } else {
+          /* 每只一张：同一工作表纵向排列（用户要求「选择单独导出或合并对比」） */
+          const rowsT = [{ h: 30, cells: [{ v: TT('各基金净值走势（起点 = 100）'), s: 1 }] }];
+          const images = [];
+          let r = 1;
+          for (let i = 0; i < lines.length; i++) {
+            tick(TQ('正在绘制走势图 {n}/{t}…', { n: i + 1, t: lines.length }));
+            rowsT.push({ h: 22, cells: [{ v: lines[i].name, s: 3 }] }); r += 1;
+            const png = await svgPng(trendSVG([lines[i]]), 900, 280, []);
+            if (png) images.push({ data: png, col: 0, row: r, fitW: 860, fitH: 280, name: lines[i].name });
+            for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); r += 1; }
+          }
+          sheets.push({ name: TT('走势图'), rows: rowsT, cols: Array(14).fill(16), images: images });
+        }
       }
 
       ST.stage = 'pack'; tick(TT('正在打包 xlsx…'));
@@ -389,6 +554,8 @@
         return;
       }
       if (t.matches('#ecNavOnly')) { ST.navOnly = t.checked; renderList(); syncSel(); return; }
+      if (t.id === 'ecHistRange') { ST.histRange = t.value; paintCounts(); return; }
+      if (t.id === 'ecTrendMode') { ST.trendMode = t.value; paintCounts(); return; }
       if (t.matches('#ecTree input[data-i]')) {
         const i = +t.getAttribute('data-i');
         if (t.checked) ST.fields.add(i); else ST.fields.delete(i);
@@ -397,7 +564,7 @@
       if (t.matches('#ecTree input[data-x]')) {
         const k = t.getAttribute('data-x');
         if (t.checked) ST.extra.add(k); else ST.extra.delete(k);
-        paintCounts(); return;
+        renderTree(); paintCounts(); return;
       }
       if (t.matches('#ecTree input[data-g]')) {
         const g = GROUPS.find((x) => x.k === t.getAttribute('data-g'));

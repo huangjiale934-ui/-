@@ -2161,3 +2161,26 @@ chk('导出中心·③按受托人筛选口径（宏利条数 = funds.json 实�
     return n > 0 && /ST\.trustee\.has\(x\.trustee\)/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8'));
   } catch (err) { return false; }
 })());
+
+/* ================= 2026-11-19 导出中心 v2（布局 / 逐日不限只数 / 走势图） ================= */
+chk('导出中心·④逐日净值不限只数且带区间选择', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    return e.indexOf('限选 10 只') < 0 && /ecHistRange/.test(e) && /histRange:\s*'1y'/.test(e) && /rangeStart\(/.test(e);
+  } catch (err) { return false; }
+})());
+chk('导出中心·⑤支持走势图（合并对比 / 每只单独）', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
+    return /trendMode:\s*'merge'/.test(e) && /function trendSVG/.test(e) && /function svgPng/.test(e) &&
+      /走势对比图/.test(e) && /ec-g-b\{display:grid/.test(st);
+  } catch (err) { return false; }
+})());
+chk('更新提示栏·⑥静态站按班次时间窗兜底（动态站仍只认 running）', (function () {
+  try {
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    return /api\/status\.json/.test(c) && /isStatic = !\(j && j\.mode === 'live'\)/.test(c) &&
+      /if \(isStatic && paintWindow\(shown\)\) return;/.test(c);
+  } catch (err) { return false; }
+})());

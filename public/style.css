@@ -3128,7 +3128,7 @@ body { overflow-x: clip; }
 .ec-sub{font-size:12px;color:#7a8698}
 .ec-x{margin-left:auto;border:0;background:none;font-size:22px;line-height:1;color:#8a94a6;cursor:pointer;padding:2px 6px}
 .ec-x:hover{color:#0f2a4a}
-.ec-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;flex:1;min-height:0}
+.ec-cols{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:0;flex:1;min-height:0}
 .ec-left,.ec-right{display:flex;flex-direction:column;min-height:0;padding:14px 16px}
 .ec-left{border-right:1px solid #eef2f7}
 .ec-cap{font-size:13px;font-weight:700;color:#0f2a4a;margin-bottom:8px;display:flex;gap:8px;align-items:baseline}
@@ -3161,13 +3161,17 @@ body { overflow-x: clip; }
 .ec-row .ec-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1c2f47}
 .ec-row .ec-nm i{font-style:normal;color:#93a0b3;font-size:11px}
 .ec-row .ec-mt{font-size:11px;color:#93a0b3;max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ec-tree{flex:1;min-height:0;overflow:auto;border:1px solid #eef2f7;border-radius:10px;padding:8px 10px}
+.ec-tree{flex:1;min-height:0;overflow:auto;border:1px solid #eef2f7;border-radius:10px;padding:8px 12px}
+.ec-sub-opt{display:flex;align-items:center;gap:8px;margin:2px 0 10px 6px;font-size:12px;color:#7a8698}
+.ec-sub-opt select{height:28px;border:1px solid #dbe3ee;border-radius:7px;background:#fff;font-size:12px;color:#33475f;padding:0 6px}
 .ec-g{margin-bottom:10px}
 .ec-g-h{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#0f2a4a;padding:4px 0;cursor:pointer}
 .ec-g-h b{font-weight:700}
 .ec-g-h span{margin-left:auto;font-size:11px;color:#93a0b3}
-.ec-f{display:flex;align-items:center;gap:8px;padding:4px 0 4px 18px;font-size:12.5px;color:#33475f;cursor:pointer}
-.ec-f:hover{color:#1a5fa8}
+.ec-g-b{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:2px 12px}
+.ec-f{display:flex;align-items:center;gap:7px;padding:5px 4px 5px 6px;border-radius:6px;font-size:12.5px;color:#33475f;cursor:pointer;min-width:0}
+.ec-f span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ec-f:hover{background:#f4f9ff;color:#1a5fa8}
 .ec-foot{display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #e8eef6;background:#fafcff}
 .ec-foot #ecEst{font-size:12px;color:#7a8698;margin-right:auto}
 .ec-foot .btn:disabled{opacity:.55;cursor:not-allowed}

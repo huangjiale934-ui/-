@@ -294,6 +294,14 @@ function initUpdateBanner() {
   const hmDay = () => hk().getUTCDay();
   let phase = '';
   let doneTimer = 0;
+  /* 2026-11-19（8.0）：静态站（GitHub Pages）没有实时状态源，只能按班次时间窗提示。
+     用 /api/status.json 区分：动态站该端点回传 mode='live'，静态站是构建产物（无 mode）。
+     探针失败按动态站处理，不误报。 */
+  let isStatic = false;
+  fetch('/api/status.json', { cache: 'no-store' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => { isStatic = !(j && j.mode === 'live'); check(); })
+    .catch(() => {});
   function paint(kind, label, text, meta, closable) {
     el.className = 'upd-bar show ' + kind + (closable ? ' closable' : '');
     lbEl.textContent = label;
@@ -387,6 +395,9 @@ function initUpdateBanner() {
           paint('ok', TT('季度便览已自动更新'), names, TT('已写回持仓与分布数据，请复核'), false);
           return;
         }
+        /* 2026-11-19：静态站（B 站）状态文件只在构建时更新，运行期间永远看不到 running →
+           按班次时间窗给出「数据更新窗口」提示（可关闭，完成后自动消失）。仅静态站生效。 */
+        if (isStatic && paintWindow(shown)) return;
         /* 2026-11-05（第三十八轮，用户反馈）：今天的更新已经跑完，就不该再显示「更新窗口」。
            只有本页亲历过 running 时才给 12 秒绿色完成提示，其余情况直接收起。 */
         /* 2026-11-18（用户要求）：顶部只显示「正在更新」。完成/失败都不再打扰客户；
