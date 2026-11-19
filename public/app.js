@@ -361,6 +361,7 @@
   let MF_TY = null, MF_S = null, MF_T = null;
   function ensureMF() {
     if (MF_TY) return;
+    if (typeof window.MPFMulti !== 'function') return;   /* 脚本尚未就绪时不抛错 */
     MF_TY = window.MPFMulti('#fType', {
       allLabel: TT('全部种类'),
       onChange: (arr) => { F.type = arr; F.sub = []; S.page = 1; fillSub(); render(); syncUrlFilters(); },

@@ -3232,7 +3232,7 @@ body { overflow-x: clip; }
 
 /* 导出中心：附加表三个模块 + 右侧二级筛选（2026-11-19） */
 .ec-mods { display: flex; flex-direction: column; }
-.ec-mod { display: grid; grid-template-columns: minmax(0, .46fr) minmax(0, .54fr);
+.ec-mod { display: grid; grid-template-columns: minmax(0, .40fr) minmax(0, .60fr);
   align-items: start; gap: 8px 10px; padding: 9px 6px; border-bottom: 1px dashed #eef2f7; }
 .ec-mod:last-child { border-bottom: 0; }
 .ec-mod.on { background: #fbfdff; border-radius: 8px; }
@@ -3248,9 +3248,10 @@ body { overflow-x: clip; }
 .ec-mod-p { grid-column: 2; min-width: 0; }
 .ec-mod-p[hidden] { display: none; }
 .ec-mod-p .ec-subcard { margin: 0; padding: 7px 8px 5px; }
-.ec-mod-p .ec-range { margin: 4px 0 6px; gap: 6px; }
+.ec-mod-p .ec-range { margin: 4px 0 6px; gap: 4px; }
+.ec-mod-p .tr-ranges { gap: 2px; padding: 3px; }
 .ec-mod-p .ec-range-lab { min-width: 24px; font-size: 11.5px; }
-.ec-mod-p .tr-r { padding: 3px 7px; font-size: 11.5px; }
+.ec-mod-p .tr-r { padding: 3px 6px; font-size: 11.5px; }
 .ec-mod-p .ec-daterow { margin: 0; gap: 5px; }
 .ec-mod-p .ec-daterow input { width: 96px; height: 26px; font-size: 11.5px; padding: 0 6px; }
 .ec-mod-p .ec-dmsg { font-size: 11px; }

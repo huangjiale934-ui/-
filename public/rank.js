@@ -1026,6 +1026,15 @@
     let off = null;   /* 隐藏列集合 */
     try { const raw = localStorage.getItem(KEY); off = raw ? new Set(JSON.parse(raw)) : null; } catch (e) { off = null; }
     if (!off) off = new Set(DEFAULT_OFF);
+    /* 2026-11-19：新增的「基金细类」列默认隐藏 —— 老用户的列设置里没有这一项，
+       这里做一次性迁移（只隐藏一次，之后用户自己勾选就按他的选择记住）。 */
+    try {
+      if (off && !localStorage.getItem('mpf-rk-sub-v1')) {
+        off.add('sub');
+        localStorage.setItem('mpf-rk-sub-v1', '1');
+        localStorage.setItem(KEY, JSON.stringify([...off]));
+      }
+    } catch (e) {}
 
     const curMode = () => (window.__rkMode && MODES[window.__rkMode]) ? window.__rkMode : 'fund';
 

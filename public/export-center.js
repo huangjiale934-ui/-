@@ -221,8 +221,7 @@
     const RANGES = [['1y', '1年'], ['3y', '3年'], ['5y', '5年'], ['10y', '10年'], ['all', '全部'], ['custom', '选择日期']];
     const rangeSel = '<div class="ec-subcard">' +
       '<div class="ec-sub-h">' + esc(TT('时间区间')) + '</div>' +
-      '<div class="ec-range"><span class="ec-range-lab">' + esc(TT('区间')) + '</span>' +
-      '<div class="tr-ranges" role="group" aria-label="' + esc(TT('区间')) + '">' +
+      '<div class="ec-range"><div class="tr-ranges" role="group" aria-label="' + esc(TT('区间')) + '">' +
       RANGES.map((o) => '<button type="button" class="tr-r' + (ST.histRange === o[0] ? ' on' : '') + '" data-range="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
       '</div></div>' +
       '<div class="ec-daterow"' + (ST.histRange === 'custom' ? '' : ' hidden') + '>' +
@@ -247,8 +246,8 @@
       '<span>' + esc(TT('勾选后在右侧展开设置')) + '</span></div>' +
       '<div class="ec-mods">' +
       modRow('hld', '持仓与分布', '前十大 + 资产分布', '') +
-      modRow('trend', '净值走势图', '合并对比 / 每只单独', trendSel) +
-      modRow('hist', '逐日净值', '长表 · 每行一个交易日', rangeSel) +
+      modRow('trend', '净值走势图', '', trendSel) +
+      modRow('hist', '逐日净值', '', rangeSel) +
       '</div></div>');
   }
 

@@ -281,7 +281,7 @@ async function loadData(onDone, attempt, force) {
     if (onDone) {
       try { onDone(DATA); }
       catch (err) {
-        console.error('[loadData] 页面渲染回调异常：', err);
+        console.error('[loadData] 页面渲染回调异常：', err, (err && err.stack) || String(err));
         if (window.mpfReportErr) window.mpfReportErr('render: ' + (err && err.message), { stack: String(err && err.stack || '').slice(0, 400) });
         const box = document.querySelector('.loading');
         if (box) box.innerHTML = '<div style="color:#a8432a">页面渲染失败：' + String(err && err.message || err) + '</div>';

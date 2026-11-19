@@ -64,17 +64,6 @@
       document.querySelectorAll('.mf.open, .mpfsel.open').forEach((h) => { if (h !== host && h.__mfClose) h.__mfClose(); });
       if (host.classList.contains('open')) close(); else { renderPop(); open(); }
     });
-    pop.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const all = e.target.closest('[data-all]');
-      if (all) { sel.clear(); fire(); return; }
-    });
-    pop.addEventListener('change', (e) => {
-      const cb = e.target.closest('input[type=checkbox]');
-      if (!cb) return;
-      if (cb.checked) sel.add(cb.value); else sel.delete(cb.value);
-      fire();
-    });
     host.__mfClose = close;
 
     const api = {
@@ -90,6 +79,8 @@
         if (!silent) o.onChange(Array.from(sel));
       },
       getSelected() { return Array.from(sel); },
+      toggle(v) { if (sel.has(v)) sel.delete(v); else sel.add(v); fire(); },
+      clear() { sel.clear(); fire(); },
       setAllLabel(t) { o.allLabel = t; syncText(); renderPop(); },
       close,
     };
@@ -98,10 +89,28 @@
     return api;
   }
 
-  /* 点空白处关闭：只绑一次，避免重复监听 */
+  /* 点空白处关闭 + 选项点击（2026-11-19：改为文档级委托——
+     组件实例的节点曾被页面重建替换，绑在节点上的监听会失效，表现为「怎么点都选不上」）。
+     只绑一次，避免重复监听。 */
   if (!window.__mfDocBound) {
     window.__mfDocBound = 1;
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (e) => {
+      const t = e.target;
+      const opt = t && t.closest ? t.closest('.mf-opt') : null;
+      if (opt) {
+        const host = opt.closest('.mf');
+        const cb = opt.querySelector('input[type=checkbox]');
+        if (host && host.__mf && cb) {
+          e.preventDefault(); e.stopPropagation();
+          host.__mf.toggle(cb.value);
+          return;
+        }
+      }
+      const all = t && t.closest ? t.closest('.mf-all') : null;
+      if (all) {
+        const host = all.closest('.mf');
+        if (host && host.__mf) { e.preventDefault(); e.stopPropagation(); host.__mf.clear(); return; }
+      }
       document.querySelectorAll('.mf.open').forEach((h) => { if (h.__mfClose) h.__mfClose(); });
     });
     document.addEventListener('keydown', (e) => {
