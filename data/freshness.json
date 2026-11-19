@@ -1,37 +1,37 @@
 {
- "checkedAt": "2026-11-18T23:11:37.785Z",
- "checkedAtHKT": "2026-11-19 07:11:37",
+ "checkedAt": "2026-11-19T03:52:10.648Z",
+ "checkedAtHKT": "2026-11-19 11:52:10",
  "ok": true,
  "problems": [],
  "detail": {
   "A": {
    "navLatest": "2026-11-17",
    "count": 451,
-   "updatedAt": 1795012530599,
-   "build": "2026-11-18-an",
+   "updatedAt": 1795053748043,
+   "build": "2026-11-19-an",
    "status": {
-    "phase": "error",
-    "step": "10/10 发布前一致性 失败：node tools/predeploy-check.js",
-    "day": "2026-11-18",
+    "phase": "done",
+    "step": "全部完成",
+    "day": "2026-11-19",
+    "finishedAt": "12:05",
     "host": "workbuddy"
    }
   },
   "B": {
    "navLatest": "2026-11-17",
    "count": 451,
-   "updatedAt": 1794993318079,
-   "build": "2026-11-18-an",
+   "updatedAt": 1795043497847,
+   "build": "2026-11-19-an",
    "status": {
     "phase": "done",
-    "step": "拉齐 11-17 净值/告警窗口收紧",
-    "finishedAt": "21:04",
-    "day": "2026-11-18",
-    "host": "workbuddy"
+    "step": "全量更新完成",
+    "finishedAt": "07:11",
+    "day": "2026-11-19",
+    "host": "github"
    }
   },
   "referenceLatest": "2026-11-17",
   "today": "2026-11-19",
-  "WorkBuddy 站_planLag": 9,
-  "GitHub 站_planLag": 12
+  "WorkBuddy 站_planLag": 9
  }
 }
