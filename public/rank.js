@@ -84,7 +84,9 @@
       /* 2026-11-04：月报头部的「资料截至」与表格下方说明同一来源 */
       const ma = document.querySelector('#mpfaAsOf');
       if (ma && DATA.dataAsOf) ma.textContent = DATA.dataAsOf;
+      applyRkUrl();          /* 2026-11-19：先读 URL，buildFilters 的细类过滤才会按已选种类收窄 */
       buildFilters();
+      paintRkUrl();
       buildMobileSort();
       initDualScroll('#rkTscroll', '#rkTopScroll', '#rkScrollGhost');
       FUND_HEAD = $('#rkThead').innerHTML;
@@ -245,21 +247,68 @@
     }));
   }
 
+  /* 2026-11-19（用户建议）：榜单筛选写入 URL，链接可直接分享「已筛好」的榜单。
+     参数用 r 前缀（rty/rsb/rtr/rrisk/rkw/rdim/rtop），与资料库的 ty/sb/tr 区分开，
+     因为两者共用 index.html，避免互相覆盖。 */
+  function syncRkUrl() {
+    try {
+      const q = new URLSearchParams(location.search);
+      const put = (k, arr) => { if (arr && arr.length) q.set(k, arr.join(',')); else q.delete(k); };
+      put('rty', S.type); put('rsb', S.sub); put('rtr', S.trustee);
+      if (S.risk !== '') q.set('rrisk', S.risk); else q.delete('rrisk');
+      if (S.kw) q.set('rkw', S.kw); else q.delete('rkw');
+      if (S.retDim && S.retDim !== 'ann1') q.set('rdim', S.retDim); else q.delete('rdim');
+      if (S.top && S.top !== 10) q.set('rtop', String(S.top)); else q.delete('rtop');
+      const s2 = q.toString();
+      history.replaceState(history.state, '', location.pathname + (s2 ? '?' + s2 : '') + location.hash);
+    } catch (e) {}
+  }
+
+  function applyRkUrl() {
+    try {
+      const q = new URLSearchParams(location.search);
+      const arr = (k) => (q.get(k) || '').split(',').map((v) => v.trim()).filter(Boolean);
+      const ty = arr('rty'), tr = arr('rtr'), sb = arr('rsb');
+      if (!ty.length && !tr.length && !sb.length && !q.get('rrisk') && !q.get('rkw') && !q.get('rdim')) return false;
+      S.type = ty; S.trustee = tr; S.sub = sb;
+      if (q.get('rrisk')) S.risk = q.get('rrisk');
+      if (q.get('rkw')) S.kw = q.get('rkw');
+      if (q.get('rdim')) S.retDim = q.get('rdim');
+      if (q.get('rtop')) { const n = parseInt(q.get('rtop'), 10); if (n > 0) S.top = n; }
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* 把 S 回填到控件（必须在 buildFilters 之后调用，选项才存在） */
+  function paintRkUrl() {
+    if (MF_RTY) MF_RTY.setSelected(S.type, true);
+    if (MF_RTR) MF_RTR.setSelected(S.trustee, true);
+    if (MF_RS) MF_RS.setSelected(S.sub, true);
+    const rk = document.querySelector('#rkRRisk');
+    if (rk && S.risk !== '') rk.value = S.risk;
+    const kw = document.querySelector('#rkKw');
+    if (kw && S.kw) kw.value = S.kw;
+    const rd = document.querySelector('#rkRRetDim');
+    if (rd && S.retDim) rd.value = S.retDim;
+    const tp = document.querySelector('#rkRTop');
+    if (tp) tp.value = String(S.top);
+  }
+
   /* 2026-11-19：榜单页三个筛选改多选，与资料库共用 MPFMulti */
   let MF_RTY = null, MF_RS = null, MF_RTR = null;
   function ensureMF() {
     if (MF_RTY) return;
     MF_RTY = window.MPFMulti('#rkRType', {
       allLabel: TT('全部种类'),
-      onChange: (arr) => { S.type = arr; S.sub = []; buildSubRisk(); S.page = 1; render(); },
+      onChange: (arr) => { S.type = arr; S.sub = []; buildSubRisk(); S.page = 1; render(); syncRkUrl(); },
     });
     MF_RS = window.MPFMulti('#rkRSub', {
       allLabel: TT('全部细类'),
-      onChange: (arr) => { S.sub = arr; S.page = 1; render(); },
+      onChange: (arr) => { S.sub = arr; S.page = 1; render(); syncRkUrl(); },
     });
     MF_RTR = window.MPFMulti('#rkRTrustee', {
       allLabel: TT('全部受托人'),
-      onChange: (arr) => { S.trustee = arr; S.page = 1; render(); },
+      onChange: (arr) => { S.trustee = arr; S.page = 1; render(); syncRkUrl(); },
     });
   }
 
@@ -335,9 +384,9 @@
   }
 
   function bind() {
-    $('#rkRTop').addEventListener('change', () => { S.top = parseInt($('#rkRTop').value, 10); S.page = 1; render(); });
+    $('#rkRTop').addEventListener('change', () => { S.top = parseInt($('#rkRTop').value, 10); S.page = 1; render(); syncRkUrl(); });
     var kwEl = document.querySelector('#rkKw');
-    if (kwEl) kwEl.addEventListener('input', function () { S.kw = this.value.trim(); render(); });
+    if (kwEl) kwEl.addEventListener('input', function () { S.kw = this.value.trim(); render(); syncRkUrl(); });
 
     /* 2026-10-19：排名页筛选卡与第一页对齐（细类 / 风险 / 涨跌幅 / 回撤 / 管理费） */
     (function bindRankFilters() {
@@ -350,7 +399,7 @@
         });
         el.addEventListener('change', function () {
           S[key] = isNum ? (this.value === '' ? '' : this.value) : this.value;
-          render();
+          render(); syncRkUrl();
         });
       };
       setK('#rkRRisk', 'risk');
@@ -371,7 +420,7 @@
         document.querySelectorAll('#rkKW,#rkKw,#rkRType,#rkRSub,#rkRTrustee,#rkRRisk,#rkRRetMin,#rkRRetMax,#rkRDdMin,#rkRDdMax,#rkRFeeMax').forEach((el) => {
           if (el.tagName === 'INPUT') el.value = ''; else if (el.options) el.selectedIndex = 0;
         });
-        render();
+        render(); syncRkUrl();
       });
     })();
     const re = $('#rkRExport');

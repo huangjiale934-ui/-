@@ -229,8 +229,9 @@
       '<span>~</span><input type="text" id="ecDateTo" placeholder="' + esc(DS().dataAsOf || '2026-11-17') + '" inputmode="numeric" maxlength="10" aria-label="' + esc(TT('结束日期')) + '" value="' + esc(ST.histTo || '') + '">' +
       '<button type="button" class="btn sm" id="ecDateGo">' + esc(TT('确定')) + '</button>' +
       '<span class="ec-dmsg" id="ecDateMsg">' + esc(ST.dateMsg || '') + '</span></div></div>';
-    const trendSel = '<div class="ec-range ec-range-mode"><span class="ec-range-lab">' + esc(TT('方式')) + '</span>' +
-      '<div class="tr-ranges" role="group">' +
+    /* 2026-11-19（用户要求）：去掉「方式」小标签，只保留两个按钮，与左侧标题水平对齐 */
+    const trendSel = '<div class="ec-range ec-range-mode">' +
+      '<div class="tr-ranges" role="group" aria-label="' + esc(TT('净值走势图')) + '">' +
       [['merge', '合并走势对比图'], ['one', '每只基金单独一张']].map((o) =>
         '<button type="button" class="tr-r' + (ST.trendMode === o[0] ? ' on' : '') + '" data-tmode="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
       '</div></div>';
@@ -254,7 +255,7 @@
   /* 2026-11-19（用户要求 v2）：三个附加表上下排列；勾选即在右侧展开二级设置，取消勾选即收起 */
   function modRow(key, title, sub, panel) {
     const on = ST.extra.has(key);
-    return '<div class="ec-mod' + (on ? ' on' : '') + '">' +
+    return '<div class="ec-mod' + (on ? ' on' : '') + (panel ? '' : ' no-p') + '">' +
       '<div class="ec-mod-l"><label><input type="checkbox" data-x="' + key + '"' + (on ? ' checked' : '') + '>' +
       '<span class="ec-mod-t">' + esc(TT(title)) + '</span>' +
       '<span class="ec-mod-s">' + esc(TT(sub)) + '</span></label></div>' +

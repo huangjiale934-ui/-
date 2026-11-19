@@ -2228,3 +2228,26 @@ chk('导出中心·⑥附加表三模块 + 右侧二级筛选 + 榜单细类列'
       /DEFAULT_OFF = \['sub'/.test(r);
   } catch (err) { return false; }
 })());
+
+/* ================= 2026-11-19 导出中心细节 + 榜单 URL（第八轮） ================= */
+chk('导出中心·⑦无面板行占满整行（说明不截断）+ 走势图无「方式」+ 日期单行', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
+    return /\(panel \? '' : ' no-p'\)/.test(e) &&
+      e.indexOf("TT('方式')") < 0 &&
+      /\.ec-mod\.no-p \{ grid-template-columns: minmax\(0, 1fr\); \}/.test(st) &&
+      /\.ec-mod\.no-p \.ec-mod-s \{ overflow: visible/.test(st) &&
+      /\.ec-mod-p \.ec-daterow input \{[^}]*min-width: 0/.test(st) &&
+      /\.ec-mod \{ display: grid;[^}]*align-items: center/.test(st);
+  } catch (err) { return false; }
+})());
+chk('榜单·①筛选写入 URL 并可还原（rty/rsb/rtr/rrisk/rkw）', (function () {
+  try {
+    const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
+    return /function syncRkUrl\(\)/.test(r) && /function applyRkUrl\(\)/.test(r) && /function paintRkUrl\(\)/.test(r) &&
+      /put\('rty', S\.type\)/.test(r) && /arr\('rtr'\)/.test(r) &&
+      /applyRkUrl\(\);[\s\S]{0,200}buildFilters\(\);[\s\S]{0,120}paintRkUrl\(\);/.test(r) &&
+      /render\(\); syncRkUrl\(\);/.test(r);
+  } catch (err) { return false; }
+})());
