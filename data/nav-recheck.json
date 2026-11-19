@@ -1,5 +1,5 @@
 {
- "runAt": "2026-11-19 03:51:11",
+ "runAt": "2026-11-19 09:37:00",
  "window": [
   "2026-11-14",
   "2026-11-19"
@@ -7,58 +7,58 @@
  "sources": {
   "bct": {
    "checked": 232,
-   "secs": 63.1
+   "secs": 49.9
   },
   "bea": {
    "checked": 80,
-   "secs": 2.9
+   "secs": 1.7
   },
   "manulife": {
    "checked": 95,
-   "secs": 8.6
+   "secs": 6.9
   },
   "fidelity": {
-   "checked": 46,
-   "secs": 1.7
+   "checked": 69,
+   "secs": 2.5
   },
   "aia": {
    "checked": 42,
-   "secs": 11.2
+   "secs": 9.7
   },
   "chinalife": {
    "checked": 20,
-   "secs": 2.3
+   "secs": 1.7
   },
   "yflife": {
    "checked": 28,
-   "secs": 1.8
+   "secs": 1.5
   },
   "haitong": {
-   "checked": 28,
-   "secs": 10.0
+   "checked": 42,
+   "secs": 8.2
   },
   "sunlife": {
    "checked": 62,
-   "secs": 12.1
+   "secs": 6.4
   },
   "etnet": {
    "checked": 16,
-   "secs": 4.6
+   "secs": 4.9
   },
   "bocom": {
    "checked": 28,
-   "secs": 19.3
+   "secs": 15.6
   },
   "hsbc": {
-   "checked": 80,
-   "secs": 1.4
+   "checked": 120,
+   "secs": 1.7
   },
   "bocpt": {
    "checked": 68,
-   "secs": 4.7
+   "secs": 3.5
   }
  },
- "checked": 825,
+ "checked": 902,
  "applied": 0,
  "diffs": [],
  "missing": [],

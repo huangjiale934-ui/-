@@ -1,13 +1,13 @@
 {
- "checkedAt": "2026-11-19T03:52:10.648Z",
- "checkedAtHKT": "2026-11-19 11:52:10",
+ "checkedAt": "2026-11-19T09:37:46.559Z",
+ "checkedAtHKT": "2026-11-19 17:37:46",
  "ok": true,
  "problems": [],
  "detail": {
   "A": {
    "navLatest": "2026-11-17",
    "count": 451,
-   "updatedAt": 1795053748043,
+   "updatedAt": 1795070448018,
    "build": "2026-11-19-an",
    "status": {
     "phase": "done",
@@ -20,12 +20,12 @@
   "B": {
    "navLatest": "2026-11-17",
    "count": 451,
-   "updatedAt": 1795043497847,
+   "updatedAt": 1795060330729,
    "build": "2026-11-19-an",
    "status": {
     "phase": "done",
-    "step": "全量更新完成",
-    "finishedAt": "07:11",
+    "step": "早晨净值更新完成",
+    "finishedAt": "11:52",
     "day": "2026-11-19",
     "host": "github"
    }
