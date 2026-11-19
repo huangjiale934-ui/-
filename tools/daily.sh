@@ -61,6 +61,8 @@ write_ustat() {
   # 2026-11-05：补 day 字段（YYYY-MM-DD）——前端要判断「这条完成状态是不是今天的」，
   # 否则昨天/上一轮的 done 会让「更新窗口」提示一直挂着。
   "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,day:process.argv[5],host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" "$(date '+%F')" >/dev/null 2>&1 || true
+  # 2026-11-19（8.0）：同时推到 A 站（失败静默），线上顶部提示栏才能实时显示「正在更新」
+  ( "$NODE" tools/push-status.js >/dev/null 2>&1 & ) || true
 }
 USTART=$(date +%s)
 USTARTH=$(date '+%H:%M')
@@ -244,6 +246,10 @@ soft_step "10/10 清理临时文件" bash tools/clean-scratch.sh
 # 2026-11-17：plan-lag 原来在 5.6 步跑（早于 funds 更新），清单里的 asOf 会滞后一天。
 # 在派生数据全部重算后再跑一次，保证 status 里的计划内落后清单是当前值。
 soft_step "9.9/9 同计划落后（末次）" node tools/plan-lag.js
+# 2026-11-19（8.0 交接验收发现）：9.5 的补抓会把 2 位净值写回 funds（AMTD 经 etnet 锚定，
+# 如 22.42），而 8.45 的 nav-round4 早已跑过 → predeploy 报「净值与历史末点不一致：16 条」
+# 并中止发布（11-18 22:35 就是这样挂在 10/10）。发布前再归一一次，幂等。
+step "9.95/9 净值精度复归（发布前）" node tools/nav-round4.js
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致（如新 funds 配旧 nav-perf）时禁止发布
 step "10/10 发布前一致性" node tools/predeploy-check.js
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"

@@ -37,6 +37,8 @@ write_ustat() {
   # 2026-11-05：补 day 字段（YYYY-MM-DD）——前端要判断「这条完成状态是不是今天的」，
   # 否则昨天/上一轮的 done 会让「更新窗口」提示一直挂着。
   "$NODE" -e "const fs=require('fs');try{fs.writeFileSync('$USTAT',JSON.stringify({phase:process.argv[1],step:process.argv[2],startedAt:process.argv[3]||undefined,finishedAt:process.argv[4]||undefined,day:process.argv[5],host:'workbuddy'}))}catch(e){}" "$1" "$2" "${3:-}" "${4:-}" "$(date '+%F')" >/dev/null 2>&1 || true
+  # 2026-11-19（8.0）：同时推到 A 站（失败静默），线上顶部提示栏才能实时显示「正在更新」
+  ( "$NODE" tools/push-status.js >/dev/null 2>&1 & ) || true
 }
 write_ustat running "早晨净值更新：启动" "$(date '+%H:%M')"
 

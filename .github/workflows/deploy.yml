@@ -227,6 +227,9 @@ jobs:
           node tools/hist-gaps-build.js --quiet || echo "!! 斷檔清單生成失敗"
           # 2026-10-26 修 4-05：补齐本机 health-check 覆盖的四类哨兵（缺日/渠道一致/allocSum/三处一致本地版）
           node tools/gap-check.js || echo "!! gap-check 有缺口（不影响发布）"
+          # 2026-11-19：与 daily.sh 同因——gap-check 的补抓会把 2 位净值写回 funds（AMTD 经 etnet），
+          # 上面 205 行的 nav-round4 已过期；构建前再归一一次，避免 funds/hist 精度不一致。
+          node tools/nav-round4.js
           node tools/health-check.js --local || echo "!! health-check 有告警（不影响发布）"
 
       # 2026-11-18（用户要求）：跑完立刻自检新鲜度，落后就发邮件（仅定时/手动数据班次）

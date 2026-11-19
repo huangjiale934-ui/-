@@ -158,7 +158,9 @@ function buildMarketStat(c) {
 
     /* 2026-11-17：分类改为严格两级（貨幣市場基金 + 细类）。图表按一级类别分组；
        保守/非保守的区分保留在表格「基金细类」列与详情页，不在环图里拆分（避免繁体值混入简体页面）。 */
-    const tk = f.type || '其他';
+    /* 2026-11-19（8.0）：B 站的 funds.json 仍可能把细类写进 type（如「貨幣市場基金 — 強積金保守基金」），
+       导致 byType 多出两项。这里统一按全角/半角破折号拆到一级类别，两站同一口径。 */
+    const tk = String(f.type || '其他').split(/[—–-]/)[0].trim() || '其他';
     byType[tk] = byType[tk] || { name: tk, count: 0, size: 0, a1: [], a5: [], a10: [] };
     byType[tk].count += 1;
     byType[tk].size += size;
@@ -1298,6 +1300,40 @@ const server = http.createServer(async (req, res) => {
         error: lastError,
       })
     );
+  }
+
+  /* 2026-11-19（8.0）：状态上报接口 —— 本机链路运行中把 running/done/error 推到线上，
+     用户才能在 A 站看到「正在更新」（此前状态文件只在发布时随包更新）。
+     只接受白名单字段，体积上限 8KB，token 规则与 /api/upload 一致。 */
+  if (p === '/api/status-push' && req.method === 'POST') {
+    const isLoopback = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress || '');
+    if (UPLOAD_TOKEN) {
+      if (u.searchParams.get('token') !== UPLOAD_TOKEN) return send(res, 401, JSON.stringify({ error: 'token 无效' }));
+    } else if (!isLoopback) {
+      return send(res, 401, JSON.stringify({ error: '服务端未配置 MPF_UPLOAD_TOKEN，且非本机推送被拒绝' }));
+    }
+    const chunks = []; let size = 0;
+    req.on('data', (c) => { chunks.push(c); size += c.length; if (size > 8192) req.destroy(); });
+    req.on('end', () => {
+      try {
+        const j = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        const PH = ['running', 'done', 'error'];
+        if (!j || PH.indexOf(j.phase) < 0) return send(res, 400, JSON.stringify({ error: 'phase 无效' }));
+        const st = {
+          phase: j.phase,
+          step: String(j.step || '').slice(0, 160),
+          day: String(j.day || '').slice(0, 10),
+          startedAt: j.startedAt ? String(j.startedAt).slice(0, 8) : undefined,
+          finishedAt: j.finishedAt ? String(j.finishedAt).slice(0, 8) : undefined,
+          host: 'workbuddy',
+        };
+        writeJsonAtomic(path.join(__dirname, 'data', 'update-status.json'), st);
+        return send(res, 200, JSON.stringify({ ok: true, phase: st.phase }));
+      } catch (e) {
+        return send(res, 400, JSON.stringify({ error: 'bad json' }));
+      }
+    });
+    return;
   }
 
   // 本机推送接口：部署环境无法直连积金局官网时，由可联网的本机抓取后推送上来

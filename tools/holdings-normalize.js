@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const P = path.join(__dirname, '..', 'data', 'holdings.json');
 const j = JSON.parse(fs.readFileSync(P, 'utf8'));
-let t = 0, s = 0, d = 0, a = 0, t0 = 0;
+let t = 0, s = 0, d = 0, a = 0, t0 = 0, q = 0;
 
 const MONTH_END = (ym) => {
   const [y, m] = ym.split('-').map(Number);
@@ -28,6 +28,14 @@ Object.values(j.funds).forEach((x) => {
   }
   if ((x.alloc || []).length && !x.allocTitle) { x.allocTitle = '投資組合分布'; t++; }
   if ((x.top10 || []).length) {
+    /* 2026-11-19（8.0，外部核验 A3-a 的根治）：top10 的行情字段（code/unit/price/chg/date）
+       由已废弃的 holdquote2.py 补写，与持仓报告期无关，且多次出现代码错配
+       （西班牙/澳洲两只不同 ETF 同映射 EEMA；报价日 11-02 而报告期 07-31）。
+       页面与导出都不渲染这些字段，regcheck 断言要求「不得出现」。
+       放在归一链路末端统一剥离，防止抓取或事务回滚把旧字段带回来。 */
+    x.top10.forEach((h) => {
+      ['code', 'unit', 'price', 'chg', 'date'].forEach((k) => { if (k in h) { delete h[k]; q++; } });
+    });
     const sorted = x.top10.slice().sort((a, b) => (b.weight || 0) - (a.weight || 0));
     if (sorted.some((v, i) => v !== x.top10[i])) { x.top10 = sorted; s++; }
   }
@@ -51,4 +59,4 @@ Object.values(j.funds).forEach((x) => {
   }
 });
 fs.writeFileSync(P, JSON.stringify(j));
-console.log('规范化：补口径标题', t, '| 简→繁', t0, '| 排序', s, '| 日期归一', d, '| 补 allocSum', a);
+console.log('规范化：补口径标题', t, '| 简→繁', t0, '| 排序', s, '| 日期归一', d, '| 补 allocSum', a, '| 剥离行情字段', q);

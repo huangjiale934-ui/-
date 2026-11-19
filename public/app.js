@@ -427,8 +427,9 @@
       2026-11-04（第三十六轮，用户要求）：
       ① 最左侧加「名次」列；② 写明排名维度与筛选条件；③ 冻结首列（含表头）；
       ④ 说明文字独立成「数据说明」工作表（含公司名、网址、LOGO），第二个表才是数据。 */
-  function exportIdx() {
-    if (!window.MPFXLSX) { if (window.mpfToast) mpfToast(TT('导出组件未加载，请刷新页面')); return; }
+  /* 2026-11-19（8.0）：列定义与取值器抽成可复用 schema —— 资料库「导出」与批量导出中心共用，
+     避免两处维护同一套列与百分比口径（百分比一律存百分数 + 0.00"%"）。 */
+  function buildExportSchema() {
     const dimTxt = (window.__DIMSEL || []).map((d, i) => (i ? '+ ' : '') + dimLabel(d.k) + (d.d === 'asc' ? ' ↑' : ' ↓')).join(' ');
     const dirTxt = (d) => (d === 'asc' ? TT('由小到大') : TT('由大到小'));
     const filterBits = [];
@@ -498,6 +499,13 @@
         default: return txt(v);
       }
     };
+    return { dimTxt, dirTxt, filterBits, conv, navLatest, COLS, cellOf };
+  }
+  window.mpfExportSchema = buildExportSchema;
+
+  function exportIdx() {
+    if (!window.MPFXLSX) { if (window.mpfToast) mpfToast(TT('导出组件未加载，请刷新页面')); return; }
+    const { dimTxt, dirTxt, filterBits, conv, navLatest, COLS, cellOf } = buildExportSchema();
 
     const head = COLS.map((c) => ({ v: c[0], s: 2 }));
     const body = ROWS.map((x, i) => COLS.map((c) => cellOf(x, i, c)));
@@ -709,7 +717,12 @@
       S.page = 1;
       render();
     });
-    $('#idxExport').addEventListener('click', exportIdx);
+    /* 2026-11-19（8.0）：导出按钮统一走「导出中心」，预置当前筛选结果；
+       export-center.js 未加载时回退旧的直接导出，保证任何环境下按钮都可用。 */
+    $('#idxExport').addEventListener('click', () => {
+      if (window.openExportCenter) window.openExportCenter(ROWS.map((x) => String(x.id)));
+      else exportIdx();
+    });
   }
 
   function debounce(fn, ms) {
