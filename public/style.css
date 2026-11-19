@@ -3229,3 +3229,29 @@ body { overflow-x: clip; }
 .ec-only-foot { margin: 8px 2px 0; padding-top: 8px; border-top: 1px dashed #e8eef6; }
 .ec-left .mf { margin-bottom: 10px; }
 .ec-extra-list .ec-f { padding-left: 2px; }
+
+/* 导出中心：附加表三个模块 + 右侧二级筛选（2026-11-19） */
+.ec-mods { display: flex; flex-direction: column; }
+.ec-mod { display: grid; grid-template-columns: minmax(0, .46fr) minmax(0, .54fr);
+  align-items: start; gap: 8px 10px; padding: 9px 6px; border-bottom: 1px dashed #eef2f7; }
+.ec-mod:last-child { border-bottom: 0; }
+.ec-mod.on { background: #fbfdff; border-radius: 8px; }
+.ec-mod-l { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ec-mod-l label { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; cursor: pointer;
+  font-size: 12.5px; color: #1c2f47; }
+.ec-mod-t { font-weight: 600; white-space: nowrap; }
+.ec-mod-s { font-weight: 400; color: #93a0b3; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ec-mod-btn { flex: none; border: 1px solid #dbe3ee; background: #fff; color: #33475f; border-radius: 7px;
+  font-size: 11.5px; padding: 3px 8px; cursor: pointer; }
+.ec-mod-btn:hover { border-color: #9fc2ea; color: #1a5fa8; }
+.ec-mod-btn.on { border-color: #0866bb; color: #0866bb; background: #eef6ff; }
+.ec-mod-p { grid-column: 2; min-width: 0; }
+.ec-mod-p[hidden] { display: none; }
+.ec-mod-p .ec-subcard { margin: 0; padding: 7px 8px 5px; }
+.ec-mod-p .ec-range { margin: 4px 0 6px; gap: 6px; }
+.ec-mod-p .ec-range-lab { min-width: 24px; font-size: 11.5px; }
+.ec-mod-p .tr-r { padding: 3px 7px; font-size: 11.5px; }
+.ec-mod-p .ec-daterow { margin: 0; gap: 5px; }
+.ec-mod-p .ec-daterow input { width: 96px; height: 26px; font-size: 11.5px; padding: 0 6px; }
+.ec-mod-p .ec-dmsg { font-size: 11px; }
+@media(max-width:760px){ .ec-mod { grid-template-columns: 1fr; } .ec-mod-p { grid-column: 1; } }

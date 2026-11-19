@@ -52,7 +52,7 @@
        但主表默认按「近 1 年年率化」由高至低（不高亮该列）；点标签进入对应榜。
        深链 ?rk= / #board 仍然有效。 */
     board: BOARDS.some((b) => b.id === HASH0) ? HASH0 : (BOARDS.some((b) => b.id === QSB) ? QSB : ''),
-    type: '', sub: '', risk: '', trustee: '', kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', top: 10, page: 1, sortKey: null, sortDir: null, calYear: '',
+    type: [], sub: [], risk: '', trustee: [], kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', top: 10, page: 1, sortKey: null, sortDir: null, calYear: '',
   };
   let FUND_HEAD = '';   // 基金榜表头（初始 DOM 快照，切换回来时还原）
   let HEAD_MODE = '';   // 当前表头模式，避免重复重绘
@@ -245,27 +245,47 @@
     }));
   }
 
+  /* 2026-11-19：榜单页三个筛选改多选，与资料库共用 MPFMulti */
+  let MF_RTY = null, MF_RS = null, MF_RTR = null;
+  function ensureMF() {
+    if (MF_RTY) return;
+    MF_RTY = window.MPFMulti('#rkRType', {
+      allLabel: TT('全部种类'),
+      onChange: (arr) => { S.type = arr; S.sub = []; buildSubRisk(); S.page = 1; render(); },
+    });
+    MF_RS = window.MPFMulti('#rkRSub', {
+      allLabel: TT('全部细类'),
+      onChange: (arr) => { S.sub = arr; S.page = 1; render(); },
+    });
+    MF_RTR = window.MPFMulti('#rkRTrustee', {
+      allLabel: TT('全部受托人'),
+      onChange: (arr) => { S.trustee = arr; S.page = 1; render(); },
+    });
+  }
+
   function buildFilters() {
+    ensureMF();
     const f = DATA.funds;
-    fill('#rkRType', uniq(f.map((x) => x.type)), (v) => typeLabel(v));
-    fill('#rkRTrustee', uniq(f.map((x) => x.trustee)), (v) => (window.trusteeDisplay ? window.trusteeDisplay(v) : v));
+    MF_RTY.setOptions(uniq(f.map((x) => x.type)).map((v) => ({ v, label: typeLabel(v) })));
+    MF_RTR.setOptions(uniq(f.map((x) => x.trustee)).map((v) => ({
+      v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
+      n: f.filter((y) => y.trustee === v).length,
+    })));
+    MF_RTY.setAllLabel(TT('全部种类'));
+    MF_RTR.setAllLabel(TT('全部受托人'));
     buildSubRisk();
   }
 
   /* 细类 / 风险级别：选项也由数据生成，语言切换时必须重建（原来只建一次，会停留在旧语言） */
   function buildSubRisk() {
-    const sub = document.querySelector('#rkRSub');
-    if (sub) {
-      const cur = sub.value;
-      sub.innerHTML = '<option value="">' + TT('全部细类') + '</option>';
-      [...new Set(DATA.funds.map((x) => x.subtype).filter(Boolean))].sort().forEach((v) => {
-        const o = document.createElement('option');
-        o.value = v;
-        o.textContent = optText(v, true);
-        sub.appendChild(o);
-      });
-      if (cur) sub.value = cur;
-    }
+    ensureMF();
+    const pool = DATA.funds.filter((x) => !S.type.length || S.type.indexOf(x.type) >= 0);
+    const vals = [...new Set(pool.map((x) => x.subtype).filter(Boolean))].sort();
+    MF_RS.setOptions(vals.map((v) => ({ v, label: typeLabel(v) })));
+    MF_RS.setAllLabel(TT('全部细类'));
+    const valid = new Set(vals);
+    S.sub = S.sub.filter((v) => valid.has(v));
+    MF_RS.setSelected(S.sub, true);
     const rk = document.querySelector('#rkRRisk');
     if (rk) {
       const cur = rk.value;
@@ -315,8 +335,6 @@
   }
 
   function bind() {
-    $('#rkRType').addEventListener('change', () => { S.type = $('#rkRType').value; render(); });
-    $('#rkRTrustee').addEventListener('change', () => { S.trustee = $('#rkRTrustee').value; render(); });
     $('#rkRTop').addEventListener('change', () => { S.top = parseInt($('#rkRTop').value, 10); S.page = 1; render(); });
     var kwEl = document.querySelector('#rkKw');
     if (kwEl) kwEl.addEventListener('input', function () { S.kw = this.value.trim(); render(); });
@@ -335,18 +353,11 @@
           render();
         });
       };
-      setK('#rkRType', 'type'); setK('#rkRSub', 'sub');
-      setK('#rkRTrustee', 'trustee'); setK('#rkRRisk', 'risk');
+      setK('#rkRRisk', 'risk');
       setK('#rkRRetDim', 'retDim'); setK('#rkRRetMin', 'retMin', 1); setK('#rkRRetMax', 'retMax', 1);
       setK('#rkRDdMin', 'ddMin', 1); setK('#rkRDdMax', 'ddMax', 1); setK('#rkRFeeMax', 'feeMax', 1);
 
-      /* 细类 / 风险级别选项 */
-      const sub = document.querySelector('#rkRSub');
-      if (sub && sub.options.length <= 1) {
-        [...new Set(DATA.funds.map((x) => x.subtype).filter(Boolean))].sort().forEach((v) => {
-          const o = document.createElement('option'); o.value = v; o.textContent = window.__t2sActive && window.t2s ? window.t2s(typeLabel(v)) : typeLabel(v); sub.appendChild(o);
-        });
-      }
+      /* 细类选项由 buildSubRisk 的 MPFMulti 负责；风险级别仍是原生 select */
       const rk = document.querySelector('#rkRRisk');
       if (rk && rk.options.length <= 1) {
         [...new Set(DATA.funds.map((x) => x.risk).filter((v) => v != null))].sort((a, b) => a - b).forEach((v) => {
@@ -355,7 +366,8 @@
       }
       const rst = document.querySelector('#rkRReset');
       if (rst) rst.addEventListener('click', () => {
-        Object.assign(S, { type: '', sub: '', risk: '', trustee: '', kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '' });
+        Object.assign(S, { type: [], sub: [], risk: '', trustee: [], kw: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '' });
+        if (MF_RTY) { MF_RTY.setSelected([], true); MF_RS.setSelected([], true); MF_RTR.setSelected([], true); }
         document.querySelectorAll('#rkKW,#rkKw,#rkRType,#rkRSub,#rkRTrustee,#rkRRisk,#rkRRetMin,#rkRRetMax,#rkRDdMin,#rkRDdMax,#rkRFeeMax').forEach((el) => {
           if (el.tagName === 'INPUT') el.value = ''; else if (el.options) el.selectedIndex = 0;
         });
@@ -370,9 +382,9 @@
      估值日分布卡片用它统计，点「宏利」后就不会再显示全市场的 364 条。 */
   function baseFiltered() {
     let arr = DATA.funds.filter((x) => {
-      if (S.type && x.type !== S.type) return false;
-      if (S.sub && x.subtype !== S.sub) return false;
-      if (S.trustee && x.trustee !== S.trustee) return false;
+      if (S.type.length && S.type.indexOf(x.type) < 0) return false;
+      if (S.sub.length && S.sub.indexOf(x.subtype) < 0) return false;
+      if (S.trustee.length && S.trustee.indexOf(x.trustee) < 0) return false;
       if (S.risk !== '' && String(x.risk) !== String(S.risk)) return false;
       if (S.retMin !== '' && !(x[S.retDim] != null && x[S.retDim] >= parseFloat(S.retMin))) return false;
       if (S.retMax !== '' && !(x[S.retDim] != null && x[S.retDim] <= parseFloat(S.retMax))) return false;
@@ -480,9 +492,9 @@
     if (!box) return;
     const c = [];
     if (S.kw) c.push([TQ('关键词：{v}', { v: S.kw }), 'kw']);
-    if (S.type) c.push([TQ('种类：{v}', { v: typeLabel(S.type) }), 'type']);
-    if (S.sub) c.push([TQ('细类：{v}', { v: typeLabel(S.sub) }), 'sub']);
-    if (S.trustee) c.push([TQ('受托人：{v}', { v: S.trustee }), 'trustee']);
+    if (S.type.length) c.push([TQ('种类：{v}', { v: S.type.map((v) => typeLabel(v)).join('、') }), 'type']);
+    if (S.sub.length) c.push([TQ('细类：{v}', { v: S.sub.map((v) => typeLabel(v)).join('、') }), 'sub']);
+    if (S.trustee.length) c.push([TQ('受托人：{v}', { v: S.trustee.map((v) => (window.trusteeDisplay ? window.trusteeDisplay(v) : v)).join('、') }), 'trustee']);
     if (S.risk !== '' && S.risk != null) c.push([TQ('风险：{v}', { v: S.risk }), 'risk']);
     if (S.retMin !== '' || S.retMax !== '') {
       const dim = document.querySelector('#rkRRetDim');
@@ -498,9 +510,9 @@
     box.querySelectorAll('.x').forEach((el) => el.addEventListener('click', () => {
       const k = el.dataset.rc;
       if (k === 'kw') { S.kw = ''; const i = document.querySelector('#rkKw'); if (i) i.value = ''; }
-      else if (k === 'type') { S.type = ''; const i = document.querySelector('#rkRType'); if (i) i.selectedIndex = 0; }
-      else if (k === 'sub') { S.sub = ''; const i = document.querySelector('#rkRSub'); if (i) i.selectedIndex = 0; }
-      else if (k === 'trustee') { S.trustee = ''; const i = document.querySelector('#rkRTrustee'); if (i) i.selectedIndex = 0; }
+      else if (k === 'type') { S.type = []; if (MF_RTY) MF_RTY.setSelected([], true); }
+      else if (k === 'sub') { S.sub = []; if (MF_RS) MF_RS.setSelected([], true); }
+      else if (k === 'trustee') { S.trustee = []; if (MF_RTR) MF_RTR.setSelected([], true); }
       else if (k === 'risk') { S.risk = ''; const i = document.querySelector('#rkRRisk'); if (i) i.selectedIndex = 0; }
       else if (k === 'ret') { S.retMin = S.retMax = ''; ['#rkRRetMin', '#rkRRetMax'].forEach((q) => { const i = document.querySelector(q); if (i) i.value = ''; }); }
       else if (k === 'dd') { S.ddMin = S.ddMax = ''; ['#rkRDdMin', '#rkRDdMax'].forEach((q) => { const i = document.querySelector(q); if (i) i.value = ''; }); }
@@ -519,6 +531,8 @@
     trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(trusteeDisplay(x.trustee)) + '</span></td>',
     /* 2026-11-02：细类不再占第二行（会让整行高出一大截）——收进悬浮说明，行高与资料库一致 */
     type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g"' + (x.subtype ? ' data-tip="' + esc(TQ('细类：{s}', { s: typeLabel(x.subtype) })) + '"' : '') + '>' + esc(typeLabel(x.type)) + '</span></td>',
+    /* 2026-11-19（用户反馈）：积金局表补「基金细类」列（此前只塞在种类列的浮层里） */
+    sub: (x) => '<td data-c="sub" data-l="' + TT('基金细类') + '" class="fz">' + esc(x.subtype ? typeLabel(x.subtype) : '—') + '</td>',
     risk: (x) => '<td data-c="risk" data-l="' + TT('风险级别') + '" class="c">' + riskTag(x.risk) + '</td>',
     ann1: (x) => '<td data-c="ann1" data-l="' + TT('近1年年率化') + '" class="r num ' + cls(x.ann1) + '">' + pct(x.ann1) + '</td>',
     ann5: (x) => '<td data-c="ann5" data-l="' + TT('近5年年率化') + '" class="r num ' + cls(x.ann5) + '">' + pct(x.ann5) + '</td>',
@@ -551,6 +565,7 @@
     scheme: '<th scope="col" data-c="scheme" data-i18n-parts>计划名称</th>',
     trustee: '<th scope="col" data-c="trustee" data-i18n-parts>受托人</th>',
     type: '<th scope="col" data-c="type" data-i18n-parts>基金种类</th>',
+    sub: '<th scope="col" data-c="sub" data-i18n-parts>基金细类</th>',
     risk: '<th scope="col" data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
     ann1: '<th scope="col" data-c="ann1" data-i18n-parts data-k="ann1" data-defdir="desc" class="sortable r">近1年<br>年率化 <span class="arrow">↕</span></th>',
     ann5: '<th scope="col" data-c="ann5" data-i18n-parts data-k="ann5" data-defdir="desc" class="sortable r">近5年<br>年率化 <span class="arrow">↕</span></th>',
@@ -939,7 +954,7 @@
     const FUND = [
       /* 2026-10-26（用户要求）：基金规模列移到回报组之后（原管理费位置），管理费移出默认显示 */
       ['rank', '名次', 1], ['fund', '基金名称', 1], ['scheme', '计划名称', 0], ['trustee', '受托人', 0],
-      ['type', '基金种类', 0], ['risk', '风险级别', 0],
+      ['type', '基金种类', 0], ['sub', '基金细类', 0], ['risk', '风险级别', 0],
       ['ann1', '近1年年率化', 0], ['ann5', '近5年年率化', 0], ['ann10', '近10年年率化', 0],
       ['annLaunch', '推出至今年率化', 0], ['size', '基金规模', 0], ['mgmtFee', '管理费', 0],
       /* 2026-10-26：补齐「抗跌榜 / 总开支 / 新锐榜」对应列——此前这 3 个标签点了只排序、不出列，

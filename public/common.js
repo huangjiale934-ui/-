@@ -231,7 +231,18 @@ async function loadData(onDone, attempt, force) {
     renderUpdateTime();
     renderFriends();
     renderNavDistCard();
-    if (onDone) onDone(DATA);
+    /* 2026-11-19（用户反馈 + 本次踩坑）：渲染回调必须单独 try/catch——
+       否则任何页面渲染异常都会被外层 catch 当成「数据接口失败」，表现成无限「服务唤醒中」，
+       排查成本极高（榜单多选改造就是这样被掩盖的）。 */
+    if (onDone) {
+      try { onDone(DATA); }
+      catch (err) {
+        console.error('[loadData] 页面渲染回调异常：', err);
+        const box = document.querySelector('.loading');
+        if (box) box.innerHTML = '<div style="color:#a8432a">页面渲染失败：' + String(err && err.message || err) + '</div>';
+        return;   /* 渲染错误不再触发「服务唤醒中」重试 */
+      }
+    }
   } catch (e) {
     // 部署切换 / 冷启动时接口可能短暂 404 / 503，自动重试
     if (attempt < 10) {
@@ -488,6 +499,8 @@ function renderUpdateTime() {
     cmp: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-9Z"/><path d="M14 3.2A9 9 0 0 1 20.8 10H14Z"/></svg>',
     rank: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>',
     calc: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M8 7h8M8 12h2M8 16h2M14 12h2M14 16h2"/></svg>',
+    /* 2026-11-19（用户要求）：基金数据导出中心入口图标（表格 + 下箭头） */
+    export: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 10h18M9 10v10"/><path d="M15 13v5M12.6 15.6 15 18l2.4-2.4"/></svg>',
   };
   /* 口径说明的 ⓘ：照抄首页卡片标题上的 i 按钮（.h3-tip 同款：15px 细描边圆圈 + 11.5px 数字） */
   const info = '<i class="ver-info db-tip" role="button" tabindex="0" data-ver="1" title="' + TT('数据口径说明') + '" aria-label="' + TT('数据口径说明') + '">ⓘ</i>';
@@ -502,6 +515,8 @@ function renderUpdateTime() {
     '<button type="button" class="db-nav' + (dbOn ? ' on' : '') + '" id="dbtDb" data-dbtab="db">' + I.db +
       '<span data-i18n="基金最新数据">' + TT('基金最新数据') + '</span>' + '<i class="db-caret" aria-hidden="true"></i></button>' +
     '<div class="db-sub" id="dbSubCmp"><nav class="an-prov" id="anProv" aria-label="发行人"></nav></div>' +
+    /* 2026-11-19（用户要求）：导出中心从页脚折叠区上移到侧栏，位于「基金最新数据」与计算器之间 */
+    '<button type="button" class="db-nav" id="navExport">' + I.export + '<span data-i18n="基金数据导出中心">' + TT('基金数据导出中心') + '</span></button>' +
     '<button type="button" class="db-nav" id="navCalc">' + I.calc + '<span data-i18n="供款（定投）计算器">' + TT('供款（定投）计算器') + '</span></button>' +
     /* 2026-11-04（第三十六轮，用户要求）：积金局月度数据从侧栏下线 —— 站内已有「基金最新数据」表，
        两个表格并列会让客户混淆。入口改到页脚「数据统计口径说明」里（更深的次级入口）。
@@ -515,6 +530,11 @@ function renderUpdateTime() {
   if (langBox && langSw) langBox.appendChild(langSw);
   /* 侧栏存在时隐藏右下角悬浮计算器（同一功能已有侧栏入口） */
   document.body.classList.add('has-sidebar');
+  const navExport = el.querySelector('#navExport');
+  if (navExport) navExport.addEventListener('click', function () {
+    if (window.openExportCenter) window.openExportCenter();
+    else if (window.mpfToast) mpfToast(TT('导出组件未加载，请刷新页面'));
+  });
   const calc = el.querySelector('#navCalc');
   if (calc) calc.addEventListener('click', function () {
     const fab = document.querySelector('.dca-fab');
@@ -3737,7 +3757,7 @@ document.addEventListener('mpf:lang', () => {
  * 这里保留原生 select 负责取值与 change 事件，外层用按钮 + 自绘 listbox 显示。 */
 (function () {
   /* 2026-11-19：#fType/#fSub/#fTrustee 已改为多选组件（multifilter.js），不再走单选自绘下拉 */
-  const IDS = ['#fRisk', '#perPage', '#rkRType', '#rkRSub', '#rkRTrustee', '#rkRRisk', '#rkRTop', '#rkDimSel', '#rkRRetDim'];
+  const IDS = ['#fRisk', '#perPage', '#rkRRisk', '#rkRTop', '#rkDimSel', '#rkRRetDim'];
   const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   function enhance(sel) {
     if (!sel || sel.__mpfsel) return;

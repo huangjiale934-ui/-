@@ -29,6 +29,7 @@
     histRange: '1y',        /* 逐日净值区间：1y/3y/5y/10y/all/custom */
     histFrom: '', histTo: '', dateMsg: '',
     mode: 'latest',         /* latest=本站最新数据 / mpfa=积金局月度口径 */
+    panels: new Set(),      /* 附加表的二级筛选面板，点「筛选」才展开 */
     trendMode: 'merge',     /* 走势图：merge 合并对比 / one 每只单独 */
     kw: '',
     trustee: new Set(),
@@ -219,7 +220,7 @@
        避免日历控件翻年份；确定后给出明确的已选区间提示。 */
     const RANGES = [['1y', '1年'], ['3y', '3年'], ['5y', '5年'], ['10y', '10年'], ['all', '全部'], ['custom', '选择日期']];
     const rangeSel = '<div class="ec-subcard">' +
-      '<div class="ec-sub-h">' + esc(TT('时间范围')) + '<span>' + esc(TT('作用于逐日净值与走势图')) + '</span></div>' +
+      '<div class="ec-sub-h">' + esc(TT('时间范围')) + '</div>' +
       '<div class="ec-range"><span class="ec-range-lab">' + esc(TT('区间')) + '</span>' +
       '<div class="tr-ranges" role="group" aria-label="' + esc(TT('区间')) + '">' +
       RANGES.map((o) => '<button type="button" class="tr-r' + (ST.histRange === o[0] ? ' on' : '') + '" data-range="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
@@ -242,15 +243,27 @@
         '<b>' + esc(TT(g.n)) + '</b><span>' + on + '/' + g.idx.length + '</span></label>' +
         '<div class="ec-g-b">' + cells(g) + '</div></div>';
     }).join('') +
-      (isMpfa ? '' : '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b></div>' +
-      '<div class="ec-g-b ec-extra-list">' +
-      '<label class="ec-f"><input type="checkbox" data-x="trend"' + (ST.extra.has('trend') ? ' checked' : '') + '><span>' + esc(TT('净值走势图')) + '</span></label>' +
-      '<label class="ec-f"><input type="checkbox" data-x="hist"' + (ST.extra.has('hist') ? ' checked' : '') + '><span>' + esc(TT('逐日净值（长表）')) + '</span></label>' +
-      '<label class="ec-f"><input type="checkbox" data-x="hld"' + (ST.extra.has('hld') ? ' checked' : '') + '><span>' + esc(TT('持仓与分布（前十大 + 资产分布）')) + '</span></label>' +
+      (isMpfa ? '' : '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b>' +
+      '<span>' + esc(TT('勾选后点右侧「筛选」展开二级设置')) + '</span></div>' +
+      '<div class="ec-mods">' +
+      modRow('hld', '持仓与分布', '前十大 + 资产分布', '') +
+      modRow('trend', '净值走势图', '合并对比 / 每只单独', trendSel) +
+      modRow('hist', '逐日净值', '长表 · 每行一个交易日', rangeSel) +
+      '</div></div>');
+  }
+
+  /* 2026-11-19（用户要求）：三个附加表上下排列；二级筛选放右侧，点「筛选」才展开 */
+  function modRow(key, title, sub, panel) {
+    const on = ST.extra.has(key);
+    const open = ST.panels.has(key);
+    return '<div class="ec-mod' + (on ? ' on' : '') + '">' +
+      '<div class="ec-mod-l"><label><input type="checkbox" data-x="' + key + '"' + (on ? ' checked' : '') + '>' +
+      '<span class="ec-mod-t">' + esc(TT(title)) + '</span>' +
+      '<span class="ec-mod-s">' + esc(TT(sub)) + '</span></label>' +
+      (panel ? '<button type="button" class="ec-mod-btn' + (open ? ' on' : '') + '" data-panel="' + key + '">' + esc(TT('筛选')) + ' ▾</button>' : '') +
       '</div>' +
-      (ST.extra.has('hist') || ST.extra.has('trend') ? rangeSel : '') +
-      (ST.extra.has('trend') ? trendSel : '') +
-      '</div>');
+      (panel ? '<div class="ec-mod-p"' + (open ? '' : ' hidden') + '>' + panel + '</div>' : '') +
+      '</div>';
   }
 
   /* ---------- 弹窗 ---------- */
@@ -261,10 +274,9 @@
     el.id = 'ecModal';
     el.innerHTML =
       '<div class="ec-box" role="dialog" aria-modal="true" aria-labelledby="ecTitle">' +
-      '<div class="ec-head"><b id="ecTitle">' + esc(TT('导出中心')) + '</b>' +
-      '<span class="ec-sub">' + esc(TT('先选基金，再选字段')) + '</span>' +
+      '<div class="ec-head"><b id="ecTitle">' + esc(TT('基金数据导出中心')) + '</b>' +
       '<div class="ec-mode" role="group">' +
-      '<button type="button" class="tr-r on" data-mode="latest">' + esc(TT('本站最新数据')) + '</button>' +
+      '<button type="button" class="tr-r on" data-mode="latest">' + esc(TT('本站最新数据')) + ' · ' + esc(latestNav() || '—') + '</button>' +
       '<button type="button" class="tr-r" data-mode="mpfa">' + esc(TT('积金局月度数据')) + ' · ' + esc(TT('截至')) + ' ' + esc(DS().dataAsOf || '—') + '</button>' +
       '</div>' +
       '<button type="button" class="ec-x" aria-label="' + esc(TT('关闭')) + '">×</button></div>' +
@@ -658,6 +670,12 @@
       }
       const tb = t.closest('[data-tmode]');
       if (tb) { ST.trendMode = tb.getAttribute('data-tmode'); renderTree(); paintCounts(); persist(); return; }
+      const pb = t.closest('[data-panel]');
+      if (pb) {
+        const k = pb.getAttribute('data-panel');
+        if (ST.panels.has(k)) ST.panels.delete(k); else ST.panels.add(k);
+        renderTree(); return;
+      }
       if (t.id === 'ecDateGo') {
         const norm = (v) => {
           const d = String(v || '').trim();

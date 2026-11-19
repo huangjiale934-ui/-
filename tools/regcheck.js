@@ -2142,8 +2142,9 @@ chk('导出中心·①入口与脚本已挂载（数据说明折叠区 + 独立�
   try {
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
-    return /id="ecOpen"/.test(h) && /export-center\.js\?v=/.test(h) &&
-      /window\.openExportCenter\s*=\s*open/.test(e) && /ecModal/.test(e);
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    return /export-center\.js\?v=/.test(h) && /id="navExport"/.test(c) &&
+      /基金数据导出中心/.test(c) && /window\.openExportCenter\s*=\s*open/.test(e) && /ecModal/.test(e);
   } catch (err) { return false; }
 })());
 chk('导出中心·②复用资料库列定义（单一 schema，百分比口径不分叉）', (function () {
@@ -2214,5 +2215,14 @@ chk('对账·①派生重算包含 breadth（防温度计长期差 1）', (funct
     const rb = fs.readFileSync(path.join(__dirname, 'rebuild-derived.js'), 'utf8');
     return /rebuild-derived\.js/.test(rec) && /tools\/breadth\.js/.test(rb) &&
       rb.indexOf('tools/breadth.js') < rb.indexOf('tools/build-static.js');
+  } catch (err) { return false; }
+})());
+
+chk('导出中心·⑥附加表三模块 + 右侧二级筛选 + 榜单细类列', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
+    return /function modRow/.test(e) && /data-panel=/.test(e) && /\[\['hld'/.test(e) === false &&
+      /sub: '<th scope="col" data-c="sub"/.test(r) && /\['sub', '基金细类', 0\]/.test(r);
   } catch (err) { return false; }
 })());
