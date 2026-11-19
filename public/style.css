@@ -3216,3 +3216,16 @@ body { overflow-x: clip; }
 .ec-daterow span { color: #93a0b3; }
 .ec-range-mode .tr-r { white-space: nowrap; }
 .mf .mpfsel-pop{min-width:200px}
+
+/* 导出中心：口径切换 / 子卡片 / 日期提示（2026-11-19 第三轮） */
+.ec-mode { display: inline-flex; align-items: center; gap: 3px; margin-left: 14px; padding: 3px;
+  background: #f4f8fd; border: 1px solid #e3edf6; border-radius: 9px; }
+.ec-mode .tr-r { padding: 4px 10px; font-size: 12px; }
+.ec-subcard { border: 1px dashed #dbe6f3; border-radius: 9px; padding: 8px 10px 6px; margin: 8px 0 2px; background: #fff; }
+.ec-sub-h { font-size: 12px; font-weight: 700; color: #0f2a4a; margin-bottom: 6px; }
+.ec-sub-h span { font-weight: 400; color: #93a0b3; margin-left: 8px; font-size: 11.5px; }
+.ec-daterow { margin-left: 0; }
+.ec-dmsg { font-size: 11.5px; color: #1a5fa8; }
+.ec-only-foot { margin: 8px 2px 0; padding-top: 8px; border-top: 1px dashed #e8eef6; }
+.ec-left .mf { margin-bottom: 10px; }
+.ec-extra-list .ec-f { padding-left: 2px; }

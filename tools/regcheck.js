@@ -2209,7 +2209,10 @@ chk('多选筛选·②导出中心三级联动 + 分组卡片 + 自定义区间'
 /* ================= 2026-11-19 对账派生清单 ================= */
 chk('对账·①派生重算包含 breadth（防温度计长期差 1）', (function () {
   try {
-    const s = fs.readFileSync(path.join(__dirname, 'site-reconcile.js'), 'utf8');
-    return /tools\/breadth\.js/.test(s) && s.indexOf('tools/breadth.js') < s.indexOf('tools/build-static.js');
+    /* 2026-11-19：派生重算改走单一入口 tools/rebuild-derived.js，由它保证 breadth 在 build-static 之前 */
+    const rec = fs.readFileSync(path.join(__dirname, 'site-reconcile.js'), 'utf8');
+    const rb = fs.readFileSync(path.join(__dirname, 'rebuild-derived.js'), 'utf8');
+    return /rebuild-derived\.js/.test(rec) && /tools\/breadth\.js/.test(rb) &&
+      rb.indexOf('tools/breadth.js') < rb.indexOf('tools/build-static.js');
   } catch (err) { return false; }
 })());

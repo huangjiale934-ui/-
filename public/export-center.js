@@ -27,7 +27,8 @@
     fields: new Set(),      /* 列下标 */
     extra: new Set(),       /* 'hld' | 'hist' | 'trend' */
     histRange: '1y',        /* 逐日净值区间：1y/3y/5y/10y/all/custom */
-    histFrom: '', histTo: '',
+    histFrom: '', histTo: '', dateMsg: '',
+    mode: 'latest',         /* latest=本站最新数据 / mpfa=积金局月度口径 */
     trendMode: 'merge',     /* 走势图：merge 合并对比 / one 每只单独 */
     kw: '',
     trustee: new Set(),
@@ -37,6 +38,37 @@
     busy: false,
     preset: null,           /* 打开时预置的 id 列表（来自当前筛选） */
   };
+
+  /* 2026-11-19（用户建议）：记住上次的基金/字段/口径/区间，重复导出省一步 */
+  const LSKEY = 'mpf-ec-v1';
+  function persist() {
+    try {
+      const cur = window.mpfExportSchema ? window.mpfExportSchema().COLS.length : 28;
+      const o = {
+        mode: ST.mode, extra: Array.from(ST.extra), histRange: ST.histRange, histFrom: ST.histFrom, histTo: ST.histTo,
+        trendMode: ST.trendMode, navOnly: ST.navOnly,
+        fields: Array.from(ST.fields).filter((i) => i < (ST.mode === 'mpfa' ? mpfaCols().length : cur)),
+        trustee: Array.from(ST.trustee), cat: Array.from(ST.cat), scheme: Array.from(ST.scheme),
+      };
+      localStorage.setItem(LSKEY, JSON.stringify(o));
+    } catch (e) {}
+  }
+  function restore() {
+    let o = null;
+    try { o = JSON.parse(localStorage.getItem(LSKEY) || 'null'); } catch (e) { o = null; }
+    if (!o) return false;
+    ST.mode = o.mode === 'mpfa' ? 'mpfa' : 'latest';
+    ST.extra = new Set(Array.isArray(o.extra) ? o.extra.filter((k) => ['hld', 'hist', 'trend'].indexOf(k) >= 0) : []);
+    ST.histRange = ['1y', '3y', '5y', '10y', 'all', 'custom'].indexOf(o.histRange) >= 0 ? o.histRange : '1y';
+    ST.histFrom = o.histFrom || ''; ST.histTo = o.histTo || '';
+    ST.trendMode = o.trendMode === 'one' ? 'one' : 'merge';
+    ST.navOnly = !!o.navOnly;
+    ST.trustee = new Set(Array.isArray(o.trustee) ? o.trustee : []);
+    ST.cat = new Set(Array.isArray(o.cat) ? o.cat : []);
+    ST.scheme = new Set(Array.isArray(o.scheme) ? o.scheme : []);
+    if (Array.isArray(o.fields) && o.fields.length) ST.fields = new Set(o.fields);
+    return true;
+  }
 
   /* common.js 用顶层 let 声明 DATA —— 它不会挂到 window 上，必须按全局词法绑定读取 */
   const DS = () => (typeof DATA !== 'undefined' && DATA ? DATA : {});
@@ -86,15 +118,15 @@
     if (MS_T) return;
     MS_T = window.MPFMulti('#ecMSTrustee', {
       allLabel: TT('全部受托人'),
-      onChange: (arr) => { ST.trustee = new Set(arr); rebuildLinked('trustee'); },
+      onChange: (arr) => { ST.trustee = new Set(arr); rebuildLinked('trustee'); persist(); },
     });
     MS_C = window.MPFMulti('#ecMSCat', {
       allLabel: TT('全部种类'),
-      onChange: (arr) => { ST.cat = new Set(arr); rebuildLinked('cat'); },
+      onChange: (arr) => { ST.cat = new Set(arr); rebuildLinked('cat'); persist(); },
     });
     MS_S = window.MPFMulti('#ecMSScheme', {
       allLabel: TT('全部计划'),
-      onChange: (arr) => { ST.scheme = new Set(arr); renderList(); },
+      onChange: (arr) => { ST.scheme = new Set(arr); renderList(); persist(); },
     });
   }
 
@@ -162,7 +194,8 @@
     if (fc) fc.textContent = TQ('已选 {n} 项', { n: fcnt });
     const est = $('#ecEst');
     if (est) {
-      const sheets = 2 + (ST.extra.has('hld') ? 1 : 0) + (ST.extra.has('hist') ? 1 : 0) + (ST.extra.has('trend') ? 1 : 0);
+      const ex = ST.mode === 'mpfa' ? 0 : ((ST.extra.has('hld') ? 1 : 0) + (ST.extra.has('hist') ? 1 : 0) + (ST.extra.has('trend') ? 1 : 0));
+      const sheets = 2 + ex;
       est.textContent = TQ('预计输出：{s} 个工作表 · {r} 行 × {c} 列', { s: sheets, r: sel + 2, c: fcnt });
     }
     const go = $('#ecGo');
@@ -175,40 +208,49 @@
     if (!box) return;
     const schema = window.mpfExportSchema ? window.mpfExportSchema() : null;
     if (!schema) { box.innerHTML = '<div class="ec-empty">' + esc(TT('导出组件未加载，请刷新页面')) + '</div>'; return; }
-    const COLS = schema.COLS;
+    const isMpfa = ST.mode === 'mpfa';
+    const COLS = isMpfa ? mpfaCols() : schema.COLS;
+    const groups = isMpfa ? [{ k: 'mpfa', n: '积金局月度口径字段', idx: COLS.map((c, i) => i) }] : GROUPS;
     const cells = (g) => g.idx.map((i) => '<label class="ec-f" title="' + esc(COLS[i][4] || '') + '">' +
       '<input type="checkbox" data-i="' + i + '"' + (ST.fields.has(i) ? ' checked' : '') + '>' +
       '<span>' + esc(COLS[i][0]) + '</span></label>').join('');
-    /* 2026-11-19（用户反馈）：区间改成站内走势图同款的胶囊按钮，并支持自定义起止日期 */
+
+    /* 2026-11-19（用户反馈）：区间改成站内走势图同款的胶囊按钮；日期改文本框（年月日手输），
+       避免日历控件翻年份；确定后给出明确的已选区间提示。 */
     const RANGES = [['1y', '1年'], ['3y', '3年'], ['5y', '5年'], ['10y', '10年'], ['all', '全部'], ['custom', '选择日期']];
-    const rangeSel = '<div class="ec-range"><span class="ec-range-lab">' + esc(TT('区间')) + '</span>' +
+    const rangeSel = '<div class="ec-subcard">' +
+      '<div class="ec-sub-h">' + esc(TT('时间范围')) + '<span>' + esc(TT('作用于逐日净值与走势图')) + '</span></div>' +
+      '<div class="ec-range"><span class="ec-range-lab">' + esc(TT('区间')) + '</span>' +
       '<div class="tr-ranges" role="group" aria-label="' + esc(TT('区间')) + '">' +
       RANGES.map((o) => '<button type="button" class="tr-r' + (ST.histRange === o[0] ? ' on' : '') + '" data-range="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
       '</div></div>' +
       '<div class="ec-daterow"' + (ST.histRange === 'custom' ? '' : ' hidden') + '>' +
-      '<input type="date" id="ecDateFrom" aria-label="' + esc(TT('起始日期')) + '" value="' + esc(ST.histFrom || '') + '">' +
-      '<span>~</span><input type="date" id="ecDateTo" aria-label="' + esc(TT('结束日期')) + '" value="' + esc(ST.histTo || '') + '">' +
-      '<button type="button" class="btn sm" id="ecDateGo">' + esc(TT('确定')) + '</button></div>';
+      '<input type="text" id="ecDateFrom" placeholder="2026-01-19" inputmode="numeric" maxlength="10" aria-label="' + esc(TT('起始日期')) + '" value="' + esc(ST.histFrom || '') + '">' +
+      '<span>~</span><input type="text" id="ecDateTo" placeholder="' + esc(DS().dataAsOf || '2026-11-17') + '" inputmode="numeric" maxlength="10" aria-label="' + esc(TT('结束日期')) + '" value="' + esc(ST.histTo || '') + '">' +
+      '<button type="button" class="btn sm" id="ecDateGo">' + esc(TT('确定')) + '</button>' +
+      '<span class="ec-dmsg" id="ecDateMsg">' + esc(ST.dateMsg || '') + '</span></div></div>';
     const trendSel = '<div class="ec-range ec-range-mode"><span class="ec-range-lab">' + esc(TT('方式')) + '</span>' +
       '<div class="tr-ranges" role="group">' +
       [['merge', '合并走势对比图'], ['one', '每只基金单独一张']].map((o) =>
         '<button type="button" class="tr-r' + (ST.trendMode === o[0] ? ' on' : '') + '" data-tmode="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
       '</div></div>';
-    box.innerHTML = GROUPS.map((g) => {
+
+    box.innerHTML = groups.map((g) => {
       const on = g.idx.filter((i) => ST.fields.has(i)).length;
       return '<div class="ec-g ec-card">' +
         '<label class="ec-g-h"><input type="checkbox" data-g="' + g.k + '"' + (on === g.idx.length ? ' checked' : '') + '>' +
         '<b>' + esc(TT(g.n)) + '</b><span>' + on + '/' + g.idx.length + '</span></label>' +
         '<div class="ec-g-b">' + cells(g) + '</div></div>';
     }).join('') +
-      '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b></div><div class="ec-g-b">' +
-      '<label class="ec-f"><input type="checkbox" data-x="hld"' + (ST.extra.has('hld') ? ' checked' : '') + '><span>' + esc(TT('持仓与分布（前十大 + 资产分布）')) + '</span></label>' +
-      '<label class="ec-f"><input type="checkbox" data-x="hist"' + (ST.extra.has('hist') ? ' checked' : '') + '><span>' + esc(TT('逐日净值（长表）')) + '</span></label>' +
+      (isMpfa ? '' : '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b></div>' +
+      '<div class="ec-g-b ec-extra-list">' +
       '<label class="ec-f"><input type="checkbox" data-x="trend"' + (ST.extra.has('trend') ? ' checked' : '') + '><span>' + esc(TT('净值走势图')) + '</span></label>' +
+      '<label class="ec-f"><input type="checkbox" data-x="hist"' + (ST.extra.has('hist') ? ' checked' : '') + '><span>' + esc(TT('逐日净值（长表）')) + '</span></label>' +
+      '<label class="ec-f"><input type="checkbox" data-x="hld"' + (ST.extra.has('hld') ? ' checked' : '') + '><span>' + esc(TT('持仓与分布（前十大 + 资产分布）')) + '</span></label>' +
       '</div>' +
       (ST.extra.has('hist') || ST.extra.has('trend') ? rangeSel : '') +
       (ST.extra.has('trend') ? trendSel : '') +
-      '</div>';
+      '</div>');
   }
 
   /* ---------- 弹窗 ---------- */
@@ -221,16 +263,21 @@
       '<div class="ec-box" role="dialog" aria-modal="true" aria-labelledby="ecTitle">' +
       '<div class="ec-head"><b id="ecTitle">' + esc(TT('导出中心')) + '</b>' +
       '<span class="ec-sub">' + esc(TT('先选基金，再选字段')) + '</span>' +
+      '<div class="ec-mode" role="group">' +
+      '<button type="button" class="tr-r on" data-mode="latest">' + esc(TT('本站最新数据')) + '</button>' +
+      '<button type="button" class="tr-r" data-mode="mpfa">' + esc(TT('积金局月度数据')) + ' · ' + esc(TT('截至')) + ' ' + esc(DS().dataAsOf || '—') + '</button>' +
+      '</div>' +
       '<button type="button" class="ec-x" aria-label="' + esc(TT('关闭')) + '">×</button></div>' +
       '<div class="ec-cols">' +
       '<section class="ec-left"><div class="ec-cap">① ' + esc(TT('选基金')) + ' <span id="ecSelCount"></span></div>' +
       '<input id="ecKw" class="ec-kw" type="search" placeholder="' + esc(TT('搜索基金名称 / 计划 / 受托人')) + '" autocomplete="off">' +
       '<span class="mf" id="ecMSTrustee"></span><span class="mf" id="ecMSCat"></span><span class="mf" id="ecMSScheme"></span>' +
-      '<label class="ec-only"><input type="checkbox" id="ecNavOnly">' + esc(TT('仅最新净值日')) + '</label>' +
       '<div class="ec-btns"><button type="button" data-a="all">' + esc(TT('全选')) + '</button>' +
       '<button type="button" data-a="inv">' + esc(TT('反选')) + '</button>' +
       '<button type="button" data-a="none">' + esc(TT('清空')) + '</button></div>' +
-      '<div class="ec-list" id="ecList"></div></section>' +
+      '<div class="ec-list" id="ecList"></div>' +
+      /* 2026-11-19（用户要求）：仅最新净值挪到列表下方，腾一行多显示一只基金 */
+      '<label class="ec-only ec-only-foot"><input type="checkbox" id="ecNavOnly">' + esc(TT('仅最新净值日')) + '</label></section>' +
       '<section class="ec-right"><div class="ec-cap">② ' + esc(TT('选数据')) + ' <span id="ecFieldCount"></span></div>' +
       '<div class="ec-tree" id="ecTree"></div></section>' +
       '</div>' +
@@ -257,9 +304,15 @@
       ST.sel = new Set(ST.preset);
     }
     const schema = window.mpfExportSchema ? window.mpfExportSchema() : null;
-    if (schema && !ST.fields.size) {
-      schema.COLS.forEach((c, i) => ST.fields.add(i));   /* 默认全选 = 与旧导出一致 */
+    const had = restore();
+    const cols = ST.mode === 'mpfa' ? mpfaCols().length : (schema ? schema.COLS.length : 0);
+    if (!had || !ST.fields.size || Array.from(ST.fields).some((i) => i >= cols)) {
+      ST.fields = new Set();
+      for (let i = 0; i < cols; i++) ST.fields.add(i);   /* 默认全选 = 与旧导出一致 */
     }
+    document.querySelectorAll('.ec-mode [data-mode]').forEach((b) => {
+      b.classList.toggle('on', b.getAttribute('data-mode') === ST.mode);
+    });
     renderMS(); renderTree(); renderList();
     $('#ecModal').classList.add('show');
   }
@@ -272,6 +325,27 @@
 
   /* ---------- 导出 ---------- */
   function colLetter(n) { let s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; }
+
+  /* 积金局月度口径列（与资料库同源的积金局字段，不含本站自算指标） */
+  function mpfaCols() {
+    const conv = (v) => (((window.getLang && window.getLang() === 'zh-Hans') && window.t2s) ? window.t2s(String(v)) : String(v));
+    const cat = (x) => ((window.splitFundType ? (window.splitFundType(x) || {}).cat : '') || x.type || '');
+    return [
+      [TT('名次'), (x, i) => i + 1, 'rank', 6, TT('按当前排序的名次')],
+      [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 34, TT('成分基金名称')],
+      [TT('受托人'), (x) => (window.trusteeDisplay ? window.trusteeDisplay(x.trustee) : x.trustee), 'txtL', 14, TT('受托人／保荐人')],
+      [TT('基金种类'), (x) => (window.typeLabel ? window.typeLabel(cat(x)) : cat(x)), 'txtL', 16, TT('积金局基金类别')],
+      [TT('风险级别'), (x) => x.risk, 'int', 8, TT('积金局按过往波幅评定的 1–7 级')],
+      [TT('近1年年率化'), (x) => x.ann1, 'pct', 11, TT('积金局公布，已扣费并计入分红再投资')],
+      [TT('近5年年率化'), (x) => x.ann5, 'pct', 11, TT('积金局公布，已扣费并计入分红再投资')],
+      [TT('近10年年率化'), (x) => x.ann10, 'pct', 11, TT('积金局公布，已扣费并计入分红再投资')],
+      [TT('推出至今年率化'), (x) => x.annLaunch, 'pct', 12, TT('积金局公布，已扣费并计入分红再投资')],
+      [TT('基金规模') + '（' + TT('百万港元') + '）', (x) => x.size, 'num2', 12, TT('积金局月度披露的基金规模')],
+      [TT('基金开支比率'), (x) => x.fer, 'num2', 11, TT('FER，含管理费、信托人费、保管费等经常性开支')],
+      [TT('基金管理费 %'), (x) => (x.mgmtFee == null ? '' : (window.feeText ? feeText(x.mgmtFee, x.feeMore && x.feeMore.mgmtFee) : x.mgmtFee)), 'txt', 11, TT('积金局披露的基金管理费')],
+      [TT('推出日期'), (x) => x.launch || '', 'txt', 11, TT('积金局披露的基金推出日期')],
+    ];
+  }
 
   /* ---------- 净值序列（逐日表与走势图共用） ---------- */
   const PALETTE = ['#0a6cbf', '#d9534f', '#2e9e5b', '#e08b1a', '#7a5cc6', '#0f9b9b', '#c2477d', '#5b6b7f', '#8a6d3b', '#1f7ae0'];
@@ -396,8 +470,9 @@
     if (!window.MPFXLSX) { mpfToast(TT('导出组件未加载，请刷新页面')); return; }
 
     const schema = window.mpfExportSchema();
-    const COLS = schema.COLS;
-    const picked = Array.from(ST.fields).sort((a, b) => a - b);
+    const isMpfa = ST.mode === 'mpfa';
+    const COLS = isMpfa ? mpfaCols() : schema.COLS;
+    const picked = Array.from(ST.fields).filter((i) => i < COLS.length).sort((a, b) => a - b);
     const rowsSel = rowsAll().filter((x) => ST.sel.has(String(x.id)));
     const go = $('#ecGo');
     const est = $('#ecEst');
@@ -420,17 +495,22 @@
       ST.stage = 'cover'; tick(TT('正在生成数据说明…'));
       const summary = ST.trustee.size === 1 ? Array.from(ST.trustee)[0] : (ST.trustee.size ? TQ('{n} 家受托人', { n: ST.trustee.size }) : TT('全市场'));
       const cover = window.buildCoverSheet({
-        page: TT('数据导出'),
+        page: isMpfa ? TT('积金局月度数据导出') : TT('数据导出'),
         title: TT('数据说明'),
         meta: [
-          [TT('净值截至'), navLatest || '—'],
+          [TT('数据口径'), isMpfa ? TT('积金局月度公布（已扣费、计入分红再投资）') : TT('本站每日净值自算')],
+          [isMpfa ? TT('资料截至') : TT('净值截至'), isMpfa ? (DS().dataAsOf || '—') : (navLatest || '—')],
           [TT('积金局字段截至'), DS().dataAsOf || '—'],
           [TT('本站同步时间'), new Date(DS().updatedAt || Date.now()).toLocaleString('zh-CN', { hour12: false })],
           [TT('导出时间'), new Date().toLocaleString('zh-CN', { hour12: false })],
           [TT('导出范围'), TQ('{n} 条成分基金（按单位类别逐条）', { n: rowsSel.length })],
           [TT('筛选条件'), summary + (ST.kw ? ' · ' + TQ('关键词「{v}」', { v: ST.kw }) : '')],
         ],
-        notes: [
+        notes: isMpfa ? [
+          TT('本表为积金局「强积金基金平台」月度公布口径：回报已扣费并计入分红再投资，与本站「基金最新数据」的每日自算口径不同，两者不可直接相减。'),
+          TT('风险级别、基金规模、历年回报、基金管理费、基金开支比率（FER）均照录积金局公布值，按月更新，通常滞后 1–2 个月。'),
+          TT('空白单元格＝积金局未公布该字段（新基金或尚未披露），本站不插值、不以本站自算值替代。'),
+        ] : [
           TT('净值来源：各计划受托人／保荐人官网每日公布的单位资产净值；风险级别、基金规模、历年回报、基金开支比率等字段取自积金局「强积金基金平台」（按月更新，通常滞后 1–2 个月）。'),
           TT('自算指标（日涨跌 / 近1周 / 近1个月 / 年初至今 / 近1年 / 近3年 / 近5年年化 / 最大回撤 / 波动率 / 夏普 / 超额收益）由本站按发行人官网净值直接计算，不含分红再投资与费用调整；与积金局公布的同名指标口径不同，不可直接相减。'),
           TT('夏普比率显示 n.a. 表示该基金近 1 年年化波动率低于 0.5%（多为保守／货币市场基金），比值会被极小的分母放大而失真，故不提供。'),
@@ -448,7 +528,7 @@
         autoFilter: 'A2:' + lastCol + rows.length,
       }];
 
-      if (ST.extra.has('hld')) {
+      if (!isMpfa && ST.extra.has('hld')) {
         ST.stage = 'hld'; tick(TT('正在生成持仓与分布…'));
         if (window.buildHoldAllocSheet) {
           const ent = rowsSel.map((x) => ({ id: x.id, name: nameOf(x) }));
@@ -458,7 +538,7 @@
       }
 
       /* 2026-11-19：逐日表与走势图共用一次抓取（6 路并发），避免重复请求 400+ 次 */
-      const needSeries = ST.extra.has('hist') || ST.extra.has('trend');
+      const needSeries = !isMpfa && (ST.extra.has('hist') || ST.extra.has('trend'));
       let seriesMap = null;
       if (needSeries) {
         ST.stage = 'series';
@@ -468,7 +548,7 @@
       const from = rangeStart(ST.histRange);
       const to = rangeEnd();
 
-      if (ST.extra.has('hist')) {
+      if (!isMpfa && ST.extra.has('hist')) {
         ST.stage = 'hist';
         const out = [{ h: 30, cells: [{ v: TT('逐日净值（每行一个交易日）'), s: 1 }] },
           { h: 30, cells: [TT('基金名称'), TT('日期'), TT('单位资产净值'), TT('日涨跌')].map((v) => ({ v, s: 2 })) }];
@@ -491,7 +571,7 @@
         sheets.push({ name: TT('逐日净值'), rows: out, cols: [30, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
       }
 
-      if (ST.extra.has('trend')) {
+      if (!isMpfa && ST.extra.has('trend')) {
         ST.stage = 'trend';
         const lines = rowsSel.map((x, i) => ({
           name: nameOf(x), color: PALETTE[i % PALETTE.length],
@@ -531,7 +611,7 @@
       const blob = window.MPFXLSX.build({ sheets: sheets });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'MPF数据导出_' + summary.replace(/[\\/:*?"<>|]/g, '') + '_' + (navLatest || DS().dataAsOf || '') + '.xlsx';
+      a.download = (isMpfa ? 'MPF积金局口径_' : 'MPF数据导出_') + summary.replace(/[\\/:*?"<>|]/g, '') + '_' + (isMpfa ? (DS().dataAsOf || '') : (navLatest || DS().dataAsOf || '')) + '.xlsx';
       document.body.appendChild(a); a.click();
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
       mpfToast(TQ('已导出 {n} 只基金、{c} 个字段', { n: rowsSel.length, c: picked.length }));
@@ -554,6 +634,16 @@
       const modal = t.closest('#ecModal');
       if (!modal) return;
       /* 区间胶囊 */
+      const mb = t.closest('[data-mode]');
+      if (mb) {
+        ST.mode = mb.getAttribute('data-mode');
+        document.querySelectorAll('.ec-mode [data-mode]').forEach((b) => b.classList.toggle('on', b === mb));
+        const schema2 = window.mpfExportSchema ? window.mpfExportSchema() : null;
+        const n = ST.mode === 'mpfa' ? mpfaCols().length : (schema2 ? schema2.COLS.length : 0);
+        ST.fields = new Set(); for (let i = 0; i < n; i++) ST.fields.add(i);
+        if (ST.mode === 'mpfa') ST.extra.clear();
+        renderTree(); paintCounts(); persist(); return;
+      }
       const rb = t.closest('[data-range]');
       if (rb) {
         ST.histRange = rb.getAttribute('data-range');
@@ -564,15 +654,28 @@
           ST.histFrom = ST.histFrom || isoDay(d0);
           ST.histTo = ST.histTo || end;
         }
-        renderTree(); paintCounts(); return;
+        renderTree(); paintCounts(); persist(); return;
       }
       const tb = t.closest('[data-tmode]');
-      if (tb) { ST.trendMode = tb.getAttribute('data-tmode'); renderTree(); paintCounts(); return; }
+      if (tb) { ST.trendMode = tb.getAttribute('data-tmode'); renderTree(); paintCounts(); persist(); return; }
       if (t.id === 'ecDateGo') {
+        const norm = (v) => {
+          const d = String(v || '').trim();
+          if (/^\d{8}$/.test(d)) return d.slice(0, 4) + '-' + d.slice(4, 6) + '-' + d.slice(6, 8);
+          return d;
+        };
         const f = $('#ecDateFrom'), e2 = $('#ecDateTo');
-        ST.histFrom = f ? f.value : ''; ST.histTo = e2 ? e2.value : '';
-        if (ST.histFrom && ST.histTo && ST.histFrom > ST.histTo) { const tmp = ST.histFrom; ST.histFrom = ST.histTo; ST.histTo = tmp; }
-        renderTree(); paintCounts(); return;
+        let a = norm(f && f.value), b = norm(e2 && e2.value);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(a) || !/^\d{4}-\d{2}-\d{2}$/.test(b)) {
+          ST.dateMsg = TT('请按 YYYY-MM-DD 填写起止日期');
+          if (window.mpfToast) mpfToast(ST.dateMsg);
+          renderTree(); return;
+        }
+        if (a > b) { const t2 = a; a = b; b = t2; }
+        ST.histFrom = a; ST.histTo = b;
+        ST.dateMsg = a + ' ~ ' + b;
+        if (window.mpfToast) mpfToast(TQ('已选区间 {d}', { d: ST.dateMsg }));
+        renderTree(); paintCounts(); persist(); return;
       }
       if (t.closest('.ec-x') || t.closest('#ecCancel') || t === modal) { close(); return; }
       if (t.closest('#ecGo')) { exportNow(); return; }
@@ -596,7 +699,7 @@
         t.closest('.ec-row').classList.toggle('on', t.checked);
         paintCounts(); return;
       }
-      if (t.matches('#ecNavOnly')) { ST.navOnly = t.checked; renderList(); syncSel(); return; }
+      if (t.matches('#ecNavOnly')) { ST.navOnly = t.checked; renderList(); syncSel(); persist(); return; }
       if (t.matches('#ecTree input[data-i]')) {
         const i = +t.getAttribute('data-i');
         if (t.checked) ST.fields.add(i); else ST.fields.delete(i);
@@ -605,13 +708,13 @@
       if (t.matches('#ecTree input[data-x]')) {
         const k = t.getAttribute('data-x');
         if (t.checked) ST.extra.add(k); else ST.extra.delete(k);
-        renderTree(); paintCounts(); return;
+        renderTree(); paintCounts(); persist(); return;
       }
       if (t.matches('#ecTree input[data-g]')) {
         const g = GROUPS.find((x) => x.k === t.getAttribute('data-g'));
         if (!g) return;
         g.idx.forEach((i) => { t.checked ? ST.fields.add(i) : ST.fields.delete(i); });
-        renderTree(); paintCounts(); return;
+        renderTree(); paintCounts(); persist(); return;
       }
     });
 

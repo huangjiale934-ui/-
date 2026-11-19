@@ -20,7 +20,7 @@
     fund: '基金名称', trustee: '受托人', typeFull: '基金种类',
     size: '基金规模', risk: '风险级别', nav: '单位资产净值',
     ann1: '近1年年率化回报', ann5: '近5年年率化回报', ann10: '近10年年率化回报',
-    annLaunch: '推出至今年率化回报', mgmtFee: '基金管理费', launchTs: '推出日期',  /* 渲染时 TT() */
+    annLaunch: '推出至今年率化回报', mgmtFee: '基金管理费', fer: '基金开支比率', launchTs: '推出日期',  /* 渲染时 TT() */
   };
 
   /* 2026-10-31（用户要求）：排名维度标签行改为工具栏下拉（默认「无」）。
@@ -217,7 +217,9 @@
       /* 2026-11-04：注册到刷新钩子表（多模块共存），不再独占 __onRefresh */
       window.addRefreshHook(() => { buildFilters(); buildMobileSort(); syncSortDir(); render(); });
       bindSelfTabs();
+      applyUrlFilters();
       render();
+      syncUrlFilters();
       /* 2026-11-03（第二十九轮，用户反馈）：首页「查看完整榜单」原指向积金局榜单（口径不同、数字对不上），
          改为跳到资料库并按同一自算维度排序 —— 这里解析 ?dim=selfY1 / selfY5a / size 等深链。 */
       /* 2026-11-03（第三十二轮）：数据说明里的计划名深链 ?kw=<计划名> */
@@ -322,22 +324,55 @@
     });
   }
 
+  /* 2026-11-19（用户建议）：筛选条件写入 URL，链接可直接分享「已筛好」的结果。
+     刷新仍按既有策略清空（见 applyUrlKw 的 reload 分支），不会粘住。 */
+  function syncUrlFilters() {
+    try {
+      const q = new URLSearchParams(location.search);
+      const put = (k, arr) => { if (arr && arr.length) q.set(k, arr.join(',')); else q.delete(k); };
+      put('tr', F.trustee); put('ty', F.type); put('sb', F.sub);
+      if (F.kw) q.set('kw', F.kw); else q.delete('kw');
+      if (F.navDate) q.set('nav', F.navDate); else q.delete('nav');
+      const s2 = q.toString();
+      history.replaceState(history.state, '', location.pathname + (s2 ? '?' + s2 : '') + location.hash);
+    } catch (e) {}
+  }
+
+  function applyUrlFilters() {
+    try {
+      const q = new URLSearchParams(location.search);
+      const arr = (k) => (q.get(k) || '').split(',').map((v) => v.trim()).filter(Boolean);
+      const ty = arr('ty'), tr = arr('tr'), sb = arr('sb');
+      if (!ty.length && !tr.length && !sb.length && !q.get('nav')) return false;
+      F.type = ty; F.trustee = tr;
+      if (q.get('nav')) F.navDate = q.get('nav');
+      if (MF_TY) {
+        MF_TY.setSelected(F.type, true);
+        MF_T.setSelected(F.trustee, true);
+        fillSub();
+        MF_S.setSelected(F.sub, true);
+      }
+      S.page = 1;
+      return true;
+    } catch (e) { return false; }
+  }
+
   /* 2026-11-19：三个筛选统一换成共用多选组件（与导出中心同一套） */
   let MF_TY = null, MF_S = null, MF_T = null;
   function ensureMF() {
     if (MF_TY) return;
     MF_TY = window.MPFMulti('#fType', {
       allLabel: TT('全部种类'),
-      onChange: (arr) => { F.type = arr; F.sub = []; S.page = 1; fillSub(); render(); },
+      onChange: (arr) => { F.type = arr; F.sub = []; S.page = 1; fillSub(); render(); syncUrlFilters(); },
     });
     MF_S = window.MPFMulti('#fSub', {
       allLabel: TT('全部细类'),
-      onChange: (arr) => { F.sub = arr; S.page = 1; render(); },
+      onChange: (arr) => { F.sub = arr; S.page = 1; render(); syncUrlFilters(); },
     });
     MF_T = window.MPFMulti('#fTrustee', {
       allLabel: TT('全部受托人'),
       onChange: (arr) => {
-        F.trustee = arr; S.page = 1; render();
+        F.trustee = arr; S.page = 1; render(); syncUrlFilters();
         if (typeof window.__anSetTrustee === 'function') { try { window.__anSetTrustee(arr[0] || ''); } catch (e) {} }
       },
     });
@@ -614,7 +649,7 @@
     ['#kw', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
     /* 2026-10-31（用户要求）：涨跌幅/回撤/费率第二行筛选已下线 */
     document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
-    fillSub(); S.page = 1; render();
+    fillSub(); S.page = 1; render(); syncUrlFilters();
   }
   window.clearAllFilters = resetAll;   // 空态「一键清除」入口（2026-10-14；筛选行/重置按钮 2026-10-31 应用户要求删除）
 
@@ -643,6 +678,7 @@
     { i: 21, k: 'posM12', n: '正收益月份占比' },
     { i: 22, k: 'size', n: '基金规模' },
     { i: 23, k: 'mgmtFee', n: '基金管理费' },
+    { i: 27, k: 'fer', n: '基金开支比率' },
     { i: 24, k: 'launchTs', n: '推出日期' },
     { i: 24, k: 'cmp', n: '对比', lock: true },
     { i: 25, k: 'ops', n: '操作' },
@@ -655,7 +691,7 @@
   /* 2026-11-01（6.0，用户要求）：近3年年化移出默认列（仍可在列设置勾选），表格更宽松 */
   /* 2026-11-02（第十七轮，用户要求）：近1年最大回撤也移出默认列（仍在列设置），表格再松一档 */
   const COL_DEFAULT = ['rank', 'fund', 'trustee', 'risk', 'nav',
-    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'size', 'cmp', 'ops'];
+    'selfD1', 'selfM1', 'selfYtd', 'selfY1', 'size', 'fer', 'cmp', 'ops'];
   /* 2026-10-27（用户要求）：「精简模式」下线，改为「默认模式」——一键回到用户指定的 14 列 */
   /* 2026-11-11（用户反馈）：列设置不再写 localStorage —— 刷新页面必须回到默认 12 列。
      之前改过列的用户会一直停在自定义列，看起来像「列设置坏了 / 恢复不了默认」。 */
@@ -727,7 +763,7 @@
 
   function bind() {
     $('#kw').addEventListener('input', debounce(() => {
-      F.kw = $('#kw').value.trim(); S.page = 1; render();
+      F.kw = $('#kw').value.trim(); S.page = 1; render(); syncUrlFilters();
       /* 首次输入时懒加载英文名，到货后自动重绘（简繁英互通） */
       ensureNamesEn().then(() => render());
     }, 200));
@@ -921,6 +957,9 @@
       const tip = more ? feeTip(TT('基金管理费'), more) : '';
       return '<td data-c="mgmtFee" data-l="' + TT('基金管理费 %') + '" class="r num"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' + feeText(x.mgmtFee, more) + '</td>';
     })(),
+    /* 2026-11-19（用户反馈）：表格补「基金开支比率 FER」——数据一直有，只是没上表 */
+    fer: (x) => '<td data-c="fer" data-l="' + TT('基金开支比率') + '" class="r num">' +
+      (x.fer == null || !isFinite(x.fer) ? '<span class="risk-na">n.a.</span>' : x.fer.toFixed(2) + '%') + '</td>',
     launchTs: (x) => '<td data-c="launchTs" data-l="' + TT('推出日期') + '" class="num">' + esc(x.launch || '—') + '</td>',
     ops: (x) => '<td data-c="ops" data-l="' + TT('操作') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
@@ -951,6 +990,7 @@
     posM12: '<th scope="col" data-c="posM12" data-i18n-parts data-k="posM12" data-defdir="desc" class="sortable r">正收益<br><small>月份占比</small> <span class="arrow">↕</span></th>',
     size: '<th scope="col" data-c="size" data-i18n-parts data-k="size" data-defdir="desc" class="sortable r">基金规模<br><small>百万港元</small> <span class="arrow">↕</span></th>',
     mgmtFee: '<th scope="col" data-c="mgmtFee" data-i18n-parts data-k="mgmtFee" data-defdir="asc" class="sortable r">基金管理费<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
+    fer: '<th scope="col" data-c="fer" data-i18n-parts data-k="fer" data-defdir="asc" class="sortable r">基金开支比率<br><small>% p.a.</small> <span class="arrow">↕</span></th>',
     launchTs: '<th scope="col" data-c="launchTs" data-i18n-parts data-k="launchTs" data-defdir="desc" class="sortable">推出日期 <span class="arrow">↕</span></th>',
     ops: '<th scope="col" data-c="ops" data-i18n-parts class="c">操作</th>',
   };
@@ -960,6 +1000,7 @@
     risk: '积金局公布的基金风险级别（1–7 级，按过往波幅评定），随积金局披露更新，非本站自算。',
     size: '积金局公布的基金资产规模（百万港元），随积金局月报更新，通常每月一次；未公布时显示 n.a.。',
     mgmtFee: '积金局披露的基金管理费（% p.a.）。部分基金以区间或「最高」形式公布，表内按原文显示，排序按区间下限。',
+    fer: '基金开支比率（FER，% p.a.）：含管理费、信托人费、保管费等经常性开支，积金局按年披露；与「基金管理费」不是同一口径。',
     launchTs: '积金局披露的基金推出日期，不随净值变动。',
   };
 
