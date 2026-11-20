@@ -49,9 +49,16 @@ Q_YEAR=$(date +%Y)
 if [ "$(date +%-m)" -le 3 ]; then Q_YEAR=$((Q_YEAR-1)); Q_NTH=4; Q_EN=4th
 else Q_NTH=$((Q_NTH-1)); case "$Q_NTH" in 1) Q_EN=1st;; 2) Q_EN=2nd;; 3) Q_EN=3rd;; 4) Q_EN=4th;; esac; fi
 
-fetch_pdf "東亞FFS" "https://www.hkbea.com/pdf/fund-fact-sheet/${Q_YEAR}/mpf-${Q_YEAR}-${Q_EN}.pdf" \
-          tmp/bea_ffs.pdf \
-  && run "東亞持仓(force)" "$PY" bea_holdings.py tmp/bea_ffs.pdf --force
+# 2026-11-20（用户反馈）：東亞 2026 年基金便覧官网只发布到第 1 季，Q2/Q3 尚未上线。
+# 先探测再下载——源站未发布时输出「源站尚未发布，跳过」，不再每次报 ✘ 被误判成抓取故障。
+BEA_URL="https://www.hkbea.com/pdf/fund-fact-sheet/${Q_YEAR}/mpf-${Q_YEAR}-${Q_EN}.pdf"
+BEA_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -A "$UA" "$BEA_URL" 2>/dev/null || echo 000)
+if [ "$BEA_CODE" = "200" ]; then
+  fetch_pdf "東亞FFS" "$BEA_URL" tmp/bea_ffs.pdf \
+    && run "東亞持仓(force)" "$PY" bea_holdings.py tmp/bea_ffs.pdf --force
+else
+  echo "  · 東亞FFS：源站尚未发布 ${Q_YEAR} 年第 ${Q_NTH} 季便覧（HTTP ${BEA_CODE}），跳过（非抓取故障）" >> "$LOG"
+fi
 [ -f bea_alloc_ingest.py ]  && run "東亞分布(读图)"           "$PY" bea_alloc_ingest.py
 
 # 滙豐：固定 URL（內容隨季更新）；恒生：固定 URL

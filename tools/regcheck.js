@@ -2253,15 +2253,13 @@ chk('榜单·①筛选写入 URL 并可还原（rty/rsb/rtr/rrisk/rkw）', (func
 })());
 
 /* ================= 2026-11-19 双口径导出 + 排序 URL（第九轮） ================= */
-chk('导出中心·⑧支持两种口径同簿导出（both → 追加积金局工作表）', (function () {
+chk('导出中心·⑧支持两种口径同簿导出（勾积金局字段 → 追加工作表）', (function () {
   try {
     const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
-    return /data-mode="both"/.test(e) && /两者都导出/.test(e) &&
-      /const bothMode = ST\.mode === 'both'/.test(e) &&
-      /if \(bothMode\) \{[\s\S]{0,600}name: TT\('积金局月度数据'\)/.test(e) &&
-      /bothMode \? \[BOTH_NOTE\]/.test(e) &&
-      /ST\.mode = \(o\.mode === 'mpfa' \|\| o\.mode === 'both'\)/.test(e) &&
-      e.indexOf("esc(TT('仅最新净值日'))") < 0 && /仅选择最新净值日的基金/.test(e);
+    return /mfields: new Set\(\)/.test(e) &&
+      /if \(hasLocal && hasMpfa\) \{[\s\S]{0,900}name: TT\('积金局月度数据'\)/.test(e) &&
+      /bothMode|data-mode="both"/.test(e) === false &&
+      /仅选择最新净值日的基金/.test(e);
   } catch (err) { return false; }
 })());
 chk('榜单·②排序写入 URL（rsk/rsd，表头点选后同步）', (function () {
@@ -2270,5 +2268,41 @@ chk('榜单·②排序写入 URL（rsk/rsd，表头点选后同步）', (functio
     return /q\.set\('rsk', S\.sortKey\)/.test(r) && /S\.sortDir \|\| 'desc'/.test(r) &&
       /q\.get\('rsk'\)/.test(r) && /S\.sortDir = q\.get\('rsd'\)/.test(r) &&
       /S\.sortKey = null; S\.sortDir = null; \}\s*\/\* ③ 取消 \*\/\s*render\(\); syncRkUrl\(\);/.test(r);
+  } catch (err) { return false; }
+})());
+
+/* ================= 2026-11-20 两组字段独立 + 组选修复（第十轮） ================= */
+chk('导出中心·⑨两组字段各自独立（积金局默认不选，勾了才多导一张表）', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    return /mfields: new Set\(\)/.test(e) && /function curFieldSet\(\)/.test(e) &&
+      /function curGroups\(\)/.test(e) && /ST\.mode === 'mpfa' \? ST\.mfields : ST\.fields/.test(e) &&
+      /已选 \{a\} 项 \+ \{b\} 项/.test(e) && e.indexOf('data-mode="both"') < 0 &&
+      /const hasLocal = ST\.fields\.size > 0/.test(e) && /const hasMpfa = ST\.mfields\.size > 0/.test(e);
+  } catch (err) { return false; }
+})());
+chk('导出中心·⑩积金局字段 20 列（含细类/计划/累积回报/最差年度）+ 口径说明', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    const i = e.indexOf('function mpfaCols'); const j = e.indexOf('净值序列', i);
+    const seg = e.slice(i, j);
+    const n = (seg.match(/\[TT\('/g) || []).length;
+    return n >= 20 && /近1年累积/.test(seg) && /近5年最差年度/.test(seg) &&
+      /基金细类/.test(seg) && /强积金计划/.test(seg) && /ec-note/.test(e);
+  } catch (err) { return false; }
+})());
+chk('资料库·⑪列设置补齐导出中心独有的三列（单位类别/细类/计划）', (function () {
+  try {
+    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
+    return /k: 'unit'/.test(a) && /k: 'sub'/.test(a) && /k: 'scheme'/.test(a) &&
+      /unit: '<th scope="col" data-c="unit"/.test(a) && /sub: '<th scope="col" data-c="sub"/.test(a) &&
+      /scheme: '<th scope="col" data-c="scheme"/.test(a) &&
+      /unit: \(x\) => '<td data-c="unit"/.test(a);
+  } catch (err) { return false; }
+})());
+chk('季度持仓·⑫東亞源站未发布时提示「跳过」而非报错', (function () {
+  try {
+    const q = fs.readFileSync(path.join(__dirname, 'quarterly.sh'), 'utf8');
+    return /BEA_CODE=/.test(q) && /源站尚未发布/.test(q) && /非抓取故障/.test(q);
   } catch (err) { return false; }
 })());

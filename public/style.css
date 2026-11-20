@@ -3263,3 +3263,8 @@ body { overflow-x: clip; }
 .ec-mod-p .ec-dmsg { flex: 1 1 100%; }
 .ec-mod-p .ec-dmsg { font-size: 11px; }
 @media(max-width:760px){ .ec-mod { grid-template-columns: 1fr; } .ec-mod-p { grid-column: 1; } }
+
+/* 导出中心：积金局口径说明（2026-11-20） */
+.ec-note { margin-top: 10px; padding: 10px 12px; border: 1px dashed #dbe6f3; border-radius: 9px;
+  background: #fbfdff; font-size: 11.5px; line-height: 1.75; color: #5b6b7f; }
+.ec-note::before { content: 'ⓘ '; color: #3b82d6; font-weight: 700; }

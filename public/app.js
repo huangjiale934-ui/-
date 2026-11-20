@@ -659,8 +659,12 @@
   const COL_DEFS = [
     { i: 1, k: 'rank', n: '名次', lock: true },
     { i: 3, k: 'fund', n: '基金名称' },
+    /* 2026-11-20（用户要求）：导出中心有、表格列设置缺的三列补上（默认不勾） */
+    { i: 3.1, k: 'unit', n: '单位类别' },
+    { i: 3.2, k: 'scheme', n: '强积金计划' },
     { i: 4, k: 'trustee', n: '受托人' },   /* 2026-10-31（用户要求）：列名由「发行人（受托人）」简写 */
     { i: 5, k: 'type', n: '基金种类' },
+    { i: 5.1, k: 'sub', n: '基金细类' },
     { i: 6, k: 'risk', n: '风险级别' },
     { i: 7, k: 'nav', n: '单位资产净值' },
     { i: 8, k: 'selfD1', n: '日涨跌' },
@@ -947,6 +951,9 @@
     sharpe1: (x) => selfCell(x, 'sharpe1', '夏普比率（近1年）', (v) => (v == null ? '—' : v.toFixed(2))),
     excess1: (x) => selfCell(x, 'excess1', '超额收益（对恒指·近1年）', (v) => pct(v), cls(x.excess1)),
     posM12: (x) => selfCell(x, 'posM12', '正收益月份占比', (v) => (v == null ? '—' : v.toFixed(0) + '%')),
+    unit: (x) => '<td data-c="unit" data-l="' + TT('单位类别') + '" class="c">' + esc(x.unit || '—') + '</td>',
+    sub: (x) => '<td data-c="sub" data-l="' + TT('基金细类') + '" class="fz">' + esc((window.splitFundType ? (window.splitFundType(x) || {}).sub : '') ? typeLabel((window.splitFundType(x) || {}).sub) : '—') + '</td>',
+    scheme: (x) => '<td data-c="scheme" data-l="' + TT('强积金计划') + '" class="fz">' + esc(x.scheme || '—') + '</td>',
     size: (x) => {
       /* 2026-10-30（5.0）：规模与风险级别统一——积金局未公布时显示 n.a. 并给悬浮说明 */
       const tip = x.size == null ? TT('积金局未公布该基金规模（新基金或官方未披露），故显示 n.a.，并非本站缺少数据。') : '';
@@ -972,6 +979,10 @@
     cmp: '<th scope="col" data-c="cmp" data-i18n-parts class="c" style="width:52px">对比</th>',
     fund: '<th scope="col" data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">基金名称 <span class="arrow">↕</span></th>',
     trustee: '<th scope="col" data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>',
+    /* 2026-11-20：导出中心有、表格缺的三列补上表头（默认不显示，可在列设置勾选） */
+    unit: '<th scope="col" data-c="unit" data-i18n-parts data-k="unit" data-defdir="asc" class="sortable c">单位<br>类别 <span class="arrow">↕</span></th>',
+    sub: '<th scope="col" data-c="sub" data-i18n-parts data-k="subtype" data-defdir="asc" class="sortable fz">基金细类 <span class="arrow">↕</span></th>',
+    scheme: '<th scope="col" data-c="scheme" data-i18n-parts data-k="scheme" data-defdir="asc" class="sortable fz">强积金计划 <span class="arrow">↕</span></th>',
     type: '<th scope="col" data-c="type" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>',
     risk: '<th scope="col" data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
     nav: '<th scope="col" data-c="nav" data-i18n-parts data-k="nav" data-defdir="desc" class="sortable r" title="取自各受托人官网公布的单位资产净值；悬浮每个数值可看来源与估值日">单位资产净值 <span class="arrow">↕</span></th>',
