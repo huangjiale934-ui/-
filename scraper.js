@@ -429,10 +429,12 @@ function parse(html) {
     // 基金类别：'股票基金 - 美國股票基金'
     let type = typeFull;
     let subtype = '';
-    const dash = typeFull.indexOf(' - ');
-    if (dash > 0) {
-      type = typeFull.slice(0, dash).trim();
-      subtype = typeFull.slice(dash + 3).trim();
+    /* 2026-11-17：兼容全角破折号「—」（货币市场基金在官方表里用这个） */
+    const mm = typeFull.match(/^(.+?)\s*[—–-]\s*(.+)$/);
+    const dash = mm ? 1 : -1;
+    if (mm) {
+      type = mm[1].trim();
+      subtype = mm[2].trim();
     }
 
     const key = (meta.cfId || fundName + '|' + scheme).toString();

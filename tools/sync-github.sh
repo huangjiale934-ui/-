@@ -60,6 +60,10 @@ else
   git add --ignore-removal data/ 2>/dev/null || true
 fi
 git add --ignore-removal tools/ .github/ 2>/dev/null || true
+# 2026-11-22 修（漏推）：根目录的抓取/构建脚本（navbuild.js、fetch-*.py、*_holdings.py…）
+# 以前从未加进索引 —— 云端仓库里的解析器因此长期是旧版。这里显式补上根目录代码文件
+# （只收 .js/.py/.sh；secrets 在 data/ 且被 .gitignore 忽略，不会误带）。
+git add --ignore-removal ./*.js ./*.py ./*.sh 2>/dev/null || true
 # 2026-11-17（用户反馈）：原来只推 data/tools/.github，**前端 public/ 从未推送** →
 # 两站界面长期不一致（导出、分类、提示都在 A 站改了、B 站还是旧的）。这里一并推。
 git add --ignore-removal public/ server.js navperf.js indexbuild.js 2>/dev/null || true

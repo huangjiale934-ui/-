@@ -141,6 +141,21 @@ def main():
         except Exception:  # noqa: BLE001
             idx = {}
     facts = {"updatedAt": int(time.time() * 1000), "source": SRC, "count": 0, "funds": {}}
+    # 2026-11-22 修（防覆盖）：旧版每次都从空表重建 → 用 --from 只跑 1 个月时，
+    # 会把已有的 19 只规模/FER 事实表整个清空（回归断言当场失败，已实证）。
+    # 改为在旧表基础上增量更新。
+    try:
+        _old = json.load(open(os.path.join(DATA, "aia-facts.json"), encoding="utf-8"))
+        if isinstance(_old.get("funds"), dict):
+            facts["funds"].update(_old["funds"])
+    except Exception:  # noqa: BLE001
+        pass
+    # hist-index 的 source 是人工维护的来源清单，子集跑不能把它改成一句概括
+    idx_prev_source = ""
+    try:
+        idx_prev_source = json.load(open(INDEX, encoding="utf-8")).get("source") or ""
+    except Exception:  # noqa: BLE001
+        pass
     saved = 0
     for fid, dmap in all_data.items():
         arr = sorted([(d, v["nav"]) for d, v in dmap.items()])
@@ -170,7 +185,7 @@ def main():
         json.dump(facts, fh, ensure_ascii=False, separators=(",", ":"))
     with open(INDEX, "w", encoding="utf-8") as fh:
         json.dump({"updatedAt": int(time.time() * 1000),
-                   "source": "各发行人官网（宏利 + BCT + 友邦 + HSBC系）",
+                   "source": idx_prev_source or "各发行人官网（宏利 + BCT + 友邦 + HSBC系）",
                    "count": len(idx), "funds": idx}, fh, ensure_ascii=False, separators=(",", ":"))
     print("\n完成：FPR 解析 %d 个月（跳过 %d）· 写入 %d 只友邦基金（hist-index 共 %d）" % (fetched, skipped, saved, len(idx)))
 

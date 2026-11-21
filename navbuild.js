@@ -225,14 +225,91 @@ function isValid(res, s) {
   if (/"data"\s*:\s*null/.test(res)) return false;
   if (s.p === 'bctJson' && res.indexOf('fundInformationList') < 0) return false;
   if (res.indexOf('Access Denied') >= 0 || res.indexOf('error code:') >= 0) return false;
+  /* 2026-11-22（用户要求）：结构探针前移到这里 —— 页面长度正常但价格表/关键节点已消失
+     （源站改版、维护页、只渲染出表头）时，视为本次抓取无效 → 触发 30 秒重试并保留旧文件，
+     同时把「缺哪个节点」写入 data/scrape-health.json，不再等到解析出 0 条才发现。 */
+  try {
+    const pr = probeNode(s, res);
+    if (!pr.ok) {
+      RENDER_FAIL[s.key] = '结构探针失败：' + (pr.node || '') + (pr.detail ? '（' + pr.detail + '）' : '');
+      return false;
+    }
+  } catch (e) { /* 探针自身异常不阻断抓取 */ }
   return true;
 }
 
-/* 2026-11-05（第四十轮）：渲染改成 3 路并发 —— 20 个页面串行要 7 分钟，
-   并发后约 2.5–3 分钟。每个页面本来就用自己的 user-data-dir，互不干扰；
-   单页失败仍然「保留上一次文件」，行为与串行版一致。 */
-async function fetchDomAsync(url, key, budget) {
-  const ms = budget || 25000;
+/* ==================== 节点级监控（2026-11-22 用户要求） ====================
+ * 目的：比 isValid 更早判定「源站改版」。
+ * isValid 只看响应长度与错误串：页面被换成维护页、表格结构被改版时仍会通过，
+ * 随后解析出 0 条 → 静默沿用上一次数据，第二天照样报「成功」。
+ * 这里按解析器真正使用的提取原语做探针（表格行 / JSON 键 / 列表节点），
+ * 探针失败 = struct_miss（结构缺失），单独告警并写入 data/scrape-health.json。
+ */
+const RENDER_FAIL = {};
+
+function probeNode(s, raw) {
+  const P = s.p;
+  try {
+    if (P === 'bctJson') {
+      const j = JSON.parse(raw);
+      const list = j.fundInformationList || (j.data && j.data.fundInformationList) || [];
+      return list.length ? { ok: true } : { ok: false, node: '基金數據 JSON', detail: 'fundInformationList 为空' };
+    }
+    if (P === 'rawJson') {
+      JSON.parse(raw);
+      return { ok: true };
+    }
+    if (P === 'amtdTable') {
+      const t = String(raw).match(/<table[\s\S]*?<\/table>/g) || [];
+      return t.length ? { ok: true } : { ok: false, node: '淨值表格', detail: '頁面無 <table>' };
+    }
+    if (P === 'manulifeList') {
+      const n = (cleanHtml(raw).match(/id="funditem\d+"/g) || []).length;
+      return n ? { ok: true } : { ok: false, node: '基金列表', detail: '無 funditem 節點' };
+    }
+    if (['hsbcTable', 'beaTable', 'sunlifeTable', 'aiaTable', 'yfTable', 'bocomTable'].indexOf(P) >= 0) {
+      const rows = rowsOf(cleanHtml(raw), s.ti || 0);
+      return rows.length >= 2 ? { ok: true } : { ok: false, node: '淨值表格', detail: '表格行數 ' + rows.length };
+    }
+  } catch (e) {
+    return { ok: false, node: '頁面解析', detail: e.message };
+  }
+  return { ok: true };  // 卡片 / 文本类解析器：交给「解析 0 条」兜底
+}
+
+function hkDay() {
+  return new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+}
+
+/* 汇总写盘：每天一份，保留 14 天；同日重跑覆盖当天记录 */
+function writeScrapeHealth(entries) {
+  const OUTP = path.join(__dirname, 'data', 'scrape-health.json');
+  let prev = {};
+  try { prev = JSON.parse(fs.readFileSync(OUTP, 'utf8')) || {}; } catch (e) { prev = {}; }
+  const day = hkDay();
+  const history = (prev.history || []).filter((h) => h && h.day !== day).slice(-13);
+  const bad = entries.filter((e) => e.status !== 'ok');
+  const summary = {
+    total: entries.length,
+    ok: entries.length - bad.length,
+    structMiss: entries.filter((e) => e.status === 'struct_miss').length,
+    empty: entries.filter((e) => e.status === 'empty').length,
+    missing: entries.filter((e) => e.status === 'missing').length,
+    failed: entries.filter((e) => e.status === 'failed').length,
+    degraded: entries.filter((e) => e.status === 'degraded').length,
+  };
+  const doc = { updatedAt: Date.now(), day, summary, sources: entries, history: history.concat([{ day, summary }]) };
+  try {
+    fs.mkdirSync(path.dirname(OUTP), { recursive: true });
+    fs.writeFileSync(OUTP, JSON.stringify(doc, null, 1));
+  } catch (e) { console.error('[NAV] scrape-health 写入失败: ' + e.message); }
+  if (bad.length) {
+    console.error('[NAV] ⚠ 节点级监控：' + bad.map((b) => b.key + '(' + b.status + (b.node ? '·' + b.node : '') + ')').join('、'));
+  }
+  return doc;
+}
+
+async function fetchDomAsync(url, key, budget) {  const ms = budget || 25000;
   const udd = path.join(os.tmpdir(), 'nav-' + key);
   const args = ['--headless=new', '--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage',
     '--user-data-dir=' + udd, '--virtual-time-budget=' + ms,
@@ -271,12 +348,23 @@ async function renderAll(concurrency) {
     while (queue.length) {
       const { s, out } = queue.shift();
       let ok = false;
-      for (const u of urlCandidates(s.url)) {
-        const res = await fetchDomAsync(u, s.key, s.budget);
-        if (res && isValid(res, s)) { fs.writeFileSync(out, res); ok = true; break; }
+      /* 2026-11-21（用户要求）：单源失败后等 30 秒重试一次。
+         并发降到 1 后仍失败，多半是瞬时限流/超时，重试通常能拿到。 */
+      for (let attempt = 1; attempt <= 2 && !ok; attempt++) {
+        if (attempt === 2) {
+          console.log('       ' + s.file + '  首次失败，等待 30 秒重试…');
+          await new Promise((r) => setTimeout(r, 30000));
+        }
+        for (const u of urlCandidates(s.url)) {
+          const res = await fetchDomAsync(u, s.key, s.budget);
+          if (res && isValid(res, s)) { fs.writeFileSync(out, res); ok = true; break; }
+        }
       }
-      if (ok) console.log('       ' + s.file + '  ' + fs.statSync(out).size + ' bytes');
-      else console.error('       ' + s.file + '  抓取无效，保留上一次文件');
+      if (ok) { console.log('       ' + s.file + '  ' + fs.statSync(out).size + ' bytes'); delete RENDER_FAIL[s.key]; }
+      else {
+        console.error('       ' + s.file + '  抓取无效（已重试 1 次），保留上一次文件');
+        RENDER_FAIL[s.key] = '渲染/下载无效（已重试 1 次），本次沿用旧文件';
+      }
     }
   };
   const n = Math.max(1, Math.min(concurrency || 3, queue.length));
@@ -779,11 +867,14 @@ function build() {
   const items = [];
   const sources = [];
   const cntByKey = {};   // 各来源本次取得的可核实条数（用于来源失效告警）
+  const health = [];     // 节点级监控（2026-11-22）
   for (const s of SOURCES) {
     const raw = readFile(s.file);
     if (raw == null) {
       console.log('[NAV] × ' + s.key + ' 缺文件 ' + s.file);
       cntByKey[s.key] = null;
+      health.push({ key: s.key, label: s.label, file: s.file, p: s.p, status: 'missing',
+        node: '源文件', detail: '本地无渲染文件（下载/渲染失败）', count: 0, asOf: '', rawBytes: 0 });
       continue;
     }
     const fn = PARSERS[s.p];
@@ -796,8 +887,17 @@ function build() {
     rows = rows.filter((r) => r.fund && (r.na || r.nav != null));
     const priced = rows.filter((r) => r.nav != null);
     cntByKey[s.key] = priced.length;
+    /* 节点级：先看结构探针，再看解析结果 */
+    const probe = probeNode(s, raw);
+    let hStatus = 'ok', hNode = '', hDetail = '';
+    if (!probe.ok) { hStatus = 'struct_miss'; hNode = probe.node || ''; hDetail = probe.detail || ''; }
+    else if (!priced.length) { hStatus = 'empty'; hNode = '淨值條目'; hDetail = '页面结构正常但没有解析出任何净值'; }
+    else if (RENDER_FAIL[s.key]) { hStatus = 'degraded'; hNode = '抓取'; hDetail = RENDER_FAIL[s.key]; }
+    health.push({ key: s.key, label: s.label, file: s.file, p: s.p, status: hStatus,
+      node: hNode, detail: hDetail, count: priced.length, asOf: '', rawBytes: String(raw).length });
     const naCnt = rows.length - priced.length;
     const asOf = priced.find((r) => r.asOf) ? priced.find((r) => r.asOf).asOf : fallbackAsOf(raw);
+    if (health.length) health[health.length - 1].asOf = asOf || '';
     console.log('[NAV] √ ' + s.key.padEnd(13) + ' ' + String(priced.length).padStart(3) + ' 只' +
       (naCnt ? ' + ' + naCnt + ' 条不适用' : '') + (asOf ? '  截至 ' + asOf : ''));
     // 部分官方接口（如 BCT）必须带真实估值日，URL 中的 DATE 占位符在此落地
@@ -822,6 +922,8 @@ function build() {
       });
     });
   }
+  /* 节点级监控落盘（在防退化判断之前，确保即使整体放弃写入也有记录） */
+  writeScrapeHealth(health);
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
 
   // 防退化：若本次条数明显少于上一次，说明部分官网来源抓取/解析失败。
@@ -971,10 +1073,10 @@ function build() {
 
 function main() {
   if (process.argv.includes('--render')) {
-    renderAll(3).then(() => build()).catch((e) => { console.error('[NAV] 渲染失败：' + e.message); build(); });
+    renderAll(1).then(() => build()).catch((e) => { console.error('[NAV] 渲染失败：' + e.message); build(); });
     return;
   }
   build();
 }
 if (require.main === module) main();
-module.exports = { SOURCES, SRC_DIR, build, urlCandidates, isValid };
+module.exports = { SOURCES, SRC_DIR, build, urlCandidates, isValid, probeNode };
