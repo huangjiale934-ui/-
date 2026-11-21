@@ -96,8 +96,25 @@ step() {
 # 完全没变化就跳过后续派生重算与发布，避免「0 更新的班次」白烧时间与积分。
 NAVSIG_BEFORE=$("$NODE" -e "const f=require('./data/funds.json').funds;const s=f.map(x=>x.id+':'+x.nav+':'+x.navAsOf).join('|');console.log(require('crypto').createHash('md5').update(s).digest('hex'))" 2>/dev/null || echo "")
 
-# 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
-soft_step "1/9 抓发行人最新净值" timeout 1800 node navbuild.js --render
+# 2026-11-22（用户要求：提速降耗）：周日净值源站不更新，若库里已经是上周五的净值，
+# 就不再重渲染 20 个官网页面（实测可省 20+ 分钟）。MPF_FORCE=1 可强制抓取。
+SKIP_NAV="${MPF_SKIP_NAV:-0}"
+if [ "$(date +%u)" = "7" ] && [ "${MPF_FORCE:-0}" != "1" ]; then
+  LAST_FRI=$(date -d 'last friday' +%F 2>/dev/null || echo "")
+  NAVL=$("$NODE" -e "const f=require('./data/funds.json').funds;let m='';f.forEach(x=>{if(x.navAsOf&&x.navAsOf>m)m=x.navAsOf});console.log(m)" 2>/dev/null || echo "")
+  if [ -n "$LAST_FRI" ] && [ -n "$NAVL" ] && { [ "$NAVL" \> "$LAST_FRI" ] || [ "$NAVL" = "$LAST_FRI" ]; }; then
+    SKIP_NAV=1
+    echo "周日且净值已是上周五（$NAVL），跳过净值重渲染（省时省积分）"
+  fi
+fi
+if [ "$SKIP_NAV" = "1" ]; then
+  echo "--- [1/9 抓发行人最新净值] 跳过（复用周五数据） ---"
+else
+  # 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
+  # 2026-11-22：拆成「渲染 → 解析」两段 —— 渲染超时也不会丢掉“用现有快照重建”的机会
+  soft_step "1/9 抓发行人最新净值（渲染）" timeout 1500 node navbuild.js --render-only
+  soft_step "1.02/9 解析净值快照" node navbuild.js
+fi
 # 2026-11-22（用户要求）：节点级抓取监控 —— 比 isValid 更早发现源站改版
 # （价格表节点消失 / 只返回维护页 / 解析 0 条）。只告警，不阻断发布。
 soft_step "1.05/9 抓取节点监控" node tools/scrape-health.js

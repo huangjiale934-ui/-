@@ -197,6 +197,29 @@ def main():
                 if old and old.get("asOf") and asof and old["asOf"] > asof:
                     continue
                 al = allocs[bi] if bi < len(allocs) else []
+                # 2026-11-22 防污染（实测 MT00083 的 #606）：分布区解析到了持仓表的公司名
+                # （阿里巴巴 / 中國建設銀行）。资产分布只可能是「股票/債券/現金」这类类别名，
+                # 一旦标签与十大持仓名称重合，直接判为解析失败、丢弃本次分布（下面会沿用旧值）。
+                if al and top10:
+                    tnames = set()
+                    for _t in top10:
+                        for _p in re.split(r"[\s/（）()、,]+", str(_t.get("name") or "")):
+                            if _p:
+                                tnames.add(_p)
+                    # 资产分布只可能是类别名；公司/ETF 名一律不合格
+                    KEY = ("股票", "債券", "债券", "現金", "现金", "存款", "貨幣", "货币",
+                           "其他", "保證", "保证", "均衡", "保守", "房地產", "房地产",
+                           "商品", "通脹", "通胀", "基金", "期貨", "衍生", "人民幣", "港元", "美元")
+                    def _ok(z):
+                        s = str(z.get("label") or "")
+                        if s in tnames:
+                            return False
+                        return any(k in s for k in KEY)
+                    bad = [z for z in al if not _ok(z)]
+                    if bad and len(bad) * 2 >= len(al):
+                        print("  ⚠ #%s 分布标签非资产类别（%s），丢弃本次分布" %
+                              (x["id"], "、".join(str(z.get("label")) for z in bad[:3])), flush=True)
+                        al = []
                 _new = {
                     "asOf": asof,
                     "src": "中國人壽信託基金表現季報 PDF（FPR，季度）",

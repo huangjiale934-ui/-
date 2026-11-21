@@ -695,6 +695,21 @@ const server = http.createServer(async (req, res) => {
         unitRows: cache.unitRows || 0,
         declaredTotal: cache.declaredTotal || null,
         navStat: cache.navStat || null,
+        /* 2026-11-22：页脚「核对」第二行需要（节点监控 + 两站核验），随 funds 一起下发 */
+        crossCheck: (function () {
+          try {
+            const j = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'cross-check.json'), 'utf8'));
+            return { at: j.at || 0, verdict: j.verdict || '', note: j.note || '', summary: j.summary || {}, a: j.a || {}, b: j.b || {} };
+          } catch (e) { return null; }
+        })(),
+        scrapeHealth: (function () {
+          try {
+            const j = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'scrape-health.json'), 'utf8'));
+            const bad = (j.sources || []).filter((s) => s.status !== 'ok')
+              .map((s) => ({ key: s.key, status: s.status, node: s.node || '' }));
+            return { day: j.day || '', summary: j.summary || {}, bad: bad.slice(0, 6), badN: bad.length };
+          } catch (e) { return null; }
+        })(),
         trusteeCount: new Set(cache.funds.map((f) => f.trustee)).size,
         schemeCount: new Set(cache.funds.map((f) => f.scheme)).size,
         stale: Date.now() - cache.updatedAt > STALE_MS,
@@ -1267,6 +1282,23 @@ const server = http.createServer(async (req, res) => {
               applied: r.applied || 0,
               sources: Object.keys(r.sources || {}).length,
             };
+          } catch (e) { return null; }
+        })(),
+        /* 2026-11-22（用户要求）：页脚「核对」第二行直接用这两个摘要——
+           ① 两站交叉核验结论（本机不再推数据，只核验并提示对方自行更正）
+           ② 节点级抓取监控（是发行人没发，还是我们没抓到） */
+        crossCheck: (function () {
+          try {
+            const j = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'cross-check.json'), 'utf8'));
+            return { at: j.at || 0, verdict: j.verdict || '', note: j.note || '', summary: j.summary || {}, a: j.a || {}, b: j.b || {} };
+          } catch (e) { return null; }
+        })(),
+        scrapeHealth: (function () {
+          try {
+            const j = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'scrape-health.json'), 'utf8'));
+            const bad = (j.sources || []).filter((s) => s.status !== 'ok')
+              .map((s) => ({ key: s.key, status: s.status, node: s.node || '' }));
+            return { day: j.day || '', summary: j.summary || {}, bad: bad.slice(0, 6), badN: bad.length };
           } catch (e) { return null; }
         })(),
         /* 2026-11-16（用户要求）：同计划内落后监控——按 scheme 取当天最大值，逐只比较。

@@ -46,7 +46,8 @@ const hard = src.filter((s) => s.status === 'struct_miss' || s.status === 'missi
 console.log('[节点监控] ' + day + (at ? '（' + at + '）' : '') +
   ' 来源 ' + (S.total || src.length) + ' · 正常 ' + (S.ok || 0) +
   ' · 结构缺失 ' + (S.structMiss || 0) + ' · 空数据 ' + (S.empty || 0) +
-  ' · 缺文件 ' + (S.missing || 0) + ' · 用旧文件 ' + (S.degraded || 0));
+  ' · 缺文件 ' + (S.missing || 0) + ' · 用旧文件 ' + (S.degraded || 0) +
+  (S.notRendered ? ' · 未渲染 ' + S.notRendered : ''));
 
 if (bad.length) {
   console.log('');

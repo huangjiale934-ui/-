@@ -251,13 +251,15 @@ function probeNode(s, raw) {
   const P = s.p;
   try {
     if (P === 'bctJson') {
-      const j = JSON.parse(raw);
-      const list = j.fundInformationList || (j.data && j.data.fundInformationList) || [];
+      /* 注意：Chrome --dump-dom 拿到的是把 JSON 包在 <pre> 里的 HTML，
+         必须用 jsonFrom()（解析器用的同一个函数），不能直接 JSON.parse。 */
+      const j = jsonFrom(raw);
+      const list = (j && j.data && j.data.fundInformationList) || [];
       return list.length ? { ok: true } : { ok: false, node: '基金數據 JSON', detail: 'fundInformationList 为空' };
     }
     if (P === 'rawJson') {
-      JSON.parse(raw);
-      return { ok: true };
+      const j = jsonFrom(raw);
+      return j ? { ok: true } : { ok: false, node: 'JSON 數據', detail: '無法解析為 JSON' };
     }
     if (P === 'amtdTable') {
       const t = String(raw).match(/<table[\s\S]*?<\/table>/g) || [];
@@ -296,6 +298,7 @@ function writeScrapeHealth(entries) {
     empty: entries.filter((e) => e.status === 'empty').length,
     missing: entries.filter((e) => e.status === 'missing').length,
     failed: entries.filter((e) => e.status === 'failed').length,
+    notRendered: entries.filter((e) => e.status === 'not_rendered').length,
     degraded: entries.filter((e) => e.status === 'degraded').length,
   };
   const doc = { updatedAt: Date.now(), day, summary, sources: entries, history: history.concat([{ day, summary }]) };
@@ -309,7 +312,20 @@ function writeScrapeHealth(entries) {
   return doc;
 }
 
-async function fetchDomAsync(url, key, budget) {  const ms = budget || 25000;
+/* 2026-11-22：JSON 接口直连（不走 Chrome）——比无头浏览器快 3-5 倍，且拿到的是原始 JSON */
+async function fetchTextAsync(url) {
+  try {
+    const r = await fetch(url, {
+      headers: { 'user-agent': UA, accept: 'application/json,text/plain,*/*' },
+      signal: AbortSignal.timeout(60000),
+    });
+    if (!r.ok) return null;
+    return await r.text();
+  } catch (e) { return null; }
+}
+
+async function fetchDomAsync(url, key, budget) {
+  const ms = budget || 25000;
   const udd = path.join(os.tmpdir(), 'nav-' + key);
   const args = ['--headless=new', '--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage',
     '--user-data-dir=' + udd, '--virtual-time-budget=' + ms,
@@ -317,10 +333,10 @@ async function fetchDomAsync(url, key, budget) {  const ms = budget || 25000;
   const run = (file, argv, opts) => new Promise((resolve) => {
     execFile(file, argv, opts, (err, stdout) => resolve(err ? null : stdout));
   });
-  const out = await run(CHROME, args, { maxBuffer: 128 * 1024 * 1024, timeout: ms + 90000 });
-  if (out != null) return out;
-  return run('timeout', [String(Math.ceil((ms + 90000) / 1000)), CHROME].concat(args),
-    { maxBuffer: 128 * 1024 * 1024, timeout: ms + 110000 });
+  /* 2026-11-22（提速）：原来失败后再套一层 `timeout` 命令重跑，单页最坏要 2×(ms+90s)=3.8 分钟
+     —— 9 个慢页就能吃掉 30 分钟。Windows 下 execFile 的 timeout 已经会杀进程，外层 timeout 是冗余的。
+     现在单页上限 ms+25s（默认 50s，HSBC/恒生 85s），失败直接进重试。 */
+  return run(CHROME, args, { maxBuffer: 128 * 1024 * 1024, timeout: ms + 25000 });
 }
 
 async function renderAll(concurrency) {
@@ -330,11 +346,14 @@ async function renderAll(concurrency) {
   }
   console.log('[NAV] 渲染器：' + CHROME + '（并发 ' + (concurrency || 3) + '）');
   fs.mkdirSync(SRC_DIR, { recursive: true });
+  /* 2026-11-22：--only=a.html,b.html 只重渲染指定文件（补抓/调试用，避免整轮 20 页） */
+  const ONLY = (process.argv.find((x) => x.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
   const seen = {};
   const list = [];
   for (const s of SOURCES) {
     if (seen[s.file]) continue;
     seen[s.file] = 1;
+    if (ONLY.length && ONLY.indexOf(s.file) < 0) continue;
     const out = path.join(SRC_DIR, s.file);
     if (s.noRender) {
       const sz = fs.existsSync(out) ? fs.statSync(out).size : 0;
@@ -344,6 +363,11 @@ async function renderAll(concurrency) {
     list.push({ s, out });
   }
   const queue = list.slice();
+  /* 2026-11-22：逐步记录渲染结果 —— 进程被 timeout 杀掉时，后面的文件根本没尝试，
+     不能当成「抓取失败」告警。build() 会读这个文件区分 failed / not_rendered。 */
+  const statePath = path.join(SRC_DIR, '.render-state.json');
+  const state = { at: Date.now(), files: {} };
+  const saveState = () => { try { fs.writeFileSync(statePath, JSON.stringify(state)); } catch (e) {} };
   const worker = async () => {
     while (queue.length) {
       const { s, out } = queue.shift();
@@ -356,15 +380,26 @@ async function renderAll(concurrency) {
           await new Promise((r) => setTimeout(r, 30000));
         }
         for (const u of urlCandidates(s.url)) {
-          const res = await fetchDomAsync(u, s.key, s.budget);
+          /* 2026-11-22（提速 + 稳定）：BCT 等 JSON 接口不需要浏览器，
+             直连 fetch 更快也能拿到原始 JSON（Chrome 会把它包成 <pre>，容易误判）。
+             失败再回退到无头 Chrome。 */
+          let res = null;
+          if (s.p === 'bctJson' || s.p === 'rawJson') {
+            res = await fetchTextAsync(u);
+            if (!(res && isValid(res, s))) res = await fetchDomAsync(u, s.key, s.budget);
+          } else {
+            res = await fetchDomAsync(u, s.key, s.budget);
+          }
           if (res && isValid(res, s)) { fs.writeFileSync(out, res); ok = true; break; }
         }
       }
-      if (ok) { console.log('       ' + s.file + '  ' + fs.statSync(out).size + ' bytes'); delete RENDER_FAIL[s.key]; }
+      if (ok) { console.log('       ' + s.file + '  ' + fs.statSync(out).size + ' bytes'); delete RENDER_FAIL[s.key]; state.files[s.file] = 'ok'; }
       else {
         console.error('       ' + s.file + '  抓取无效（已重试 1 次），保留上一次文件');
         RENDER_FAIL[s.key] = '渲染/下载无效（已重试 1 次），本次沿用旧文件';
+        state.files[s.file] = 'fail';
       }
+      saveState();
     }
   };
   const n = Math.max(1, Math.min(concurrency || 3, queue.length));
@@ -868,13 +903,24 @@ function build() {
   const sources = [];
   const cntByKey = {};   // 各来源本次取得的可核实条数（用于来源失效告警）
   const health = [];     // 节点级监控（2026-11-22）
+  /* 渲染进度：进程被 timeout 杀掉时，未尝试的页面不能算「抓取失败」 */
+  let renderState = null;
+  try { renderState = JSON.parse(fs.readFileSync(path.join(SRC_DIR, '.render-state.json'), 'utf8')); } catch (e) { renderState = null; }
   for (const s of SOURCES) {
     const raw = readFile(s.file);
     if (raw == null) {
       console.log('[NAV] × ' + s.key + ' 缺文件 ' + s.file);
       cntByKey[s.key] = null;
-      health.push({ key: s.key, label: s.label, file: s.file, p: s.p, status: 'missing',
-        node: '源文件', detail: '本地无渲染文件（下载/渲染失败）', count: 0, asOf: '', rawBytes: 0 });
+      const rv = renderState && renderState.files ? renderState.files[s.file] : null;
+      /* 文件缺失只在「本次渲染明确失败」时才算 failed；否则一律 not_rendered（沿用上次快照），
+         避免渲染进程被 timeout 杀掉时把后半段来源全报成「缺文件」。 */
+      /* 按设计不渲染的来源（如新地月报由外部工具落盘）不算异常 */
+      const st = s.noRender ? 'ok' : (rv === 'fail' ? 'failed' : 'not_rendered');
+      health.push({ key: s.key, label: s.label, file: s.file, p: s.p, status: st,
+        node: '源文件',
+        detail: st === 'not_rendered' ? '本轮渲染未执行到该页（多半是渲染超时），沿用上次快照'
+          : st === 'failed' ? '下载/渲染无效（已重试 1 次）' : '本地无渲染文件',
+        count: 0, asOf: '', rawBytes: 0 });
       continue;
     }
     const fn = PARSERS[s.p];
@@ -1072,6 +1118,14 @@ function build() {
 }
 
 function main() {
+  /* 2026-11-22（提速/稳健）：渲染与解析拆开跑。
+     以前渲染+解析在同一个进程，渲染一旦超时（并发 1 时最长见过 25 分钟）整个进程被 timeout 杀掉，
+     连“用现有快照重建 nav.json”都不会执行 → 当天净值白抓。
+     --render-only 只负责把页面落盘；解析由下一条命令单独执行，必然跑完。 */
+  if (process.argv.includes('--render-only')) {
+    renderAll(1).then(() => process.exit(0)).catch((e) => { console.error('[NAV] 渲染失败：' + e.message); process.exit(1); });
+    return;
+  }
   if (process.argv.includes('--render')) {
     renderAll(1).then(() => build()).catch((e) => { console.error('[NAV] 渲染失败：' + e.message); build(); });
     return;

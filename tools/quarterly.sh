@@ -73,6 +73,31 @@ fetch_pdf "富達MT00288" "https://www.mpfa.org.hk/assets/FF/MT00288.pdf" tmp/ff
 
 # 2026-11-22（用户要求）：宏利 68 只走官网基金详情 JSON 接口（curl_cffi 浏览器指纹），
 # 完全绕开「季度概覽」页面的 Akamai 反爬；接口按季度返回 top10Holdings / portfolioAllocation。
+# 2026-11-22（用户要求：不允许再有「人工下载」）：三家改全自动
+#  · 永明：官网固定 URL（SLR_MPF_Quarterly_Update.pdf，每季原地更新）
+#  · 中國人壽：積金局匯總 MT00083.pdf（固定 URL，季度更新）
+#  · AMTD：Google Drive 需真浏览器，用 tools/amtd-fetch-chrome.js 逐只下载
+# 先用 source-due 判本季是否已齐 —— 已齐就不再下载/解析（省时间与积分）。
+if "$NODE" tools/source-due.js 永明; then
+  fetch_pdf "永明SLR" "https://www.sunlife.com.hk/content/dam/sunlife/regional/hong-kong/documents/pensions/SLR_MPF_Quarterly_Update.pdf" tmp/slr_mpf.pdf \
+    && run "永明持仓" "$PY" sunlife_holdings.py tmp/slr_mpf.pdf
+  [ -f sunlife_alloc_ingest.py ] && run "永明分布" "$PY" sunlife_alloc_ingest.py
+else
+  echo "  · 永明：本季持仓已齐，跳过下载/解析" >> "$LOG"
+fi
+if "$NODE" tools/source-due.js 中國人壽; then
+  fetch_pdf "中國人壽MT00083" "https://www.mpfa.org.hk/assets/FF/MT00083.pdf" tmp/cl_mt83.pdf \
+    && run "中國人壽持仓" "$PY" chinalife_holdings.py tmp/cl_mt83.pdf
+else
+  echo "  · 中國人壽：本季持仓已齐，跳过下载/解析" >> "$LOG"
+fi
+if "$NODE" tools/source-due.js AMTD; then
+  run "AMTD下载(Chrome)" node tools/amtd-fetch-chrome.js
+  run "AMTD持仓" "$PY" tools/parse-amtd-ffs.py --write
+else
+  echo "  · AMTD：本季持仓已齐，跳过下载/解析" >> "$LOG"
+fi
+
 [ -f fetch-manulife-detail.py ] && run "宏利持仓/分布（官方API）"    "$PY" fetch-manulife-detail.py
 [ -f alloc_fill.py ]        && run "通用持仓/分布抓取(alloc_fill)"  "$PY" alloc_fill.py
 [ -f bct_ffs_auto.py ]      && run "BCT 便览自动发现"               "$PY" bct_ffs_auto.py

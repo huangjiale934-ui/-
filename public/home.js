@@ -479,7 +479,13 @@
     const srcA = $('#moSrc');
     if (srcA) {
       srcA.href = mo.source || '#';
-      srcA.textContent = TQ('数据截至 {d} · {p} 公布 ↗', { d: mo.asOf, p: mo.publishedAt });
+      /* 2026-11-22（用户反馈「积金局早就到 10-31」）：这里原来只写月报日期，
+         而站内「资料截止」用的是基金平台日期，两者容易看混。
+         现在同时标出：官方月报（资产类别汇总）与基金平台（逐基金，月更）各自的日期。 */
+      const plat = (window.DATA && window.DATA.dataAsOf) || '';
+      srcA.textContent = (plat && String(plat) > String(mo.asOf || ''))
+        ? TQ('官方月报：截至 {d}（{p} 公布）· 基金平台：{a} ↗', { d: mo.asOf, p: mo.publishedAt, a: plat })
+        : TQ('数据截至 {d} · {p} 公布 ↗', { d: mo.asOf, p: mo.publishedAt });
     }
 
     // —— 左栏：回报横条（零线双向）——

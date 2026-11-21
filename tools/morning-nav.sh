@@ -144,9 +144,9 @@ node tools/link-audit.js || echo "!!! 链接巡检未通过（详见上）"
 
 echo ""
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致时不写 done、不发布
-# 2026-11-18（用户要求两站数值必须一致）：早班抓完后与 GitHub 站对账，
-# 对方更新的逐只拉齐（--force：哪怕只差 1 只也拉，否则温度计会差 1 个百分点）。
-soft "14.5 与 GitHub 站对账" node tools/site-reconcile.js --apply --force
+# 2026-11-22（用户要求）：两站各自独立抓取，不再把对站数据「拉」过来覆盖本地。
+# 只做只读核验：差异写 data/cross-check.json，页脚展示，由各自下一班自行更正。
+soft "14.5 两站核验（只读）" node tools/cross-check.js
 node tools/predeploy-check.js || { echo "!!! 一致性未通过，中止发布"; write_ustat error "发布前一致性未通过"; exit 1; }
 write_ustat done "早晨净值更新完成" "" "$(date '+%H:%M')"
 echo "=== 早晨净值更新完成 $(date '+%F %T')；日志：$LOG ==="

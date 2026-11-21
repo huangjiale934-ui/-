@@ -83,7 +83,8 @@ jobs:
           # 逐渠道軟失敗：單渠道失敗只記錄，不中斷（與本機 daily.sh 同哲學）
           # 2026-10-28：与本机同样加硬超时——某些发行人页面会让无头浏览器挂住，
           # 云端 job 上限 90 分钟，一旦挂住整条链就等于今天没更新。
-          timeout 1500 node navbuild.js --render || echo "!! navbuild 官網快照失敗"
+          timeout 1500 node navbuild.js --render-only || echo "!! navbuild 官網快照失敗"
+          node navbuild.js || echo "!! navbuild 解析失敗"
           # 2026-11-22：節點級抓取監控（源站改版單獨告警，不阻斷）
           node tools/scrape-health.js || true
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
@@ -113,7 +114,8 @@ jobs:
           # 只抓「單位淨值」渠道；不跑指数、新闻、持仓解析、积金局档案
           # 2026-10-28：与本机同样加硬超时——某些发行人页面会让无头浏览器挂住，
           # 云端 job 上限 90 分钟，一旦挂住整条链就等于今天没更新。
-          timeout 1500 node navbuild.js --render || echo "!! navbuild 官網快照失敗"
+          timeout 1500 node navbuild.js --render-only || echo "!! navbuild 官網快照失敗"
+          node navbuild.js || echo "!! navbuild 解析失敗"
           # 2026-11-22：節點級抓取監控（源站改版單獨告警，不阻斷）
           node tools/scrape-health.js || true
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
@@ -377,6 +379,14 @@ jobs:
       - name: 重算自算指數（每次構建都用当前 hist 重算，避免任何触发方式留下舊值）
         run: |
           node mpfindex.js || echo "!! 自算指數失敗（沿用倉庫數據）"
+
+      # 2026-11-22（用户要求）：两站各自独立，不互推数据；这里只做「只读核验」，
+      # 结果写 data/cross-check.json（页脚「核对」第二行读取）。需要 secret MPF_SHARE 才能读 A 站，
+      # 没有 secret 时脚本自行跳过，不影响构建。
+      - name: 兩站交叉核驗（只讀）
+        env:
+          MPF_SHARE: ${{ secrets.MPF_SHARE }}
+        run: node tools/cross-check.js || true
 
       - name: 靜態化構建
         run: node tools/build-static.js

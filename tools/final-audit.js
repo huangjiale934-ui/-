@@ -199,8 +199,8 @@ if (!monthly.asOf) bad('mpfa-monthly.json 缺 asOf');
 if (/^\d{4}-\d{2}-\d{2}$/.test(monthly.asOf || '')) {
   const mAge = Math.floor((Date.now() - new Date(monthly.asOf + 'T00:00:00Z').getTime()) / 864e5);
   /* 45 天以上先提醒（官方偶爾晚發），60 天以上才視為自動化失效 */
-  if (mAge > 60) bad('積金局月度統計已 ' + mAge + ' 天未推進（asOf ' + monthly.asOf + '，OCR 可能失敗）');
-  else if (mAge > 45) wrn('積金局月度統計已 ' + mAge + ' 天未推進（asOf ' + monthly.asOf + '，等官方發佈）');
+  if (mAge > 60) bad('積金局月報（資產類別匯總）已 ' + mAge + ' 天未推進（asOf ' + monthly.asOf + '，OCR 可能失敗）');
+  else if (mAge > 45) wrn('積金局月報（資產類別匯總）尚未發佈下一期（asOf ' + monthly.asOf + '，官方每月 6 日前後；基金平台逐基金數據另行月更）');
   else ok('積金局月度統計 ' + monthly.asOf + '（' + mAge + ' 天前）');
 }
 const allstats = read('allstats.json', {});
