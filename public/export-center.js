@@ -285,9 +285,7 @@
     el.innerHTML =
       '<div class="ec-box" role="dialog" aria-modal="true" aria-labelledby="ecTitle">' +
       '<div class="ec-head"><b id="ecTitle">' + esc(TT('基金数据导出中心')) + '</b>' +
-      '<div class="ec-mode" role="group">' +
-      '<button type="button" class="tr-r on" data-mode="latest">' + esc(TT('本站最新数据')) + ' · ' + esc(latestNav() || '—') + '</button>' +
-      '</div>' +
+
       '<button type="button" class="ec-x" aria-label="' + esc(TT('关闭')) + '">×</button></div>' +
       '<div class="ec-cols">' +
       '<section class="ec-left"><div class="ec-cap">① ' + esc(TT('选基金')) + ' <span id="ecSelCount"></span></div>' +
@@ -318,7 +316,7 @@
     const n = all.filter((x) => x.navAsOf === latest).length;
     const rest = all.length - n;
     lab.textContent = n
-      ? TQ('仅选择已更新至 {d} 的 {n} 只（其余 {m} 只停在更早日期）', { d: latest, n, m: rest })
+      ? TQ('仅选择已更新至 {d} 的 {n} 只基金', { d: latest, n })
       : TT('仅选择最新净值日的基金');
   }
 

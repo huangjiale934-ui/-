@@ -2272,7 +2272,7 @@ chk('导出中心·⑬只保留本站口径（积金局导出已下线）', (fun
   try {
     const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
     return e.indexOf('data-mode=\"mpfa\"') < 0 && e.indexOf('mpfaCols') < 0 && e.indexOf('mfields') < 0 &&
-      /仅选择已更新至 \{d\} 的 \{n\} 只/.test(e) && /MPF数据导出_/.test(e) &&
+      /仅选择已更新至 \{d\} 的 \{n\} 只基金/.test(e) && /MPF数据导出_/.test(e) &&
       /if \(!ST\.fields\.size\)/.test(e) && /ST\.fields\.size \+ ST\.extra\.size/.test(e);
   } catch (err) { return false; }
 })());
@@ -2329,5 +2329,62 @@ chk('列设置·榜单与对比页补齐（unit / nav / fer）', (function () {
     return /\['unit', '单位类别', 0\]/.test(r) && /\['nav', '单位资产净值', 0\]/.test(r) &&
       /unit: '<th scope="col" data-c="unit"/.test(r) &&
       /k: 'unit'/.test(a) && /k: 'fer'/.test(a) && /case 'fer'/.test(a);
+  } catch (err) { return false; }
+})());
+
+/* ================= 2026-11-21 第二轮（导出精简 / 侧栏缩放 / 调度） ================= */
+chk('导出中心·⑮去掉口径按钮 + 净值文案一行', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    return e.indexOf('ec-mode') < 0 && e.indexOf('data-mode=') < 0 &&
+      /仅选择已更新至 \{d\} 的 \{n\} 只基金/.test(e);
+  } catch (err) { return false; }
+})());
+chk('样式·①只缩侧栏二级筛选，不再整页 zoom', (function () {
+  try {
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
+    return /\.db-sub \.an-prov \{ zoom: \.9/.test(st) && st.indexOf('.db-main { zoom') < 0;
+  } catch (err) { return false; }
+})());
+chk('页脚·免责声明换成「仅供参考 / 投资有风险」', (function () {
+  try {
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+    return /网站数据仅供参考，不构成投资建议；投资有风险，理财需谨慎。/.test(h) &&
+      h.indexOf('基金过往表现并非未来表现的指引') < 0;
+  } catch (err) { return false; }
+})());
+chk('调度·①周六跳过 / 无变化短路 / 晚间摘要', (function () {
+  try {
+    const d = fs.readFileSync(path.join(__dirname, 'daily.sh'), 'utf8');
+    return /date \+%u\)" = "6"/.test(d) && /NAVSIG_BEFORE/.test(d) && /NAVSIG_AFTER/.test(d) &&
+      /tools\/daily-log\.js/.test(d) && /quarterly-due\.js/.test(d);
+  } catch (err) { return false; }
+})());
+chk('调度·②抓取降并发 + 失败重试 30 秒', (function () {
+  try {
+    const n = fs.readFileSync(path.join(__dirname, '..', 'navbuild.js'), 'utf8');
+    return /renderAll\(1\)/.test(n) && /等待 30 秒重试/.test(n) && /attempt <= 2/.test(n);
+  } catch (err) { return false; }
+})());
+chk('调度·③季度判定（月份递增频率 + 90% 完成即停）', (function () {
+  try {
+    const q = fs.readFileSync(path.join(__dirname, 'quarterly-due.js'), 'utf8');
+    return /1: \[0\], 2: \[3, 0\], 3: \[2, 4, 0\]/.test(q) && /pct >= 0\.9/.test(q) &&
+      /prevQuarterEnd/.test(q);
+  } catch (err) { return false; }
+})());
+chk('调度·④GitHub 两班时间（00:00 / 09:00）+ 邮件只在晚间', (function () {
+  try {
+    const w = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
+    return /cron: '0 16 \* \* \*'/.test(w) && /cron: '0 1 \* \* 1-5'/.test(w) &&
+      /github\.event\.schedule == '0 16 \* \* \*'/.test(w) && /pages1/.test(w);
+  } catch (err) { return false; }
+})());
+chk('每日摘要·④不再依赖 push.js，独立脚本可写', (function () {
+  try {
+    const f = fs.readFileSync(path.join(__dirname, 'daily-log.js'), 'utf8');
+    const l = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'daily-log.json'), 'utf8'));
+    return /navLatest/.test(f) && /lagByTrustee/.test(f) && Array.isArray(l) &&
+      l.some((r) => r && r.navLatest);
   } catch (err) { return false; }
 })());

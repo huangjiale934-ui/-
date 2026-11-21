@@ -1562,6 +1562,8 @@
   '已导出 {n} 只基金、{c} 个字段': 'Exported {n} funds, {c} fields',
   '导出失败，请稍后重试': 'Export failed, please try again',
   '批量导出数据': 'Batch export',
+  '仅选择已更新至 {d} 的 {n} 只基金': 'Only the {n} funds updated to {d}',
+  '网站数据仅供参考，不构成投资建议；投资有风险，理财需谨慎。': 'Website data is for reference only and does not constitute investment advice. Investments carry risk; invest prudently.',
   '另有 {n} 只落后 1 个估值日，多为发行人 T+1 公布，属正常节奏。': '{n} more are one valuation day behind (mostly T+1 publication, which is normal).',
   '仅选择已更新至 {d} 的 {n} 只（其余 {m} 只停在更早日期）': 'Only the {n} funds updated to {d} (the other {m} are on earlier dates)',
   '积金局基金细类（第二级）': 'MPFA fund sub-category (level 2)',

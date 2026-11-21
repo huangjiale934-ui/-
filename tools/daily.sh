@@ -64,6 +64,14 @@ write_ustat() {
   # 2026-11-19（8.0）：同时推到 A 站（失败静默），线上顶部提示栏才能实时显示「正在更新」
   ( "$NODE" tools/push-status.js >/dev/null 2>&1 & ) || true
 }
+# 2026-11-21（用户要求）：周六源站不发布净值，全量班纯耗积分 —— 直接退出。
+# 周日晚上照常跑全量；MPF_FORCE=1 可强制（补数据、修 bug 时用）。
+if [ "$(date +%u)" = "6" ] && [ "${MPF_FORCE:-0}" != "1" ]; then
+  echo "[$(date '+%F %H:%M')] 周六不更新（源站不发布净值），退出"
+  "$NODE" tools/daily-log.js >/dev/null 2>&1 || true
+  exit 0
+fi
+
 USTART=$(date +%s)
 USTARTH=$(date '+%H:%M')
 write_ustat running "开始" "$USTARTH"
@@ -83,6 +91,10 @@ step() {
     exit $rc
   fi
 }
+
+# 2026-11-21（用户要求）：无变化短路——先记净值指纹，抓完比对；
+# 完全没变化就跳过后续派生重算与发布，避免「0 更新的班次」白烧时间与积分。
+NAVSIG_BEFORE=$("$NODE" -e "const f=require('./data/funds.json').funds;const s=f.map(x=>x.id+':'+x.nav+':'+x.navAsOf).join('|');console.log(require('crypto').createHash('md5').update(s).digest('hex'))" 2>/dev/null || echo "")
 
 # 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
 soft_step "1/9 抓发行人最新净值" timeout 1800 node navbuild.js --render
@@ -172,6 +184,17 @@ fi
 # 于是两站 funds 分布不同、breadth 差 1 个百分点。这里从 GitHub 站补「本地缺、远端有」
 # 的点（严格校验：本地点必须与远端逐点相同，单只最多补 5 个点，否则跳过等人工）。
 soft_step "5.9/9 云端补点（历史对齐）" node tools/sync-hist-from-cloud.js
+
+# 2026-11-21（用户要求）：净值无变化 → 跳过派生重算与发布（MPF_FORCE=1 可强制跑全量）
+NAVSIG_AFTER=$("$NODE" -e "const f=require('./data/funds.json').funds;const s=f.map(x=>x.id+':'+x.nav+':'+x.navAsOf).join('|');console.log(require('crypto').createHash('md5').update(s).digest('hex'))" 2>/dev/null || echo "")
+if [ -n "$NAVSIG_BEFORE" ] && [ "$NAVSIG_BEFORE" = "$NAVSIG_AFTER" ] && [ "${MPF_FORCE:-0}" != "1" ]; then
+  echo ""
+  echo "--- [短路] 本班净值无变化（指纹 $NAVSIG_AFTER）→ 跳过派生重算与发布 ---"
+  "$NODE" tools/daily-log.js 2>&1 | sed 's/^/    /' || true
+  write_ustat done "无变化，已跳过" "" "$(date '+%H:%M')"
+  exit 0
+fi
+
 step "6/9 重算自算指标" node navperf.js
 # 2026-11-11（自查发现）：allstats 是「走势图未选基金时」的统计表数据源，
 # 上次生成停在 10-28（两周前）→ 用户默认看到的是旧区间收益。6 秒可重算完。
@@ -202,6 +225,15 @@ step "8.4/9 历史索引对齐" node tools/hist-index-sync.js
 step "8.45/9 净值精度归一（表 = 历史末点，4 位）" node tools/hist-round4.js
 node tools/nav-round4.js
 # 2026-10-24：链路末尾固化验收（不依赖 AI 纪律；核验 U01）
+# 2026-11-21（用户要求）：季度持仓并入每晚全量任务，按「季度结束后第 1/2/3 个月」
+# 的频率自动判定（周日 / 周三+周日 / 周二+周四+周日），更新到 90% 即停。
+# 判定在 tools/quarterly-due.js，手动强制跑仍可直接 bash tools/quarterly.sh。
+if "$NODE" tools/quarterly-due.js; then
+  step "8.6/9 季度持仓（到期）" bash tools/quarterly.sh
+else
+  echo "    · 季度持仓：今天不到计划日或已基本更新完，跳过"
+fi
+
 step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js
 # 2026-11-03（第二十九轮）：缺日检查改成「真缺才补」的自动闭环 ——
 # 旧版按 HSI 交易日历判缺，把源站未发布的日期（宏利退休精選 T+2 / AMTD 走 etnet / 新地按季）
@@ -251,6 +283,9 @@ soft_step "9.9/9 同计划落后（末次）" node tools/plan-lag.js
 # 并中止发布（11-18 22:35 就是这样挂在 10/10）。发布前再归一一次，幂等。
 step "9.95/9 净值精度复归（发布前）" node tools/nav-round4.js
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致（如新 funds 配旧 nav-perf）时禁止发布
+# 2026-11-21（用户反馈）：无论是否发布都写每日摘要，日志不再依赖 push.js
+soft_step "9.98/10 每日摘要" node tools/daily-log.js
+
 step "10/10 发布前一致性" node tools/predeploy-check.js
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
 
