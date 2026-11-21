@@ -84,6 +84,8 @@ jobs:
           # 2026-10-28：与本机同样加硬超时——某些发行人页面会让无头浏览器挂住，
           # 云端 job 上限 90 分钟，一旦挂住整条链就等于今天没更新。
           timeout 1500 node navbuild.js --render || echo "!! navbuild 官網快照失敗"
+          # 2026-11-22：節點級抓取監控（源站改版單獨告警，不阻斷）
+          node tools/scrape-health.js || true
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
           python nav-etnet.py || echo "!! etnet 失敗"
           python fetch-bea-hist.py || echo "!! 東亞失敗"
@@ -112,6 +114,8 @@ jobs:
           # 2026-10-28：与本机同样加硬超时——某些发行人页面会让无头浏览器挂住，
           # 云端 job 上限 90 分钟，一旦挂住整条链就等于今天没更新。
           timeout 1500 node navbuild.js --render || echo "!! navbuild 官網快照失敗"
+          # 2026-11-22：節點級抓取監控（源站改版單獨告警，不阻斷）
+          node tools/scrape-health.js || true
           python fetch-manulife-hist.py || echo "!! 宏利失敗"
           python fetch-bea-hist.py || echo "!! 東亞失敗"
           python fetch-fidelity-hist.py || echo "!! 富達失敗"
