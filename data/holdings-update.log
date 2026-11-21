@@ -455,3 +455,1557 @@ FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17
   异常明细： 173:98 183:98 218:100.6 231:90.5 387:88.1 390:84.9 460:97.68 463:96.91 659:94.3 660:92.2 703:99.5 707:99.5 710:99.5 799:101.4 800:79.5 816:77.52 819:83.51 820:96.36 821:81.29 822:98.68 824:97.65 826:79.76 896:99.4 1399:96.83 1498:94.36 1533:99.2 1537:99.3 1539:97.4 1543:102.43 2401:92.35
 top10 校验：全部通过 ✓
 [2026-11-17 21:07] 季度持仓刷新结束
+[2026-11-18 21:04] 季度持仓刷新开始
+持仓快照已保存 → tmp\holdings-txn.json（451 只，其中不合规 2 只）
+  ✘ 東亞FFS 下载失败（https://www.hkbea.com/pdf/fund-fact-sheet/2026/mpf-2026-3rd.pdf）
+写入 6 条
+  ✔ 東亞分布(读图)
+  ✔ 滙豐invrptce1 → tmp/hsbc_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+· 跳過（無 PDF）: D:\2026-10-08-11-05-17\mpf-app\tmp/hase_invrptce1.pdf
+共 5 條
+已寫回
+  ✔ 滙豐持仓(价格匹配)
+  ✔ 恒生FFS → tmp/hase_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+== hase_invrptce1.pdf（HS）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 302,305,307,311,807
+  #302 p11 HK$27.0205 top=10 合計=48.10 ✓
+  #305 p6 HK$10.6201 top=10 合計=16.60 ✓
+  #307 p9 HK$23.0593 top=10 合計=26.50 ✓
+  #311 p8 HK$33.1032 top=10 合計=11.40 ✓
+  #807 p7 HK$14.0882 top=10 合計=11.30 ✓
+共 10 條
+已寫回
+  ✔ 恒生持仓(价格匹配)
+  ✘ 富達MT00288 下载失败（https://www.mpfa.org.hk/assets/FF/MT00288.pdf）
+补入 0 只；有资产分布 451 / 451
+  ✔ 通用持仓/分布抓取(alloc_fill)
+发现 8 份：
+  行業計劃           IS_Fact_Sheet.pdf                          5587KB
+  積金之選           MTS_Fact_Sheet.pdf                         4237KB
+  策略計劃           IV_Fact_Sheet.pdf                          695KB
+  明智之選           Smart_FFS_2026Q2.pdf                       1646KB
+  易富之選           Simple_FFS_2026Q2.pdf                      1226KB
+  800系列          S800_FFS_2026Q2.pdf                        1733KB
+  積金之選(季報)       MTS_Fact_Sheet_Q226.pdf                    4237KB
+  策略計劃(月報)       Strategic-MPF-Factsheet-(A)-202609.pdf     695KB
+  IS_Fact_Sheet.pdf                          新写入 12
+  MTS_Fact_Sheet.pdf                         新写入 26
+  IV_Fact_Sheet.pdf                          新写入 13
+  Smart_FFS_2026Q2.pdf                       新写入 9
+  Simple_FFS_2026Q2.pdf                      新写入 6
+  S800_FFS_2026Q2.pdf                        新写入 17
+  MTS_Fact_Sheet_Q226.pdf                    新写入 26
+  Strategic-MPF-Factsheet-(A)-202609.pdf     新写入 13
+自动解析写入 122；holdings 共 451
+  ✔ BCT 便览自动发现
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 208, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 166, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocpt_fs.pdf'
+  ✘ 中銀保誠持仓
+  817 asset        100.0%
+  818 asset        100.0%
+  822 industry      98.7%
+  825 region       100.0%
+  827 asset         99.9%
+  1359 asset        100.0%
+  1543 asset        102.4%
+  2399 industry     100.0%
+  2400 asset        100.0%
+写入 9 条
+  ✔ 中銀保誠分布
+✘ 不存在: D:\2026-10-08-11-05-17\mpf-app\tmp\cl_fpr_2026q1.pdf
+完成：写入 0；holdings 共 451
+  ✔ 中國人壽持仓(需先下载FPR PDF)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 124, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 85, in main
+    pdf = pdfplumber.open(path)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocom_ffs.pdf'
+  ✘ 交通持仓
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 153, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 98, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf3\\Haitong_Korea_Fund.pdf'
+  ✘ 海通持仓(逐頁v3)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 211, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 146, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf2\\Haitong_Korea_Fund.pdf'
+  ✘ 海通分布(v2)
+① 各計劃基金行…
+  BCT積金之選：26 只
+  BCT強積金計劃800系列：28 只
+  BCT強積金策略計劃：26 只
+  BCT強積金—明智之選：14 只
+  BCT（強積金）行業計劃：12 只
+  BCT強積金—易富之選：10 只
+② Fact Sheet PDF：8 個
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 publications#sd_fact_sheet …
+  [!] PDF -updates/insights/publications#sd_fact_sheet → 200
+  下載 IV_Fact_Sheet_H.pdf …
+    解析 IV_Fact_Sheet_H.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：7 個基金分節
+  下載 IV_Fact_Sheet.pdf …
+    解析 IV_Fact_Sheet.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 15 → 景順環球追蹤指數基金（top10 10 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：15 個基金分節
+  下載 publications#sm_fact_sheet …
+  [!] PDF -updates/insights/publications#sm_fact_sheet → 200
+  下載 IS_Fact_Sheet.pdf …
+    解析 IS_Fact_Sheet.pdf（0 頁，12 候選基金名）…
+    小計：15 個基金分節
+  下載 publications#si_fact_sheet …
+  [!] PDF -updates/insights/publications#si_fact_sheet → 200
+  ⚠ #187 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1533 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #800 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #628 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #627 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #198 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #199 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1557 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1558 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2066 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2067 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #200 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #201 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1339 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1340 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #195 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #196 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2068 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2069 解析结果不合规（空名稱/分布塌縮），保留旧数据
+③ 寫入：命中 -19 / 未匹配 116
+  ✔ BCT 持仓
+持仓事务校验：零退化 ✅（对照 451 只）
+  ✔ 持仓事务校验：零退化
+规范化：补口径标题 83 | 简→繁 0 | 排序 0 | 日期归一 0 | 补 allocSum 83
+持仓校验：合规 421 只 | 合计异常 30 只 | 缺分布 0 只
+  异常明细： 173:98 183:98 218:100.6 231:90.5 387:88.1 390:84.9 460:97.68 463:96.91 659:94.3 660:92.2 703:99.5 707:99.5 710:99.5 799:101.4 800:79.5 816:77.52 819:83.51 820:96.36 821:81.29 822:98.68 824:97.65 826:79.76 896:99.4 1399:96.83 1498:94.36 1533:99.2 1537:99.3 1539:97.4 1543:102.43 2401:92.35
+top10 校验：全部通过 ✓
+[2026-11-18 21:09] 季度持仓刷新结束
+[2026-11-19 21:06] 季度持仓刷新开始
+持仓快照已保存 → tmp\holdings-txn.json（451 只，其中不合规 2 只）
+  ✘ 東亞FFS 下载失败（https://www.hkbea.com/pdf/fund-fact-sheet/2026/mpf-2026-3rd.pdf）
+写入 6 条
+  ✔ 東亞分布(读图)
+  ✔ 滙豐invrptce1 → tmp/hsbc_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+· 跳過（無 PDF）: D:\2026-10-08-11-05-17\mpf-app\tmp/hase_invrptce1.pdf
+共 5 條
+已寫回
+  ✔ 滙豐持仓(价格匹配)
+  ✔ 恒生FFS → tmp/hase_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+== hase_invrptce1.pdf（HS）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 302,305,307,311,807
+  #302 p11 HK$27.0205 top=10 合計=48.10 ✓
+  #305 p6 HK$10.6201 top=10 合計=16.60 ✓
+  #307 p9 HK$23.0593 top=10 合計=26.50 ✓
+  #311 p8 HK$33.1032 top=10 合計=11.40 ✓
+  #807 p7 HK$14.0882 top=10 合計=11.30 ✓
+共 10 條
+已寫回
+  ✔ 恒生持仓(价格匹配)
+  ✔ 富達MT00288 → tmp/ff_fid.pdf
+強積金保守基金 p26[asset] asOf=2026-06-30 top=10 分佈=2 合计=100.00
+    貨幣基金              99.73
+    現金及其他              0.27
+    · TERM DEPOSIT IN OCBC (HK) LTD 02/07/2026              8.28
+    · TERM DEPOSIT IN ING BANK 02/07/2026                   7.14
+    · DZ BANK AG 0% 02/07/2026                              4.85
+增長基金 p16[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票              17.12
+    中國在岸股票            10.90
+    亞太股票              16.45
+    日本股票              12.24
+    歐洲股票              15.60
+    美國股票              20.87
+    新興市場股票             0.52
+    世界股票               1.02
+    高評級債券              3.82
+    貨幣基金               0.35
+    現金及其他              1.11
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                12.19
+    · JAPAN INDEX FUND                                      5.84
+    · INVESCO QQQ TRUST 景順QQQ                               4.72
+平穩增長基金 p18[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               7.96
+    中國在岸股票             7.73
+    亞太股票               9.20
+    日本股票               7.10
+    歐洲股票               8.64
+    美國股票              12.90
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             41.96
+    貨幣基金               0.69
+    現金及其他              2.29
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       7.32
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 6.30
+    · INVESCO QQQ TRUST 景順QQQ                               4.76
+資本穩定基金 p19[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               4.71
+    中國在岸股票             5.10
+    亞太股票               6.02
+    日本股票               4.67
+    歐洲股票               4.17
+    美國股票               8.91
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             57.33
+    貨幣基金               5.26
+    現金及其他              2.30
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       7.75
+    · USTN 4.375% 15/05/2036                                4.47
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 4.41
+均衡基金 p17[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票              12.80
+    中國在岸股票             9.88
+    亞太股票              12.03
+    日本股票               9.25
+    歐洲股票              11.71
+    美國股票              17.66
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             22.91
+    貨幣基金               0.38
+    現金及其他              1.85
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                10.95
+    · JAPAN INDEX FUND                                      5.39
+    · INVESCO QQQ TRUST 景順QQQ                               4.68
+環球股票基金 p11[asset] asOf=2026-06-30 top=10 分佈=9 合计=100.00
+    香港股票               0.71
+    中國在岸股票             1.85
+    亞太股票              11.42
+    日本股票               6.39
+    歐洲股票              11.00
+    美國股票              62.92
+    新興市場股票             0.52
+    世界股票               4.96
+    現金及其他              0.23
+    · AMERICAN INDEX FUND                                  19.20
+    · ISHARES GLOBAL TECH ETF                               4.96
+    · NVIDIA CORP 輝達                                        3.01
+核心累積基金 p21[asset] asOf=2026-06-30 top=10 分佈=4 合计=100.00
+    世界股票              63.27
+    高評級債券             33.94
+    貨幣基金               1.16
+    現金及其他              1.63
+    · NVIDIA CORP 輝達                                        2.86
+    · APPLE INC 蘋果公司                                        2.56
+    · MICROSOFT CORP 微軟                                     1.70
+65歲後基金 p22[asset] asOf=2026-06-30 top=10 分佈=4 合计=100.00
+    世界股票              22.93
+    高評級債券             74.68
+    貨幣基金               1.24
+    現金及其他              1.15
+    · NVIDIA CORP 輝達                                        1.04
+    · APPLE INC 蘋果公司                                        0.93
+    · 2.52% 25/08/2033                                      0.89
+富達「儲蓄易」2025基金 p32[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               8.20
+    中國在岸股票             3.94
+    亞太股票               6.57
+    日本股票               4.97
+    歐洲股票               4.07
+    美國股票              10.41
+    新興市場股票             0.53
+    世界股票               0.51
+    高評級債券             54.07
+    貨幣基金               4.84
+    現金及其他              1.89
+    · USTN 4.375% 15/05/2036                                7.26
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 7.07
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       4.08
+富達「儲蓄易」2030基金 p31[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              20.09
+    中國在岸股票             4.65
+    亞太股票              13.43
+    日本股票              10.65
+    歐洲股票              12.50
+    美國股票              21.43
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券             15.40
+    現金及其他              0.82
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                16.66
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       6.82
+    · INVESCO QQQ TRUST 景順QQQ                               4.79
+富達「儲蓄易」2035基金 p30[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              23.26
+    中國在岸股票             4.34
+    亞太股票              15.36
+    日本股票              12.48
+    歐洲股票              15.21
+    美國股票              22.86
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券              4.46
+    現金及其他              1.00
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                19.33
+    · AMERICAN INDEX FUND                                   4.86
+    · INVESCO QQQ TRUST 景順QQQ                               4.77
+富達「儲蓄易」2040基金 p29[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              24.53
+    中國在岸股票             4.27
+    亞太股票              15.71
+    日本股票              12.88
+    歐洲股票              16.30
+    美國股票              23.14
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券              1.08
+    現金及其他              1.06
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                18.62
+    · AMERICAN INDEX FUND                                   5.00
+    · INVESCO QQQ TRUST 景順QQQ                               4.80
+富達「儲蓄易」2045基金 p28[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              25.03
+    中國在岸股票             4.37
+    亞太股票              16.05
+    日本股票              13.41
+    歐洲股票              16.16
+    美國股票              23.45
+    新興市場股票             0.52
+    世界股票               0.50
+    高評級債券              0.32
+    現金及其他              0.19
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                19.26
+    · JAPAN INDEX FUND                                      4.32
+    · ISHARES US TECHNOLOGY ETF                             4.25
+富達「儲蓄易」2050基金 p27[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              25.85
+    中國在岸股票             3.57
+    亞太股票              16.12
+    日本股票              13.62
+    歐洲股票              17.00
+    美國股票              22.61
+    新興市場股票             0.52
+    世界股票               0.50
+    高評級債券              0.02
+    現金及其他              0.19
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                20.08
+    · ISHARES US TECHNOLOGY ETF                             4.41
+    · INVESCO QQQ TRUST 景順QQQ                               4.02
+亞太股票基金 p10[industry] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    科技                38.10
+    金融                18.50
+    電訊                12.40
+    工業                10.40
+    基本物料               5.90
+    非必需消費品             3.30
+    健康護理               3.10
+    能源                 2.40
+    主要消費品              1.60
+    公用事業               1.60
+    其他                 2.70
+    · SK HYNIX INC                                          9.15
+    · TAIWAN SEMICONDUCTOR MFG CO LTD 台積電                   8.86
+    · SAMSUNG ELECTRONICS 三星電子                              8.61
+香港股票基金 p12[industry] asOf=2026-06-30 top=10 分佈=12 合计=100.00
+    金融                29.20
+    非必需消費品            20.80
+    科技                18.80
+    工業                11.00
+    主要消費品              6.80
+    房地產                4.90
+    能源                 3.00
+    健康護理               2.60
+    公用事業               1.30
+    基本物料               0.70
+    電訊                 0.60
+    其他                 0.30
+    · TENCENT HOLDINGS LTD 騰訊控股                             9.95
+    · HSBC HOLDINGS PLC 滙豐控股                                9.29
+    · ALIBABA GROUP HOLDING LTD 阿里巴巴－W                      8.35
+歐洲股票基金 p14[industry] asOf=2026-06-30 top=10 分佈=12 合计=100.00
+    金融                24.50
+    工業                19.40
+    健康護理              12.70
+    科技                 9.70
+    非必需消費品             7.30
+    主要消費品              6.50
+    能源                 5.70
+    公用事業               4.10
+    基本物料               4.00
+    電訊                 2.40
+    房地產                0.40
+    其他                 3.30
+    · ASML HOLDING 艾司摩爾                                     5.29
+    · HSBC HOLDINGS PLC 滙豐控股                                2.58
+    · NOVARTIS AG 諾華製藥集團                                    2.00
+富達香港盈富基金 p15[industry] asOf=2026-06-30 top=10 分佈=13 合计=100.00
+    金融                33.50
+    非必需消費品            20.60
+    科技                16.30
+    健康護理               5.10
+    能源                 4.70
+    地產及建設              4.00
+    電訊                 3.70
+    工業                 2.50
+    公用事業               2.50
+    物料                 2.10
+    主要消費品              1.80
+    綜合企業               1.60
+    其他                 1.60
+    · HSBC HOLDINGS PLC 滙豐控股                                9.00
+    · TENCENT HOLDINGS LTD 騰訊控股                             8.00
+    · ALIBABA GROUP HOLDING LTD 阿里巴巴－W                      6.35
+香港債券基金 p23[industry] asOf=2026-06-30 top=10 分佈=6 合计=100.00
+    金融                48.70
+    半政府/主權/超國家/機構債券   33.30
+    公用事業               9.20
+    工業                 6.20
+    國庫券                2.60
+    其他                 0.00
+    · LINK CB LTD CONV 4.5% 12/12/2027 REGS                 4.74
+    · NATIONAL AUSTRALIA BANK 4.7% 03/08/2032 REGS          4.47
+    · 法國巴黎銀行 4.3% 14/10/2034                                3.17
+人民幣債券基金 p24[industry] asOf=2026-06-30 top=10 分佈=5 合计=100.00
+    金融                39.00
+    半政府/主權/超國家/機構債券   36.70
+    工業                16.20
+    公用事業               1.70
+    其他                 6.40
+    · 香港機場管理局 2.85% 14/01/2035 REGS                         3.93
+    · 友邦保險 2.88% 30/04/2036 REGS                            3.52
+    · BNP PARIBAS VAR 17/08/2031 REGS                       2.87
+國際債券基金 p25[industry] asOf=2026-06-30 top=10 分佈=5 合计=100.00
+    國庫券               91.20
+    工業                 1.60
+    金融                 1.50
+    半政府/主權/超國家/機構債券    0.20
+    其他                 5.50
+    · USTN 4.375% 15/05/2036                               14.76
+    · BUNDESREPUB DEUTSCHLAND 2.6% 15/08/2035 REGS          7.15
+    · USTN 4.375% 31/01/2032 美國國庫券 4.375% 31/01/2032        7.12
+已写回 21 条
+  ✔ 富達持仓
+补入 0 只；有资产分布 451 / 451
+  ✔ 通用持仓/分布抓取(alloc_fill)
+发现 8 份：
+  行業計劃           IS_Fact_Sheet.pdf                          5587KB
+  積金之選           MTS_Fact_Sheet.pdf                         4237KB
+  策略計劃           IV_Fact_Sheet.pdf                          695KB
+  明智之選           Smart_FFS_2026Q2.pdf                       1646KB
+  易富之選           Simple_FFS_2026Q2.pdf                      1226KB
+  800系列          S800_FFS_2026Q2.pdf                        1733KB
+  積金之選(季報)       MTS_Fact_Sheet_Q226.pdf                    4237KB
+  策略計劃(月報)       Strategic-MPF-Factsheet-(A)-202609.pdf     695KB
+  IS_Fact_Sheet.pdf                          新写入 12
+  MTS_Fact_Sheet.pdf                         新写入 26
+  IV_Fact_Sheet.pdf                          新写入 13
+  Smart_FFS_2026Q2.pdf                       新写入 9
+  Simple_FFS_2026Q2.pdf                      新写入 6
+  S800_FFS_2026Q2.pdf                        新写入 17
+  MTS_Fact_Sheet_Q226.pdf                    新写入 26
+  Strategic-MPF-Factsheet-(A)-202609.pdf     新写入 13
+自动解析写入 122；holdings 共 451
+  ✔ BCT 便览自动发现
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 208, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 166, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocpt_fs.pdf'
+  ✘ 中銀保誠持仓
+  817 asset        100.0%
+  818 asset        100.0%
+  822 industry      98.7%
+  825 region       100.0%
+  827 asset         99.9%
+  1359 asset        100.0%
+  1543 asset        102.4%
+  2399 industry     100.0%
+  2400 asset        100.0%
+写入 9 条
+  ✔ 中銀保誠分布
+✘ 不存在: D:\2026-10-08-11-05-17\mpf-app\tmp\cl_fpr_2026q1.pdf
+完成：写入 0；holdings 共 451
+  ✔ 中國人壽持仓(需先下载FPR PDF)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 124, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 85, in main
+    pdf = pdfplumber.open(path)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocom_ffs.pdf'
+  ✘ 交通持仓
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 153, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 98, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf3\\Haitong_Korea_Fund.pdf'
+  ✘ 海通持仓(逐頁v3)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 211, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 146, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf2\\Haitong_Korea_Fund.pdf'
+  ✘ 海通分布(v2)
+① 各計劃基金行…
+  BCT積金之選：26 只
+  BCT強積金計劃800系列：28 只
+  BCT強積金策略計劃：26 只
+  BCT強積金—明智之選：14 只
+  BCT（強積金）行業計劃：12 只
+  BCT強積金—易富之選：10 只
+② Fact Sheet PDF：8 個
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 publications#sd_fact_sheet …
+  [!] PDF -updates/insights/publications#sd_fact_sheet → 200
+  下載 IV_Fact_Sheet_H.pdf …
+    解析 IV_Fact_Sheet_H.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：7 個基金分節
+  下載 IV_Fact_Sheet.pdf …
+    解析 IV_Fact_Sheet.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 15 → 景順環球追蹤指數基金（top10 10 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：15 個基金分節
+  下載 publications#sm_fact_sheet …
+  [!] PDF -updates/insights/publications#sm_fact_sheet → 200
+  下載 IS_Fact_Sheet.pdf …
+    解析 IS_Fact_Sheet.pdf（0 頁，12 候選基金名）…
+    小計：15 個基金分節
+  下載 publications#si_fact_sheet …
+  [!] PDF -updates/insights/publications#si_fact_sheet → 200
+  ⚠ #187 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1533 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #800 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #628 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #627 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #198 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #199 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1557 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1558 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2066 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2067 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #200 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #201 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1339 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1340 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #195 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #196 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2068 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2069 解析结果不合规（空名稱/分布塌縮），保留旧数据
+③ 寫入：命中 -19 / 未匹配 116
+  ✔ BCT 持仓
+持仓事务校验：零退化 ✅（对照 451 只）
+  ✔ 持仓事务校验：零退化
+规范化：补口径标题 83 | 简→繁 0 | 排序 0 | 日期归一 0 | 补 allocSum 83 | 剥离行情字段 0
+持仓校验：合规 421 只 | 合计异常 30 只 | 缺分布 0 只
+  异常明细： 173:98 183:98 218:100.6 231:90.5 387:88.1 390:84.9 460:97.68 463:96.91 659:94.3 660:92.2 703:99.5 707:99.5 710:99.5 799:101.4 800:79.5 816:77.52 819:83.51 820:96.36 821:81.29 822:98.68 824:97.65 826:79.76 896:99.4 1399:96.83 1498:94.36 1533:99.2 1537:99.3 1539:97.4 1543:102.43 2401:92.35
+top10 校验：全部通过 ✓
+[2026-11-19 21:09] 季度持仓刷新结束
+[2026-11-20 21:05] 季度持仓刷新开始
+持仓快照已保存 → tmp\holdings-txn.json（451 只，其中不合规 2 只）
+  · 東亞FFS：源站尚未发布 2026 年第 3 季便覧（HTTP 404），跳过（非抓取故障）
+写入 6 条
+  ✔ 東亞分布(读图)
+  ✔ 滙豐invrptce1 → tmp/hsbc_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+· 跳過（無 PDF）: D:\2026-10-08-11-05-17\mpf-app\tmp/hase_invrptce1.pdf
+共 5 條
+已寫回
+  ✔ 滙豐持仓(价格匹配)
+  ✔ 恒生FFS → tmp/hase_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+== hase_invrptce1.pdf（HS）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 302,305,307,311,807
+  #302 p11 HK$27.0205 top=10 合計=48.10 ✓
+  #305 p6 HK$10.6201 top=10 合計=16.60 ✓
+  #307 p9 HK$23.0593 top=10 合計=26.50 ✓
+  #311 p8 HK$33.1032 top=10 合計=11.40 ✓
+  #807 p7 HK$14.0882 top=10 合計=11.30 ✓
+共 10 條
+已寫回
+  ✔ 恒生持仓(价格匹配)
+  ✔ 富達MT00288 → tmp/ff_fid.pdf
+強積金保守基金 p26[asset] asOf=2026-06-30 top=10 分佈=2 合计=100.00
+    貨幣基金              99.73
+    現金及其他              0.27
+    · TERM DEPOSIT IN OCBC (HK) LTD 02/07/2026              8.28
+    · TERM DEPOSIT IN ING BANK 02/07/2026                   7.14
+    · DZ BANK AG 0% 02/07/2026                              4.85
+增長基金 p16[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票              17.12
+    中國在岸股票            10.90
+    亞太股票              16.45
+    日本股票              12.24
+    歐洲股票              15.60
+    美國股票              20.87
+    新興市場股票             0.52
+    世界股票               1.02
+    高評級債券              3.82
+    貨幣基金               0.35
+    現金及其他              1.11
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                12.19
+    · JAPAN INDEX FUND                                      5.84
+    · INVESCO QQQ TRUST 景順QQQ                               4.72
+平穩增長基金 p18[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               7.96
+    中國在岸股票             7.73
+    亞太股票               9.20
+    日本股票               7.10
+    歐洲股票               8.64
+    美國股票              12.90
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             41.96
+    貨幣基金               0.69
+    現金及其他              2.29
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       7.32
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 6.30
+    · INVESCO QQQ TRUST 景順QQQ                               4.76
+資本穩定基金 p19[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               4.71
+    中國在岸股票             5.10
+    亞太股票               6.02
+    日本股票               4.67
+    歐洲股票               4.17
+    美國股票               8.91
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             57.33
+    貨幣基金               5.26
+    現金及其他              2.30
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       7.75
+    · USTN 4.375% 15/05/2036                                4.47
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 4.41
+均衡基金 p17[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票              12.80
+    中國在岸股票             9.88
+    亞太股票              12.03
+    日本股票               9.25
+    歐洲股票              11.71
+    美國股票              17.66
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             22.91
+    貨幣基金               0.38
+    現金及其他              1.85
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                10.95
+    · JAPAN INDEX FUND                                      5.39
+    · INVESCO QQQ TRUST 景順QQQ                               4.68
+環球股票基金 p11[asset] asOf=2026-06-30 top=10 分佈=9 合计=100.00
+    香港股票               0.71
+    中國在岸股票             1.85
+    亞太股票              11.42
+    日本股票               6.39
+    歐洲股票              11.00
+    美國股票              62.92
+    新興市場股票             0.52
+    世界股票               4.96
+    現金及其他              0.23
+    · AMERICAN INDEX FUND                                  19.20
+    · ISHARES GLOBAL TECH ETF                               4.96
+    · NVIDIA CORP 輝達                                        3.01
+核心累積基金 p21[asset] asOf=2026-06-30 top=10 分佈=4 合计=100.00
+    世界股票              63.27
+    高評級債券             33.94
+    貨幣基金               1.16
+    現金及其他              1.63
+    · NVIDIA CORP 輝達                                        2.86
+    · APPLE INC 蘋果公司                                        2.56
+    · MICROSOFT CORP 微軟                                     1.70
+65歲後基金 p22[asset] asOf=2026-06-30 top=10 分佈=4 合计=100.00
+    世界股票              22.93
+    高評級債券             74.68
+    貨幣基金               1.24
+    現金及其他              1.15
+    · NVIDIA CORP 輝達                                        1.04
+    · APPLE INC 蘋果公司                                        0.93
+    · 2.52% 25/08/2033                                      0.89
+富達「儲蓄易」2025基金 p32[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               8.20
+    中國在岸股票             3.94
+    亞太股票               6.57
+    日本股票               4.97
+    歐洲股票               4.07
+    美國股票              10.41
+    新興市場股票             0.53
+    世界股票               0.51
+    高評級債券             54.07
+    貨幣基金               4.84
+    現金及其他              1.89
+    · USTN 4.375% 15/05/2036                                7.26
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 7.07
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       4.08
+富達「儲蓄易」2030基金 p31[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              20.09
+    中國在岸股票             4.65
+    亞太股票              13.43
+    日本股票              10.65
+    歐洲股票              12.50
+    美國股票              21.43
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券             15.40
+    現金及其他              0.82
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                16.66
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       6.82
+    · INVESCO QQQ TRUST 景順QQQ                               4.79
+富達「儲蓄易」2035基金 p30[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              23.26
+    中國在岸股票             4.34
+    亞太股票              15.36
+    日本股票              12.48
+    歐洲股票              15.21
+    美國股票              22.86
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券              4.46
+    現金及其他              1.00
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                19.33
+    · AMERICAN INDEX FUND                                   4.86
+    · INVESCO QQQ TRUST 景順QQQ                               4.77
+富達「儲蓄易」2040基金 p29[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              24.53
+    中國在岸股票             4.27
+    亞太股票              15.71
+    日本股票              12.88
+    歐洲股票              16.30
+    美國股票              23.14
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券              1.08
+    現金及其他              1.06
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                18.62
+    · AMERICAN INDEX FUND                                   5.00
+    · INVESCO QQQ TRUST 景順QQQ                               4.80
+富達「儲蓄易」2045基金 p28[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              25.03
+    中國在岸股票             4.37
+    亞太股票              16.05
+    日本股票              13.41
+    歐洲股票              16.16
+    美國股票              23.45
+    新興市場股票             0.52
+    世界股票               0.50
+    高評級債券              0.32
+    現金及其他              0.19
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                19.26
+    · JAPAN INDEX FUND                                      4.32
+    · ISHARES US TECHNOLOGY ETF                             4.25
+富達「儲蓄易」2050基金 p27[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              25.85
+    中國在岸股票             3.57
+    亞太股票              16.12
+    日本股票              13.62
+    歐洲股票              17.00
+    美國股票              22.61
+    新興市場股票             0.52
+    世界股票               0.50
+    高評級債券              0.02
+    現金及其他              0.19
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                20.08
+    · ISHARES US TECHNOLOGY ETF                             4.41
+    · INVESCO QQQ TRUST 景順QQQ                               4.02
+亞太股票基金 p10[industry] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    科技                38.10
+    金融                18.50
+    電訊                12.40
+    工業                10.40
+    基本物料               5.90
+    非必需消費品             3.30
+    健康護理               3.10
+    能源                 2.40
+    主要消費品              1.60
+    公用事業               1.60
+    其他                 2.70
+    · SK HYNIX INC                                          9.15
+    · TAIWAN SEMICONDUCTOR MFG CO LTD 台積電                   8.86
+    · SAMSUNG ELECTRONICS 三星電子                              8.61
+香港股票基金 p12[industry] asOf=2026-06-30 top=10 分佈=12 合计=100.00
+    金融                29.20
+    非必需消費品            20.80
+    科技                18.80
+    工業                11.00
+    主要消費品              6.80
+    房地產                4.90
+    能源                 3.00
+    健康護理               2.60
+    公用事業               1.30
+    基本物料               0.70
+    電訊                 0.60
+    其他                 0.30
+    · TENCENT HOLDINGS LTD 騰訊控股                             9.95
+    · HSBC HOLDINGS PLC 滙豐控股                                9.29
+    · ALIBABA GROUP HOLDING LTD 阿里巴巴－W                      8.35
+歐洲股票基金 p14[industry] asOf=2026-06-30 top=10 分佈=12 合计=100.00
+    金融                24.50
+    工業                19.40
+    健康護理              12.70
+    科技                 9.70
+    非必需消費品             7.30
+    主要消費品              6.50
+    能源                 5.70
+    公用事業               4.10
+    基本物料               4.00
+    電訊                 2.40
+    房地產                0.40
+    其他                 3.30
+    · ASML HOLDING 艾司摩爾                                     5.29
+    · HSBC HOLDINGS PLC 滙豐控股                                2.58
+    · NOVARTIS AG 諾華製藥集團                                    2.00
+富達香港盈富基金 p15[industry] asOf=2026-06-30 top=10 分佈=13 合计=100.00
+    金融                33.50
+    非必需消費品            20.60
+    科技                16.30
+    健康護理               5.10
+    能源                 4.70
+    地產及建設              4.00
+    電訊                 3.70
+    工業                 2.50
+    公用事業               2.50
+    物料                 2.10
+    主要消費品              1.80
+    綜合企業               1.60
+    其他                 1.60
+    · HSBC HOLDINGS PLC 滙豐控股                                9.00
+    · TENCENT HOLDINGS LTD 騰訊控股                             8.00
+    · ALIBABA GROUP HOLDING LTD 阿里巴巴－W                      6.35
+香港債券基金 p23[industry] asOf=2026-06-30 top=10 分佈=6 合计=100.00
+    金融                48.70
+    半政府/主權/超國家/機構債券   33.30
+    公用事業               9.20
+    工業                 6.20
+    國庫券                2.60
+    其他                 0.00
+    · LINK CB LTD CONV 4.5% 12/12/2027 REGS                 4.74
+    · NATIONAL AUSTRALIA BANK 4.7% 03/08/2032 REGS          4.47
+    · 法國巴黎銀行 4.3% 14/10/2034                                3.17
+人民幣債券基金 p24[industry] asOf=2026-06-30 top=10 分佈=5 合计=100.00
+    金融                39.00
+    半政府/主權/超國家/機構債券   36.70
+    工業                16.20
+    公用事業               1.70
+    其他                 6.40
+    · 香港機場管理局 2.85% 14/01/2035 REGS                         3.93
+    · 友邦保險 2.88% 30/04/2036 REGS                            3.52
+    · BNP PARIBAS VAR 17/08/2031 REGS                       2.87
+國際債券基金 p25[industry] asOf=2026-06-30 top=10 分佈=5 合计=100.00
+    國庫券               91.20
+    工業                 1.60
+    金融                 1.50
+    半政府/主權/超國家/機構債券    0.20
+    其他                 5.50
+    · USTN 4.375% 15/05/2036                               14.76
+    · BUNDESREPUB DEUTSCHLAND 2.6% 15/08/2035 REGS          7.15
+    · USTN 4.375% 31/01/2032 美國國庫券 4.375% 31/01/2032        7.12
+已写回 21 条
+  ✔ 富達持仓
+补入 0 只；有资产分布 451 / 451
+  ✔ 通用持仓/分布抓取(alloc_fill)
+发现 8 份：
+  行業計劃           IS_Fact_Sheet.pdf                          5587KB
+  積金之選           MTS_Fact_Sheet.pdf                         4237KB
+  策略計劃           IV_Fact_Sheet.pdf                          695KB
+  明智之選           Smart_FFS_2026Q2.pdf                       1646KB
+  易富之選           Simple_FFS_2026Q2.pdf                      1226KB
+  800系列          S800_FFS_2026Q2.pdf                        1733KB
+  積金之選(季報)       MTS_Fact_Sheet_Q226.pdf                    4237KB
+  策略計劃(月報)       Strategic-MPF-Factsheet-(A)-202609.pdf     695KB
+  IS_Fact_Sheet.pdf                          新写入 12
+  MTS_Fact_Sheet.pdf                         新写入 26
+  IV_Fact_Sheet.pdf                          新写入 13
+  Smart_FFS_2026Q2.pdf                       新写入 9
+  Simple_FFS_2026Q2.pdf                      新写入 6
+  S800_FFS_2026Q2.pdf                        新写入 17
+  MTS_Fact_Sheet_Q226.pdf                    新写入 26
+  Strategic-MPF-Factsheet-(A)-202609.pdf     新写入 13
+自动解析写入 122；holdings 共 451
+  ✔ BCT 便览自动发现
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 208, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 166, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocpt_fs.pdf'
+  ✘ 中銀保誠持仓
+  817 asset        100.0%
+  818 asset        100.0%
+  822 industry      98.7%
+  825 region       100.0%
+  827 asset         99.9%
+  1359 asset        100.0%
+  1543 asset        102.4%
+  2399 industry     100.0%
+  2400 asset        100.0%
+写入 9 条
+  ✔ 中銀保誠分布
+✘ 不存在: D:\2026-10-08-11-05-17\mpf-app\tmp\cl_fpr_2026q1.pdf
+完成：写入 0；holdings 共 451
+  ✔ 中國人壽持仓(需先下载FPR PDF)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 124, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 85, in main
+    pdf = pdfplumber.open(path)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocom_ffs.pdf'
+  ✘ 交通持仓
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 153, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 98, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf3\\Haitong_Korea_Fund.pdf'
+  ✘ 海通持仓(逐頁v3)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 211, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 146, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf2\\Haitong_Korea_Fund.pdf'
+  ✘ 海通分布(v2)
+① 各計劃基金行…
+  BCT積金之選：26 只
+  BCT強積金計劃800系列：28 只
+  BCT強積金策略計劃：26 只
+  BCT強積金—明智之選：14 只
+  BCT（強積金）行業計劃：12 只
+  BCT強積金—易富之選：10 只
+② Fact Sheet PDF：8 個
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 publications#sd_fact_sheet …
+  [!] PDF -updates/insights/publications#sd_fact_sheet → 200
+  下載 IV_Fact_Sheet_H.pdf …
+    解析 IV_Fact_Sheet_H.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：7 個基金分節
+  下載 IV_Fact_Sheet.pdf …
+    解析 IV_Fact_Sheet.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 15 → 景順環球追蹤指數基金（top10 10 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：15 個基金分節
+  下載 publications#sm_fact_sheet …
+  [!] PDF -updates/insights/publications#sm_fact_sheet → 200
+  下載 IS_Fact_Sheet.pdf …
+    解析 IS_Fact_Sheet.pdf（0 頁，12 候選基金名）…
+    小計：15 個基金分節
+  下載 publications#si_fact_sheet …
+  [!] PDF -updates/insights/publications#si_fact_sheet → 200
+  ⚠ #187 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1533 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #800 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #628 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #627 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #198 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #199 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1557 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1558 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2066 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2067 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #200 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #201 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1339 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1340 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #195 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #196 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2068 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2069 解析结果不合规（空名稱/分布塌縮），保留旧数据
+③ 寫入：命中 -19 / 未匹配 116
+  ✔ BCT 持仓
+持仓事务校验：零退化 ✅（对照 451 只）
+  ✔ 持仓事务校验：零退化
+规范化：补口径标题 83 | 简→繁 0 | 排序 0 | 日期归一 0 | 补 allocSum 83 | 剥离行情字段 0
+持仓校验：合规 421 只 | 合计异常 30 只 | 缺分布 0 只
+  异常明细： 173:98 183:98 218:100.6 231:90.5 387:88.1 390:84.9 460:97.68 463:96.91 659:94.3 660:92.2 703:99.5 707:99.5 710:99.5 799:101.4 800:79.5 816:77.52 819:83.51 820:96.36 821:81.29 822:98.68 824:97.65 826:79.76 896:99.4 1399:96.83 1498:94.36 1533:99.2 1537:99.3 1539:97.4 1543:102.43 2401:92.35
+top10 校验：全部通过 ✓
+[2026-11-20 21:08] 季度持仓刷新结束
+[2026-11-21 21:03] 季度持仓刷新开始
+持仓快照已保存 → tmp\holdings-txn.json（451 只，其中不合规 2 只）
+  · 東亞FFS：源站尚未发布 2026 年第 3 季便覧（HTTP 404），跳过（非抓取故障）
+写入 6 条
+  ✔ 東亞分布(读图)
+  ✔ 滙豐invrptce1 → tmp/hsbc_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+· 跳過（無 PDF）: D:\2026-10-08-11-05-17\mpf-app\tmp/hase_invrptce1.pdf
+共 5 條
+已寫回
+  ✔ 滙豐持仓(价格匹配)
+  ✔ 恒生FFS → tmp/hase_invrptce1.pdf
+== hsbc_invrptce1.pdf（HB）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 317,320,325,326,803
+  #317 p8 HK$33.1068 top=10 合計=11.40 ✓
+  #320 p6 HK$10.6208 top=10 合計=16.60 ✓
+  #325 p11 HK$27.0212 top=10 合計=48.10 ✓
+  #326 p9 HK$23.0661 top=10 合計=26.50 ✓
+  #803 p7 HK$14.0886 top=10 合計=11.30 ✓
+== hase_invrptce1.pdf（HS）：5 只目標，hist 價格 5 個
+  價格匹配到 5 個區塊： 302,305,307,311,807
+  #302 p11 HK$27.0205 top=10 合計=48.10 ✓
+  #305 p6 HK$10.6201 top=10 合計=16.60 ✓
+  #307 p9 HK$23.0593 top=10 合計=26.50 ✓
+  #311 p8 HK$33.1032 top=10 合計=11.40 ✓
+  #807 p7 HK$14.0882 top=10 合計=11.30 ✓
+共 10 條
+已寫回
+  ✔ 恒生持仓(价格匹配)
+  ✔ 富達MT00288 → tmp/ff_fid.pdf
+強積金保守基金 p26[asset] asOf=2026-06-30 top=10 分佈=2 合计=100.00
+    貨幣基金              99.73
+    現金及其他              0.27
+    · TERM DEPOSIT IN OCBC (HK) LTD 02/07/2026              8.28
+    · TERM DEPOSIT IN ING BANK 02/07/2026                   7.14
+    · DZ BANK AG 0% 02/07/2026                              4.85
+增長基金 p16[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票              17.12
+    中國在岸股票            10.90
+    亞太股票              16.45
+    日本股票              12.24
+    歐洲股票              15.60
+    美國股票              20.87
+    新興市場股票             0.52
+    世界股票               1.02
+    高評級債券              3.82
+    貨幣基金               0.35
+    現金及其他              1.11
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                12.19
+    · JAPAN INDEX FUND                                      5.84
+    · INVESCO QQQ TRUST 景順QQQ                               4.72
+平穩增長基金 p18[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               7.96
+    中國在岸股票             7.73
+    亞太股票               9.20
+    日本股票               7.10
+    歐洲股票               8.64
+    美國股票              12.90
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             41.96
+    貨幣基金               0.69
+    現金及其他              2.29
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       7.32
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 6.30
+    · INVESCO QQQ TRUST 景順QQQ                               4.76
+資本穩定基金 p19[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               4.71
+    中國在岸股票             5.10
+    亞太股票               6.02
+    日本股票               4.67
+    歐洲股票               4.17
+    美國股票               8.91
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             57.33
+    貨幣基金               5.26
+    現金及其他              2.30
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       7.75
+    · USTN 4.375% 15/05/2036                                4.47
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 4.41
+均衡基金 p17[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票              12.80
+    中國在岸股票             9.88
+    亞太股票              12.03
+    日本股票               9.25
+    歐洲股票              11.71
+    美國股票              17.66
+    新興市場股票             0.52
+    世界股票               1.01
+    高評級債券             22.91
+    貨幣基金               0.38
+    現金及其他              1.85
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                10.95
+    · JAPAN INDEX FUND                                      5.39
+    · INVESCO QQQ TRUST 景順QQQ                               4.68
+環球股票基金 p11[asset] asOf=2026-06-30 top=10 分佈=9 合计=100.00
+    香港股票               0.71
+    中國在岸股票             1.85
+    亞太股票              11.42
+    日本股票               6.39
+    歐洲股票              11.00
+    美國股票              62.92
+    新興市場股票             0.52
+    世界股票               4.96
+    現金及其他              0.23
+    · AMERICAN INDEX FUND                                  19.20
+    · ISHARES GLOBAL TECH ETF                               4.96
+    · NVIDIA CORP 輝達                                        3.01
+核心累積基金 p21[asset] asOf=2026-06-30 top=10 分佈=4 合计=100.00
+    世界股票              63.27
+    高評級債券             33.94
+    貨幣基金               1.16
+    現金及其他              1.63
+    · NVIDIA CORP 輝達                                        2.86
+    · APPLE INC 蘋果公司                                        2.56
+    · MICROSOFT CORP 微軟                                     1.70
+65歲後基金 p22[asset] asOf=2026-06-30 top=10 分佈=4 合计=100.00
+    世界股票              22.93
+    高評級債券             74.68
+    貨幣基金               1.24
+    現金及其他              1.15
+    · NVIDIA CORP 輝達                                        1.04
+    · APPLE INC 蘋果公司                                        0.93
+    · 2.52% 25/08/2033                                      0.89
+富達「儲蓄易」2025基金 p32[asset] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    香港股票               8.20
+    中國在岸股票             3.94
+    亞太股票               6.57
+    日本股票               4.97
+    歐洲股票               4.07
+    美國股票              10.41
+    新興市場股票             0.53
+    世界股票               0.51
+    高評級債券             54.07
+    貨幣基金               4.84
+    現金及其他              1.89
+    · USTN 4.375% 15/05/2036                                7.26
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                 7.07
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       4.08
+富達「儲蓄易」2030基金 p31[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              20.09
+    中國在岸股票             4.65
+    亞太股票              13.43
+    日本股票              10.65
+    歐洲股票              12.50
+    美國股票              21.43
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券             15.40
+    現金及其他              0.82
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                16.66
+    · HSBC GF ICAV - GLOBAL GOVERNMENT BOND UCITS ETF       6.82
+    · INVESCO QQQ TRUST 景順QQQ                               4.79
+富達「儲蓄易」2035基金 p30[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              23.26
+    中國在岸股票             4.34
+    亞太股票              15.36
+    日本股票              12.48
+    歐洲股票              15.21
+    美國股票              22.86
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券              4.46
+    現金及其他              1.00
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                19.33
+    · AMERICAN INDEX FUND                                   4.86
+    · INVESCO QQQ TRUST 景順QQQ                               4.77
+富達「儲蓄易」2040基金 p29[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              24.53
+    中國在岸股票             4.27
+    亞太股票              15.71
+    日本股票              12.88
+    歐洲股票              16.30
+    美國股票              23.14
+    新興市場股票             0.52
+    世界股票               0.51
+    高評級債券              1.08
+    現金及其他              1.06
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                18.62
+    · AMERICAN INDEX FUND                                   5.00
+    · INVESCO QQQ TRUST 景順QQQ                               4.80
+富達「儲蓄易」2045基金 p28[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              25.03
+    中國在岸股票             4.37
+    亞太股票              16.05
+    日本股票              13.41
+    歐洲股票              16.16
+    美國股票              23.45
+    新興市場股票             0.52
+    世界股票               0.50
+    高評級債券              0.32
+    現金及其他              0.19
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                19.26
+    · JAPAN INDEX FUND                                      4.32
+    · ISHARES US TECHNOLOGY ETF                             4.25
+富達「儲蓄易」2050基金 p27[asset] asOf=2026-06-30 top=10 分佈=10 合计=100.00
+    香港股票              25.85
+    中國在岸股票             3.57
+    亞太股票              16.12
+    日本股票              13.62
+    歐洲股票              17.00
+    美國股票              22.61
+    新興市場股票             0.52
+    世界股票               0.50
+    高評級債券              0.02
+    現金及其他              0.19
+    · CSOP FTSE HONG KONG EQUITY ETF 南方香港股票                20.08
+    · ISHARES US TECHNOLOGY ETF                             4.41
+    · INVESCO QQQ TRUST 景順QQQ                               4.02
+亞太股票基金 p10[industry] asOf=2026-06-30 top=10 分佈=11 合计=100.00
+    科技                38.10
+    金融                18.50
+    電訊                12.40
+    工業                10.40
+    基本物料               5.90
+    非必需消費品             3.30
+    健康護理               3.10
+    能源                 2.40
+    主要消費品              1.60
+    公用事業               1.60
+    其他                 2.70
+    · SK HYNIX INC                                          9.15
+    · TAIWAN SEMICONDUCTOR MFG CO LTD 台積電                   8.86
+    · SAMSUNG ELECTRONICS 三星電子                              8.61
+香港股票基金 p12[industry] asOf=2026-06-30 top=10 分佈=12 合计=100.00
+    金融                29.20
+    非必需消費品            20.80
+    科技                18.80
+    工業                11.00
+    主要消費品              6.80
+    房地產                4.90
+    能源                 3.00
+    健康護理               2.60
+    公用事業               1.30
+    基本物料               0.70
+    電訊                 0.60
+    其他                 0.30
+    · TENCENT HOLDINGS LTD 騰訊控股                             9.95
+    · HSBC HOLDINGS PLC 滙豐控股                                9.29
+    · ALIBABA GROUP HOLDING LTD 阿里巴巴－W                      8.35
+歐洲股票基金 p14[industry] asOf=2026-06-30 top=10 分佈=12 合计=100.00
+    金融                24.50
+    工業                19.40
+    健康護理              12.70
+    科技                 9.70
+    非必需消費品             7.30
+    主要消費品              6.50
+    能源                 5.70
+    公用事業               4.10
+    基本物料               4.00
+    電訊                 2.40
+    房地產                0.40
+    其他                 3.30
+    · ASML HOLDING 艾司摩爾                                     5.29
+    · HSBC HOLDINGS PLC 滙豐控股                                2.58
+    · NOVARTIS AG 諾華製藥集團                                    2.00
+富達香港盈富基金 p15[industry] asOf=2026-06-30 top=10 分佈=13 合计=100.00
+    金融                33.50
+    非必需消費品            20.60
+    科技                16.30
+    健康護理               5.10
+    能源                 4.70
+    地產及建設              4.00
+    電訊                 3.70
+    工業                 2.50
+    公用事業               2.50
+    物料                 2.10
+    主要消費品              1.80
+    綜合企業               1.60
+    其他                 1.60
+    · HSBC HOLDINGS PLC 滙豐控股                                9.00
+    · TENCENT HOLDINGS LTD 騰訊控股                             8.00
+    · ALIBABA GROUP HOLDING LTD 阿里巴巴－W                      6.35
+香港債券基金 p23[industry] asOf=2026-06-30 top=10 分佈=6 合计=100.00
+    金融                48.70
+    半政府/主權/超國家/機構債券   33.30
+    公用事業               9.20
+    工業                 6.20
+    國庫券                2.60
+    其他                 0.00
+    · LINK CB LTD CONV 4.5% 12/12/2027 REGS                 4.74
+    · NATIONAL AUSTRALIA BANK 4.7% 03/08/2032 REGS          4.47
+    · 法國巴黎銀行 4.3% 14/10/2034                                3.17
+人民幣債券基金 p24[industry] asOf=2026-06-30 top=10 分佈=5 合计=100.00
+    金融                39.00
+    半政府/主權/超國家/機構債券   36.70
+    工業                16.20
+    公用事業               1.70
+    其他                 6.40
+    · 香港機場管理局 2.85% 14/01/2035 REGS                         3.93
+    · 友邦保險 2.88% 30/04/2036 REGS                            3.52
+    · BNP PARIBAS VAR 17/08/2031 REGS                       2.87
+國際債券基金 p25[industry] asOf=2026-06-30 top=10 分佈=5 合计=100.00
+    國庫券               91.20
+    工業                 1.60
+    金融                 1.50
+    半政府/主權/超國家/機構債券    0.20
+    其他                 5.50
+    · USTN 4.375% 15/05/2036                               14.76
+    · BUNDESREPUB DEUTSCHLAND 2.6% 15/08/2035 REGS          7.15
+    · USTN 4.375% 31/01/2032 美國國庫券 4.375% 31/01/2032        7.12
+已写回 21 条
+  ✔ 富達持仓
+补入 0 只；有资产分布 451 / 451
+  ✔ 通用持仓/分布抓取(alloc_fill)
+发现 8 份：
+  行業計劃           IS_Fact_Sheet.pdf                          5587KB
+  積金之選           MTS_Fact_Sheet.pdf                         4237KB
+  策略計劃           IV_Fact_Sheet.pdf                          695KB
+  明智之選           Smart_FFS_2026Q2.pdf                       1646KB
+  易富之選           Simple_FFS_2026Q2.pdf                      1226KB
+  800系列          S800_FFS_2026Q2.pdf                        1733KB
+  積金之選(季報)       MTS_Fact_Sheet_Q226.pdf                    4237KB
+  策略計劃(月報)       Strategic-MPF-Factsheet-(A)-202609.pdf     695KB
+  IS_Fact_Sheet.pdf                          新写入 12
+  MTS_Fact_Sheet.pdf                         新写入 26
+  IV_Fact_Sheet.pdf                          新写入 13
+  Smart_FFS_2026Q2.pdf                       新写入 9
+  Simple_FFS_2026Q2.pdf                      新写入 6
+  S800_FFS_2026Q2.pdf                        新写入 17
+  MTS_Fact_Sheet_Q226.pdf                    新写入 26
+  Strategic-MPF-Factsheet-(A)-202609.pdf     新写入 13
+自动解析写入 122；holdings 共 451
+  ✔ BCT 便览自动发现
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 208, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocpt_holdings.py", line 166, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocpt_fs.pdf'
+  ✘ 中銀保誠持仓
+  817 asset        100.0%
+  818 asset        100.0%
+  822 industry      98.7%
+  825 region       100.0%
+  827 asset         99.9%
+  1359 asset        100.0%
+  1543 asset        102.4%
+  2399 industry     100.0%
+  2400 asset        100.0%
+写入 9 条
+  ✔ 中銀保誠分布
+✘ 不存在: D:\2026-10-08-11-05-17\mpf-app\tmp\cl_fpr_2026q1.pdf
+完成：写入 0；holdings 共 451
+  ✔ 中國人壽持仓(需先下载FPR PDF)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 124, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\bocom_holdings.py", line 85, in main
+    pdf = pdfplumber.open(path)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\bocom_ffs.pdf'
+  ✘ 交通持仓
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 153, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings3.py", line 98, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf3\\Haitong_Korea_Fund.pdf'
+  ✘ 海通持仓(逐頁v3)
+Traceback (most recent call last):
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 211, in <module>
+    main()
+    ~~~~^^
+  File "D:\2026-10-08-11-05-17\mpf-app\ht_holdings2.py", line 146, in main
+    pdf = pdfplumber.open(PDF)
+  File "C:\Users\11718\.workbuddy\binaries\python\envs\default\Lib\site-packages\pdfplumber\pdf.py", line 98, in open
+    stream = open(path_or_fp, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'D:\\2026-10-08-11-05-17\\mpf-app\\tmp\\ht_pdf2\\Haitong_Korea_Fund.pdf'
+  ✘ 海通分布(v2)
+① 各計劃基金行…
+  BCT積金之選：26 只
+  BCT強積金計劃800系列：28 只
+  BCT強積金策略計劃：26 只
+  BCT強積金—明智之選：14 只
+  BCT（強積金）行業計劃：12 只
+  BCT強積金—易富之選：10 只
+② Fact Sheet PDF：8 個
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 MTS_Fact_Sheet.pdf …
+    解析 MTS_Fact_Sheet.pdf（0 頁，26 候選基金名）…
+    小計：0 個基金分節
+  下載 publications#sd_fact_sheet …
+  [!] PDF -updates/insights/publications#sd_fact_sheet → 200
+  下載 IV_Fact_Sheet_H.pdf …
+    解析 IV_Fact_Sheet_H.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：7 個基金分節
+  下載 IV_Fact_Sheet.pdf …
+    解析 IV_Fact_Sheet.pdf（0 頁，13 候選基金名）…
+    頁 4 → 景順中港股票基金（top10 10 / alloc 1）
+    頁 5 → 景順恒指基金（top10 10 / alloc 1）
+    頁 6 → 景順亞洲股票基金（top10 10 / alloc 1）
+    頁 7 → 景順增長基金（top10 10 / alloc 1）
+    頁 8 → 景順均衡基金（top10 8 / alloc 1）
+    頁 9 → 景順核心累積基金（top10 7 / alloc 1）
+    頁 15 → 景順環球追蹤指數基金（top10 10 / alloc 1）
+    頁 16 → 景順美國追蹤指數基金（top10 10 / alloc 1）
+    小計：15 個基金分節
+  下載 publications#sm_fact_sheet …
+  [!] PDF -updates/insights/publications#sm_fact_sheet → 200
+  下載 IS_Fact_Sheet.pdf …
+    解析 IS_Fact_Sheet.pdf（0 頁，12 候選基金名）…
+    小計：15 個基金分節
+  下載 publications#si_fact_sheet …
+  [!] PDF -updates/insights/publications#si_fact_sheet → 200
+  ⚠ #187 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1533 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #800 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #628 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #627 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #198 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #199 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1557 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1558 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2066 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2067 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #200 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #201 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1339 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #1340 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #195 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #196 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2068 解析结果不合规（空名稱/分布塌縮），保留旧数据
+  ⚠ #2069 解析结果不合规（空名稱/分布塌縮），保留旧数据
+③ 寫入：命中 -19 / 未匹配 116
+  ✔ BCT 持仓
+持仓事务校验：零退化 ✅（对照 451 只）
+  ✔ 持仓事务校验：零退化
+规范化：补口径标题 83 | 简→繁 0 | 排序 0 | 日期归一 0 | 补 allocSum 83 | 剥离行情字段 0
+持仓校验：合规 421 只 | 合计异常 30 只 | 缺分布 0 只
+  异常明细： 173:98 183:98 218:100.6 231:90.5 387:88.1 390:84.9 460:97.68 463:96.91 659:94.3 660:92.2 703:99.5 707:99.5 710:99.5 799:101.4 800:79.5 816:77.52 819:83.51 820:96.36 821:81.29 822:98.68 824:97.65 826:79.76 896:99.4 1399:96.83 1498:94.36 1533:99.2 1537:99.3 1539:97.4 1543:102.43 2401:92.35
+top10 校验：全部通过 ✓
+[2026-11-21 21:09] 季度持仓刷新结束

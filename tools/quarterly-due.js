@@ -55,9 +55,9 @@ const pct = total ? done / total : 0;
 log('季末 ' + qEndIso + '（第 ' + monthIdx + ' 个月）· 计划星期 ' + JSON.stringify(PLAN) +
   ' · 今日星期 ' + dow + ' · 完成 ' + done + '/' + total + '（' + Math.round(pct * 100) + '%）');
 
-/* 已基本更新完（≥90%）→ 不再跑，等下一季度 */
-if (total && pct >= 0.9) {
-  log('该季已更新 ' + Math.round(pct * 100) + '%，跳过');
+/* 已基本更新完（≥95%）→ 不再跑，下一季度重新计数 */
+if (total && pct >= 0.95) {
+  log('该季已更新 ' + Math.round(pct * 100) + '%（阈值 95%），跳过，下一季度重新计');
   process.exit(1);
 }
 

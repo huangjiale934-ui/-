@@ -71,6 +71,9 @@ fetch_pdf "恒生FFS" "https://cms.hangseng.com/cms/pws/files/pdfs/FFS.pdf" tmp/
 fetch_pdf "富達MT00288" "https://www.mpfa.org.hk/assets/FF/MT00288.pdf" tmp/ff_fid.pdf \
   && run "富達持仓" "$PY" tools/parse-fidelity-ffs.py tmp/ff_fid.pdf --write
 
+# 2026-11-22（用户要求）：宏利 68 只走官网基金详情 JSON 接口（curl_cffi 浏览器指纹），
+# 完全绕开「季度概覽」页面的 Akamai 反爬；接口按季度返回 top10Holdings / portfolioAllocation。
+[ -f fetch-manulife-detail.py ] && run "宏利持仓/分布（官方API）"    "$PY" fetch-manulife-detail.py
 [ -f alloc_fill.py ]        && run "通用持仓/分布抓取(alloc_fill)"  "$PY" alloc_fill.py
 [ -f bct_ffs_auto.py ]      && run "BCT 便览自动发现"               "$PY" bct_ffs_auto.py
 [ -f bocpt_holdings.py ]    && run "中銀保誠持仓"                   "$PY" bocpt_holdings.py

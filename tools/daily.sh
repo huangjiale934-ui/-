@@ -98,6 +98,9 @@ NAVSIG_BEFORE=$("$NODE" -e "const f=require('./data/funds.json').funds;const s=f
 
 # 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
 soft_step "1/9 抓发行人最新净值" timeout 1800 node navbuild.js --render
+# 2026-11-22（用户要求）：节点级抓取监控 —— 比 isValid 更早发现源站改版
+# （价格表节点消失 / 只返回维护页 / 解析 0 条）。只告警，不阻断发布。
+soft_step "1.05/9 抓取节点监控" node tools/scrape-health.js
 
 # 2026-11-05（第四十轮，用户要求）：下面四家互相独立（各写自己的 hist，共享索引已是加锁 + 原子写入），
 # 改成同一波并行。原先串行合计约 10 分钟，并行后由最慢的一家决定（约 3–4 分钟）。
@@ -226,12 +229,28 @@ step "8.45/9 净值精度归一（表 = 历史末点，4 位）" node tools/hist
 node tools/nav-round4.js
 # 2026-10-24：链路末尾固化验收（不依赖 AI 纪律；核验 U01）
 # 2026-11-21（用户要求）：季度持仓并入每晚全量任务，按「季度结束后第 1/2/3 个月」
-# 的频率自动判定（周日 / 周三+周日 / 周二+周四+周日），更新到 90% 即停。
+# 的频率自动判定（周日 / 周三+周日 / 周二+周四+周日），更新到 95% 即停（下一季度重新计）。
 # 判定在 tools/quarterly-due.js，手动强制跑仍可直接 bash tools/quarterly.sh。
 if "$NODE" tools/quarterly-due.js; then
   step "8.6/9 季度持仓（到期）" bash tools/quarterly.sh
 else
   echo "    · 季度持仓：今天不到计划日或已基本更新完，跳过"
+fi
+
+# 2026-11-22（用户要求）：宏利是最重要的发行人，官网「季度概覽」页面有反爬，
+# 改为每天探测其基金详情 JSON 接口的 asOfDate —— 新季一上线当天就全量刷新，
+# 不必等季度计划日（计划日是第 1 个月每周日，最坏会晚 6 天）。
+if MH_OUT=$("$PY" tools/manulife-holdings-probe.py 2>&1); then
+  echo "$MH_OUT" | sed 's/^/    /'
+  case "$MH_OUT" in
+    *CHANGED*)
+      step "8.65/9 宏利持仓刷新（新季已发布）" "$PY" fetch-manulife-detail.py
+      step "8.66/9 持仓规范化" "$NODE" tools/holdings-normalize.js
+      soft_step "8.67/9 持仓护栏" "$NODE" tools/holdings-guard.js --fix
+      ;;
+  esac
+else
+  echo "    · 宏利持仓探测失败（不影响主链）"
 fi
 
 step "9/9 链路验收 nav-consistency" node tools/nav-consistency.js

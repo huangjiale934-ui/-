@@ -303,6 +303,18 @@ async function main() {
     }
   }
 
+  /* 2026-11-22（用户要求）：节点级抓取监控 —— 源站改版（找不到净值表格/节点）单独告警，
+     不必等到「净值条数变少」才发现；结构缺失 = 当天数据必然静默沿用旧值。 */
+  try {
+    const sh = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'scrape-health.json'), 'utf8'));
+    const bad = (sh.sources || []).filter((x) => x.status === 'struct_miss' || x.status === 'missing');
+    if (bad.length) {
+      problems.push('源站疑似改版/取数失败 ' + bad.length + ' 个来源：' +
+        bad.map((b) => b.key + (b.node ? '·' + b.node : '')).join('、'));
+      detail.scrapeHealth = bad.map((b) => ({ key: b.key, status: b.status, node: b.node, detail: b.detail }));
+    }
+  } catch (e) { /* 尚未产出监控文件时跳过 */ }
+
   const doc = {
     checkedAt: new Date().toISOString(),
     checkedAtHKT: new Date(Date.now() + 8 * 3600e3).toISOString().replace('T', ' ').slice(0, 19),

@@ -2340,10 +2340,10 @@ chk('导出中心·⑮去掉口径按钮 + 净值文案一行', (function () {
       /仅选择已更新至 \{d\} 的 \{n\} 只基金/.test(e);
   } catch (err) { return false; }
 })());
-chk('样式·①只缩侧栏二级筛选，不再整页 zoom', (function () {
+chk('样式·①侧栏恢复原始尺寸（用户已撤回缩小）', (function () {
   try {
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
-    return /\.db-sub \.an-prov \{ zoom: \.9/.test(st) && st.indexOf('.db-main { zoom') < 0;
+    return st.indexOf('.db-sub .an-prov { zoom') < 0 && st.indexOf('.db-main { zoom') < 0;
   } catch (err) { return false; }
 })());
 chk('页脚·免责声明换成「仅供参考 / 投资有风险」', (function () {

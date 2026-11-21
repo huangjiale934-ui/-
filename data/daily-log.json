@@ -61,5 +61,21 @@
   "navVerified": 449,
   "navNa": 2,
   "avgAnn1": 7.62
+ },
+ {
+  "date": "2026-11-21",
+  "syncAt": "2026-11-21T15:46:41.426Z",
+  "count": 451,
+  "dataAsOf": "2026-10-31",
+  "navVerified": 450,
+  "navNa": 1,
+  "avgAnn1": 3.75,
+  "navLatest": "2026-11-19",
+  "lagged": 76,
+  "lagByTrustee": {
+   "友邦信託": 21,
+   "銀聯信託": 55
+  },
+  "updated": 374
  }
 ]

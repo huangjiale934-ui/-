@@ -12,6 +12,13 @@ const SITE = (process.env.MPF_SITE || 'https://mpf-data.app.workbuddy.host').rep
    保留三处一致 / top10 五规则 / allocSum / 缺日巡检 / 渠道一致性四类数据哨兵 */
 const LOCAL = process.argv.includes('--local');
 const OUT_DIR = path.join(__dirname, '..', 'data', 'health');
+/* 2026-11-22 修（体检误报）：A 站凭分享码分发，不带码一律 403。
+   旧版体检不附码 → 每天必报「状态接口 403 / 页面打不开」6 条 critical 假阳性。
+   现在默认读 data/wb-share.txt，可用 MPF_SHARE 覆盖。 */
+const SHARE = (() => {
+  if (process.env.MPF_SHARE) return String(process.env.MPF_SHARE).trim();
+  try { return fs.readFileSync(path.join(__dirname, '..', 'data', 'wb-share.txt'), 'utf8').trim(); } catch (e) { return ''; }
+})();
 
 /* 2026-10-24：加超时与重试。此前一次连接被掐断（terminated）就让整次体检 exit 2。 */
 const LOCAL_FILES = {
@@ -33,7 +40,8 @@ const get = async (p, tries = 3) => {
   for (let i = 0; i < tries; i++) {
     try {
       /* 2026-10-24：加时间戳绕过 CDN/边缘缓存，否则会读到旧快照误报 */
-      const bust = (p.indexOf('?') >= 0 ? '&' : '?') + '_t=' + Date.now();
+      const bust = (p.indexOf('?') >= 0 ? '&' : '?') + '_t=' + Date.now() +
+        (SHARE ? '&sharecode=' + encodeURIComponent(SHARE) : '');
       const r = await fetch(SITE + p + bust, {
         headers: { 'user-agent': 'mpf-health/1.0' },
         signal: AbortSignal.timeout(15000),
