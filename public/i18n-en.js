@@ -181,6 +181,7 @@
 '；空白＝官网未披露，不插值。': '; blank = not disclosed by the issuer, no interpolation.',
 '；{n} 个未渲染沿用旧值': '; {n} not rendered this run, previous values kept',
 '异常': 'failed',
+'抓取节点 {ok}/{t}': 'Fetch nodes {ok}/{t}',
 '抓取节点 {ok}/{t} 正常': 'Fetch nodes OK: {ok}/{t}',
 '官方月报：截至 {d}（{p} 公布）· 基金平台：{a} ↗': 'Official monthly: as at {d} (published {p}) · Fund platform: {a} ↗',
 '，{n} 个来源结构缺失（{list}）': '; {n} source(s) structurally missing ({list})',
