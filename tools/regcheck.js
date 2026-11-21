@@ -2218,18 +2218,6 @@ chk('对账·①派生重算包含 breadth（防温度计长期差 1）', (funct
   } catch (err) { return false; }
 })());
 
-chk('导出中心·⑥附加表三模块 + 右侧二级筛选 + 榜单细类列', (function () {
-  try {
-    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
-    const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
-    return /function modRow/.test(e) && /ec-mod-p/.test(e) && /on \? '' : ' hidden'/.test(e) &&
-      !/data-panel=/.test(e) &&
-      /sub: '<th scope="col" data-c="sub"/.test(r) && /\['sub', '基金细类', 0\]/.test(r) &&
-      /DEFAULT_OFF = \['sub'/.test(r);
-  } catch (err) { return false; }
-})());
-
-/* ================= 2026-11-19 导出中心细节 + 榜单 URL（第八轮） ================= */
 chk('导出中心·⑦无面板行占满整行（说明不截断）+ 走势图无「方式」+ 日期单行', (function () {
   try {
     const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
@@ -2253,15 +2241,6 @@ chk('榜单·①筛选写入 URL 并可还原（rty/rsb/rtr/rrisk/rkw）', (func
 })());
 
 /* ================= 2026-11-19 双口径导出 + 排序 URL（第九轮） ================= */
-chk('导出中心·⑧支持两种口径同簿导出（勾积金局字段 → 追加工作表）', (function () {
-  try {
-    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
-    return /mfields: new Set\(\)/.test(e) &&
-      /if \(hasLocal && hasMpfa\) \{[\s\S]{0,900}name: TT\('积金局月度数据'\)/.test(e) &&
-      /bothMode|data-mode="both"/.test(e) === false &&
-      /仅选择最新净值日的基金/.test(e);
-  } catch (err) { return false; }
-})());
 chk('榜单·②排序写入 URL（rsk/rsd，表头点选后同步）', (function () {
   try {
     const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
@@ -2272,25 +2251,6 @@ chk('榜单·②排序写入 URL（rsk/rsd，表头点选后同步）', (functio
 })());
 
 /* ================= 2026-11-20 两组字段独立 + 组选修复（第十轮） ================= */
-chk('导出中心·⑨两组字段各自独立（积金局默认不选，勾了才多导一张表）', (function () {
-  try {
-    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
-    return /mfields: new Set\(\)/.test(e) && /function curFieldSet\(\)/.test(e) &&
-      /function curGroups\(\)/.test(e) && /ST\.mode === 'mpfa' \? ST\.mfields : ST\.fields/.test(e) &&
-      /已选 \{a\} 项 \+ \{b\} 项/.test(e) && e.indexOf('data-mode="both"') < 0 &&
-      /const hasLocal = ST\.fields\.size > 0/.test(e) && /const hasMpfa = ST\.mfields\.size > 0/.test(e);
-  } catch (err) { return false; }
-})());
-chk('导出中心·⑩积金局字段 20 列（含细类/计划/累积回报/最差年度）+ 口径说明', (function () {
-  try {
-    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
-    const i = e.indexOf('function mpfaCols'); const j = e.indexOf('净值序列', i);
-    const seg = e.slice(i, j);
-    const n = (seg.match(/\[TT\('/g) || []).length;
-    return n >= 20 && /近1年累积/.test(seg) && /近5年最差年度/.test(seg) &&
-      /基金细类/.test(seg) && /强积金计划/.test(seg) && /ec-note/.test(e);
-  } catch (err) { return false; }
-})());
 chk('资料库·⑪列设置补齐导出中心独有的三列（单位类别/细类/计划）', (function () {
   try {
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
@@ -2304,5 +2264,70 @@ chk('季度持仓·⑫東亞源站未发布时提示「跳过」而非报错', (
   try {
     const q = fs.readFileSync(path.join(__dirname, 'quarterly.sh'), 'utf8');
     return /BEA_CODE=/.test(q) && /源站尚未发布/.test(q) && /非抓取故障/.test(q);
+  } catch (err) { return false; }
+})());
+
+/* ================= 2026-11-21 只保留本站口径 / 排序 / 折叠 / 版权（第十一轮） ================= */
+chk('导出中心·⑬只保留本站口径（积金局导出已下线）', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    return e.indexOf('data-mode=\"mpfa\"') < 0 && e.indexOf('mpfaCols') < 0 && e.indexOf('mfields') < 0 &&
+      /仅选择已更新至 \{d\} 的 \{n\} 只/.test(e) && /MPF数据导出_/.test(e) &&
+      /if \(!ST\.fields\.size\)/.test(e) && /ST\.fields\.size \+ ST\.extra\.size/.test(e);
+  } catch (err) { return false; }
+})());
+chk('导出中心·⑭附加表整行点击（修复偶发失效）', (function () {
+  try {
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    return /\.ec-mod-lab/.test(e) && /ev\.preventDefault\(\)/.test(e) &&
+      /ST\.extra\.has\(k\)/.test(e) && /ST\.extra\.delete\(k\)/.test(e);
+  } catch (err) { return false; }
+})());
+chk('发行人顺序·①全局排序表（宏利/银联/友邦优先，渣打末位）', (function () {
+  try {
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    return /window\.MPF_TRUSTEE_ORDER/.test(c) && /'宏利': 0/.test(c) && /'銀聯信託': 1/.test(c) &&
+      /'渣打信托': 10/.test(c) && /window\.mpfSortTrustees/.test(c) && /window\.mpfSortSchemes/.test(c);
+  } catch (err) { return false; }
+})());
+chk('发行人顺序·②四个筛选面统一调用排序函数', (function () {
+  try {
+    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
+    const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
+    const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    return /mpfSortTrustees/.test(a) && /mpfSortTrustees/.test(r) && /mpfSortTrustees/.test(e) &&
+      (c.match(/mpfSortTrustees/g) || []).length >= 3 && /mpfSortSchemes/.test(e);
+  } catch (err) { return false; }
+})());
+chk('走势图·折叠后隐藏添加按钮与工具条', (function () {
+  try {
+    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
+    return /\.tr-box\.tr-folded \.tr-adds/.test(st) && /\.tr-box\.tr-folded \.tr-ctrls/.test(st);
+  } catch (err) { return false; }
+})());
+chk('页脚·免责声明移到版权行，核对段合并滞后说明', (function () {
+  try {
+    const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+    const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
+    return /class="copy-dis"/.test(h) && /function lag1Count\(\)/.test(c) &&
+      /另有 \{n\} 只落后 1 个估值日，多为发行人 T\+1 公布/.test(c) &&
+      c.indexOf('snote-dis') < 0;
+  } catch (err) { return false; }
+})());
+chk('部署·Pages 失败后 30 秒自动重试一次', (function () {
+  try {
+    const w = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
+    return /id: pages1/.test(w) && /continue-on-error: true/.test(w) &&
+      /steps\.pages1\.outcome == 'failure'/.test(w) && /sleep 30/.test(w);
+  } catch (err) { return false; }
+})());
+chk('列设置·榜单与对比页补齐（unit / nav / fer）', (function () {
+  try {
+    const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
+    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
+    return /\['unit', '单位类别', 0\]/.test(r) && /\['nav', '单位资产净值', 0\]/.test(r) &&
+      /unit: '<th scope="col" data-c="unit"/.test(r) &&
+      /k: 'unit'/.test(a) && /k: 'fer'/.test(a) && /case 'fer'/.test(a);
   } catch (err) { return false; }
 })());

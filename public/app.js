@@ -383,7 +383,8 @@
     ensureMF();
     const f = DATA.funds;
     MF_TY.setOptions(uniq(f.map((x) => x.type)).map((v) => ({ v, label: typeLabel(v) })));
-    MF_T.setOptions(uniq(f.map((x) => x.trustee)).map((v) => ({
+    const tlist = window.mpfSortTrustees ? window.mpfSortTrustees(uniq(f.map((x) => x.trustee))) : uniq(f.map((x) => x.trustee));
+    MF_T.setOptions(tlist.map((v) => ({
       v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
       n: f.filter((y) => y.trustee === v).length,
     })));

@@ -393,7 +393,19 @@ jobs:
         with:
           path: site
 
-      - uses: actions/deploy-pages@v4
+      # 2026-11-21（用户要求）：GitHub Pages 偶发部署失败（deploy-pages@v4），
+      # 失败后等 30 秒自动重试一次——这类失败重试基本都能过。
+      - id: pages1
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: 等待 30 秒后重试 Pages 部署
+        if: steps.pages1.outcome == 'failure'
+        run: sleep 30
+
+      - name: 重试 Pages 部署
+        if: steps.pages1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
 
   # 2026-11-17（用户要求）：数据任务失败/被跳过 → 直接发邮件，不再等人发现。
   # 依赖 Secrets：MPF_SMTP_USER / MPF_SMTP_PASS / MPF_MAIL_TO（已在仓库设置）。

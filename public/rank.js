@@ -320,7 +320,8 @@
     ensureMF();
     const f = DATA.funds;
     MF_RTY.setOptions(uniq(f.map((x) => x.type)).map((v) => ({ v, label: typeLabel(v) })));
-    MF_RTR.setOptions(uniq(f.map((x) => x.trustee)).map((v) => ({
+    const trList = window.mpfSortTrustees ? window.mpfSortTrustees(uniq(f.map((x) => x.trustee))) : uniq(f.map((x) => x.trustee));
+    MF_RTR.setOptions(trList.map((v) => ({
       v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
       n: f.filter((y) => y.trustee === v).length,
     })));
@@ -581,6 +582,8 @@
     fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(fundFullName(x)) + '</div></td>',   /* 2026-10-31 四版：名称下的对比横线一并删除（用户不需要） */
     scheme: (x) => '<td data-c="scheme" data-l="' + TT('计划名称') + '" class="fz"><div>' + esc(x.scheme || '—') + '</div>' +
       (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
+    unit: (x) => '<td data-c="unit" data-l="' + TT('单位类别') + '" class="c">' + esc(x.unit || '—') + '</td>',
+    nav: (x) => '<td data-c="nav" data-l="' + TT('单位资产净值') + '" class="r num">' + (x.nav == null ? '—' : esc(String(x.nav))) + '</td>',
     trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(trusteeDisplay(x.trustee)) + '</span></td>',
     /* 2026-11-02：细类不再占第二行（会让整行高出一大截）——收进悬浮说明，行高与资料库一致 */
     type: (x) => '<td data-c="type" data-l="' + TT('基金种类') + '"><span class="tag g"' + (x.subtype ? ' data-tip="' + esc(TQ('细类：{s}', { s: typeLabel(x.subtype) })) + '"' : '') + '>' + esc(typeLabel(x.type)) + '</span></td>',
@@ -617,6 +620,8 @@
     fund: '<th scope="col" data-c="fund" data-i18n-parts class="f-main fz">基金名称</th>',
     scheme: '<th scope="col" data-c="scheme" data-i18n-parts>计划名称</th>',
     trustee: '<th scope="col" data-c="trustee" data-i18n-parts>受托人</th>',
+    unit: '<th scope="col" data-c="unit" data-i18n-parts>单位类别</th>',
+    nav: '<th scope="col" data-c="nav" data-i18n-parts>单位资产净值</th>',
     type: '<th scope="col" data-c="type" data-i18n-parts>基金种类</th>',
     sub: '<th scope="col" data-c="sub" data-i18n-parts>基金细类</th>',
     risk: '<th scope="col" data-c="risk" data-i18n-parts data-k="risk" data-defdir="asc" class="sortable c">风险<br>级别 <span class="arrow">↕</span></th>',
@@ -1006,7 +1011,9 @@
     /* 列定义：k=列键、n=显示名、lock=必显 */
     const FUND = [
       /* 2026-10-26（用户要求）：基金规模列移到回报组之后（原管理费位置），管理费移出默认显示 */
-      ['rank', '名次', 1], ['fund', '基金名称', 1], ['scheme', '计划名称', 0], ['trustee', '受托人', 0],
+      ['rank', '名次', 1], ['fund', '基金名称', 1],
+      ['unit', '单位类别', 0], ['nav', '单位资产净值', 0],   /* 2026-11-21：与导出中心对齐 */
+      ['scheme', '计划名称', 0], ['trustee', '受托人', 0],
       ['type', '基金种类', 0], ['sub', '基金细类', 0], ['risk', '风险级别', 0],
       ['ann1', '近1年年率化', 0], ['ann5', '近5年年率化', 0], ['ann10', '近10年年率化', 0],
       ['annLaunch', '推出至今年率化', 0], ['size', '基金规模', 0], ['mgmtFee', '管理费', 0],
@@ -1036,7 +1043,7 @@
     ];
     const MODES = { fund: FUND, agg: AGG, self: SELF };
     /* 2026-11-02（用户要求）：基金种类列默认显示（与「基金最新数据」一致）；受托人保持显示 */
-    const DEFAULT_OFF = ['sub', 'cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee', 'worstYear', 'launchTs',
+    const DEFAULT_OFF = ['unit', 'nav', 'sub', 'cum1', 'cum5', 'cum10', 'cumLaunch', 'mgmtFee', 'worstYear', 'launchTs',
       'cal2021', 'cal2022', 'cal2023', 'cal2024', 'cal2025', 'scheme'];
     const SLIM_OFF = ['trustee', 'type', 'scheme', 'risk', 'size', 'ann5', 'ann10', 'annLaunch', 'mgmtFee',
       'worstYear', 'fer', 'launchTs',

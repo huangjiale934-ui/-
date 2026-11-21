@@ -283,6 +283,9 @@
     { k: 'mgmtFee', n: '基金管理费', dir: 'asc', off: 1 },
     { k: 'launchTs', n: '推出日期', dir: 'desc', off: 1 },
     { k: 'navAsOf', n: '更新日期', dir: 'desc', off: 1 },
+    /* 2026-11-21（用户要求）：与导出中心对齐，补单位类别 / 基金开支比率 */
+    { k: 'unit', n: '单位类别', dir: 'asc', off: 1 },
+    { k: 'fer', n: '基金开支比率', dir: 'asc', off: 1 },
   ];
   const LCOL_K = {};
   LCOLS.forEach((c) => { LCOL_K[c.k] = c; });
@@ -327,6 +330,8 @@
       case 'fund': return String(x.fundBase || x.fund || '');
       case 'partner': return partnerRank(x.trustee);
       case 'nav': return x.nav == null ? null : x.nav;
+      case 'unit': return x.unit || '';
+      case 'fer': return x.fer == null ? null : x.fer;
       case 'risk': return x.risk == null ? null : x.risk;
       case 'size': return x.size == null ? null : x.size;
       case 'type': return String(x.type || '');
@@ -678,6 +683,8 @@
       }
       case 'risk': return '<td data-c="risk" class="c" data-l="' + TT('风险级别') + '">' + riskTag(x.risk) + '</td>';
       case 'nav': return '<td data-c="nav" class="r num" data-l="' + TT('单位资产净值') + '">' + navCell(x) + '</td>';
+      case 'unit': return '<td data-c="unit" data-l="' + TT('单位类别') + '" class="c">' + escA(x.unit || '—') + '</td>';
+      case 'fer': return '<td data-c="fer" class="r num" data-l="' + TT('基金开支比率') + '">' + (x.fer == null ? '—' : (Math.round(x.fer * 100) / 100).toFixed(2) + '%') + '</td>';
       case 'size': {
         const tip = x.size == null ? TT('积金局未公布该基金规模（新基金或官方未披露），故显示 n.a.，并非本站缺少数据。') : '';
         return '<td data-c="size" class="r num" data-l="' + TQ('基金规模（{u}）', { u: TT('百万港元') }) + '"' + (tip ? ' data-tip="' + esc(tip) + '"' : '') + '>' +

@@ -154,6 +154,35 @@ function fetchJSON(url, key, force, onFresh) {
 }
 window.fetchJSON = fetchJSON;
 
+/* 2026-11-21（用户要求）：发行人显示顺序 = 合作深度排序，全站统一。
+   宏利 / 银联信托 / 友邦信托 为深度合作方，其后按侧栏既定顺序；渣打（新地）数据最弱排末位。
+   任何筛选器、下拉、多选、侧栏都必须用这个顺序，不得按出现次数或字母排。 */
+window.MPF_TRUSTEE_ORDER = {
+  '宏利': 0, '銀聯信託': 1, '友邦信託': 2, 'HSBC': 3, '東亞': 4,
+  '中銀保誠': 5, '永明': 6, '交通': 7, '萬通': 8, '中國人壽': 9, '渣打信托': 10,
+};
+window.mpfTrusteeRank = function (t) {
+  const m = window.MPF_TRUSTEE_ORDER;
+  return m[t] == null ? 99 : m[t];
+};
+window.mpfSortTrustees = function (arr) {
+  return (arr || []).slice().sort(function (a, b) {
+    return window.mpfTrusteeRank(a) - window.mpfTrusteeRank(b) || String(a).localeCompare(String(b), 'zh-Hans-CN');
+  });
+};
+/* 计划排序：宏利、银联的计划排最前，其余按名称 */
+window.mpfSortSchemes = function (arr) {
+  const rank = function (s) {
+    const t = String(s || '');
+    if (t.indexOf('宏利') >= 0) return 0;
+    if (t.indexOf('銀聯') >= 0 || t.indexOf('银联') >= 0) return 1;
+    return 2;
+  };
+  return (arr || []).slice().sort(function (a, b) {
+    return rank(a) - rank(b) || String(a).localeCompare(String(b), 'zh-Hans-CN');
+  });
+};
+
 /* 2026-11-19：日期输入统一容错——接受 2026-1-5 / 2026/1/5 / 2026.1.5 / 20260105 / 2026年1月5日 */
 window.mpfNormDate = function (v) {
   var s = String(v == null ? '' : v).trim();
@@ -803,11 +832,11 @@ function renderSrcNote() {
         /* 英文句子之间要有空格，否则会出现 …N/A".Blank = … 的粘连 */
         ((window.getLang && window.getLang() === 'en') ? ' ' : '') +
         TT('空白＝当日官网未披露净值，本站不插值、不前值填充。') +
+        (function () { const n = lag1Count(); return n ? TQ('另有 {n} 只落后 1 个估值日，多为发行人 T+1 公布，属正常节奏。', { n }) : ''; })() +
       '</span></div>' +
       staleNote() +
       /* 2026-11-04（第三十七轮，用户要求）：积金局入口另起一行，并写明「想看官方月报点这里」 */
       '<div class="snote-foot">' +
-        '<div class="snote-dis">' + TT('仅供研究参考，不构成投资建议；基金过往表现并非未来表现的指引，投资涉及风险。') + '</div>' +
         '<div class="snote-mpfa">' + TT('想看积金局官方每月公布的基金列表，可点击') +
           ' <a class="snote-link" href="#rank">' + TT('积金局月度数据（旧口径）') + ' <em>MPFA</em> →</a></div>' +
       '</div>' +
@@ -828,6 +857,17 @@ function renderSrcNote() {
 /* 2026-11-03（第三十一轮，用户要求）：把「源站尚未发布」的计划列出来。
    用户看到某只基金停在 10-29 会以为本站漏抓 —— 这里讲清是发行人还没发，不是我们缺。
    该区块在页脚 <details> 里，默认折叠。 */
+/* 2026-11-21（用户要求）：「另有 N 只落后 1 个估值日」并入「核对」段，不再单独占一行 */
+function lag1Count() {
+  const all = (DATA && DATA.funds) || [];
+  const dates = Array.from(new Set(all.map((f) => f.navAsOf).filter(Boolean))).sort().reverse();
+  const lagOf = {};
+  dates.forEach((d, i) => { lagOf[d] = i; });
+  let n = 0;
+  all.forEach((f) => { if (f.navAsOf && lagOf[f.navAsOf] === 1) n++; });
+  return n;
+}
+
 function staleNote() {
   const all = (DATA && DATA.funds) || [];
   let max = '';
@@ -853,9 +893,7 @@ function staleNote() {
   });
   const list = Object.keys(m).map((k) => ({ s: k, n: m[k].n, d: m[k].d }))
     .sort((a, b) => (a.d < b.d ? 1 : -1));
-  const lag1Note = lag1
-    ? '<div class="ns-lag1">' + TQ('另有 {n} 只落后 1 个估值日（多为发行人 T+1 公布，属正常节奏）', { n: lag1 }) + '</div>'
-    : '';
+  const lag1Note = '';   /* 2026-11-21：已并入「核对」段 */
   if (!list.length) return lag1Note;
   /* 2026-11-03（第三十二轮，用户要求）：一句话讲完，每个计划单独一行；计划名可点，点了直接筛出该计划的基金 */
   /* 2026-11-04：计划名走 schemeDisplay（英文名表按基金 id 索引，取该计划任意一只即可） */
@@ -3415,7 +3453,8 @@ function initDCABuild() {
     const q = (pkSearch.value || '').trim().toLowerCase();
     /* 左列：全部发行人（计数始终按全库，切换类别时不会跳数） */
     const tc = trusteeCounts(FUNDS);
-    const tKeys = Object.keys(tc).sort((a, b) => tc[b] - tc[a]);
+    /* 2026-11-21（用户要求）：与全站一致，按合作深度排序 */
+    const tKeys = window.mpfSortTrustees ? window.mpfSortTrustees(Object.keys(tc)) : Object.keys(tc);
     pkTrustees.innerHTML =
       '<button type="button" class="dca-tside' + (pkTrustee === '' ? ' on' : '') + '" data-t="">' +
         TT('全部') + '<em>' + FUNDS.length + '</em></button>' +

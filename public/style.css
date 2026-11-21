@@ -3239,7 +3239,7 @@ body { overflow-x: clip; }
 .ec-mod:last-child { border-bottom: 0; }
 .ec-mod.on { background: #fbfdff; border-radius: 8px; }
 .ec-mod-l { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.ec-mod-l label { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; cursor: pointer;
+.ec-mod-l .ec-mod-lab { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; cursor: pointer;
   font-size: 12.5px; color: #1c2f47; }
 .ec-mod-t { font-weight: 600; white-space: nowrap; }
 .ec-mod-s { font-weight: 400; color: #93a0b3; font-size: 11.5px; min-width: 0;
@@ -3268,3 +3268,22 @@ body { overflow-x: clip; }
 .ec-note { margin-top: 10px; padding: 10px 12px; border: 1px dashed #dbe6f3; border-radius: 9px;
   background: #fbfdff; font-size: 11.5px; line-height: 1.75; color: #5b6b7f; }
 .ec-note::before { content: 'ⓘ '; color: #3b82d6; font-weight: 700; }
+
+/* ===== 2026-11-21：走势图折叠 / 导出中心对齐 / 资料库紧凑 ===== */
+/* 折叠后只剩标题行：添加指数/基金、清空、区间、导出分享一并收起 */
+.tr-box.tr-folded .tr-adds,
+.tr-box.tr-folded .tr-ctrls { display: none !important; }
+
+/* 导出中心：左右两栏标题基线严格对齐 */
+.ec-left, .ec-right { padding-top: 14px; margin-top: 0 !important; }
+.ec-cap { height: 21px; line-height: 21px; margin: 0 0 9px; padding: 0; display: flex; align-items: center; gap: 8px; }
+.ec-cap > span { line-height: 1; }
+
+/* 资料库内容区整体缩小 10%（字号、间距、行高一起缩），宽度补偿避免右侧留白 */
+.db-main { zoom: .9; width: 111.12%; }
+@supports not (zoom: 1) { .db-main { zoom: normal; width: auto; } }
+
+/* 版权行 + 免责声明（2026-11-21：从说明区移到底部一行） */
+.copyright { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.copyright .copy-dis { margin-left: auto; font-size: 11.5px; color: #8a94a6; line-height: 1.5; text-align: right; }
+@media (max-width: 760px) { .copyright .copy-dis { margin-left: 0; text-align: left; } }
