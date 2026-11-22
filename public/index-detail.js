@@ -248,7 +248,8 @@
     var tries = 0;
     (function wait() {
       tries += 1;
-      if (window.DATA && window.DATA.count) { window.openIndexDetail(k); return; }
+      /* DATA 是 bundle 内的模块级变量（不是 window.DATA） */
+      if (typeof DATA !== 'undefined' && DATA && DATA.count) { window.openIndexDetail(k); return; }
       if (tries < 40) setTimeout(wait, 300);
     })();
   });
