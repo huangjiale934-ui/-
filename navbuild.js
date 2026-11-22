@@ -36,6 +36,7 @@ const SOURCES = [
     trustee: '銀聯信託', scheme: 'AMTD強積金計劃', p: 'amtdTable',
   },
   {
+    histSrc: '滙豐官網', noRender: true,
     key: 'HSBC', label: '滙豐強積金智選計劃（滙豐銀行）', file: 'HSBC.html',
     url: 'https://www.hsbc.com.hk/zh-hk/mpf/tool/unit-prices/',
     trustee: 'HSBC', scheme: '滙豐強積金智選計劃', p: 'hsbcTable', ti: 0,
@@ -43,6 +44,7 @@ const SOURCES = [
     budget: 60000,
   },
   {
+    histSrc: '恒生官網', noRender: true,
     key: 'HangSeng', label: '恒生強積金智選計劃（恒生銀行）', file: 'HangSeng.html',
     url: 'https://www.hangseng.com/zh-hk/personal/insurance-mpf/e-mpf/fund-price-performance/',
     trustee: 'HSBC', scheme: '恒生強積金智選計劃', p: 'hsbcTable', ti: 0,
@@ -50,26 +52,31 @@ const SOURCES = [
     budget: 60000,
   },
   {
+    histSrc: '東亞銀行官網', histScheme: '集成信託', noRender: true,
     key: 'BEA-ITP', label: '東亞（強積金）集成信託計劃（東亞銀行）', file: 'BEA.html',
     url: 'https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc',
     trustee: '東亞', scheme: '東亞（強積金）集成信託計劃', p: 'beaTable', ti: 0,
   },
   {
+    histSrc: '東亞銀行官網', histScheme: '享惠', noRender: true,
     key: 'BEA-GSP', label: '東亞（強積金）享惠計劃（東亞銀行）', file: 'BEA.html',
     url: 'https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc',
     trustee: '東亞', scheme: '東亞（強積金）享惠計劃', p: 'beaTable', ti: 1,
   },
   {
+    histSrc: '東亞銀行官網', histScheme: '行業', noRender: true,
     key: 'BEA-IND', label: '東亞（強積金）行業計劃（東亞銀行）', file: 'BEA.html',
     url: 'https://www.hkbea.com/cgi-bin/rate_mpfcfp.jsp?language=tc',
     trustee: '東亞', scheme: '東亞（強積金）行業計劃', p: 'beaTable', ti: 2,
   },
   {
+    histSrc: '中銀保誠官網', histScheme: '我的強積金', noRender: true,
     key: 'BOC-My', label: '我的強積金計劃（中銀保誠）', file: 'BOCmy.html',
     url: 'https://www.bocpt.com/homepage/zh-hk/my-choice-mpf/fund-price-enquiry/',
     trustee: '中銀保誠', scheme: '我的強積金計劃', p: 'bocptDiv',
   },
   {
+    histSrc: '中銀保誠官網', histScheme: '簡易', noRender: true,
     key: 'BOC-Easy', label: '中銀保誠簡易強積金計劃（中銀保誠）', file: 'BOCeasy.html',
     url: 'https://www.bocpt.com/homepage/easy-choice-mpf/fund-price-enquiry/',
     trustee: '中銀保誠', scheme: '中銀保誠簡易強積金計劃', p: 'bocptDiv',

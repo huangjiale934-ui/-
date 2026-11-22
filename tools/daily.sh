@@ -33,6 +33,9 @@ NODE="$(command -v node 2>/dev/null || true)"
 [ -n "${NODE:-}" ] || NODE="$NODE_DIR/node.exe"
 [ -x "$NODE" ] || [ -f "$NODE" ] || NODE=""
 LOG="tmp/daily-$(date +%Y%m%d-%H%M).log"
+# 2026-11-22（用户要求）：各步骤耗时流水，收尾时出「最慢前 3 名」
+STEP_TIMES="tmp/step-times-$(date +%Y%m%d).tsv"
+: > "$STEP_TIMES" 2>/dev/null || true
 mkdir -p tmp
 exec > >(tee -a "$LOG") 2>&1
 echo "=== 每日更新开始 $(date '+%F %T') ==="
@@ -47,7 +50,9 @@ soft_step() {
   local t0; t0=$(date +%s)          # 2026-11-05：记每步耗时，便于定位瓶颈
   "$@"
   local rc=$?
-  echo "    [耗时 $(( $(date +%s) - t0 ))s]"
+  local dt=$(( $(date +%s) - t0 ))
+  echo "    [耗时 ${dt}s]"
+  echo "$n|$dt|$rc" >> "$STEP_TIMES"
   if [ $rc -ne 0 ]; then
     echo "!!! [$n] 失败（退出码 $rc），已跳过，继续后续步骤"
   fi
@@ -84,7 +89,9 @@ step() {
   local t0; t0=$(date +%s)
   "$@"
   local rc=$?
-  echo "    [耗时 $(( $(date +%s) - t0 ))s]"
+  local dt=$(( $(date +%s) - t0 ))
+  echo "    [耗时 ${dt}s]"
+  echo "$n|$dt|$rc" >> "$STEP_TIMES"
   if [ $rc -ne 0 ]; then
     echo "!!! [$n] 失败（退出码 $rc），中止后续步骤，保留上次产物"
     write_ustat error "$n 失败：$*"
@@ -322,6 +329,7 @@ soft_step "9.9/9 同计划落后（末次）" node tools/plan-lag.js
 step "9.95/9 净值精度复归（发布前）" node tools/nav-round4.js
 # 2026-10-29（5.0）：发布闸门——四份核心数据不一致（如新 funds 配旧 nav-perf）时禁止发布
 # 2026-11-21（用户反馈）：无论是否发布都写每日摘要，日志不再依赖 push.js
+node tools/step-times.js "$STEP_TIMES" || true
 soft_step "9.98/10 每日摘要" node tools/daily-log.js
 
 step "10/10 发布前一致性" node tools/predeploy-check.js

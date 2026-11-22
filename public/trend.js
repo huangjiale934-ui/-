@@ -884,8 +884,7 @@ window.TREND = (function () {
         '<div class="tr-tablewrap"></div>' +
         (o.hideGoto ? '' :
           '<div class="tr-gotowrap"><button type="button" class="btn tr-goto"' + (hasFund ? '' : ' style="display:none"') + '>' + esc0( _t('查看具体基金分析')) + '</button></div>') +
-        '<div class="tr-note"><span class="tr-note-tip">' + esc0( _t('点线条可改颜色 / 线宽 / 线型')) + '</span>' +
-          '<span class="tr-note-txt">' + esc0( _t('纵轴为累计涨跌幅：每条线 = 该标的每日数值 ÷ 区间起点数值 − 1（区间起点当天 = 0%）。例：净值 30 → 33 显示为 +10%；悬停可查看实际数值（净值 / 指数点位）。')) + '</span></div>';
+        '';
     }
 
     /* 「清空筛选」：清空全部对比对象（含指数）并重置面板筛选（2026-10-17）
@@ -1506,7 +1505,9 @@ window.TREND = (function () {
       wrap.innerHTML =
         '<div class="tr-tbl-scroll"><table class="tr-tbl tr-center">' +
           '<thead><tr>' +
-            '<th scope="col">' + esc0(_t('名称')) + '</th>' +
+            '<th scope="col" class="tr-nameth">' + esc0(_t('名称')) +
+              '<i class="ver-info" role="button" tabindex="0" aria-label="' + esc0(_t('图表说明')) +
+              '" data-tip="' + esc0(_t('点线条可改颜色 / 线宽 / 线型。单条对比时纵轴为实际数值（净值 / 指数点位），悬停显示当日净值与当日涨跌幅；再加入一条即切换为相对区间起点的累计涨跌幅对比。')) + '">ⓘ</i></th>' +
             '<th scope="col" class="r">' + esc0(_t('区间最高')) + '</th>' +
             '<th scope="col" class="r">' + esc0(_t('区间最低')) + '</th>' +
             /* 2026-11-03（第二十九轮，用户要求）：去掉四个列头的「?」悬浮提示（含义已够直白） */

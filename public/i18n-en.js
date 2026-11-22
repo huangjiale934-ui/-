@@ -173,6 +173,8 @@
 '本站数据来自香港强制性公积金计划管理局（积金局）「強積金基金平台」公布的基金资讯表，由广州精研数据有限公司整理并每日自动同步（数值与原始资料一致，未经加工）；单位资产净值、业绩与持仓等数据另取自各计划受托人／保荐人官网。本网页所载资料仅供参考，不构成任何投资建议或要约邀请；基金过往表现并非未来表现的指引，投资涉及风险，强积金成员应参阅相关计划的销售文件及基金便览。广州精研数据有限公司力求资料准确可靠，但不对资料的准确性、完整性及适时性作出任何保证。': 'Data comes from the MPFA "MPF Fund Platform" fund information table (compiled and synced daily by Guangzhou Jingyan Data Co., Ltd.; figures kept as published). NAV, performance and holdings come from trustees’ / sponsors’ official websites. This page is for reference only and is not investment advice or a solicitation; past performance is not indicative of future results and investment involves risk. Members should read the scheme documents and fund fact sheets. Jingyan strives for accuracy but gives no warranty as to completeness or timeliness.',
 '区间年化 = (末值 ÷ 区间起点)^(1÷年数) − 1；区间不足半年不展示': 'Annualised = (end ÷ start)^(1÷years) − 1; hidden for ranges shorter than 6 months',
 '区间年化': 'Annualised',
+'图表说明': 'Chart help',
+'点线条可改颜色 / 线宽 / 线型。单条对比时纵轴为实际数值（净值 / 指数点位），悬停显示当日净值与当日涨跌幅；再加入一条即切换为相对区间起点的累计涨跌幅对比。': 'Click a line to change colour, width or dash. With a single series the axis shows actual values (NAV / index level) and hovering shows that the value and change; add a second series to switch to cumulative change since the period start.',
 '数据统计口径说明': 'Data methodology notes',
 '发行人未发布': 'Issuer not published',
 '发行人官网最新净值只公布到 {d}（落后 {n} 个估值日）；本站不插值、不前值填充。': 'Latest NAV published by the issuer is {d} ({n} valuation days behind); no interpolation or carry-forward.',

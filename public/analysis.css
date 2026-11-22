@@ -1297,3 +1297,8 @@
 .cmp-box .tr-tbl th:nth-child(1), .cmp-box .tr-tbl td:nth-child(1) { width: 20% !important; }
 .cmp-box .tr-tbl th:last-child, .cmp-box .tr-tbl td:last-child { width: 21% !important; }
 .modal-bd .tr-tbl td.date, .cmp-box .tr-tbl td.date { white-space: nowrap; }
+
+/* 2026-11-22（用户要求）：走势表「名称」表头右侧的 ⓘ（原来说明行占一整行，已并入悬浮提示） */
+.tr-tbl th.tr-nameth .ver-info { width: 15px; height: 15px; line-height: 13px; font-size: 11px;
+  margin-left: 5px; vertical-align: -2px; }
+@media (max-width: 760px) { .tr-tbl th.tr-nameth .ver-info { width: 14px; height: 14px; line-height: 12px; } }
