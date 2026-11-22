@@ -171,7 +171,11 @@
 
   window.openIndexDetail = function (key) {
     var d0 = document.querySelector('#anDetail');
-    if (!d0) return;
+    if (!d0) {
+      /* 小窗/弹窗里没有放大容器：跳到资料库分析视图再打开（避免「点了没反应」） */
+      try { location.href = 'index.html?idx=' + encodeURIComponent(key) + '#cmp'; } catch (e) {}
+      return;
+    }
     /* 先出骨架：本地/线上都秒回，用户不会以为没反应 */
     if (!CACHE) {
       d0.innerHTML = '<div class="an-dwrap"><button type="button" class="an-back" onclick="window.idxBack()">' +
@@ -240,6 +244,12 @@
   document.addEventListener('DOMContentLoaded', function () {
     var k = '';
     try { k = new URLSearchParams(location.search).get('idx') || ''; } catch (e) {}
-    if (k && window.DATA && window.DATA.count) window.openIndexDetail(k);
+    if (!k) return;
+    var tries = 0;
+    (function wait() {
+      tries += 1;
+      if (window.DATA && window.DATA.count) { window.openIndexDetail(k); return; }
+      if (tries < 40) setTimeout(wait, 300);
+    })();
   });
 })();
