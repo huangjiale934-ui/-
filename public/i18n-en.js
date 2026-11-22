@@ -174,6 +174,8 @@
 '区间年化 = (末值 ÷ 区间起点)^(1÷年数) − 1；区间不足半年不展示': 'Annualised = (end ÷ start)^(1÷years) − 1; hidden for ranges shorter than 6 months',
 '区间年化': 'Annualised',
 '数据统计口径说明': 'Data methodology notes',
+'发行人未发布': 'Issuer not published',
+'发行人官网最新净值只公布到 {d}（落后 {n} 个估值日）；本站不插值、不前值填充。': 'Latest NAV published by the issuer is {d} ({n} valuation days behind); no interpolation or carry-forward.',
 '已核实 {v}/{t}（{p}%）': 'Verified {v}/{t} ({p}%)',
 '，{n} 条为非单位化基金': '; {n} non-unitised fund row(s)',
 '，{n} 条为第三方补值': '; {n} filled from third-party quotes',

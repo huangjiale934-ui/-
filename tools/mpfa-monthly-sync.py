@@ -21,10 +21,15 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "mpfa-monthly.json")
+WATCH = os.path.join(ROOT, "data", "mpfa-monthly-watch.json")
+NEWS_API = "https://www.mpfa.org.hk/api/feature/pressrelease/data"
+DS_ID = "{FDB292CA-7C79-43B7-A40B-D546423BBF74}"
+LIST_URL = "https://www.mpfa.org.hk/tc/info-centre/press-releases"
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/142.0"}
 
 # 9 行的固定順序（官方原表順序，OCR 只認位置，名稱與 key 用這裡的）
@@ -54,15 +59,42 @@ def fetch_text(url):
 
 
 def find_release(today=None, only=None):
-    """探測最近 12 天（或指定日期）的新聞稿，回傳 (date, url) 或 (None, None)"""
-    import datetime
+    """找最新一期「投資回報臨時數據」新聞稿。
+    2026-11-22：改为优先调用官網新闻稿 JSON 接口（一次取 40 条，能回溯一个多月），
+    不再逐日猜 URL —— 官方偶尔延迟发布时，20 天窗口会漏掉。"""
     if only:
-        cands = [only]
-    else:
-        d0 = today or datetime.date.today()
-        # 回溯 20 天：機器若在月初停機幾天，恢復後仍能補上（官方約每月 6 日發佈）
-        cands = [(d0 - datetime.timedelta(days=i)).strftime("%Y%m%d") for i in range(0, 20)]
-    for d in cands:
+        u = "https://www.mpfa.org.hk/tc/info-centre/press-releases/%s" % only
+        try:
+            return only, u, fetch_text(u)
+        except Exception:
+            return None, None, None
+    try:
+        body = json.dumps({
+            "year": None, "currentPage": 0, "pageSize": 40,
+            "currentLanguage": "zh-TW", "dataSourceId": DS_ID,
+        }).encode("utf-8")
+        req = urllib.request.Request(NEWS_API, data=body, method="POST", headers={
+            "Content-Type": "application/json",
+            "User-Agent": UA["User-Agent"],
+            "Referer": LIST_URL,
+            "Accept": "application/json, text/plain, */*",
+        })
+        with urllib.request.urlopen(req, timeout=40) as r:
+            j = json.loads(r.read().decode("utf-8", "ignore"))
+        for it in (j.get("news") or []):
+            title = re.sub(r"<[^>]+>", "", it.get("title") or "")
+            if "投資回報" in title and "臨時數據" in title:
+                path = it.get("url") or ""
+                d = path.rstrip("/").rsplit("/", 1)[-1]
+                u = "https://www.mpfa.org.hk" + path
+                return d, u, fetch_text(u)
+    except Exception:
+        pass
+    # 兜底：接口不可用时，仍按日期回退 20 天
+    import datetime
+    d0 = today or datetime.date.today()
+    for i in range(0, 20):
+        d = (d0 - datetime.timedelta(days=i)).strftime("%Y%m%d")
         url = "https://www.mpfa.org.hk/tc/info-centre/press-releases/%s" % d
         try:
             html = fetch_text(url)
@@ -297,7 +329,17 @@ def main():
 
     date, url, html = find_release(only=a.date or None)
     if not date:
-        print("SKIP 最近 20 天沒有新的「投資回報臨時數據」新聞稿（官網尚未發佈）")
+        try:
+            json.dump({
+                "checkedAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                "found": False,
+                "asOf": old.get("asOf"),
+                "publishedAt": old.get("publishedAt"),
+                "note": "官網尚未發佈新月報（每晚自動重試）",
+            }, open(WATCH, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        except Exception:
+            pass
+        print("SKIP 官網最新一期仍是 %s（尚未發佈新一期；每晚自動重試）" % (old.get("publishedAt") or "未知"))
         # 2026-11-13（复验报告 E4）：SKIP 不是失败。原返回 2 会被 daily.sh 记成「!!! 失败」，
         # 11-11 与 11-13 两次日志都留了假告警。改成 0，同时在输出里保留 SKIP 字样。
         return 0
@@ -314,7 +356,17 @@ def main():
         asof = "%04d-%02d-%02d" % (y, mo, calendar.monthrange(y, mo)[1])
 
     if old.get("asOf") and asof <= old["asOf"] and not a.dry:
-        print("SKIP 官網最新一期 %s 不新於本地 %s" % (asof, old["asOf"]))
+        try:
+            json.dump({
+                "checkedAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                "found": True,
+                "asOf": asof,
+                "publishedAt": date,
+                "note": "官網最新一期與本地一致（每晚自動重試）",
+            }, open(WATCH, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        except Exception:
+            pass
+        print("SKIP 官網最新一期 %s 不新於本地 %s（watch 已更新）" % (asof, old["asOf"]))
         return 0   # 同上：无新数据不算失败
 
     png = a.png

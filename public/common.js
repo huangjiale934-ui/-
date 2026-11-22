@@ -824,15 +824,15 @@ function renderSrcNote() {
         TQ('本页共 {c} 条，按单位类别逐条收录；积金局按「合并单位类别」计 {d} 只，两者口径不同、并不矛盾。',
           { c: DATA.count, d: declared }) +
       '</span></div>' +
-      '<div class="snote-r"><b>' + TT('核对') + '</b><span class="snote-2l">' +
-        '<i>' +
-          TQ('已核实 {v}/{t}（{p}%）', { v: ns0.verified != null ? ns0.verified : '—', t: ns0.total || DATA.count, p: pct1 }) +
-          (naN ? TQ('，{n} 条为非单位化基金', { n: naN }) : '') +
-          (provN ? TQ('，{n} 条为第三方补值', { n: provN }) : '') +
-          (function () { const n = lag1Count(); return n ? TQ('，{n} 只落后 1 个估值日（T+1 正常）', { n }) : ''; })() +
-          TT('；空白＝官网未披露，不插值。') +
-        '</i>' +
-        '<i>' + checkLine2() + '</i>' +
+      '<div class="snote-r"><b>' + TT('核对') + '</b><span>' +
+        TQ('本次已逐条核实 {v} / {t} 条（{p}%）', { v: ns0.verified != null ? ns0.verified : '—', t: ns0.total || DATA.count, p: pct1 }) +
+        (naN ? TQ('；另有 {n} 条为非单位化基金，官方不提供单位价格，显示「不适用」。', { n: naN }) : '。') +
+        (provN ? TQ('其中 {n} 条的近期净值为第三方行情补值（Yahoo），官方源发布后自动替换，悬浮净值可辨。', { n: provN }) +
+          ((window.getLang && window.getLang() === 'en') ? ' ' : '') : '') +
+        /* 英文句子之间要有空格，否则会出现 …N/A".Blank = … 的粘连 */
+        ((window.getLang && window.getLang() === 'en') ? ' ' : '') +
+        TT('空白＝当日官网未披露净值，本站不插值、不前值填充。') +
+        (function () { const n = lag1Count(); return n ? TQ('另有 {n} 只落后 1 个估值日，多为发行人 T+1 公布，属正常节奏。', { n }) : ''; })() +
       '</span></div>' +
       staleNote() +
       /* 2026-11-04（第三十七轮，用户要求）：积金局入口另起一行，并写明「想看官方月报点这里」 */
@@ -866,38 +866,6 @@ function lag1Count() {
   let n = 0;
   all.forEach((f) => { if (f.navAsOf && lagOf[f.navAsOf] === 1) n++; });
   return n;
-}
-
-/* 2026-11-22（用户要求）：页脚「核对」第二行 —— 节点级抓取监控 + 两站交叉核验。
-   目的：让用户一眼看出「是发行人没发，还是我们没抓到」，以及「对站是否落后/不一致」。
-   本机不再向 GitHub 推数据，这里只做核验与提示，不互相覆盖。 */
-function checkLine2() {
-  const parts = [];
-  const sh = DATA && DATA.scrapeHealth;
-  if (sh && sh.summary && sh.summary.total) {
-    const s = sh.summary;
-    const bad = sh.bad || [];
-    const hard = bad.filter((x) => x.status === 'struct_miss' || x.status === 'failed' || x.status === 'missing');
-    const nr = bad.filter((x) => x.status === 'not_rendered').length;
-    let t = TQ('抓取节点 {ok}/{t}', { ok: s.ok || 0, t: s.total });
-    if (hard.length) t += '；' + TT('异常') + '：' + hard.map((x) => x.key).join('、');
-    if (nr) t += TQ('；{n} 个未渲染沿用旧值', { n: nr });
-    parts.push(t);
-  }
-  const cc = DATA && DATA.crossCheck;
-  if (cc && cc.verdict && cc.verdict !== 'error') {
-    const s = cc.summary || {};
-    if (cc.verdict === 'ok') {
-      parts.push(TQ('与 GitHub 站核对：{n} 只一致（净值日 {d}）', { n: s.same || 0, d: (cc.a && cc.a.navLatest) || '—' }));
-    } else if (cc.verdict === 'aheadB') {
-      parts.push(TQ('与 GitHub 站核对：B 站有 {n} 只更新（A 站下一班补齐）', { n: s.aheadB || 0 }));
-    } else {
-      parts.push(TQ('与 GitHub 站核对：{n} 只需复核（同日不同值/单侧）',
-        { n: (s.valueDiff || 0) + (s.onlyA || 0) + (s.onlyB || 0) }));
-    }
-  }
-  if (!parts.length) return TT('节点监控与两站核对将于下一班生成。');
-  return parts.join(' · ') + '。';
 }
 
 function staleNote() {
@@ -1646,6 +1614,27 @@ function fdStars(id, pick, lowerBetter) {
 }
 
 /** 表头：醒目价格 + 其他重要信息（对齐积金局基金页表头的信息密度） */
+
+/* 2026-11-22（用户要求）：详情页「发行人未发布」徽标 —— 按全站估值日序列判断落后级数。
+   1 级 = T+1，正常；≥2 级才提示，避免把正常节奏标成异常。 */
+function navLagSteps(asOf) {
+  if (!asOf) return 0;
+  const all = (typeof DATA !== 'undefined' && DATA && DATA.funds) || [];
+  const dates = Array.from(new Set(all.map((f) => f.navAsOf).filter(Boolean))).sort().reverse();
+  const i = dates.indexOf(asOf);
+  return i < 0 ? 0 : i;
+}
+
+
+function lateTag(x) {
+  if (!x || !x.navAsOf || x.navStatus !== 'verified') return '';
+  const steps = navLagSteps(x.navAsOf);
+  if (steps < 2) return '';
+  const tip = TQ('发行人官网最新净值只公布到 {d}（落后 {n} 个估值日）；本站不插值、不前值填充。',
+    { d: x.navAsOf, n: steps });
+  return '<span class="fd-late" title="' + esc(tip) + '">' + TT('发行人未发布') + '</span>';
+}
+
 function fdHead(x, pf) {
   const hasNav = x.navStatus === 'verified' && x.nav != null;
   const price = hasNav ? nf(x.nav, 4) : (x.navStatus === 'na' ? TT('不适用') : TT('待核实'));
@@ -1660,7 +1649,7 @@ function fdHead(x, pf) {
   return '<div class="fd-head" id="fdHead">' +
     '<div class="fd-price">' +
       '<div class="fd-k">' + TT('价格（HKD）') + '</div>' +
-      (asof ? '<div class="fd-asof">' + asof + '</div>' : '') +
+      (asof ? '<div class="fd-asof">' + asof + lateTag(x) + '</div>' : '') +
       '<div class="fd-v">' + price + '</div>' +
       (rng ? '<div class="fd-range">' + rng + '</div>' : '') +
     '</div>' +

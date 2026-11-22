@@ -86,8 +86,10 @@ else
   echo "  · 永明：本季持仓已齐，跳过下载/解析" >> "$LOG"
 fi
 if "$NODE" tools/source-due.js 中國人壽; then
-  fetch_pdf "中國人壽MT00083" "https://www.mpfa.org.hk/assets/FF/MT00083.pdf" tmp/cl_mt83.pdf \
-    && run "中國人壽持仓" "$PY" chinalife_holdings.py tmp/cl_mt83.pdf
+  # 2026-11-22（用户要求）：优先发行人官网「基金表现便览」（简中版季度最全），失败才回退積金局 MT00083
+  if "$PY" tools/fetch-chinalife-fpr.py >> "$LOG" 2>&1; then
+    run "中國人壽持仓（官網）" "$PY" chinalife_holdings.py tmp/cl_fpr.pdf
+  fi
 else
   echo "  · 中國人壽：本季持仓已齐，跳过下载/解析" >> "$LOG"
 fi

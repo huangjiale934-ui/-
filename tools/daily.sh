@@ -96,29 +96,6 @@ step() {
 # 完全没变化就跳过后续派生重算与发布，避免「0 更新的班次」白烧时间与积分。
 NAVSIG_BEFORE=$("$NODE" -e "const f=require('./data/funds.json').funds;const s=f.map(x=>x.id+':'+x.nav+':'+x.navAsOf).join('|');console.log(require('crypto').createHash('md5').update(s).digest('hex'))" 2>/dev/null || echo "")
 
-# 2026-11-22（用户要求：提速降耗）：周日净值源站不更新，若库里已经是上周五的净值，
-# 就不再重渲染 20 个官网页面（实测可省 20+ 分钟）。MPF_FORCE=1 可强制抓取。
-SKIP_NAV="${MPF_SKIP_NAV:-0}"
-if [ "$(date +%u)" = "7" ] && [ "${MPF_FORCE:-0}" != "1" ]; then
-  LAST_FRI=$(date -d 'last friday' +%F 2>/dev/null || echo "")
-  NAVL=$("$NODE" -e "const f=require('./data/funds.json').funds;let m='';f.forEach(x=>{if(x.navAsOf&&x.navAsOf>m)m=x.navAsOf});console.log(m)" 2>/dev/null || echo "")
-  if [ -n "$LAST_FRI" ] && [ -n "$NAVL" ] && { [ "$NAVL" \> "$LAST_FRI" ] || [ "$NAVL" = "$LAST_FRI" ]; }; then
-    SKIP_NAV=1
-    echo "周日且净值已是上周五（$NAVL），跳过净值重渲染（省时省积分）"
-  fi
-fi
-if [ "$SKIP_NAV" = "1" ]; then
-  echo "--- [1/9 抓发行人最新净值] 跳过（复用周五数据） ---"
-else
-  # 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
-  # 2026-11-22：拆成「渲染 → 解析」两段 —— 渲染超时也不会丢掉“用现有快照重建”的机会
-  soft_step "1/9 抓发行人最新净值（渲染）" timeout 1500 node navbuild.js --render-only
-  soft_step "1.02/9 解析净值快照" node navbuild.js
-fi
-# 2026-11-22（用户要求）：节点级抓取监控 —— 比 isValid 更早发现源站改版
-# （价格表节点消失 / 只返回维护页 / 解析 0 条）。只告警，不阻断发布。
-soft_step "1.05/9 抓取节点监控" node tools/scrape-health.js
-
 # 2026-11-05（第四十轮，用户要求）：下面四家互相独立（各写自己的 hist，共享索引已是加锁 + 原子写入），
 # 改成同一波并行。原先串行合计约 10 分钟，并行后由最慢的一家决定（约 3–4 分钟）。
 # 注意：必须排在 navbuild 之后 —— 这四个脚本都要读 navbuild 刚写出的 funds.json 做映射。
@@ -159,6 +136,31 @@ rm -f "$PAR_DIR"/*.log "$PAR_DIR"/*.rc "$PAR_DIR"/*.end 2>/dev/null; rmdir "$PAR
 # 原来只跑宏利/東亞，滙豐、中銀保誠、友邦、萬通、銀聯等 hist 会停在上一次运行日，
 # 导出表就出现「前面有值、最后几格空白」。脚本内含快照合并，不会截断历史。
 soft_step "3.5/9 各发行人历史近端补齐" bash tools/hist-topup.sh recent
+# 2026-11-22（用户要求）：净值构建挪到历史抓取之后 —— 永明/富達/海通/宏利的净值直接取
+# API 历史序列（hist/*.json），必须先跑完上面的 par 与 3.5，否则拿到的是昨天的值。
+# 2026-11-22（用户要求：提速降耗）：周日净值源站不更新，若库里已经是上周五的净值，
+# 就不再重渲染 20 个官网页面（实测可省 20+ 分钟）。MPF_FORCE=1 可强制抓取。
+SKIP_NAV="${MPF_SKIP_NAV:-0}"
+if [ "$(date +%u)" = "7" ] && [ "${MPF_FORCE:-0}" != "1" ]; then
+  LAST_FRI=$(date -d 'last friday' +%F 2>/dev/null || echo "")
+  NAVL=$("$NODE" -e "const f=require('./data/funds.json').funds;let m='';f.forEach(x=>{if(x.navAsOf&&x.navAsOf>m)m=x.navAsOf});console.log(m)" 2>/dev/null || echo "")
+  if [ -n "$LAST_FRI" ] && [ -n "$NAVL" ] && { [ "$NAVL" \> "$LAST_FRI" ] || [ "$NAVL" = "$LAST_FRI" ]; }; then
+    SKIP_NAV=1
+    echo "周日且净值已是上周五（$NAVL），跳过净值重渲染（省时省积分）"
+  fi
+fi
+if [ "$SKIP_NAV" = "1" ]; then
+  echo "--- [1/9 抓发行人最新净值] 跳过（复用周五数据） ---"
+else
+  # 2026-10-27：navbuild --render 可能卡死（实测 25 分钟无输出），加 1800s 硬超时，超时后继续后续步骤
+  # 2026-11-22：拆成「渲染 → 解析」两段 —— 渲染超时也不会丢掉“用现有快照重建”的机会
+  soft_step "1/9 抓发行人最新净值（渲染）" timeout 1500 node navbuild.js --render-only
+  soft_step "1.02/9 解析净值快照" node navbuild.js
+fi
+# 2026-11-22（用户要求）：节点级抓取监控 —— 比 isValid 更早发现源站改版
+# （价格表节点消失 / 只返回维护页 / 解析 0 条）。只告警，不阻断发布。
+soft_step "1.05/9 抓取节点监控" node tools/scrape-health.js
+
 soft_step "3.6/9 積金局新聞稿" "$PY" news_fetch.py
 # 2026-10-26 新增：持仓写入事务——BCT / 资产分布两步会整条覆盖 holdings 条目，
 # 解析退化（空名称/分布塌缩）过去要人工 diff 回滚，这里抓取前快照、写后自动判定并回滚。

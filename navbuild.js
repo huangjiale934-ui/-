@@ -105,6 +105,7 @@ const SOURCES = [
     trustee: '銀聯信託', scheme: 'BCT（強積金）行業計劃', p: 'bctJson',
   },
   {
+    histSrc: '永明官網', noRender: true,
     key: 'SunLife', label: '永明彩虹強積金計劃（永明）', file: 'SunLife.html',
     url: 'https://www.sunlife.com.hk/zh-hant/investments/mpf-orso-fund-prices-performance/mpf-fund-prices-performance.type-MPF/',
     trustee: '永明', scheme: '永明彩虹強積金計劃', p: 'sunlifeTable', ti: 0,
@@ -132,21 +133,25 @@ const SOURCES = [
     budget: 45000,
   },
   {
+    histSrc: 'NavChartData', noRender: true,
     key: 'Fidelity', label: '富達退休集成信託（富達）', file: 'Fidelity.html',
     url: 'https://www.fidelity.com.hk/zh/our-funds/mpf',
     trustee: 'HSBC', scheme: '富達退休集成信託', p: 'fidelityCards',
   },
   {
+    histSrc: '宏利官网', histScheme: '環球精選', noRender: true,
     key: 'Manu-GS', label: '宏利環球精選（強積金）計劃（宏利）', file: 'manu_gs_cn2.html',
     url: 'https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2?product=%E5%AE%8F%E5%88%A9%E7%92%B0%E7%90%83%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83',
     trustee: '宏利', scheme: '宏利環球精選（強積金）計劃', p: 'manulifeList',
   },
   {
+    histSrc: '宏利官网', histScheme: '退休精選', noRender: true,
     key: 'Manu-RC', label: '宏利退休精選（強積金）計劃（宏利）', file: 'manu_rc_cn2.html',
     url: 'https://www.manulife.com.hk/zh-hk/individual/fund-price/retirechoice.html/v2/fundlist?product=%E5%AE%8F%E5%88%A9%E9%80%80%E4%BC%91%E7%B2%BE%E9%81%B8%28%E5%BC%B7%E7%A9%8D%E9%87%91%29%E8%A8%88%E5%8A%83',
     trustee: '宏利', scheme: '宏利退休精選（強積金）計劃', p: 'manulifeList',
   },
   {
+    histSrc: 'PerformanceChart', noRender: true,
     key: 'Haitong', label: '海通MPF退休金（海通國際投資經理）', file: 'htisec.html',
     url: 'https://www.htisec.com/asm/tc/mpf.jsp?type=1',
     trustee: 'HSBC', scheme: '海通MPF退休金', p: 'haitongCards',
@@ -898,6 +903,31 @@ const PARSERS = {
 };
 
 /* ============================ 主流程 ============================ */
+
+/* 2026-11-22（用户要求）：永明/富達/海通/宏利改用 API 历史序列（fetch-*-hist.py 落盘），
+   不再开无头浏览器。hist 条目自带 id，用 funds.json 反查标准名称，匹配零歧义。 */
+function rowsFromHist(s) {
+  const out = [];
+  let funds = [];
+  try { funds = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'funds.json'), 'utf8')).funds || []; } catch (e) {}
+  const byId = {};
+  funds.forEach((f) => { byId[String(f.id)] = f; });
+  let files = [];
+  try { files = fs.readdirSync(path.join(__dirname, 'data', 'hist')); } catch (e) { return out; }
+  for (const fn of files) {
+    if (!/\.json$/.test(fn)) continue;
+    let j;
+    try { j = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'hist', fn), 'utf8')); } catch (e) { continue; }
+    if (String(j.src || '').indexOf(s.histSrc) < 0) continue;
+    if (s.histScheme && String(j.scheme || '').indexOf(s.histScheme) < 0) continue;
+    const nav = Number(j.last);
+    if (!isFinite(nav)) continue;
+    const f = byId[String(j.id)] || {};
+    out.push({ fund: f.fund || j.name, unit: f.unit || j.unit || '', nav, asOf: j.asOf || '' });
+  }
+  return out;
+}
+
 function build() {
   const items = [];
   const sources = [];
@@ -907,6 +937,27 @@ function build() {
   let renderState = null;
   try { renderState = JSON.parse(fs.readFileSync(path.join(SRC_DIR, '.render-state.json'), 'utf8')); } catch (e) { renderState = null; }
   for (const s of SOURCES) {
+    /* hist 源：直接从 API 历史序列取（无需渲染文件） */
+    if (s.histSrc) {
+      let rows0 = [];
+      try { rows0 = rowsFromHist(s); } catch (e) { rows0 = []; }
+      rows0 = rows0.filter((r) => r.fund && r.nav != null);
+      const asOf0 = rows0.reduce((m, r) => (r.asOf && r.asOf > m ? r.asOf : m), '');
+      cntByKey[s.key] = rows0.length;
+      health.push({ key: s.key, label: s.label, file: '(hist/*.json)', p: s.p,
+        status: rows0.length ? 'ok' : 'failed', node: 'API 历史序列',
+        detail: rows0.length ? '' : 'hist 中找不到该来源的可用条目', count: rows0.length, asOf: asOf0, rawBytes: 0 });
+      const realUrl0 = String(s.url || '');
+      sources.push({ key: s.key, label: s.label, url: realUrl0, asOf: asOf0, count: rows0.length, na: 0,
+        page: PAGE_LINKS[s.key] || realUrl0 });
+      rows0.forEach((r) => {
+        items.push({ trustee: s.trustee, scheme: s.scheme, fund: r.fund, unit: r.unit || '',
+          nav: r.nav, na: false, asOf: r.asOf || asOf0, src: s.label, srcUrl: realUrl0 });
+      });
+      console.log('[NAV] √ ' + s.key.padEnd(13) + ' ' + String(rows0.length).padStart(3) + ' 只' +
+        (asOf0 ? '  截至 ' + asOf0 : '') + '（API 历史）');
+      continue;
+    }
     const raw = readFile(s.file);
     if (raw == null) {
       console.log('[NAV] × ' + s.key + ' 缺文件 ' + s.file);

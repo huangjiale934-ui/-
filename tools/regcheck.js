@@ -2060,7 +2060,7 @@ chk('三十三轮·⑧三个图表 20 套配色方案页在位（真实图表）
   (fs.readFileSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-palette.html'), 'utf8').match(/id: 'P\d\d'/g) || []).length >= 20);
 chk('三十三轮·⑨数据统计口径说明改写（2026-11-04 精简为来源/收录/核对三行）',
   /单位净值取自 \{u\} 家受托人官网/.test(readSrc('common.js')) &&
-  /已核实 \{v\}\/\{t\}/.test(readSrc('common.js')) &&
+  /本次已逐条核实/.test(readSrc('common.js')) &&
   !/积金局资料截至 <b>\{d\}<\/b>。/.test(readSrc('common.js')));
 chk('三十三轮·⑩板块切换进历史（返回能回到刚看的板块）',
   /function show\(tab, keepHash, push\)/.test(readSrc('index.html')) &&
@@ -2311,7 +2311,7 @@ chk('页脚·免责声明移到版权行，核对段合并滞后说明', (functi
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     return /class="copy-dis"/.test(h) && /function lag1Count\(\)/.test(c) &&
-      /只落后 1 个估值日（T\+1 正常）/.test(c) &&
+      /另有 \{n\} 只落后 1 个估值日，多为发行人 T\+1 公布/.test(c) &&
       c.indexOf('snote-dis') < 0;
   } catch (err) { return false; }
 })());
