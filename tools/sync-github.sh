@@ -105,6 +105,7 @@ for i in 1 2 3 4 5; do
   if git push origin "$COMMIT:main" 2>&1 | tail -2; then
     if git ls-remote origin refs/heads/main 2>/dev/null | grep -q "$COMMIT"; then
       echo "✔ 已推送 GitHub：${COMMIT:0:7}（push 事件将触发 Pages 构建）"
+      rm -f data/push-queue.json 2>/dev/null || true
       exit 0
     fi
   fi
@@ -113,4 +114,7 @@ for i in 1 2 3 4 5; do
   git fetch origin main >/dev/null 2>&1 || true
 done
 echo "!!! 推送 GitHub 失败（5 次），请检查 SSH 通道；本地数据未受影响"
+# 2026-11-22（用户建议）：记一条「待推送」，网络恢复后由 nightly 自动补推（只补代码）
+printf '{"at":"%s","code":1,"note":"sync-github 推送失败，等待自动补推"}
+' "$(date '+%Y-%m-%dT%H:%M:%S%z')" > data/push-queue.json 2>/dev/null || true
 exit 1

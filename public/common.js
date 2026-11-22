@@ -570,6 +570,22 @@ document.addEventListener('pointermove', function () {
     if (svg && svg.querySelector('.tr-empty')) t.hidden = true;
   }
 }, true);
+/* 2026-11-22（用户建议）：全站浮层统一管理 —— 同一时刻只允许一个浮层存在。
+   规则：指针移到别处时，关掉不属于当前目标的 .mf 下拉、.tr-tip、data-tip 自绘浮层。 */
+document.addEventListener('pointerover', function (e) {
+  var t = e.target;
+  if (!t || !t.closest) return;
+  /* 2026-11-22（用户反馈）：原来指针一离开就关下拉，导致「移到选项上就消失」。
+     下拉的关闭交给组件自己的「点空白关闭」，这里不再介入。 */
+  document.querySelectorAll('.tr-tip').forEach(function (tip) {
+    if (tip.hidden) return;
+    var box = tip.closest('.tr-canvas');
+    if (!box || !box.contains(t)) tip.hidden = true;
+  });
+  var dp = document.querySelector('.tip-pop.on');
+  if (dp && !dp.contains(t) && !(dp.__anchor && dp.__anchor.contains && dp.__anchor.contains(t))) dp.classList.remove('on');
+}, true);
+
 window.__trendWake = function () {
   try { window.dispatchEvent(new Event('resize')); } catch (e) {}
 };
@@ -2509,22 +2525,8 @@ window.openDetail = function (id) {
   if (btnEx) btnEx.onclick = () => { if (window.__trendExportBook) window.__trendExportBook(); else exportOneFund(x); };
   const btnSh = document.querySelector('#mShare');
   if (btnSh) btnSh.onclick = () => shareFundLink(x.id);
-  const btnEx2 = document.querySelector('#mExpand');
-  if (btnEx2) btnEx2.onclick = () => {
-    if (typeof window.anOpen === 'function') {
-      const m = document.querySelector('#modal');
-      if (m) m.classList.remove('show');
-      /* 2026-11-03：先切到「可视化对比」板块，否则分析视图渲染在隐藏容器里（点了没反应） */
-      if (typeof window.__dbShowTab === 'function') { try { window.__dbShowTab('cmp'); } catch (e) {} }
-      try {
-        const u = new URL(location.href);
-        if (u.searchParams.has('fund')) { u.searchParams.delete('fund'); history.replaceState(null, '', u); }
-      } catch (e) {}
-      window.anOpen(x.id, { replace: true });
-    } else {
-      window.location.href = 'index.html?open=' + encodeURIComponent(x.id) + '#cmp';   /* 2026-10-31 四版：第三页已删除，落合并页 */
-    }
-  };
+  /* 2026-11-22（用户要求）：基金详情的「放大」功能整体删除（按钮与视图均已移除） */
+
 };
 
 /* 详情（小窗 / 放大页）走势图：只画本基金，不带「净值走势｜导出｜分享」标题行 */
@@ -3013,7 +3015,6 @@ window.openCmp = function () {
       const tools = document.createElement('div');
       tools.className = 'cmp-tools';
       tools.innerHTML =
-        '<button type="button" class="btn ghost sm" data-cmp="expand" title="' + TT('在分析页放大查看这组对比') + '">⤢ ' + TT('放大') + '</button>' +
         '<button type="button" class="btn ghost sm" data-cmp="share" title="' + TT('复制包含这组对比的分享链接') + '">' + TT('分享') + '</button>' +
         '<button type="button" class="btn ghost sm" data-cmp="csv" title="' + TT('下载对比数据（CSV）') + '">' + TT('下载') + '</button>';
       const cx = hd.querySelector('.close-x');
@@ -3025,15 +3026,7 @@ window.openCmp = function () {
       if (!b) return;
       const act = b.getAttribute('data-cmp');
       const ids2 = CMPX.ids();
-      if (act === 'expand') {
-        /* 2026-10-20：放大 = 同一份内容就地放大（容器变宽变高），不再跳到第三个页面。
-           用户口径：「单纯放大不就是共用一套渲染」——所以这里只切一个 CSS 状态类。 */
-        const on = m.classList.toggle('cmp-max');
-        b.innerHTML = on ? '⤢ ' + TT('还原') : '⤢ ' + TT('放大');
-        b.setAttribute('title', on ? TT('还原为普通窗口') : TT('放大查看这组对比'));
-        try { document.body.style.overflow = on ? 'hidden' : ''; } catch (e2) {}
-        return;
-      }
+      /* 2026-11-22（用户要求）：对比弹窗的「放大」功能已删除 */
       if (act === 'share') {
         const u = new URL(location.href);
         u.searchParams.set('cmp', ids2.join(','));

@@ -344,7 +344,7 @@
         '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b>' +
         '<span>' + esc(TT('勾选后在右侧展开设置')) + '</span></div>' +
         '<div class="ec-mods">' +
-        modRow('hld', '前十大持仓 + 投资组合分布', '指数无持仓数据，勾选后导出说明页', '') +
+        /* 2026-11-22（用户要求）：指数没有持仓/分布数据，直接不提供这一项，避免每次都要写说明 */
         modRow('trend', '净值走势图', '', trendSel) +
         modRow('hist', '逐日净值', '', rangeSel) +
         '</div></div>' +
@@ -372,7 +372,7 @@
       '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b>' +
       '<span>' + esc(TT('勾选后在右侧展开设置')) + '</span></div>' +
       '<div class="ec-mods">' +
-      modRow('hld', '前十大持仓 + 投资组合分布', '占基金资产净值 %', '') +
+      modRow('hld', '前十大持仓 + 投资组合分布', '', '') +
       modRow('trend', '净值走势图', '', trendSel) +
       modRow('hist', '逐日净值', '', rangeSel) +
       '</div></div>';
@@ -700,15 +700,6 @@
           }
           sheets.push({ name: TT('走势图'), rows: rowsT, cols: Array(14).fill(16), images: images });
         }
-      }
-      if (ST.extra.has('hld')) {
-        sheets.push({
-          name: TT('前十大持仓与分布'),
-          rows: [{ h: 32, cells: [{ v: TT('指数无持仓与资产分布数据'), s: 1 }] },
-            { h: 28, cells: [{ v: TT('说明：指数为价格指数，编制机构不公布成分权重以外的持仓明细；本站亦不提供指数的前十大持仓或资产分布。若需个股/成分权重，请查阅指数编制公司官网。'), s: 4 }] }],
-          merges: ['A1:B1'],
-          cols: [90],
-        });
       }
       if (window.buildCoverSheet) {
         sheets.unshift(window.buildCoverSheet({

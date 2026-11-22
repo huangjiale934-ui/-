@@ -1311,13 +1311,12 @@ chk('趋势图·名称列 ✕ 可移除条目（2026-11-02：委托从图例迁�
       /data-toggle="' \+ esc0\(L\.key\)/.test(t);
   } catch (e) { return false; }
 })());
-chk('详情小窗·放大按钮（只换视图不回退历史）+ 960px 两页同在', (function () {
+chk('详情小窗·放大按钮已按用户要求整体删除（2026-11-22）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
     const i = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-    return /id="mExpand"/.test(i) && /#mExpand/.test(c) &&
-      /anOpen\(x\.id, \{ replace: true \}\)/.test(c) && /\.modal-box \{ max-width: 960px; \}/.test(css);
+    return i.indexOf('id="mExpand"') < 0 && i.indexOf('id="anDetail"') < 0 &&
+      c.indexOf('data-cmp="expand"') < 0;
   } catch (e) { return false; }
 })());
 chk('详情页·前十大持仓 + 投资组合分布（空态+来源标注，可自动点亮）', (function () {
@@ -1903,9 +1902,9 @@ chk('二十八轮·⑧行情迷你折线恢复（≥980 显示）',
 chk('四十轮·设计页（第二批）也已移出 public',
   fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-detail2.html')) &&
   fs.existsSync(path.join(__dirname, '..', 'output', 'design-pages', 'design-shell2.html')));
-chk('二十八轮·详情弹窗「放大」先切到对比页（修「点了没反应」）',
-  /window\.__dbShowTab = function \(t\) \{ show\(t, false, false\); \};/.test(readSrc('index.html')) &&
-  /__dbShowTab\('cmp'\)/.test(readSrc('common.js')));
+chk('二十八轮·详情弹窗「放大」已随功能整体删除（2026-11-22）',
+  !/__dbShowTab\('cmp'\)/.test(readSrc('common.js')) &&
+  readSrc('index.html').indexOf('id="anDetail"') < 0);
 chk('二十八轮·首页图表网格允许收缩（消除横向滚动 256px）',
   /\.mk-charts > \.mk-panel, \.mk-charts2 > \.mk-panel, \.mk-charts > \.mk-card \{ min-width: 0; \}/.test(readSrc('home.css')));
 

@@ -1088,6 +1088,11 @@ window.TREND = (function () {
     }
 
     /* ---- 画图 ---- */
+    /* 2026-11-22（用户反复反馈的「关弹窗后悬停失效」根因）：
+       MOVE_SEQ 原来是模块级全局，弹窗里的走势图一 draw 就把它 +1，
+       主图的旧闭包立刻被判为过期（mySeq !== MOVE_SEQ）→ 永久不再响应 pointermove，只能刷新页面。
+       改为每个实例各自一个序号，互不影响。 */
+    let MOVE_SEQ_LOCAL = 0;
     function draw() {
       const svg = q('.tr-svg');
       const tip = q('.tr-tip');
@@ -1310,10 +1315,10 @@ window.TREND = (function () {
 
       const cross = svg.querySelector('.tr-cross');
       const crossline = svg.querySelector('.tr-crossline');
-      const mySeq = ++MOVE_SEQ;
+      const mySeq = ++MOVE_SEQ_LOCAL;
       const move = (ev) => {
         /* 旧 draw 闭包失效 + 无线条（未选基金/全部取消）时不弹悬浮提示 */
-        if (mySeq !== MOVE_SEQ) return;
+        if (mySeq !== MOVE_SEQ_LOCAL) return;
         if (!lines.length) { tip.hidden = true; return; }
         const rect = svg.getBoundingClientRect();
         const cx = (ev.clientX - rect.left) / rect.width * W;

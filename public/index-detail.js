@@ -75,14 +75,14 @@
     /* 近 1 年：波动率（按平均间隔年化）、最大回撤、高低 */
     var i1 = atOrBefore(s, lastMs - 365 * DAY, n - 1);
     var seg = s.slice(i1);
-    var hi = -Infinity, lo = Infinity, mdd = 0, peak = -Infinity;
+    var hi = -Infinity, lo = Infinity, mdd = 0, peak = -Infinity, peakD = '', mddFrom = '', mddTo = '';
     var rets = [], spans = [];
     for (var k = 0; k < seg.length; k++) {
       var v = Number(seg[k][1]);
       if (v > hi) hi = v;
       if (v < lo) lo = v;
-      if (v > peak) peak = v;
-      if (peak > 0) { var dd = v / peak - 1; if (dd < mdd) mdd = dd; }
+      if (v > peak) { peak = v; peakD = seg[k][0]; }
+      if (peak > 0) { var dd = v / peak - 1; if (dd < mdd) { mdd = dd; mddFrom = peakD; mddTo = seg[k][0]; } }
       if (k > 0) {
         var pv = Number(seg[k - 1][1]);
         if (pv) rets.push(v / pv - 1);
@@ -95,6 +95,8 @@
     var vol = span > 0 ? Math.sqrt(varr) * Math.sqrt(365 / span) : null;
 
     return {
+      mddFrom: mddFrom, mddTo: mddTo,
+      sharpe: (vol && vol > 0.005) ? (lastV / Number(s[i1][1]) - 1) / vol : null,
       lastV: lastV, asOf: last[0], first: it.first || s[0][0], points: n,
       r1m: ret(30), r3m: ret(91), r6m: ret(182), r1y: ret(365), r3y: ret(1095), r5y: ret(1825), ytd: ytd,
       vol: vol, mdd: mdd, hi: hi, lo: lo, series: s
@@ -125,30 +127,40 @@
   function body(key, it) {
     var m = META[key] || { cat: '指数', desc: '该指数的编制说明暂未收录。', src: '' };
     var st = stats(it);
-    var head = '', perf = '';
+    var head = '', perf = '', base = '', risk = '';
     if (st) {
       head =
         '<div class="fd-head" id="fdHead">' +
-          '<div class="fd-price">' +
-            '<div class="fd-k">最新点位</div>' +
+          '<div class="fd-price"><div class="fd-k">最新点位</div>' +
             '<div class="fd-asof">截至 ' + st.asOf + '</div>' +
             '<div class="fd-v">' + nf(st.lastV) + '</div>' +
-            '<div class="fd-range">52 周波幅 ' + nf(st.lo) + ' – ' + nf(st.hi) + '</div>' +
-          '</div>' +
+            '<div class="fd-range">52 周波幅 ' + nf(st.lo) + ' – ' + nf(st.hi) + '</div></div>' +
           '<div class="fd-cell"><div class="fd-k">近 1 年</div><div class="fd-v2 ' + cls(st.r1y) + '">' + pct(st.r1y) + '</div></div>' +
           '<div class="fd-cell"><div class="fd-k">年化波动率</div><div class="fd-v2">' + (st.vol == null ? '—' : (st.vol * 100).toFixed(1) + '%') + '</div></div>' +
+          /* 2026-11-22（用户要求）：价格那一行不再写回撤区间，下面「风险指标」里已有 */
           '<div class="fd-cell"><div class="fd-k">最大回撤（1 年）</div><div class="fd-v2 down">' + pct(st.mdd) + '</div></div>' +
-          '<div class="fd-cell"><div class="fd-k">数据点</div><div class="fd-v2">' + nf(st.points, 0) + '</div><div class="fd-s">' + st.first + ' 起</div></div>' +
+          '<div class="fd-cell"><div class="fd-k">夏普比率（1 年）</div><div class="fd-v2">' + (st.sharpe == null ? 'n.a.' : nf(st.sharpe, 2)) + '</div></div>' +
         '</div>';
+      base = '<div class="idx-sec"><div class="idx-sec-h">基本信息</div><div class="idx-grid">' +
+        row('指数类别', m.cat) + row('代码', it.code || key) + row('数据来源', m.src || '—') + row('更新频率', '每交易日') +
+        row('数据起点', st.first) + row('数据点数', nf(st.points, 0)) + row('最新日期', st.asOf) + row('币种', '指数点位') +
+        '</div></div>';
       perf = '<div class="idx-sec"><div class="idx-sec-h">区间表现</div><div class="idx-grid">' +
         row('近 1 月', pct(st.r1m), cls(st.r1m)) + row('近 3 月', pct(st.r3m), cls(st.r3m)) +
         row('近 6 月', pct(st.r6m), cls(st.r6m)) + row('年初至今', pct(st.ytd), cls(st.ytd)) +
         row('近 1 年', pct(st.r1y), cls(st.r1y)) + row('近 3 年', pct(st.r3y), cls(st.r3y)) +
-        row('近 5 年', pct(st.r5y), cls(st.r5y)) + '</div></div>';
+        row('近 5 年', pct(st.r5y), cls(st.r5y)) + row('52 周最高 / 最低', nf(st.hi) + ' / ' + nf(st.lo)) +
+        '</div></div>';
+      risk = '<div class="idx-sec"><div class="idx-sec-h">风险指标</div><div class="idx-grid">' +
+        row('年化波动率（1 年）', st.vol == null ? '—' : (st.vol * 100).toFixed(2) + '%') +
+        row('最大回撤（1 年）', pct(st.mdd)) +
+        row('回撤区间', st.mddFrom ? (st.mddFrom + ' → ' + st.mddTo) : '—') +
+        row('夏普比率（1 年）', st.sharpe == null ? 'n.a.' : nf(st.sharpe, 2)) +
+        '</div></div>';
     }
     return '<div class="fd">' + head +
-      '<div class="idx-sec"><div class="idx-sec-h">走势（近一年左右）</div>' + spark(st ? st.series : []) + '</div>' +
-      perf +
+      '<div class="an-trendwrap" id="idxTrend"></div>' +
+      base + perf + risk +
       '<div class="idx-sec"><div class="idx-sec-h">指数说明</div><div class="idx-desc">' + m.desc + '</div></div>' +
       '</div>';
   }
@@ -216,6 +228,13 @@
       if (ms) ms.textContent = meta.cat + (it.code ? ' · ' + it.code : '') + ' · ' + (meta.src || '');
       mb.innerHTML = body(key, it);
       m.classList.add('show');
+      /* 2026-11-22（用户要求）：走势图接主走势组件（十字线 + 悬停涨跌） */
+      setTimeout(function () {
+        var tb = document.querySelector('#idxTrend');
+        if (tb && window.TREND) {
+          try { window.TREND.mount(tb, [{ type: 'index', key: key }], { bareHead: true, hideGoto: true }); } catch (e) {}
+        }
+      }, 30);
       document.body.classList.add('modal-open');
       try { history.replaceState(null, '', location.href); } catch (e) {}
     });

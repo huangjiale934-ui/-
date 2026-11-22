@@ -60,6 +60,15 @@
   line-height: 1.8;
 }
 .an-pitem.on b { color: #fff; background: rgba(255, 255, 255, 0.18); border-color: transparent; }
+/* 2026-11-22（用户要求）：默认就是「全部」——若一个都没选中，视觉上把第一项当选中，
+   避免用户以为没生效、还要手动点一下。 */
+.an-prov:not(:has(.an-pitem.on)) .an-pitem:first-child {
+  background: var(--brand); color: #fff; font-weight: 600;
+}
+.an-prov:not(:has(.an-pitem.on)) .an-pitem:first-child b {
+  color: #fff; background: rgba(255, 255, 255, 0.18); border-color: transparent;
+}
+
 .an-side-note {
   padding: 9px 14px 11px;
   font-size: 11px;
@@ -1333,3 +1342,9 @@
 .an-table tr.idx-row td.f-main .fund-name { white-space: nowrap; }
 .an-table tr.idx-row td.f-main { min-width: 150px; }
 @media (max-width: 760px) { .an-table tr.idx-row td.f-main { min-width: 0; white-space: normal; } }
+
+/* 2026-11-22（用户反馈）：指数详情的指标条与基金详情不完全一致 —— 补上价格块的右侧分隔线，
+   并让指标卡高度/内边距与基金详情保持一致。 */
+.modal-bd .fd-head .fd-price { border-right: 1px solid var(--border-strong); }
+.modal-bd .fd-head .fd-cell { min-height: 96px; display: flex; flex-direction: column; justify-content: center; }
+.modal-bd .fd-head .fd-price { display: flex; flex-direction: column; justify-content: center; }

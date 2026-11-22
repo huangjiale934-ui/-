@@ -207,6 +207,12 @@
         '<button type="button" class="an-pitem' + (S.trustee === t ? ' on' : '') + '" data-t="' + escA(t) + '">' +
         /* 2026-11-04：发行人名称走 trusteeDisplay —— 英文模式下侧栏一度仍显示中文 */
         '<span>' + esc((window.trusteeDisplay ? window.trusteeDisplay(t) : t)) + '</span><b>' + map[t] + '</b></button>').join('');
+    /* 2026-11-22（用户要求）：打开「基金最新数据」时默认就是「全部」，
+       视觉上也要有选中态（原来要手动点一下才有框）。 */
+    if (!el.querySelector('.an-pitem.on')) {
+      const f0 = el.querySelector('.an-pitem');
+      if (f0) f0.classList.add('on');
+    }
     if (!el.__bound) {
       el.__bound = 1;
       el.addEventListener('click', (e) => {
@@ -762,6 +768,8 @@
 
   /* ---------- 基金分析视图 ---------- */
   function openAnalysis(id, opts) {
+    /* 2026-11-22：放大视图已删除；深链 ?open= 不再打开任何东西，避免空指针 */
+    if (!$('#anDetail')) return;
     const x = findFund(id);
     if (!x) return;
     CUR = id;
@@ -797,6 +805,23 @@
 
   /* A1（2026-10-21）：恢复「← 返回对比」—— 重构时丢失，点击会报 anBack is not a function。
      有本页历史（pushState 过）→ history.back()；深链/放大进入 → 清参数并切回对比视图。 */
+  /* 2026-11-22（用户要求）：缩小 = 回到「放大前」的基金详情弹窗，而不是退回对比视图。
+     之前缩小时调用 anBack → history.back() → 落在对比页（用户看到的是另一个版式，以为跳到旧页面）。 */
+  window.anShrink = function () {
+    const id = CUR || (function () { try { return new URLSearchParams(location.search).get('open') || ''; } catch (e) { return ''; } })();
+    const d = $('#anDetail'); if (d) d.hidden = true;
+    const c = $('#anCompare'); if (c) c.hidden = false;
+    document.body.classList.remove('an-detail');
+    try {
+      const u = new URL(location.href);
+      u.searchParams.delete('open');
+      history.replaceState(null, '', u);
+    } catch (e) {}
+    if (typeof window.__dbShowTab === 'function') { try { window.__dbShowTab('db'); } catch (e) {} }
+    if (id && typeof window.openDetail === 'function') setTimeout(function () { window.openDetail(id); }, 80);
+    else if (typeof window.showCompareView === 'function') window.showCompareView();
+  };
+
   window.anBack = function () {
     try {
       const u = new URL(location.href);
@@ -810,6 +835,7 @@
      （2026-10-20 重构时此监听被误删，导致详情页按返回键无反应，此处恢复） */
   window.addEventListener('popstate', function () {
     if (!DATA.count) return;
+    if (!$('#anDetail')) return;   /* 放大视图已删除，不再恢复 */
     try {
       const want = new URLSearchParams(location.search).get('open');
       if (want && findFund(want)) openAnalysis(want, { replace: true });
@@ -834,7 +860,7 @@
           '<button type="button" class="btn ghost sm" id="anShrBtn">' + TT('分享') + '</button>' +
           /* 2026-11-22（用户要求）：放大页底部不再放「打开官方页面核对 / 积金局基金详情」，
              改为一个「缩小」按钮（返回对比视图，等价于浏览器返回）。 */
-          '<button type="button" class="btn ghost sm" id="anShrinkBtn" onclick="window.anBack()" title="' + TT('返回对比视图') + '">' + TT('缩小') + '</button>' +
+          '<button type="button" class="btn ghost sm" id="anShrinkBtn" onclick="window.anShrink()" title="' + TT('缩小为详情弹窗') + '">' + TT('缩小') + '</button>' +
         '</div>' +
       '</div>';
     bindDetail(x);

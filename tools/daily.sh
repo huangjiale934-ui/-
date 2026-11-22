@@ -296,6 +296,10 @@ soft_step "9.7/9 链接巡检" node tools/link-audit.js
 # 2026-10-29（5.0）：季度哨兵——汇丰/恒生/AMTD 一旦发布新季便览，自动下载并写复核报告
 # 2026-11-05：裸 python 没装 pymupdf → 每天必报 ModuleNotFoundError（长期误报），改用 $PY
 soft_step "9.8/9 季度便览哨兵" "$PY" tools/quarterly-watch.py
+# 2026-11-22（用户建议）：上次推送 GitHub 失败 → 每晚自动补推一次（只补代码，绝不推数据）
+if [ -f data/push-queue.json ]; then
+  soft_step "9.85/9 补推 GitHub（待推送队列）" bash tools/sync-github.sh --code-only
+fi
 
 echo ""
 echo "=== 数据链路完成 $(date '+%F %T')；日志：$LOG ==="
