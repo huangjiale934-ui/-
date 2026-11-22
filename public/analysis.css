@@ -970,7 +970,8 @@
 .modal-bd .fd-price { grid-column: 1 / -1; border-right: 0; }
 .modal-bd .fd-cell { border-bottom: 1px solid var(--border-strong); }
 .modal-bd .fd-cell:nth-child(2), .modal-bd .fd-cell:nth-child(4) { border-right: 1px solid var(--border-strong); }
-.modal-bd .fd-cell:nth-child(3), .modal-bd .fd-cell:nth-child(5) { border-right: 0; }
+/* 2026-11-22（用户反馈）：5 格布局下第 3 格的分隔线被误清掉；只有最后一格不需要右边线 */
+.modal-bd .fd-cell:nth-child(5) { border-right: 0; }
 .modal-bd .fd-cell:nth-child(4), .modal-bd .fd-cell:nth-child(5) { border-bottom: 0; }
 
 /* 历年走势图：缩至 70% 并居中（原全宽显得过大） */

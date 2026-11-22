@@ -587,8 +587,24 @@ document.addEventListener('pointerover', function (e) {
 }, true);
 
 window.__trendWake = function () {
-  try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+  /* 2026-11-22（用户建议）：改走实例注册表，只重绘真实存在的走势图 */
+  try {
+    if (window.TREND && window.TREND.redrawAll) { window.TREND.redrawAll(); return; }
+    window.dispatchEvent(new Event('resize'));
+  } catch (e) {}
 };
+
+/* 2026-11-22（用户要求）：?open= 是已删除的「放大视图」深链，老链接会打开空白页。
+   统一重定向回首页（保留其余参数，如分享码）。 */
+(function () {
+  try {
+    var u = new URL(location.href);
+    if (!u.searchParams.has('open')) return;
+    u.searchParams.delete('open');
+    var q = u.searchParams.toString();
+    location.replace('home.html' + (q ? '?' + q : ''));
+  } catch (e) {}
+})();
 
 /* ===== 2026-11-02（第二十六轮）：全站左侧导航 + 数据口径 ⓘ =====
    侧边栏从「资料库页内导航」升级为全站导航：首页 / 基金最新数据 / 可视化对比 /

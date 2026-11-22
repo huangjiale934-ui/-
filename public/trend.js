@@ -16,6 +16,8 @@ window.TREND = (function () {
   /* 2026-10-18：draw 闭包令牌——每次重绘 +1，旧 move 闭包发现令牌过期即失效，
      杜绝「点击图表时上一次的线条数据覆盖 tooltip」的残留浮窗问题 */
   let MOVE_SEQ = 0;
+  /* 2026-11-22（用户建议）：走势图实例注册表 —— 全局重绘由注册表分发，不再依赖 window.resize */
+  const TREND_INSTANCES = [];
   /* 2026-11-02（第二十一轮，用户要求）：去掉「1周」，新增「10年 / 全部」；
      「选择日期」保留并放在区间按钮最后（最右）。 */
   const RANGES = [
@@ -1097,6 +1099,11 @@ window.TREND = (function () {
       const svg = q('.tr-svg');
       const tip = q('.tr-tip');
       if (tip) tip.hidden = true;
+      /* 2026-11-22（用户反复反馈的「空图仍弹悬浮」根因）：
+         空态分支在 return 前没有重新绑定 pointermove，SVG 上留着上一次 draw 的旧闭包（old lines 还在），
+         鼠标一移就按旧数据把 tooltip/十字线又画出来。这里先解绑，只有成功绘制到最后才重新绑定。 */
+      svg.onpointermove = null;
+      svg.onpointerleave = null;
       /* 按容器实测像素绘制：viewBox = 实际尺寸 → 文字/线条 1:1，任何屏幕都不放大缩小 */
       const W = Math.max(320, Math.round(svg.clientWidth || 900));
       const H = Math.max(220, Math.round(svg.clientHeight || 300));
@@ -1565,7 +1572,9 @@ window.TREND = (function () {
       ro.observe(box);
     }
 
-    return {
+    const api = {
+      redraw() { try { draw(); } catch (e) {} },
+      destroy() { const i = TREND_INSTANCES.indexOf(api); if (i >= 0) TREND_INSTANCES.splice(i, 1); },
       setItems(items) { S.items = (items || []).slice(0, MAX_ITEMS); S.data = {}; renderLegend(); draw(); syncSelButtons(); S.items.forEach(loadItem); if (opts.onSelChange) opts.onSelChange(); },
       getItems() { return S.items.slice(); },
       getPerf() { return cachedPerf; },
@@ -1583,6 +1592,8 @@ window.TREND = (function () {
         renderPanel('fund');
       },
     };
+    TREND_INSTANCES.push(api);
+    return api;
   }
 
   /* 点击面板/选择器/样式弹层以外的地方 → 关闭展开的面板、样式弹层与悬浮提示框（2026-10-14 强化） */
@@ -1599,5 +1610,9 @@ window.TREND = (function () {
     }
   });
 
-  return { mount, perfOf, ensurePerf, ensureHist, ensureIdxs };
+  /* 2026-11-22（用户建议）：实例注册表 —— 全局事件统一下发给所有存活的走势图 */
+  function redrawAll() { TREND_INSTANCES.slice().forEach(function (t) { try { t.redraw(); } catch (e) {} }); }
+  window.addEventListener('resize', function () { clearTimeout(window.__trRz); window.__trRz = setTimeout(redrawAll, 150); });
+
+  return { mount, perfOf, ensurePerf, ensureHist, ensureIdxs, redrawAll, instances: TREND_INSTANCES };
 })();

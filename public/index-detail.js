@@ -232,7 +232,16 @@
       setTimeout(function () {
         var tb = document.querySelector('#idxTrend');
         if (tb && window.TREND) {
-          try { window.TREND.mount(tb, [{ type: 'index', key: key }], { bareHead: true, hideGoto: true }); } catch (e) {}
+          try {
+            /* 2026-11-22（用户要求）：与基金详情完全一致的工具条 ——
+               添加指数 / 添加基金 / 清空 / 区间 / 导出 / 分享，一个都不能少 */
+            var meta = {};
+            ((typeof DATA !== 'undefined' && DATA && DATA.funds) || []).forEach(function (f) {
+              meta[String(f.id)] = { trustee: f.trustee || '其他', type: f.type || '' };
+            });
+            window.TREND.mount(tb, [{ type: 'index', key: key }],
+              { hideGoto: true, fundMeta: meta, title: (it.name || key) + ' 走势图' });
+          } catch (e) {}
         }
       }, 30);
       document.body.classList.add('modal-open');
