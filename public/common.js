@@ -2538,7 +2538,15 @@ window.openDetail = function (id) {
   /* 头部按钮：用 onclick 覆盖（addEventListener 会在每次打开时累积监听，导致「导出」被触发多次） */
   const btnEx = document.querySelector('#mExport');
   /* 2026-10-21：导出改用走势图工作簿（逐日净值 + 当日涨跌幅 + 走势图 + 对比表），单只基金同样适用 */
-  if (btnEx) btnEx.onclick = () => { if (window.__trendExportBook) window.__trendExportBook(); else exportOneFund(x); };
+  /* 2026-11-22（用户要求）：详情页导出单只基金，完全按「全量导出」的工作簿格式 */
+  if (btnEx) btnEx.onclick = () => {
+    if (window.mpfFundBook && window.DATA && DATA.funds) {
+      const one = DATA.funds.filter((f) => String(f.id) === String(x.id));
+      window.mpfFundBook(one.length ? one : [x]).catch(function () { if (window.__trendExportBook) window.__trendExportBook(); });
+      return;
+    }
+    if (window.__trendExportBook) window.__trendExportBook(); else exportOneFund(x);
+  };
   const btnSh = document.querySelector('#mShare');
   if (btnSh) btnSh.onclick = () => shareFundLink(x.id);
   /* 2026-11-22（用户要求）：基金详情的「放大」功能整体删除（按钮与视图均已移除） */
@@ -2930,7 +2938,12 @@ function renderCmpBar() {
 }
 window.renderCmpBar = renderCmpBar;
 
-window.clearCmp = function () { CMPX.clear(); renderCmpBar(); };
+window.clearCmp = function () {
+  CMPX.clear();
+  /* 2026-11-22（用户反馈）：底部对比栏清空后，表格里的勾选态也要跟着取消 */
+  document.querySelectorAll('.fsel.on').forEach(function (b) { b.classList.remove('on'); b.textContent = ''; });
+  renderCmpBar();
+};
 window.closeCmp = function () { const m = document.getElementById('cmpModal'); if (m) m.classList.remove('show'); };
 window.openCmp = function () {
   const ids = CMPX.ids();
@@ -3031,8 +3044,9 @@ window.openCmp = function () {
       const tools = document.createElement('div');
       tools.className = 'cmp-tools';
       tools.innerHTML =
-        '<button type="button" class="btn ghost sm" data-cmp="share" title="' + TT('复制包含这组对比的分享链接') + '">' + TT('分享') + '</button>' +
-        '<button type="button" class="btn ghost sm" data-cmp="csv" title="' + TT('下载对比数据（CSV）') + '">' + TT('下载') + '</button>';
+        /* 2026-11-22（用户要求）：与基金详情页统一 —— 先「导出」后「分享」 */
+        '<button type="button" class="btn ghost sm" data-cmp="csv" title="' + TT('导出这组对比（Excel）') + '">' + TT('导出') + '</button>' +
+        '<button type="button" class="btn ghost sm" data-cmp="share" title="' + TT('复制包含这组对比的分享链接') + '">' + TT('分享') + '</button>';
       const cx = hd.querySelector('.close-x');
       hd.insertBefore(tools, cx || null);
     }

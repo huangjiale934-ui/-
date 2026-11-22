@@ -31,7 +31,7 @@
     histFrom: '', histTo: '', dateMsg: '',
     mode: 'latest',         /* latest=本站最新数据 / mpfa=积金局月度口径 / both=两种口径各一张表 */
     panels: new Set(),      /* 附加表的二级筛选面板，点「筛选」才展开 */
-    trendMode: 'merge',     /* 走势图：merge 合并对比 / one 每只单独 */
+    trendMode: 'one',       /* 2026-11-22（用户要求）：默认每只单独一张 */
     kw: '',
     trustee: new Set(),
     cat: new Set(),
@@ -698,7 +698,7 @@
             if (png) images.push({ data: png, col: 0, row: rr, fitW: 860, fitH: 280, name: lines[i].name });
             for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); rr += 1; }
           }
-          sheets.push({ name: TT('走势图'), rows: rowsT, cols: Array(14).fill(16), images: images });
+          sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: ['A1:N1'], cols: Array(14).fill(16), images: images });
         }
       }
       if (window.buildCoverSheet) {
@@ -734,6 +734,131 @@
     } finally { ST.busy = false; if (go) go.disabled = false; paintCounts(); }
   }
 
+
+  /* 2026-11-22（用户要求）：导出可能几十秒，给一个全局进度浮层（百分比 + 阶段文案），
+     成功后显示「导出成功」再自动消失。 */
+  let PROG_EL = null, PROG_T = 0;
+  function prog(pct, text) {
+    if (!PROG_EL) {
+      PROG_EL = document.createElement('div');
+      PROG_EL.className = 'ec-prog';
+      PROG_EL.innerHTML = '<div class="ec-prog-box"><div class="ec-prog-t">正在导出…</div>' +
+        '<div class="ec-prog-bar"><i></i></div><div class="ec-prog-n">0%</div></div>';
+      document.body.appendChild(PROG_EL);
+    }
+    clearTimeout(PROG_T);
+    PROG_EL.classList.add('show');
+    const n = Math.max(0, Math.min(100, Math.round(pct)));
+    PROG_EL.querySelector('.ec-prog-bar i').style.width = n + '%';
+    PROG_EL.querySelector('.ec-prog-n').textContent = n + '%';
+    if (text) PROG_EL.querySelector('.ec-prog-t').textContent = text;
+  }
+  function progDone(ok) {
+    if (!PROG_EL) return;
+    PROG_EL.querySelector('.ec-prog-bar i').style.width = '100%';
+    PROG_EL.querySelector('.ec-prog-n').textContent = '100%';
+    PROG_EL.querySelector('.ec-prog-t').textContent = ok ? TT('导出成功') : TT('导出失败');
+    PROG_T = setTimeout(function () { if (PROG_EL) { PROG_EL.classList.remove('show'); } }, ok ? 900 : 2200);
+  }
+
+  /* 2026-11-22（用户要求）：对外统一入口 —— 单只基金（详情页）/多只基金（对比页）导出，
+     工作表顺序与「全量导出」完全一致：数据说明 / 基金数据 / 持仓与分布 / 逐日净值 / 净值走势图。
+     opts.compareSheet 存在时插到第 2 位（基金对比页专用）。 */
+  window.mpfFundBook = async function (list, opts) {
+    opts = opts || {};
+    const rowsSel = (list || []).slice();
+    if (!rowsSel.length || !window.MPFXLSX) return false;
+    const sc = window.mpfExportSchema ? window.mpfExportSchema() : null;
+    if (!sc) return false;
+    const COLS = sc.COLS;
+    const all = COLS.map((c, i) => i);
+    const navLatest = (function () { let m = ''; (DS().funds || []).forEach((f) => { if (f.navAsOf && f.navAsOf > m) m = f.navAsOf; }); return m; })();
+    const lastCol = colLetter(all.length);
+    const fundSheet = {
+      name: TT('基金数据'),
+      rows: [{ h: 32, cells: [{ v: TT('基金最新数据') + ' · ' + TQ('净值截至 {d}', { d: navLatest || DS().dataAsOf || '—' }), s: 1 }] },
+        { h: 34, cells: all.map((i) => ({ v: COLS[i][0], s: 2 })) }]
+        .concat(rowsSel.map((x, ri) => ({ cells: all.map((i) => sc.cellOf(x, ri, COLS[i])) }))),
+      merges: ['A1:' + lastCol + '1'],
+      cols: all.map((i) => COLS[i][3]),
+      freeze: { x: 1, y: 2, top: 'B3' },
+      autoFilter: 'A2:' + lastCol + (rowsSel.length + 2),
+    };
+    ST.extra.add('hld'); ST.extra.add('hist'); ST.extra.add('trend');
+    const sheets = [];
+    if (window.buildCoverSheet) {
+      sheets.push(window.buildCoverSheet({
+        page: TT('数据导出'),
+        title: TT('数据说明'),
+        meta: [
+          [TT('数据口径'), TT('本站每日净值自算')],
+          [TT('净值截至'), navLatest || '—'],
+          [TT('积金局字段截至'), DS().dataAsOf || '—'],
+          [TT('导出时间'), new Date().toLocaleString('zh-CN', { hour12: false })],
+          [TT('导出范围'), TQ('{n} 条成分基金（按单位类别逐条）', { n: rowsSel.length })],
+        ],
+        notes: [
+          TT('净值来源：各计划受托人／保荐人官网每日公布的单位资产净值；风险级别、基金规模、历年回报、基金开支比率等字段取自积金局「强积金基金平台」（按月更新，通常滞后 1–2 个月）。'),
+          TT('自算指标（日涨跌 / 近1周 / 近1个月 / 年初至今 / 近1年 / 近3年 / 近5年年化 / 最大回撤 / 波动率 / 夏普 / 超额收益）由本站按发行人官网净值直接计算，不含分红再投资与费用调整；与积金局公布的同名指标口径不同，不可直接相减。'),
+          TT('夏普比率显示 n.a. 表示该基金近 1 年年化波动率低于 0.5%，比值会被极小的分母放大而失真，故不提供。'),
+          TT('空白单元格＝该基金当日无官方净值，或积金局未公布该字段；本站不插值、不使用前值填充。'),
+        ],
+        columns: all.map((i) => [COLS[i][0], COLS[i][4] || '']),
+      }));
+    }
+    if (opts.compareSheet) sheets.push(Object.assign({ name: TT('基金对比') }, opts.compareSheet));
+    sheets.push(fundSheet);
+    if (window.buildHoldAllocSheet) {
+      try {
+        const ent = rowsSel.map((x) => ({ id: x.id, name: nameOf(x) }));
+        const sh = await window.buildHoldAllocSheet(ent, { chartLimit: 30, imgScale: 0.8 });
+        if (sh) sheets.push(Object.assign({ name: TT('持仓与分布') }, sh));
+      } catch (e) {}
+    }
+    const from = '', to = '';
+    const seriesMap = await loadSeries(rowsSel, null);
+    const histRows = [{ h: 30, cells: [{ v: TT('逐日净值（每行一个交易日）'), s: 1 }] },
+      { h: 30, cells: [TT('基金名称'), TT('日期'), TT('单位资产净值'), TT('日涨跌')].map((v) => ({ v, s: 2 })) }];
+    rowsSel.forEach((x) => {
+      const nm = nameOf(x);
+      const ser = (seriesMap.get(String(x.id)) || []);
+      let prev = null;
+      ser.forEach((p) => {
+        const v = Number(p[1]);
+        const chg = prev ? Math.round((v / prev - 1) * 1e4) / 100 : '';
+        histRows.push({ cells: [{ v: nm, s: 4 }, { v: p[0], s: 4 },
+          { v: isFinite(v) ? Math.round(v * 1e4) / 1e4 : '', s: 6 },
+          chg === '' ? { v: '', s: 4 } : { v: chg, s: 21 }] });
+        prev = v;
+      });
+    });
+    sheets.push({ name: TT('逐日净值'), rows: histRows, merges: ['A1:D1'], cols: [30, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
+    /* 净值走势图：每只一张（纵向排列） */
+    const lines = rowsSel.map((x, i) => ({
+      name: nameOf(x), color: PALETTE[i % PALETTE.length],
+      pts: (seriesMap.get(String(x.id)) || []),
+    })).filter((l) => l.pts.length > 1);
+    if (lines.length) {
+      const rowsT = [{ h: 30, cells: [{ v: TT('净值走势对比（起点 = 100）'), s: 1 }] }];
+      const images = [];
+      let r = 1;
+      for (let i = 0; i < lines.length; i++) {
+        rowsT.push({ h: 22, cells: [{ v: lines[i].name, s: 3 }] }); r += 1;
+        const png = await svgPng(trendSVG([lines[i]]), 900, 280, []);
+        if (png) images.push({ data: png, col: 0, row: r, fitW: 860, fitH: 280, name: lines[i].name });
+        for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); r += 1; }
+      }
+      sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: ['A1:N1'], cols: Array(14).fill(16), images: images });
+    }
+    const blob = window.MPFXLSX.build({ sheets: sheets });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'MPF基金数据_' + (navLatest || '') + '.xlsx';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+    return true;
+  };
+
   async function exportNow() {
     if (isIdx() && !ST.fundFallback) return exportIdx();
     if (ST.busy) return;
@@ -750,7 +875,8 @@
     const go = $('#ecGo');
     const est = $('#ecEst');
     ST.busy = true; ST.stage = 'start'; if (go) go.disabled = true;
-    const tick = (t) => { if (est) est.textContent = t; };
+    const tick = (t) => { if (est) est.textContent = t; if (t) prog($$PCT, t); };
+    let $$PCT = 8; prog(8, TT('正在准备数据…'));
 
     try {
       const navLatest = latestNav();
@@ -765,7 +891,7 @@
       const namePos = picked.indexOf(1);
       const fx = namePos >= 0 ? namePos + 1 : 0;
 
-      ST.stage = 'cover'; tick(TT('正在生成数据说明…'));
+      $$PCT = 18; ST.stage = 'cover'; tick(TT('正在生成数据说明…'));
       const summary = ST.trustee.size === 1 ? Array.from(ST.trustee)[0] : (ST.trustee.size ? TQ('{n} 家受托人', { n: ST.trustee.size }) : TT('全市场'));
       const MPFA_NOTES = [
         TT('本表为积金局「强积金基金平台」月度公布口径：回报已扣费并计入分红再投资，与本站「基金最新数据」的每日自算口径不同，两者不可直接相减。'),
@@ -805,7 +931,7 @@
       }];
 
       if (ST.extra.has('hld')) {
-        ST.stage = 'hld'; tick(TT('正在生成持仓与分布…'));
+        $$PCT = 45; ST.stage = 'hld'; tick(TT('正在生成持仓与分布…'));
         if (window.buildHoldAllocSheet) {
           const ent = rowsSel.map((x) => ({ id: x.id, name: nameOf(x) }));
           const sh = await window.buildHoldAllocSheet(ent, { chartLimit: 30, imgScale: 0.8 });
@@ -818,8 +944,8 @@
       let seriesMap = null;
       if (needSeries) {
         ST.stage = 'series';
-        tick(TQ('正在读取逐日净值 {n}/{t}…', { n: 0, t: rowsSel.length }));
-        seriesMap = await loadSeries(rowsSel, (n, t) => tick(TQ('正在读取逐日净值 {n}/{t}…', { n, t })));
+        $$PCT = 55; tick(TQ('正在读取逐日净值 {n}/{t}…', { n: 0, t: rowsSel.length }));
+        seriesMap = await loadSeries(rowsSel, (n, t) => { $$PCT = 55 + (n / Math.max(1, t)) * 30; tick(TQ('正在读取逐日净值 {n}/{t}…', { n, t })); });
       }
       const from = rangeStart(ST.histRange);
       const to = rangeEnd();
@@ -844,7 +970,7 @@
             prev = v;
           });
         });
-        sheets.push({ name: TT('逐日净值'), rows: out, cols: [30, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
+        sheets.push({ name: TT('逐日净值'), rows: out, merges: ['A1:D1'], cols: [30, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
       }
 
       if (ST.extra.has('trend')) {
@@ -883,7 +1009,7 @@
         }
       }
 
-      ST.stage = 'pack'; tick(TT('正在打包 xlsx…'));
+      $$PCT = 92; ST.stage = 'pack'; tick(TT('正在打包 xlsx…'));
       const blob = window.MPFXLSX.build({ sheets: sheets });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -891,11 +1017,13 @@
       document.body.appendChild(a); a.click();
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
       mpfToast(TQ('已导出 {n} 只基金、{c} 个字段', { n: rowsSel.length, c: picked.length }));
+      progDone(true);
       ST.stage = 'done';
       close();
     } catch (e) {
       ST.stage = 'error:' + (e && e.message);
       console.error('[export-center]', e);
+      progDone(false);
       mpfToast(TT('导出失败，请稍后重试'));
     } finally {
       ST.busy = false; if (go) go.disabled = false; paintCounts();

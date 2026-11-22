@@ -176,6 +176,7 @@
 '图表说明': 'Chart help',
 '点线条可改颜色 / 线宽 / 线型。单条对比时纵轴为实际数值（净值 / 指数点位），悬停显示当日净值与当日涨跌幅；再加入一条即切换为相对区间起点的累计涨跌幅对比。': 'Click a line to change colour, width or dash. With a single series the axis shows actual values (NAV / index level) and hovering shows that the value and change; add a second series to switch to cumulative change since the period start.',
 '发行人官网最新「基金便览」截至 {d}，{y} 年第 {q} 季报告尚未公布；本站不推测、不前值填充。': 'The latest fund fact sheet is dated {d}; the {y} Q{q} report is not published yet. No estimates or carry-forward.',
+'导出这组对比（Excel）': 'Export this comparison (Excel)',
 '数据统计口径说明': 'Data methodology notes',
 '发行人未发布': 'Issuer not published',
 '发行人官网最新净值只公布到 {d}（落后 {n} 个估值日）；本站不插值、不前值填充。': 'Latest NAV published by the issuer is {d} ({n} valuation days behind); no interpolation or carry-forward.',

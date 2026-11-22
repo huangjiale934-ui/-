@@ -617,12 +617,20 @@ window.TREND = (function () {
             _t('基金名称为发行人官网的中文／英文名称；同一基金的不同单位类别（A / T 类）净值与回报各自独立，对比时请看清类别。'),
             _t('本文件由本站程序自动生成，仅供研究参考，不构成投资建议。'),
           ],
-          columns: [
-            [_t('区间收益'), _t('区间末值 ÷ 区间起点 − 1')],
-            [_t('最大回撤'), _t('区间内自高点回落的最大幅度')],
-            [_t('回撤区间'), _t('上述最大回撤的起止日期')],
-            [_t('年率化回报'), _t('按几何平均折算的年化回报，供不同期限横向比较')],
-          ],
+          columns: (function () {
+            /* 2026-11-22（用户反馈）：对比导出的「列说明」太少 —— 把全量导出那套列说明一并附上 */
+            var base = [
+              [_t('区间收益'), _t('区间末值 ÷ 区间起点 − 1')],
+              [_t('最大回撤'), _t('区间内自高点回落的最大幅度')],
+              [_t('回撤区间'), _t('上述最大回撤的起止日期')],
+              [_t('年率化回报'), _t('按几何平均折算的年化回报，供不同期限横向比较')],
+            ];
+            try {
+              var sc = window.mpfExportSchema && window.mpfExportSchema();
+              (sc ? sc.COLS : []).forEach(function (c) { if (c && c[0]) base.push([c[0], c[4] || '']); });
+            } catch (e) {}
+            return base;
+          })(),
           logo: null,
         }) : { name: _t('数据说明'), rows: [], merges: [], cols: [14, 60] };
 
@@ -685,10 +693,13 @@ window.TREND = (function () {
             { name: _t('基金对比'), rows: r1, merges: merges1,
               cols: [24].concat(cols.map(() => 30)),
               freeze: { x: 1, y: 2, top: 'B3' } },
-            { name: '基金逐日净值数据', rows: r2, merges: merges2,
+            { name: _t('逐日净值'), rows: r2, merges: merges2,
               cols: [13].concat(cols.reduce((a) => a.concat([12, 12]), [])).concat([2, 2, 2]),
               /* 2026-10-22（用户要求）：走势图横向拉长（8 → 15 列），纵向高度不变 */
               drawing: png ? { col: imgCol, row: 2, col2: imgCol + 15, row2: 2 + 16 } : null },
+            { name: _t('净值走势图'), rows: [{ h: 30, cells: [{ v: _t('净值走势对比（起点 = 100）'), s: 1 }] }, { h: 16, cells: [{ v: '', s: 4 }] }],
+              merges: ['A1:P1'], cols: Array(16).fill(16),
+              images: png ? [{ data: png, col: 0, row: 1, fitW: 900, fitH: 400, name: _t('净值走势图') }] : [] },
             { name: '持仓与分布', rows: sheet3.rows, merges: sheet3.merges, cols: sheet3.cols, images: sheet3.images },
           ],
           image: png ? { data: png, col: imgCol, row: 2, col2: imgCol + 15, row2: 2 + 16 } : null,
@@ -884,6 +895,7 @@ window.TREND = (function () {
           '<div class="tr-loading" style="display:none">' + esc0( _t('加载中…')) + '</div>' +
           '<svg class="tr-svg" viewBox="0 0 760 300" preserveAspectRatio="xMidYMid meet" role="img"></svg>' +
           '<div class="tr-tip" hidden></div>' +
+          '<div class="tr-emptycard" hidden></div>' +
         '</div>' +
         '<div class="tr-tablewrap"></div>' +
         (o.hideGoto ? '' :
@@ -1095,6 +1107,28 @@ window.TREND = (function () {
        主图的旧闭包立刻被判为过期（mySeq !== MOVE_SEQ）→ 永久不再响应 pointermove，只能刷新页面。
        改为每个实例各自一个序号，互不影响。 */
     let MOVE_SEQ_LOCAL = 0;
+
+    /* 2026-11-22（用户要求）：空态从「一行灰字」改成带图标的卡片，并直接给两个添加入口；
+       SVG 内容整体清空，避免残留上一次的圆点/十字线。 */
+    function showEmpty(msg, withButtons) {
+      const svg0 = q('.tr-svg');
+      if (svg0) svg0.innerHTML = '';
+      const tip0 = q('.tr-tip'); if (tip0) tip0.hidden = true;
+      const card = q('.tr-emptycard');
+      if (!card) return;
+      card.hidden = false;
+      card.innerHTML = '<div class="tec-i" aria-hidden="true">📈</div>' +
+        '<div class="tec-t">' + esc0(msg) + '</div>' +
+        (withButtons ? '<div class="tec-b">' +
+          '<button type="button" class="tec-btn" data-add="idx">＋ ' + _t('添加指数') + '</button>' +
+          '<button type="button" class="tec-btn" data-add="fund">＋ ' + _t('添加基金') + '</button></div>' : '');
+      card.querySelectorAll('[data-add]').forEach(function (b) {
+        b.onclick = function () {
+          const sel = q('.tr-sel[data-panel="' + b.getAttribute('data-add') + '"]');
+          if (sel) sel.click();
+        };
+      });
+    }
     function draw() {
       const svg = q('.tr-svg');
       const tip = q('.tr-tip');
@@ -1121,7 +1155,7 @@ window.TREND = (function () {
         /* 2026-10-21：区分「没选」与「选了但该基金无日度净值」，避免用户以为图坏了 */
         const anyErr = S.items.some((it) => { const d = S.data[keyOf(it)]; return d && d.err; });
         const msg = anyErr ? _t('该基金暂无日度净值数据，无法绘制走势图（利息基金／非单位化基金官方不提供单位净值）') : _t('请在上方选择指数或基金开始对比');
-        svg.innerHTML = '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" class="tr-empty">' + esc0(msg) + '</text>';
+        showEmpty(msg, true);
         q('.tr-tablewrap').innerHTML = '';
         return;
       }
@@ -1139,7 +1173,8 @@ window.TREND = (function () {
       });
       if (!lines.length) {
         const msg = S.items.length ? _t('数据加载中…') : _t('暂无对比对象——请从上方「选择指数 / 选择基金」添加');
-        svg.innerHTML = '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" class="tr-empty">' + esc0(msg) + '</text>';
+        showEmpty(msg, !S.items.length);
+        q('.tr-tablewrap').innerHTML = '';
         q('.tr-tablewrap').innerHTML = '';
         return;
       }
@@ -1318,6 +1353,7 @@ window.TREND = (function () {
       /* 2026-10-18 修复：重绘前强制隐藏悬浮提示——否则取消选择/切换发行人后
          图表已重绘而 tooltip 仍显示上一次的悬停内容（用户报「没选基金却有浮窗」） */
       if (tip) tip.hidden = true;
+      const ec0 = q('.tr-emptycard'); if (ec0) ec0.hidden = true;
       svg.innerHTML = g;
 
       const cross = svg.querySelector('.tr-cross');

@@ -2176,8 +2176,9 @@ chk('导出中心·⑤支持走势图（合并对比 / 每只单独）', (functi
   try {
     const e = fs.readFileSync(path.join(__dirname, '..', 'public', 'export-center.js'), 'utf8');
     const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
-    return /trendMode:\s*'merge'/.test(e) && /function trendSVG/.test(e) && /function svgPng/.test(e) &&
-      /走势对比图/.test(e) && /ec-g-b\{display:grid/.test(st);
+    /* 2026-11-22（用户要求）：默认改为「每只单独一张」 */
+    return /trendMode:\s*'one'/.test(e) && /function trendSVG/.test(e) && /function svgPng/.test(e) &&
+      /净值走势图/.test(e) && /ec-g-b\{display:grid/.test(st);
   } catch (err) { return false; }
 })());
 chk('更新提示栏·⑥静态站按班次时间窗兜底（动态站仍只认 running）', (function () {

@@ -1349,3 +1349,25 @@
 .modal-bd .fd-head .fd-price { border-right: 1px solid var(--border-strong); }
 .modal-bd .fd-head .fd-cell { min-height: 96px; display: flex; flex-direction: column; justify-content: center; }
 .modal-bd .fd-head .fd-price { display: flex; flex-direction: column; justify-content: center; }
+
+/* 2026-11-22（用户要求）：导出进度浮层 */
+.ec-prog { position: fixed; inset: 0; z-index: 300; display: none; align-items: center; justify-content: center;
+  background: rgba(20, 32, 50, 0.35); }
+.ec-prog.show { display: flex; }
+.ec-prog-box { width: 320px; background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: 0 18px 50px rgba(0,0,0,.22); text-align: center; }
+.ec-prog-t { font-size: 13.5px; color: #24425f; margin-bottom: 12px; }
+.ec-prog-bar { height: 8px; background: #e8f0f8; border-radius: 6px; overflow: hidden; }
+.ec-prog-bar i { display: block; height: 100%; width: 0; background: var(--brand, #0866bb); transition: width .25s ease; }
+.ec-prog-n { margin-top: 8px; font-size: 12px; color: #6b7f96; }
+
+/* 2026-11-22（用户要求）：走势图空态卡片（图标 + 说明 + 添加按钮），替代一行灰字 */
+.tr-canvas { position: relative; }
+.tr-emptycard { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px; background: #fbfdff; }
+.tr-emptycard[hidden] { display: none; }
+.tec-i { font-size: 26px; line-height: 1; opacity: .55; }
+.tec-t { font-size: 13px; color: #7d8fa3; }
+.tec-b { display: flex; gap: 10px; }
+.tec-btn { border: 1px solid var(--brand, #0866bb); color: var(--brand, #0866bb); background: #fff;
+  border-radius: 16px; padding: 5px 12px; font-size: 12.5px; cursor: pointer; }
+.tec-btn:hover { background: var(--brand, #0866bb); color: #fff; }

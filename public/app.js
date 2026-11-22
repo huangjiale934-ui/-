@@ -781,12 +781,9 @@
       S.page = 1;
       render();
     });
-    /* 2026-11-19（8.0）：导出按钮统一走「导出中心」，预置当前筛选结果；
-       export-center.js 未加载时回退旧的直接导出，保证任何环境下按钮都可用。 */
-    $('#idxExport').addEventListener('click', () => {
-      if (window.openExportCenter) window.openExportCenter(ROWS.map((x) => String(x.id)));
-      else exportIdx();
-    });
+    /* 2026-11-22（用户要求恢复）：表格上方的「导出」直接导出当前表格（与走势图导出同思路），
+       不再跳转到导出中心 —— 导出中心仍从左侧栏进入。 */
+    $('#idxExport').addEventListener('click', () => { exportIdx(); });
   }
 
   function debounce(fn, ms) {
