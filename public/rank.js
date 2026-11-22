@@ -606,7 +606,10 @@
     cumLaunch: (x) => '<td data-c="cumLaunch" data-l="' + TT('推出至今累积') + '" class="r num o-cum ' + cls(x.cumLaunch) + '">' + pct(x.cumLaunch) + '</td>',
     cal2021: (x) => calCell(x, '2021'), cal2022: (x) => calCell(x, '2022'), cal2023: (x) => calCell(x, '2023'),
     cal2024: (x) => calCell(x, '2024'), cal2025: (x) => calCell(x, '2025'),
-    cmp: (x) => '<td data-c="cmp" data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>',
+    /* 2026-11-22：无日度净值历史的基金不占对比名额（画不出线） */
+    cmp: (x) => (x && x.navStatus === 'verified' && x.nav != null)
+      ? '<td data-c="cmp" data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>'
+      : '<td data-c="cmp" data-l="' + TT('对比') + '" class="c"><span class="risk-na" title="' + esc(TT('该基金暂无日度净值历史，无法加入对比')) + '">—</span></td>',
     ops: (x) => '<td data-c="ops" data-l="' + TT('详情') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
       TT('详情') + '</button></td>',
@@ -734,7 +737,9 @@
               k === 'selfMdd' || k === 'selfMdd5'
                 ? '<td data-l="' + TT(n) + '" class="r num down">' + pct(x[k]) + '</td>'
                 : '<td data-l="' + TT(n) + '" class="r num ' + cls(x[k]) + '">' + pct(x[k]) + '</td>').join('') +
-            '<td data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>' +
+            ((x && x.navStatus === 'verified' && x.nav != null)
+              ? '<td data-l="' + TT('对比') + '" class="c"><input type="checkbox" data-cmp="' + esc(x.id) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>'
+              : '<td data-l="' + TT('对比') + '" class="c"><span class="risk-na" title="' + esc(TT('该基金暂无日度净值历史，无法加入对比')) + '">—</span></td>') +
             '<td data-l="' + TT('详情') + '" class="c"><button class="btn-detail" onclick="openDetail(\'' + esc(x.id) + '\')">' +
               '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>' +
               TT('详情') + '</button></td>'

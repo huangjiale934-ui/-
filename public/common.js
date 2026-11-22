@@ -2872,7 +2872,7 @@ window.csvDownload = function (rows, filename) {
  * 注意：ids() 只在数据已载入的页面做「存在性过滤」，避免在没有基金数据的页面
  * 把用户的对比列表误清空。
  */
-const CMP_MAX = 6;
+const CMP_MAX = 8;   /* 2026-11-22（用户要求）：与图表上限统一为 8 只 */
 const CMPX = {
   key: 'mpf-cmp',
   ids() {
@@ -3010,7 +3010,7 @@ window.openCmp = function () {
   h += '</tbody></table>';
   const body = document.getElementById('cmpBody');
   if (!body) return;
-  /* 走势对比模块置顶（所选基金的净值走势，最多 6 条；详表在下方）
+  /* 走势对比模块置顶（所选基金的净值走势，最多 8 条；详表在下方）
      2026-10-20：导出/分享从走势图上方移到弹窗右上角（与详情页一致），图内不再渲染标题行 */
   const tb = document.getElementById('cmpTrend');
   if (tb && window.TREND && TREND.mount) {

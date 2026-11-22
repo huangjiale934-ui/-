@@ -81,6 +81,15 @@ def fetch(code, tries=3):
 
 
 def main():
+    # 2026-11-22（运维事故）：本步曾在 5.55 卡死 27 分钟（curl_cffi 个别请求不返回），
+    # 导致整条 nightly 停在半路、站点一直显示「更新中」。加看门狗：420s 未完成就跳过本轮。
+    import threading
+    def _wd(sec):
+        time.sleep(sec)
+        print("!! 宏利最新点补齐超时（%ds），跳过本轮，下一班重试" % sec, flush=True)
+        os._exit(0)
+    threading.Thread(target=_wd, args=(420,), daemon=True).start()
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--id", action="append", default=[])

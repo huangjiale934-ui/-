@@ -631,7 +631,7 @@ chk('对比·勾选失败回滚（资料库 + 排名两处）', (function () {
 })());
 chk('对比·弹窗按钮显式分支（超限不改按钮 / 提示不误导）', (function () {
   try { const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
-    return /CMPX\.add\(/.test(c) && /const CMP_MAX = 6;/.test(c); } catch (e) { return false; }
+    return /CMPX\.add\(/.test(c) && /const CMP_MAX = 8;/.test(c); } catch (e) { return false; }
 })());
 chk('i18n·「空数据」已 TT 化并补三语词条', (function () {
   try {
@@ -1332,11 +1332,14 @@ chk('详情页·前十大持仓 + 投资组合分布（空态+来源标注，可
       /'\/api\/holdings'/.test(srv) && /前十大持仓/.test(c) && /投资组合分布/.test(c) && /基金便览/.test(c);
   } catch (e) { return false; }
 })());
-chk('对比数量·弹窗上限 6 只 + 走势上限 8 条', (function () {
+chk('对比数量·统一 8 只（CMP_MAX=8 / 图表 9 条含指数）', (function () {
   try {
     const c = fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8');
     const t = fs.readFileSync(path.join(__dirname, '..', 'public', 'trend.js'), 'utf8');
-    return /const CMP_MAX = 6;/.test(c) && /const MAX_ITEMS = 8;/.test(t) && /slice\(0, 8\)/.test(c);
+    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
+    /* 2026-11-22（用户要求）：勾选上限、资料库图、分析图三处统一为 8 只基金 */
+    return /const CMP_MAX = 8;/.test(c) && /const MAX_ITEMS = 9;/.test(t) &&
+      /CMPX\.ids\(\)\.slice\(0, 8\)/.test(a) && /\.slice\(0, 9\)/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8'));
   } catch (e) { return false; }
 })());
 chk('涨跌幅说明·含换算公式与示例（2026-10-19 改口径）', (function () {

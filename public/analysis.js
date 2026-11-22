@@ -141,7 +141,7 @@
         const funds = (TREND_MAIN.getItems ? TREND_MAIN.getItems() : []).filter((it) => it.type === 'fund');
         if (funds.length < 2) { mpfToast(TT('请至少选择 2 只基金再打开详细对比')); return; }
         CMPX.clear();
-        funds.slice(0, 6).forEach((it) => CMPX.add(it.id));
+        funds.slice(0, 8).forEach((it) => CMPX.add(it.id));
         renderCmpBar();
         window.openCmp();
       });
@@ -537,7 +537,8 @@
     const keep = TREND_MAIN.getItems().filter((it) => it.type !== 'fund');
     const add = (ids || []).map((id) => ({ type: 'fund', id: String(id) }));
     AN_SYNCING = true;
-    try { TREND_MAIN.setItems(keep.concat(add).slice(0, 8)); } finally { AN_SYNCING = false; }
+    /* 8 只基金 + 可能存在的指数 = 最多 9 条 */
+    try { TREND_MAIN.setItems(keep.concat(add).slice(0, 9)); } finally { AN_SYNCING = false; }
   };
   /* 兼容旧调用 */
   window.__anClearChartFunds = function () { window.__anSetCmpFunds([]); };
