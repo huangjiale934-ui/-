@@ -121,6 +121,38 @@
     return '<div class="idx-row"><span>' + label + '</span><b class="' + (klass || '') + '">' + val + '</b></div>';
   }
 
+
+  function body(key, it) {
+    var m = META[key] || { cat: '指数', desc: '该指数的编制说明暂未收录。', src: '' };
+    var st = stats(it);
+    var head = '', perf = '';
+    if (st) {
+      head =
+        '<div class="fd-head" id="fdHead">' +
+          '<div class="fd-price">' +
+            '<div class="fd-k">最新点位</div>' +
+            '<div class="fd-asof">截至 ' + st.asOf + '</div>' +
+            '<div class="fd-v">' + nf(st.lastV) + '</div>' +
+            '<div class="fd-range">52 周波幅 ' + nf(st.lo) + ' – ' + nf(st.hi) + '</div>' +
+          '</div>' +
+          '<div class="fd-cell"><div class="fd-k">近 1 年</div><div class="fd-v2 ' + cls(st.r1y) + '">' + pct(st.r1y) + '</div></div>' +
+          '<div class="fd-cell"><div class="fd-k">年化波动率</div><div class="fd-v2">' + (st.vol == null ? '—' : (st.vol * 100).toFixed(1) + '%') + '</div></div>' +
+          '<div class="fd-cell"><div class="fd-k">最大回撤（1 年）</div><div class="fd-v2 down">' + pct(st.mdd) + '</div></div>' +
+          '<div class="fd-cell"><div class="fd-k">数据点</div><div class="fd-v2">' + nf(st.points, 0) + '</div><div class="fd-s">' + st.first + ' 起</div></div>' +
+        '</div>';
+      perf = '<div class="idx-sec"><div class="idx-sec-h">区间表现</div><div class="idx-grid">' +
+        row('近 1 月', pct(st.r1m), cls(st.r1m)) + row('近 3 月', pct(st.r3m), cls(st.r3m)) +
+        row('近 6 月', pct(st.r6m), cls(st.r6m)) + row('年初至今', pct(st.ytd), cls(st.ytd)) +
+        row('近 1 年', pct(st.r1y), cls(st.r1y)) + row('近 3 年', pct(st.r3y), cls(st.r3y)) +
+        row('近 5 年', pct(st.r5y), cls(st.r5y)) + '</div></div>';
+    }
+    return '<div class="fd">' + head +
+      '<div class="idx-sec"><div class="idx-sec-h">走势（近一年左右）</div>' + spark(st ? st.series : []) + '</div>' +
+      perf +
+      '<div class="idx-sec"><div class="idx-sec-h">指数说明</div><div class="idx-desc">' + m.desc + '</div></div>' +
+      '</div>';
+  }
+
   function html(key, it) {
     var m = META[key] || { cat: '指数', desc: '该指数的编制说明暂未收录。', src: '东方财富日线', url: '#' };
     var st = stats(it);
@@ -170,39 +202,22 @@
   window.loadIndices = load;
 
   window.openIndexDetail = function (key) {
-    var d0 = document.querySelector('#anDetail');
-    if (!d0) {
-      /* 小窗/弹窗里没有放大容器：跳到资料库分析视图再打开（避免「点了没反应」） */
-      try { location.href = 'index.html?idx=' + encodeURIComponent(key) + '#cmp'; } catch (e) {}
-      return;
-    }
-    /* 先出骨架：本地/线上都秒回，用户不会以为没反应 */
-    if (!CACHE) {
-      d0.innerHTML = '<div class="an-dwrap"><button type="button" class="an-back" onclick="window.idxBack()">' +
-        (window.TT ? TT('← 返回对比') : '← 返回对比') + '</button>' +
-        '<div class="fd"><div class="fd-title">' + key + '</div>' +
-        '<div class="fd-empty">' + (window.TT ? TT('正在读取指数数据…') : '正在读取指数数据…') + '</div></div></div>';
-      d0.hidden = false;
-      var c0 = document.querySelector('#anCompare'); if (c0) c0.hidden = true;
-      document.body.classList.add('an-detail');
-    }
+    /* 2026-11-22：改为在「详情弹窗」里打开（和基金详情同一个容器）。
+       之前走 #anDetail 放大视图，在小窗/首页等场景没有该容器 → 用户点了一点反应都没有。 */
     load().then(function (j) {
       var it = (j.items || {})[key];
       if (!it) return;
-      var d = document.querySelector('#anDetail');
-      if (!d) return;
-      d.innerHTML = html(key, it);
-      d.hidden = false;
-      var cmp = document.querySelector('#anCompare');
-      if (cmp) cmp.hidden = true;
-      document.body.classList.add('an-detail');
-      try {
-        var u = new URL(location.href);
-        u.searchParams.delete('open');
-        u.searchParams.set('idx', key);
-        history.pushState({ mpfView: 'index', idx: key }, '', u);
-      } catch (e) {}
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      var m = document.querySelector('#modal');
+      if (!m) return;
+      var mh = m.querySelector('#mTitle'), ms = m.querySelector('#mSub'), mb = m.querySelector('#mBody');
+      if (!mb) return;
+      var meta = META[key] || { cat: '指数', src: '' };
+      if (mh) mh.textContent = it.name || key;
+      if (ms) ms.textContent = meta.cat + (it.code ? ' · ' + it.code : '') + ' · ' + (meta.src || '');
+      mb.innerHTML = body(key, it);
+      m.classList.add('show');
+      document.body.classList.add('modal-open');
+      try { history.replaceState(null, '', location.href); } catch (e) {}
     });
   };
 

@@ -48,28 +48,26 @@
     { k: 'ibase', n: '基本信息', idx: [0, 1, 2, 3, 4, 16, 17] },
     { k: 'iperf', n: '点位与回报', idx: [5, 6, 7, 8, 9, 10, 11] },
     { k: 'irisk', n: '风险与波动', idx: [12, 13, 14, 15] },
-    { k: 'idesc', n: '编制说明', idx: [18] },
   ];
   const IDX_FIELDS = [
-    { n: '指数名称', w: 24, get: (r) => r.it.name || r.key },
-    { n: '代码', w: 14, get: (r) => r.it.code || r.key },
-    { n: '类别', w: 16, get: (r) => (window.idxMetaOf && (window.idxMetaOf(r.key) || {}).cat) || '指数' },
-    { n: '最新点位', w: 12, num: true, get: (r) => (r.st ? r.st.lastV : null) },
-    { n: '最新日期', w: 12, get: (r) => (r.st ? r.st.asOf : '') },
-    { n: '近 1 月', w: 10, pct: true, get: (r) => (r.st ? r.st.r1m : null) },
-    { n: '近 3 月', w: 10, pct: true, get: (r) => (r.st ? r.st.r3m : null) },
-    { n: '近 6 月', w: 10, pct: true, get: (r) => (r.st ? r.st.r6m : null) },
-    { n: '年初至今', w: 10, pct: true, get: (r) => (r.st ? r.st.ytd : null) },
-    { n: '近 1 年', w: 10, pct: true, get: (r) => (r.st ? r.st.r1y : null) },
-    { n: '近 3 年', w: 10, pct: true, get: (r) => (r.st ? r.st.r3y : null) },
-    { n: '近 5 年', w: 10, pct: true, get: (r) => (r.st ? r.st.r5y : null) },
-    { n: '年化波动率', w: 11, pct: true, get: (r) => (r.st ? r.st.vol : null) },
-    { n: '最大回撤（1 年）', w: 13, pct: true, get: (r) => (r.st ? r.st.mdd : null) },
-    { n: '52 周最高', w: 11, num: true, get: (r) => (r.st ? r.st.hi : null) },
-    { n: '52 周最低', w: 11, num: true, get: (r) => (r.st ? r.st.lo : null) },
-    { n: '数据起点', w: 12, get: (r) => (r.st ? r.st.first : '') },
-    { n: '数据点数', w: 10, num: true, get: (r) => (r.st ? r.st.points : null) },
-    { n: '编制说明', w: 60, get: (r) => (window.idxMetaOf && (window.idxMetaOf(r.key) || {}).desc) || '' },
+    { n: '指数名称', d: '指数中文名称', w: 24, get: (r) => r.it.name || r.key },
+    { n: '代码', d: '数据源代码（自算指数无官方代码，显示站点键名）', w: 14, get: (r) => r.it.code || r.key },
+    { n: '类别', d: '港股 / 美股 / 日股 / A 股 / 自算 MPF 指数', w: 16, get: (r) => (window.idxMetaOf && (window.idxMetaOf(r.key) || {}).cat) || '指数' },
+    { n: '最新点位', d: '区间最后一个交易日的收盘点位', w: 12, num: true, get: (r) => (r.st ? r.st.lastV : null) },
+    { n: '最新日期', d: '最新点位对应的交易日', w: 12, get: (r) => (r.st ? r.st.asOf : '') },
+    { n: '近 1 月', d: '最近 30 个自然日的涨跌幅', w: 10, pct: true, get: (r) => (r.st ? r.st.r1m : null) },
+    { n: '近 3 月', d: '最近 91 个自然日的涨跌幅', w: 10, pct: true, get: (r) => (r.st ? r.st.r3m : null) },
+    { n: '近 6 月', d: '最近 182 个自然日的涨跌幅', w: 10, pct: true, get: (r) => (r.st ? r.st.r6m : null) },
+    { n: '年初至今', d: '以上一年最后一个交易日为基准的涨跌幅', w: 10, pct: true, get: (r) => (r.st ? r.st.ytd : null) },
+    { n: '近 1 年', d: '最近 365 个自然日的涨跌幅', w: 10, pct: true, get: (r) => (r.st ? r.st.r1y : null) },
+    { n: '近 3 年', d: '最近 3 年的累计涨跌幅（未年化）', w: 10, pct: true, get: (r) => (r.st ? r.st.r3y : null) },
+    { n: '近 5 年', d: '最近 5 年的累计涨跌幅（未年化）', w: 10, pct: true, get: (r) => (r.st ? r.st.r5y : null) },
+    { n: '年化波动率', d: '近一年日收益率标准差按平均间隔年化', w: 11, pct: true, get: (r) => (r.st ? r.st.vol : null) },
+    { n: '最大回撤（1 年）', d: '近一年内从峰值到谷底的最大跌幅', w: 13, pct: true, get: (r) => (r.st ? r.st.mdd : null) },
+    { n: '52 周最高', d: '近一年内的最高点位', w: 11, num: true, get: (r) => (r.st ? r.st.hi : null) },
+    { n: '52 周最低', d: '近一年内的最低点位', w: 11, num: true, get: (r) => (r.st ? r.st.lo : null) },
+    { n: '数据起点', d: '该指数序列的第一个交易日', w: 12, get: (r) => (r.st ? r.st.first : '') },
+    { n: '数据点数', d: '该指数序列的观测点数', w: 10, num: true, get: (r) => (r.st ? r.st.points : null) },
   ];
 
   /* 2026-11-19（用户建议）：记住上次的基金/字段/口径/区间，重复导出省一步 */
@@ -134,11 +132,13 @@
 
   /* ---------- 筛选 ---------- */
   function filtered() {
-    if (isIdx()) return [];
     const kw = ST.kw.trim().toLowerCase();
     const latest = latestNav();
+    /* 只选了「其他市场指数」时没有真实受托人 → 基金列表为空（不再返回全部 451 只） */
+    const real = Array.from(ST.trustee).filter((v) => v !== IDXK);
+    if (isIdx() && !real.length) return [];
     return rowsAll().filter((x) => {
-      if (ST.trustee.size && !ST.trustee.has(x.trustee)) return false;
+      if (real.length && real.indexOf(x.trustee) < 0) return false;
       if (ST.cat.size && !ST.cat.has(catOf(x))) return false;
       if (ST.scheme.size && !ST.scheme.has(x.scheme)) return false;
       if (ST.navOnly && x.navAsOf !== latest) return false;
@@ -201,6 +201,14 @@
 
   function rebuildLinked(from) {
     ensureMS();
+    if (isIdx()) {
+      /* 2026-11-22（用户要求）：指数模式保留这两个筛选框，点开显示「无」，
+         保持与基金模式一致的版式，不隐藏、不跳位。 */
+      MS_C.setOptions([]); MS_C.setAllLabel(TT('无'));
+      MS_S.setOptions([]); MS_S.setAllLabel(TT('无'));
+      renderList();
+      return;
+    }
     const cats = msValues('cat', linkedRows('cat'));
     MS_C.setOptions(cats.map((o) => ({ v: o.v, label: o.label, n: o.n })));
     MS_C.setAllLabel(TT('全部种类'));
@@ -233,37 +241,22 @@
   function renderList() {
     const box = $('#ecList');
     if (!box) return;
-    /* 指数没有「种类/计划/最新净值日」这些基金维度，隐藏避免误操作 */
-    [['#ecMSCat', 1], ['#ecMSScheme', 1], ['.ec-only-foot', 2]].forEach((pair) => {
-      const el = pair[1] === 1 ? document.querySelector(pair[0]) : document.querySelector(pair[0]);
-      if (el) el.style.display = isIdx() ? 'none' : '';
-    });
-    if (isIdx()) {
-      /* 基金 ↔ 指数 切换时清掉对方的选择，避免「选了 0 只基金却按指数导出」 */
-      if (Array.from(ST.sel).some((id) => String(id).indexOf('IDX:') !== 0)) ST.sel.clear();
-      if (!ST.idxFields.size) IDX_FIELDS.forEach((f, i) => ST.idxFields.add(i));
-      if (!Array.from(ST.sel).some((id) => String(id).indexOf('IDX:') === 0)) {
-        idxRows().forEach((r) => ST.sel.add('IDX:' + r.key));
-      }
-      const rows = idxRows();
-      const kw = ST.kw.trim().toLowerCase();
-      const pick = kw ? rows.filter((r) => ((r.it.name || '') + ' ' + r.key + ' ' + ((window.idxMetaOf && (window.idxMetaOf(r.key) || {}).cat) || '')).toLowerCase().indexOf(kw) >= 0) : rows;
-      box.innerHTML = pick.map((r) => {
-        const id = 'IDX:' + r.key;
-        const on = ST.sel.has(id);
-        return '<label class="ec-row' + (on ? ' on' : '') + '">' +
-          '<input type="checkbox" data-id="' + esc(id) + '"' + (on ? ' checked' : '') + '>' +
-          '<span class="ec-nm">' + esc(r.it.name || r.key) + (r.it.code ? ' <i>' + esc(r.it.code) + '</i>' : '') + '</span>' +
-          '<span class="ec-mt"> · ' + esc(r.st ? r.st.asOf : (r.it.asOf || '—')) + '</span>' +
-          '</label>';
-      }).join('') || '<div class="ec-empty">' + esc(TT('没有符合条件的指数')) + '</div>';
-      paintCounts(pick.length);
-      return;
-    }
-    if (Array.from(ST.sel).some((id) => String(id).indexOf('IDX:') === 0)) ST.sel.clear();
+    if (isIdx() && !ST.idxFields.size) IDX_FIELDS.forEach((f, i) => ST.idxFields.add(i));
+    /* 2026-11-22（用户要求）：指数与受托人可同时选 —— 基金行 + 指数行一起列出；
+       只选「其他市场指数」时没有真实受托人，基金列表自然为空。 */
     const list = filtered();
     const latest = latestNav();
-    box.innerHTML = list.map((x) => {
+    const kw = ST.kw.trim().toLowerCase();
+    const idxLatest = idxRows().reduce((m, r) => (r.st && r.st.asOf > m ? r.st.asOf : m), '');
+    const idxPick = isIdx()
+      ? idxRows().filter((r) => {
+        if (ST.navOnly && !(r.st && r.st.asOf === idxLatest)) return false;
+        if (!kw) return true;
+        const cat = (window.idxMetaOf && (window.idxMetaOf(r.key) || {}).cat) || '';
+        return ((r.it.name || '') + ' ' + r.key + ' ' + cat).toLowerCase().indexOf(kw) >= 0;
+      })
+      : [];
+    const fundHtml = list.map((x) => {
       const id = String(x.id);
       const on = ST.sel.has(id);
       return '<label class="ec-row' + (on ? ' on' : '') + '">' +
@@ -271,8 +264,21 @@
         '<span class="ec-nm">' + esc(nameOf(x)) + (x.unit ? ' <i>' + esc(x.unit) + '</i>' : '') + '</span>' +
         '<span class="ec-mt"> · ' + esc(x.navAsOf === latest ? TT('最新') : (x.navAsOf || '—')) + '</span>' +
         '</label>';
-    }).join('') || '<div class="ec-empty">' + esc(TT('没有符合条件的基金')) + '</div>';
-    paintCounts(list.length);
+    }).join('');
+    const idxHtml = idxPick.map((r) => {
+      const id = 'IDX:' + r.key;
+      const on = ST.sel.has(id);
+      return '<label class="ec-row ec-row-idx' + (on ? ' on' : '') + '">' +
+        '<input type="checkbox" data-id="' + esc(id) + '"' + (on ? ' checked' : '') + '>' +
+        '<span class="ec-nm">' + esc(r.it.name || r.key) + (r.it.code ? ' <i>' + esc(r.it.code) + '</i>' : '') + '</span>' +
+        '<span class="ec-mt"> · ' + esc(r.st ? r.st.asOf : (r.it.asOf || '—')) + '</span>' +
+        '</label>';
+    }).join('');
+    const allHtml = fundHtml + idxHtml;
+    box.innerHTML = allHtml ||
+      '<div class="ec-empty">' + esc(isIdx() && !list.length ? TT('没有符合条件的指数') : TT('没有符合条件的基金')) + '</div>';
+    paintNavOnly();
+    paintCounts(list.length + idxPick.length);
   }
 
   function paintCounts(n) {
@@ -304,34 +310,6 @@
   function renderTree() {
     const box = $('#ecTree');
     if (!box) return;
-    if (isIdx()) {
-      /* 指数口径：字段固定（指数没有单位类别/受托人/费用等基金字段） */
-      const SET = ST.idxFields;
-      box.innerHTML = IDX_GROUPS.map((g) => {
-        const on = g.idx.filter((i) => SET.has(i)).length;
-        const cells = g.idx.map((i) => '<label class="ec-f" title="' + esc(IDX_FIELDS[i].n) + '">' +
-          '<input type="checkbox" data-i="' + i + '"' + (SET.has(i) ? ' checked' : '') + '>' +
-          '<span>' + esc(TT(IDX_FIELDS[i].n)) + '</span></label>').join('');
-        return '<div class="ec-g ec-card">' +
-          '<label class="ec-g-h"><input type="checkbox" data-g="' + g.k + '"' + (on === g.idx.length ? ' checked' : '') + '>' +
-          '<b>' + esc(TT(g.n)) + '</b><span>' + on + '/' + g.idx.length + '</span></label>' +
-          '<div class="ec-g-b">' + cells + '</div></div>';
-      }).join('') +
-        '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('说明')) + '</b><span></span></div>' +
-        '<div class="ec-g-b"><div class="ec-idxtip">' + esc(TT('指数数据与走势图同源（东方财富日线 + 本站自算 MPF 指数），每晚随数据更新重算；区间回报为价格涨幅，不含分红。')) + '</div></div></div>';
-      return;
-    }
-    const schema = window.mpfExportSchema ? window.mpfExportSchema() : null;
-    if (!schema) { box.innerHTML = '<div class="ec-empty">' + esc(TT('导出组件未加载，请刷新页面')) + '</div>'; return; }
-    const COLS = schema.COLS;
-    const groups = curGroups();
-    const SET = curFieldSet();
-    const cells = (g) => g.idx.map((i) => '<label class="ec-f" title="' + esc(COLS[i][4] || '') + '">' +
-      '<input type="checkbox" data-i="' + i + '"' + (SET.has(i) ? ' checked' : '') + '>' +
-      '<span>' + esc(COLS[i][0]) + '</span></label>').join('');
-
-    /* 2026-11-19（用户反馈）：区间改成站内走势图同款的胶囊按钮；日期改文本框（年月日手输），
-       避免日历控件翻年份；确定后给出明确的已选区间提示。 */
     const RANGES = [['1y', '1年'], ['3y', '3年'], ['5y', '5年'], ['10y', '10年'], ['all', '全部'], ['custom', '选择日期']];
     const rangeSel = '<div class="ec-subcard">' +
       '<div class="ec-sub-h">' + esc(TT('时间区间')) + '</div>' +
@@ -350,6 +328,40 @@
         '<button type="button" class="tr-r' + (ST.trendMode === o[0] ? ' on' : '') + '" data-tmode="' + o[0] + '">' + esc(TT(o[1])) + '</button>').join('') +
       '</div></div>';
 
+    if (isIdx()) {
+      /* 指数口径：字段固定（指数没有单位类别/受托人/费用等基金字段） */
+      const SET = ST.idxFields;
+      box.innerHTML = IDX_GROUPS.map((g) => {
+        const on = g.idx.filter((i) => SET.has(i)).length;
+        const cells = g.idx.map((i) => '<label class="ec-f" title="' + esc(IDX_FIELDS[i].n) + '">' +
+          '<input type="checkbox" data-i="' + i + '"' + (SET.has(i) ? ' checked' : '') + '>' +
+          '<span>' + esc(TT(IDX_FIELDS[i].n)) + '</span></label>').join('');
+        return '<div class="ec-g ec-card">' +
+          '<label class="ec-g-h"><input type="checkbox" data-g="' + g.k + '"' + (on === g.idx.length ? ' checked' : '') + '>' +
+          '<b>' + esc(TT(g.n)) + '</b><span>' + on + '/' + g.idx.length + '</span></label>' +
+          '<div class="ec-g-b">' + cells + '</div></div>';
+      }).join('') +
+        '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b>' +
+        '<span>' + esc(TT('勾选后在右侧展开设置')) + '</span></div>' +
+        '<div class="ec-mods">' +
+        modRow('hld', '前十大持仓 + 投资组合分布', '指数无持仓数据，勾选后导出说明页', '') +
+        modRow('trend', '净值走势图', '', trendSel) +
+        modRow('hist', '逐日净值', '', rangeSel) +
+        '</div></div>' +
+        '<div class="ec-idxtip">' + esc(TT('指数数据与走势图同源（东方财富日线 + 本站自算 MPF 指数），每晚随数据更新重算；区间回报为价格涨幅，不含分红。')) + '</div>';
+      return;
+    }
+    const schema = window.mpfExportSchema ? window.mpfExportSchema() : null;
+    if (!schema) { box.innerHTML = '<div class="ec-empty">' + esc(TT('导出组件未加载，请刷新页面')) + '</div>'; return; }
+    const COLS = schema.COLS;
+    const groups = curGroups();
+    const SET = curFieldSet();
+    const cells = (g) => g.idx.map((i) => '<label class="ec-f" title="' + esc(COLS[i][4] || '') + '">' +
+      '<input type="checkbox" data-i="' + i + '"' + (SET.has(i) ? ' checked' : '') + '>' +
+      '<span>' + esc(COLS[i][0]) + '</span></label>').join('');
+
+    /* 2026-11-19（用户反馈）：区间改成站内走势图同款的胶囊按钮；日期改文本框（年月日手输），
+       避免日历控件翻年份；确定后给出明确的已选区间提示。 */
     box.innerHTML = groups.map((g) => {
       const on = g.idx.filter((i) => SET.has(i)).length;
       return '<div class="ec-g ec-card">' +
@@ -360,7 +372,7 @@
       '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('附加工作表')) + '</b>' +
       '<span>' + esc(TT('勾选后在右侧展开设置')) + '</span></div>' +
       '<div class="ec-mods">' +
-      modRow('hld', '持仓与分布', '前十大 + 资产分布', '') +
+      modRow('hld', '前十大持仓 + 投资组合分布', '占基金资产净值 %', '') +
       modRow('trend', '净值走势图', '', trendSel) +
       modRow('hist', '逐日净值', '', rangeSel) +
       '</div></div>';
@@ -412,6 +424,17 @@
   function paintNavOnly() {
     const lab = $('#ecNavOnlyLab');
     if (!lab) return;
+    if (isIdx()) {
+      const rows = idxRows();
+      const latest = rows.reduce((m, r) => (r.st && r.st.asOf > m ? r.st.asOf : m), '');
+      const n = rows.filter((r) => r.st && r.st.asOf === latest).length;
+      lab.textContent = n
+        ? TQ('仅选择已更新至 {d} 的 {n} 只指数', { d: latest, n })
+        : TT('仅选择最新日期的指数');
+      const cb = $('#ecNavOnly');
+      if (cb) cb.disabled = false;
+      return;
+    }
     const all = rowsAll();
     const latest = latestNav() || '';
     const n = all.filter((x) => x.navAsOf === latest).length;
@@ -453,6 +476,8 @@
     ST.open = false;
     const m = $('#ecModal');
     if (m) m.classList.remove('show');
+    /* 2026-11-22（用户反馈）：关掉导出中心后走势图十字线失效 —— 让图表按当前尺寸重绘一次 */
+    setTimeout(function () { if (window.__trendWake) window.__trendWake(); }, 60);
   }
 
   /* ---------- 导出 ---------- */
@@ -584,6 +609,8 @@
     try {
       await ensureIdx();
       const rows = idxRows().filter((r) => ST.sel.has('IDX:' + r.key));
+      /* 只勾了基金（指数一个没选）：直接走基金导出，别生成空的指数表 */
+      if (!rows.length) { ST.busy = false; ST.fundFallback = true; try { return await exportNow(); } finally { ST.fundFallback = false; } }
       const picked = Array.from(ST.idxFields).sort((a, b) => a - b);
       const head = picked.map((i) => ({ v: TT(IDX_FIELDS[i].n), s: 2 }));
       const body = rows.map((r) => ({
@@ -606,6 +633,83 @@
         autoFilter: 'A2:' + lastCol + (body.length + 2),
       };
       const sheets = [sheet];
+      /* 2026-11-22（用户反馈「同时选指数和受托人」）：基金也一起导 —— 用默认全列出一张基金表 */
+      const fundIds = Array.from(ST.sel).filter((id) => String(id).indexOf('IDX:') !== 0);
+      if (fundIds.length && window.mpfExportSchema) {
+        const sc = window.mpfExportSchema();
+        const COLS = sc.COLS;
+        const fr = rowsAll().filter((x) => fundIds.indexOf(String(x.id)) >= 0);
+        const all = COLS.map((c, i) => i);
+        sheets.push({
+          name: TT('基金数据'),
+          rows: [{ h: 32, cells: [{ v: TT('基金最新数据') + ' · ' + TQ('净值截至 {d}', { d: latestNav() || DS().dataAsOf || '—' }), s: 1 }] },
+            { h: 34, cells: all.map((i) => ({ v: COLS[i][0], s: 2 })) }]
+            .concat(fr.map((x, ri) => ({ cells: all.map((i) => sc.cellOf(x, ri, COLS[i])) }))),
+          merges: ['A1:' + colLetter(all.length) + '1'],
+          cols: all.map((i) => COLS[i][3]),
+          freeze: { x: 1, y: 2, top: 'B3' },
+          autoFilter: 'A2:' + colLetter(all.length) + (fr.length + 2),
+        });
+      }
+      /* 附加工作表：逐日净值 / 走势图 / 持仓说明 */
+      const from = rangeStart(ST.histRange), to = rangeEnd();
+      if (ST.extra.has('hist')) {
+        const out = [{ h: 30, cells: [{ v: TT('逐日点位（每行一个交易日）'), s: 1 }] },
+          { h: 30, cells: [TT('指数名称'), TT('日期'), TT('点位'), TT('日涨跌')].map((v) => ({ v, s: 2 })) }];
+        rows.forEach((r) => {
+          const ser = (r.it.series || []).filter((q) => (!from || q[0] >= from) && (!to || q[0] <= to));
+          let prev = null;
+          ser.forEach((q) => {
+            const v = Number(q[1]);
+            const chg = prev ? Math.round((v / prev - 1) * 1e4) / 100 : '';
+            out.push({ cells: [
+              { v: r.it.name || r.key, s: 4 }, { v: q[0], s: 4 },
+              { v: isFinite(v) ? Math.round(v * 1e4) / 1e4 : '', s: 7 },
+              chg === '' ? { v: '', s: 4 } : { v: chg, s: 21 },
+            ] });
+            prev = v;
+          });
+        });
+        sheets.push({ name: TT('逐日净值'), rows: out, cols: [26, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
+      }
+      if (ST.extra.has('trend') && window.svgPng === undefined && typeof svgPng !== 'function') { /* 占位 */ }
+      if (ST.extra.has('trend')) {
+        const lines = rows.map((r, i) => ({
+          name: r.it.name || r.key, color: PALETTE[i % PALETTE.length],
+          pts: (r.it.series || []).filter((q) => (!from || q[0] >= from) && (!to || q[0] <= to)),
+        })).filter((l) => l.pts.length > 1);
+        if (!lines.length) mpfToast(TT('所选区间内没有可画图的点位'));
+        else if (ST.trendMode === 'merge' || lines.length === 1) {
+          const legendH = Math.ceil(lines.length / 3) * 26 + 8;
+          const png = await svgPng(trendSVG(lines), 980, 400, lines.map((l) => ({ name: l.name, color: l.color })));
+          if (png) sheets.push({
+            name: TT('走势对比图'),
+            rows: [{ h: 30, cells: [{ v: TT('指数走势（起点 = 100）'), s: 1 }] }, { h: 16, cells: [{ v: '', s: 4 }] }],
+            cols: Array(16).fill(16),
+            images: [{ data: png, col: 0, row: 1, fitW: 900, fitH: 400 + legendH, name: TT('走势对比图') }],
+          });
+        } else {
+          const rowsT = [{ h: 30, cells: [{ v: TT('各指数走势（起点 = 100）'), s: 1 }] }];
+          const images = [];
+          let rr = 1;
+          for (let i = 0; i < lines.length; i++) {
+            rowsT.push({ h: 22, cells: [{ v: lines[i].name, s: 3 }] }); rr += 1;
+            const png = await svgPng(trendSVG([lines[i]]), 900, 280, []);
+            if (png) images.push({ data: png, col: 0, row: rr, fitW: 860, fitH: 280, name: lines[i].name });
+            for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); rr += 1; }
+          }
+          sheets.push({ name: TT('走势图'), rows: rowsT, cols: Array(14).fill(16), images: images });
+        }
+      }
+      if (ST.extra.has('hld')) {
+        sheets.push({
+          name: TT('前十大持仓与分布'),
+          rows: [{ h: 32, cells: [{ v: TT('指数无持仓与资产分布数据'), s: 1 }] },
+            { h: 28, cells: [{ v: TT('说明：指数为价格指数，编制机构不公布成分权重以外的持仓明细；本站亦不提供指数的前十大持仓或资产分布。若需个股/成分权重，请查阅指数编制公司官网。'), s: 4 }] }],
+          merges: ['A1:B1'],
+          cols: [90],
+        });
+      }
       if (window.buildCoverSheet) {
         sheets.unshift(window.buildCoverSheet({
           page: TT('数据导出'),
@@ -621,7 +725,7 @@
             TT('区间回报为价格涨幅，不含分红与费用；年化波动率按近一年日收益率年化，最大回撤取近一年峰值到谷底的最大跌幅。'),
             TT('空白单元格＝该指数无此项数据（例如自算指数没有官方代码），本站不推测。'),
           ],
-          columns: picked.map((i) => [TT(IDX_FIELDS[i].n), '']),
+          columns: picked.map((i) => [TT(IDX_FIELDS[i].n), TT(IDX_FIELDS[i].d || '')]),
         }));
       }
       if (est) est.textContent = TT('正在打包 xlsx…');
@@ -640,7 +744,7 @@
   }
 
   async function exportNow() {
-    if (isIdx()) return exportIdx();
+    if (isIdx() && !ST.fundFallback) return exportIdx();
     if (ST.busy) return;
     if (!ST.sel.size) { mpfToast(TT('请至少选择一只基金')); return; }
     /* 2026-11-20（用户要求）：两组字段各自独立——本站默认全选，积金局默认不选。

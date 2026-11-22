@@ -1323,3 +1323,13 @@
 /* 2026-11-22：指数名称可点（打开指数详情），给出手型光标与虚线下划线提示 */
 .tr-tbl .nm[data-openidx] { cursor: pointer; }
 .tr-tbl .nm[data-openidx]:hover { text-decoration: underline dotted; text-underline-offset: 3px; }
+
+/* 2026-11-22（用户反馈）：导出中心说明文字太大、换行过早 —— 缩到 12px 并占满整栏 */
+.ec-idxtip { font-size: 12px; line-height: 1.7; color: #6b7f96; width: 100%; max-width: none; padding: 2px 2px 0; }
+.ec-tree .ec-idxtip { display: block; }
+
+/* 2026-11-22（用户反馈「乱码」）：对比表里勾选的指数行被挤成竖排 —— 名称列改为不换行并给足宽度 */
+.an-table tr.idx-row td.f-main,
+.an-table tr.idx-row td.f-main .fund-name { white-space: nowrap; }
+.an-table tr.idx-row td.f-main { min-width: 150px; }
+@media (max-width: 760px) { .an-table tr.idx-row td.f-main { min-width: 0; white-space: normal; } }

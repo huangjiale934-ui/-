@@ -832,13 +832,9 @@
           '<button type="button" class="btn ghost sm" id="anPlanBtn" data-i18n-title="与该基金同一基金类型、规模最大的另外几只一键对比">' + TT('同类型对比') + '</button>' +
           '<button type="button" class="btn ghost sm" id="anExpBtn">' + TT('导出') + '</button>' +
           '<button type="button" class="btn ghost sm" id="anShrBtn">' + TT('分享') + '</button>' +
-          '<span class="sep"></span>' +
-          (x.navSourceUrl ? '<a class="btn ghost sm" href="' + esc(x.navSourceUrl) + '" target="_blank" rel="noopener"' +
-            (/fidelity\.com\.hk|manulife\.com\.hk/.test(x.navSourceUrl) ? ' title="' + TT('该官网有反爬，若打不开请在浏览器地址栏直接访问') + '"' : '') +
-            '>' + TT('打开官方页面核对') + ' ↗</a>' : '') +
-          /* 2026-10-23：来源长期未更新的基金，明确标出（如新地只有月度 PDF、宏利利息基金官网不更新） */
-          (x.navStale ? '<span class="hl-src hl-stale" title="' + TT('该发行人官网尚未发布更新的净值') + '">' + TQ('来源已 {n} 天未更新', { n: Math.round((Date.now() - new Date(x.navAsOf + 'T00:00:00').getTime()) / 864e5) }) + '</span>' : '') +
-          (x.id ? '<a class="btn ghost sm" href="https://mfp.mpfa.org.hk/mobile/tch/cf_detail.jsp?cf_id=' + esc(x.id) + '" target="_blank" rel="noopener">' + TT('积金局基金详情') + ' ↗</a>' : '') +
+          /* 2026-11-22（用户要求）：放大页底部不再放「打开官方页面核对 / 积金局基金详情」，
+             改为一个「缩小」按钮（返回对比视图，等价于浏览器返回）。 */
+          '<button type="button" class="btn ghost sm" id="anShrinkBtn" onclick="window.anBack()" title="' + TT('返回对比视图') + '">' + TT('缩小') + '</button>' +
         '</div>' +
       '</div>';
     bindDetail(x);

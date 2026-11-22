@@ -557,6 +557,23 @@ function renderUpdateTime() {
 /* ---------- 「数据版本」徽标（页头）：来源与日期一眼可查 ----------
  * 徽标本身体积小：显示数据同步日期；悬浮（移动端点击）按行展开各来源与最新日期，
  * 回应「数据来源与日期要充分说明」。/api/status 到货后补上指数行情与回填进度。 */
+/* 2026-11-22（用户多次反馈）：空图上残留悬浮提示 / 关闭弹窗后十字线失效。
+   ① 全局守卫：只要图表处于「请选择指数或基金开始对比」的空态，任何 .tr-tip 一律隐藏；
+   ② __trendWake()：让所有走势图按当前尺寸重绘一次（关弹窗/切视图后调用）。 */
+document.addEventListener('pointermove', function () {
+  var tips = document.querySelectorAll('.tr-tip');
+  for (var i = 0; i < tips.length; i++) {
+    var t = tips[i];
+    if (t.hidden) continue;
+    var box = t.closest ? t.closest('.tr-canvas') : null;
+    var svg = box && box.querySelector('.tr-svg');
+    if (svg && svg.querySelector('.tr-empty')) t.hidden = true;
+  }
+}, true);
+window.__trendWake = function () {
+  try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+};
+
 /* ===== 2026-11-02（第二十六轮）：全站左侧导航 + 数据口径 ⓘ =====
    侧边栏从「资料库页内导航」升级为全站导航：首页 / 基金最新数据 / 可视化对比 /
    MPFA 基金榜单 / 供款计算器；标题改为「强积金数据分析平台」。
@@ -2637,6 +2654,7 @@ window.fillFDHolds = fillFDHolds;
 window.closeModal = function () {
   const m = document.querySelector('#modal');
   if (m) m.classList.remove('show');
+  setTimeout(function () { if (window.__trendWake) window.__trendWake(); }, 60);
   clearFundParam();
   /* 焦点还原到打开弹窗的那个按钮（键盘用户不会「丢失位置」） */
   try {
