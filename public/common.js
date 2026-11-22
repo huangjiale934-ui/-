@@ -2540,9 +2540,11 @@ window.openDetail = function (id) {
   /* 2026-10-21：导出改用走势图工作簿（逐日净值 + 当日涨跌幅 + 走势图 + 对比表），单只基金同样适用 */
   /* 2026-11-22（用户要求）：详情页导出单只基金，完全按「全量导出」的工作簿格式 */
   if (btnEx) btnEx.onclick = () => {
-    if (window.mpfFundBook && window.DATA && DATA.funds) {
+    if (window.mpfFundBook && typeof DATA !== 'undefined' && DATA && DATA.funds) {
       const one = DATA.funds.filter((f) => String(f.id) === String(x.id));
-      window.mpfFundBook(one.length ? one : [x]).catch(function () { if (window.__trendExportBook) window.__trendExportBook(); });
+      window.mpfFundBook(one.length ? one : [x]).then(function (ok) {
+        if (ok && window.mpfToast) window.mpfToast(TT('已导出该基金（数据说明 / 基金数据 / 持仓与分布 / 逐日净值 / 净值走势图）'));
+      }).catch(function () { if (window.__trendExportBook) window.__trendExportBook(); });
       return;
     }
     if (window.__trendExportBook) window.__trendExportBook(); else exportOneFund(x);
