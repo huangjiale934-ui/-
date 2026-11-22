@@ -337,6 +337,8 @@ node tools/step-times.js "$STEP_TIMES" || true
 soft_step "9.98/10 每日摘要" node tools/daily-log.js
 
 step "10/10 发布前一致性" node tools/predeploy-check.js
+# 2026-11-22（用户要求）：UI 冒烟接进发布闸门 —— 交互回归（悬停残留 / 下拉误关 / 图表尺寸）不过就不发布
+step "10.2/10 UI 冒烟（发布闸门）" bash tools/prepublish.sh
 echo "下一步：发布（由调用方执行 workbuddy_sites_deploy）"
 
 # 2026-10-26：更新结束状态（提示栏收起）

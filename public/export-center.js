@@ -606,6 +606,9 @@
     if (!window.MPFXLSX) { mpfToast(TT('导出组件未加载，请刷新页面')); return; }
     const go = $('#ecGo'), est = $('#ecEst');
     ST.busy = true; if (go) go.disabled = true;
+    let pct = 6;
+    const tick = (t) => { if (est) est.textContent = t; if (t) prog(pct, t); };
+    await progShow(TT('正在准备指数数据…'));
     try {
       await ensureIdx();
       const rows = idxRows().filter((r) => ST.sel.has('IDX:' + r.key));
@@ -670,10 +673,10 @@
             prev = v;
           });
         });
-        sheets.push({ name: TT('逐日净值'), rows: out, cols: [26, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
+        sheets.push({ name: TT('逐日净值'), rows: out, merges: ['A1:D1'], cols: [26, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
       }
-      if (ST.extra.has('trend') && window.svgPng === undefined && typeof svgPng !== 'function') { /* 占位 */ }
       if (ST.extra.has('trend')) {
+        pct = 72; tick(TT('正在绘制指数走势…')); await nextPaint();
         const lines = rows.map((r, i) => ({
           name: r.it.name || r.key, color: PALETTE[i % PALETTE.length],
           pts: (r.it.series || []).filter((q) => (!from || q[0] >= from) && (!to || q[0] <= to)),
@@ -683,25 +686,29 @@
           const legendH = Math.ceil(lines.length / 3) * 26 + 8;
           const png = await svgPng(trendSVG(lines), 980, 400, lines.map((l) => ({ name: l.name, color: l.color })));
           if (png) sheets.push({
-            name: TT('走势对比图'),
+            name: TT('净值走势图'),
             rows: [{ h: 30, cells: [{ v: TT('指数走势（起点 = 100）'), s: 1 }] }, { h: 16, cells: [{ v: '', s: 4 }] }],
-            cols: Array(16).fill(16),
-            images: [{ data: png, col: 0, row: 1, fitW: 900, fitH: 400 + legendH, name: TT('走势对比图') }],
+            merges: ['A1:H1'],
+            cols: Array(8).fill(16),
+            images: [{ data: png, col: 0, row: 1, fitW: 860, fitH: 400 + legendH, name: TT('净值走势图') }],
           });
         } else {
           const rowsT = [{ h: 30, cells: [{ v: TT('各指数走势（起点 = 100）'), s: 1 }] }];
+          const mergesT = ['A1:H1'];
           const images = [];
           let rr = 1;
           for (let i = 0; i < lines.length; i++) {
-            rowsT.push({ h: 22, cells: [{ v: lines[i].name, s: 3 }] }); rr += 1;
+            rowsT.push({ h: 24, cells: [{ v: lines[i].name, s: 3 }] });
+            rr += 1; mergesT.push('A' + rowsT.length + ':H' + rowsT.length);
             const png = await svgPng(trendSVG([lines[i]]), 900, 280, []);
             if (png) images.push({ data: png, col: 0, row: rr, fitW: 860, fitH: 280, name: lines[i].name });
             for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); rr += 1; }
           }
-          sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: ['A1:N1'], cols: Array(14).fill(16), images: images });
+          sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: mergesT, cols: Array(8).fill(16), images: images });
         }
       }
       if (window.buildCoverSheet) {
+        pct = 88; tick(TT('正在生成数据说明…')); await nextPaint();
         sheets.unshift(window.buildCoverSheet({
           page: TT('数据导出'),
           title: TT('数据说明'),
@@ -720,6 +727,7 @@
         }));
       }
       if (est) est.textContent = TT('正在打包 xlsx…');
+      pct = 94; prog(94, TT('正在打包 xlsx…')); await nextPaint();
       const blob = window.MPFXLSX.build({ sheets: sheets });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -727,44 +735,64 @@
       document.body.appendChild(a); a.click();
       setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
       mpfToast(TQ('已导出 {n} 个指数、{c} 个字段', { n: rows.length, c: picked.length }));
-      close();
+      progDone(true);
+      /* 2026-11-22（用户要求）：导出完成后留在导出中心 */
     } catch (e) {
       console.error('[export-center:idx]', e);
+      progDone(false);
       mpfToast(TT('导出失败，请稍后重试'));
     } finally { ST.busy = false; if (go) go.disabled = false; paintCounts(); }
   }
 
 
-  /* 2026-11-22（用户要求）：导出可能几十秒，给一个全局进度浮层（百分比 + 阶段文案），
-     成功后显示「导出成功」再自动消失。 */
-  let PROG_EL = null, PROG_T = 0;
+  /* 2026-11-22（用户反馈「进度条根本看不到」）：
+     ① 原来 show 之后立刻同步跑重活，浏览器没有机会绘制 → 现在每次更新都让出两帧；
+     ② 大数据分块 await，进度是实时的，不是最后一下从 0 跳到 100；
+     ③ 成功后不再关闭导出中心（用户要求留在原地），浮层显示「导出成功」后自动淡出。 */
+  let PROG_EL = null, PROG_HIDE = 0;
+  const nextPaint = () => new Promise(function (r) {
+    /* 后台标签页里 rAF 会被暂停，必须留一个定时兜底，否则导出会一直卡住 */
+    let done = false;
+    const fin = function () { if (!done) { done = true; r(); } };
+    try { requestAnimationFrame(function () { requestAnimationFrame(fin); }); } catch (e) {}
+    setTimeout(fin, 120);
+  });
+  function progEl() {
+    if (PROG_EL) return PROG_EL;
+    PROG_EL = document.createElement('div');
+    PROG_EL.className = 'ec-prog';
+    PROG_EL.innerHTML = '<div class="ec-prog-box"><div class="ec-prog-t">正在导出…</div>' +
+      '<div class="ec-prog-bar"><i></i></div><div class="ec-prog-n">0%</div></div>';
+    document.body.appendChild(PROG_EL);
+    return PROG_EL;
+  }
   function prog(pct, text) {
-    if (!PROG_EL) {
-      PROG_EL = document.createElement('div');
-      PROG_EL.className = 'ec-prog';
-      PROG_EL.innerHTML = '<div class="ec-prog-box"><div class="ec-prog-t">正在导出…</div>' +
-        '<div class="ec-prog-bar"><i></i></div><div class="ec-prog-n">0%</div></div>';
-      document.body.appendChild(PROG_EL);
-    }
-    clearTimeout(PROG_T);
-    PROG_EL.classList.add('show');
-    const n = Math.max(0, Math.min(100, Math.round(pct)));
-    PROG_EL.querySelector('.ec-prog-bar i').style.width = n + '%';
-    PROG_EL.querySelector('.ec-prog-n').textContent = n + '%';
-    if (text) PROG_EL.querySelector('.ec-prog-t').textContent = text;
+    const el = progEl();
+    clearTimeout(PROG_HIDE);
+    el.classList.add('show');
+    const n = Math.max(2, Math.min(100, Math.round(pct)));
+    el.querySelector('.ec-prog-bar i').style.width = n + '%';
+    el.querySelector('.ec-prog-n').textContent = n + '%';
+    if (text) el.querySelector('.ec-prog-t').textContent = text;
+  }
+  /* 先画出来再干活：连等两帧，确保用户点完导出立刻看到进度条 */
+  async function progShow(text) {
+    prog(2, text || TT('正在导出…'));
+    await nextPaint();
+    await nextPaint();
   }
   function progDone(ok) {
     if (!PROG_EL) return;
     PROG_EL.querySelector('.ec-prog-bar i').style.width = '100%';
     PROG_EL.querySelector('.ec-prog-n').textContent = '100%';
     PROG_EL.querySelector('.ec-prog-t').textContent = ok ? TT('导出成功') : TT('导出失败');
-    PROG_T = setTimeout(function () { if (PROG_EL) { PROG_EL.classList.remove('show'); } }, ok ? 900 : 2200);
+    PROG_HIDE = setTimeout(function () { if (PROG_EL) PROG_EL.classList.remove('show'); }, ok ? 1100 : 2400);
   }
 
   /* 2026-11-22（用户要求）：对外统一入口 —— 单只基金（详情页）/多只基金（对比页）导出，
      工作表顺序与「全量导出」完全一致：数据说明 / 基金数据 / 持仓与分布 / 逐日净值 / 净值走势图。
      opts.compareSheet 存在时插到第 2 位（基金对比页专用）。 */
-  window.mpfFundBook = async function (list, opts) {
+  const _fundBook = async function (list, opts) {
     opts = opts || {};
     const rowsSel = (list || []).slice();
     if (!rowsSel.length || !window.MPFXLSX) return false;
@@ -816,6 +844,7 @@
       } catch (e) {}
     }
     const from = '', to = '';
+    prog(60, TT('正在读取逐日净值…')); await nextPaint();
     const seriesMap = await loadSeries(rowsSel, null);
     const histRows = [{ h: 30, cells: [{ v: TT('逐日净值（每行一个交易日）'), s: 1 }] },
       { h: 30, cells: [TT('基金名称'), TT('日期'), TT('单位资产净值'), TT('日涨跌')].map((v) => ({ v, s: 2 })) }];
@@ -833,23 +862,37 @@
       });
     });
     sheets.push({ name: TT('逐日净值'), rows: histRows, merges: ['A1:D1'], cols: [30, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
-    /* 净值走势图：每只一张（纵向排列） */
+    /* 净值走势图：默认每只一张；对比导出（opts.mergeTrend）用一张合并对比图 */
     const lines = rowsSel.map((x, i) => ({
       name: nameOf(x), color: PALETTE[i % PALETTE.length],
       pts: (seriesMap.get(String(x.id)) || []),
     })).filter((l) => l.pts.length > 1);
-    if (lines.length) {
-      const rowsT = [{ h: 30, cells: [{ v: TT('净值走势对比（起点 = 100）'), s: 1 }] }];
+    if (lines.length && opts.mergeTrend) {
+      const legendH = Math.ceil(lines.length / 3) * 26 + 8;
+      const png = await svgPng(trendSVG(lines), 980, 400, lines.map((l) => ({ name: l.name, color: l.color })));
+      if (png) sheets.push({
+        name: TT('净值走势图'),
+        rows: [{ h: 30, cells: [{ v: TT('净值走势对比（起点 = 100）'), s: 1 }] }, { h: 16, cells: [{ v: '', s: 4 }] }],
+        merges: ['A1:H1'],
+        cols: Array(8).fill(16),
+        images: [{ data: png, col: 0, row: 1, fitW: 860, fitH: 400 + legendH, name: TT('净值走势图') }],
+      });
+    } else if (lines.length) {
+      /* 2026-11-22（用户要求）：表头 + 每只基金名，合并单元格并居中 */
+      const rowsT = [{ h: 30, cells: [{ v: TT('各基金净值走势（起点 = 100）'), s: 1 }] }];
+      const mergesT = ['A1:H1'];
       const images = [];
       let r = 1;
       for (let i = 0; i < lines.length; i++) {
-        rowsT.push({ h: 22, cells: [{ v: lines[i].name, s: 3 }] }); r += 1;
+        rowsT.push({ h: 24, cells: [{ v: lines[i].name, s: 3 }] });
+        r += 1; mergesT.push('A' + rowsT.length + ':H' + rowsT.length);
         const png = await svgPng(trendSVG([lines[i]]), 900, 280, []);
         if (png) images.push({ data: png, col: 0, row: r, fitW: 860, fitH: 280, name: lines[i].name });
         for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); r += 1; }
       }
-      sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: ['A1:N1'], cols: Array(14).fill(16), images: images });
+      sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: mergesT, cols: Array(8).fill(16), images: images });
     }
+    prog(92, TT('正在打包 xlsx…')); await nextPaint();
     const blob = window.MPFXLSX.build({ sheets: sheets });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -857,6 +900,125 @@
     document.body.appendChild(a); a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
     return true;
+  };
+
+  /* 对外入口：先亮进度条再干活（详情页 / 对比页导出都可能几秒），完成后显示「导出成功」 */
+  window.mpfFundBook = async function (list, opts) {
+    await progShow(TT('正在准备数据…'));
+    try {
+      const ok = await _fundBook(list, opts);
+      progDone(!!ok);
+      return ok;
+    } catch (e) {
+      progDone(false);
+      throw e;
+    }
+  };
+
+  /* 2026-11-22（用户反馈「在恒生指数详情页导出，结果是一只基金的表格」）：
+     原因是指数详情复用了基金详情的弹窗与 #mExport 按钮，按钮上还挂着上一只基金的导出闭包。
+     这里提供指数专用工作簿，指数详情打开时会重新绑定按钮。 */
+  window.mpfIndexBook = async function (keys) {
+    const list = (keys || []).map(String).filter(Boolean);
+    if (!list.length || !window.MPFXLSX) return false;
+    let pct = 8;
+    const tick = (t) => { if (t) prog(pct, t); };
+    await progShow(TT('正在准备指数数据…'));
+    try {
+      await ensureIdx();
+      const rows = idxRows().filter((r) => list.indexOf(String(r.key)) >= 0);
+      if (!rows.length) { progDone(false); return false; }
+      const all = IDX_FIELDS.map((f, i) => i);
+      const lastCol = colLetter(all.length);
+      const idxLatest = rows.reduce((m, r) => (r.st && r.st.asOf > m ? r.st.asOf : m), '');
+      const sheets = [];
+      if (window.buildCoverSheet) {
+        pct = 20;
+        sheets.push(window.buildCoverSheet({
+          page: TT('数据导出'),
+          title: TT('数据说明'),
+          meta: [
+            [TT('数据口径'), TT('市场指数（与走势图同源）')],
+            [TT('数据截至'), idxLatest || '—'],
+            [TT('导出时间'), new Date().toLocaleString('zh-CN', { hour12: false })],
+            [TT('导出范围'), TQ('{n} 个指数', { n: rows.length })],
+          ],
+          notes: [
+            TT('指数日线来自东方财富；自算 MPF 指数为本站按成分基金官方净值等权链式累计（基期 = 1000，不含费用），非官方指数。'),
+            TT('区间回报为价格涨幅，不含分红与费用；年化波动率按近一年日收益率年化，最大回撤取近一年峰值到谷底的最大跌幅。'),
+            TT('指数为价格指数，编制机构不公布成分持仓明细，本站亦不提供前十大持仓或资产分布。'),
+            TT('空白单元格＝该指数无此项数据（例如自算指数没有官方代码），本站不推测。'),
+          ],
+          columns: all.map((i) => [TT(IDX_FIELDS[i].n), TT(IDX_FIELDS[i].d || '')]),
+        }));
+      }
+      const body = rows.map((r) => ({
+        cells: all.map((i) => {
+          const f = IDX_FIELDS[i], v = f.get(r);
+          if (f.pct) return (v == null || !isFinite(v)) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e6, s: 5 };
+          if (f.num) return (v == null || !isFinite(v)) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e4, s: 7 };
+          return { v: v == null ? '' : String(v), s: 4 };
+        }),
+      }));
+      sheets.push({
+        name: TT('指数数据'),
+        rows: [{ h: 32, cells: [{ v: TT('市场指数数据') + ' · ' + TQ('截至 {d}', { d: idxLatest || '—' }), s: 1 }] },
+          { h: 34, cells: all.map((i) => ({ v: TT(IDX_FIELDS[i].n), s: 2 })) }].concat(body),
+        merges: ['A1:' + lastCol + '1'],
+        cols: all.map((i) => [IDX_FIELDS[i].w]),
+        freeze: { x: 1, y: 2, top: 'B3' },
+        autoFilter: 'A2:' + lastCol + (body.length + 2),
+      });
+      /* 逐日点位：全区间（与走势图同源） */
+      pct = 55; tick(TT('正在写入逐日点位…')); await nextPaint();
+      const pt = [{ h: 30, cells: [{ v: TT('逐日点位（每行一个交易日）'), s: 1 }] },
+        { h: 30, cells: [TT('指数名称'), TT('日期'), TT('点位'), TT('日涨跌')].map((v) => ({ v, s: 2 })) }];
+      rows.forEach((r) => {
+        let prev = null;
+        (r.it.series || []).forEach((q) => {
+          const v = Number(q[1]);
+          const chg = prev ? Math.round((v / prev - 1) * 1e4) / 100 : '';
+          pt.push({ cells: [{ v: r.it.name || r.key, s: 4 }, { v: q[0], s: 4 },
+            { v: isFinite(v) ? Math.round(v * 1e4) / 1e4 : '', s: 7 },
+            chg === '' ? { v: '', s: 4 } : { v: chg, s: 21 }] });
+          prev = v;
+        });
+      });
+      sheets.push({ name: TT('逐日点位'), rows: pt, merges: ['A1:D1'], cols: [26, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
+      /* 走势图：每只一张，标题与名称合并居中 */
+      pct = 74; tick(TT('正在绘制指数走势…')); await nextPaint();
+      const lines = rows.map((r, i) => ({
+        name: r.it.name || r.key, color: PALETTE[i % PALETTE.length],
+        pts: (r.it.series || []),
+      })).filter((l) => l.pts.length > 1);
+      if (lines.length) {
+        const rowsT = [{ h: 30, cells: [{ v: TT('指数走势（起点 = 100）'), s: 1 }] }];
+        const mergesT = ['A1:H1'];
+        const images = [];
+        let r = 1;
+        for (let i = 0; i < lines.length; i++) {
+          rowsT.push({ h: 24, cells: [{ v: lines[i].name, s: 3 }] });
+          r += 1; mergesT.push('A' + rowsT.length + ':H' + rowsT.length);
+          const png = await svgPng(trendSVG([lines[i]]), 900, 280, []);
+          if (png) images.push({ data: png, col: 0, row: r, fitW: 860, fitH: 280, name: lines[i].name });
+          for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); r += 1; }
+        }
+        sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: mergesT, cols: Array(8).fill(16), images: images });
+      }
+      pct = 94; tick(TT('正在打包 xlsx…')); await nextPaint();
+      const blob = window.MPFXLSX.build({ sheets: sheets });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'MPF指数_' + (rows[0].it.name || rows[0].key) + '_' + (idxLatest || '') + '.xlsx';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+      progDone(true);
+      return true;
+    } catch (e) {
+      console.error('[index-book]', e);
+      progDone(false);
+      return false;
+    }
   };
 
   async function exportNow() {
@@ -875,23 +1037,29 @@
     const go = $('#ecGo');
     const est = $('#ecEst');
     ST.busy = true; ST.stage = 'start'; if (go) go.disabled = true;
-    const tick = (t) => { if (est) est.textContent = t; if (t) prog($$PCT, t); };
-    let $$PCT = 8; prog(8, TT('正在准备数据…'));
+    let pct = 6;
+    const tick = (t) => { if (est) est.textContent = t; if (t) prog(pct, t); };
+    await progShow(TT('正在准备数据…'));
 
     try {
       const navLatest = latestNav();
       const head = picked.map((i) => ({ v: COLS[i][0], s: 2 }));
       const rows = [{ h: 32, cells: [{ v: TT('基金最新数据') + ' · ' + TQ('净值截至 {d}', { d: navLatest || DS().dataAsOf || '—' }), s: 1 }] },
         { h: 34, cells: head }];
-      rowsSel.forEach((x, ri) => {
-        rows.push({ cells: picked.map((i) => schema.cellOf(x, ri, COLS[i])) });
-      });
+      for (let ri = 0; ri < rowsSel.length; ri++) {
+        rows.push({ cells: picked.map((i) => schema.cellOf(rowsSel[ri], ri, COLS[i])) });
+        if (ri % 60 === 59) {
+          pct = 8 + (ri / Math.max(1, rowsSel.length)) * 10;
+          tick(TT('正在整理基金数据…'));
+          await nextPaint();
+        }
+      }
       const lastCol = colLetter(picked.length);
       const hide = picked.map((i, k) => (HIDDEN_IDX.indexOf(i) >= 0 ? k : -1)).filter((k) => k >= 0);
       const namePos = picked.indexOf(1);
       const fx = namePos >= 0 ? namePos + 1 : 0;
 
-      $$PCT = 18; ST.stage = 'cover'; tick(TT('正在生成数据说明…'));
+      pct = 20; ST.stage = 'cover'; tick(TT('正在生成数据说明…')); await nextPaint();
       const summary = ST.trustee.size === 1 ? Array.from(ST.trustee)[0] : (ST.trustee.size ? TQ('{n} 家受托人', { n: ST.trustee.size }) : TT('全市场'));
       const MPFA_NOTES = [
         TT('本表为积金局「强积金基金平台」月度公布口径：回报已扣费并计入分红再投资，与本站「基金最新数据」的每日自算口径不同，两者不可直接相减。'),
@@ -931,7 +1099,7 @@
       }];
 
       if (ST.extra.has('hld')) {
-        $$PCT = 45; ST.stage = 'hld'; tick(TT('正在生成持仓与分布…'));
+        pct = 32; ST.stage = 'hld'; tick(TT('正在生成持仓与分布…')); await nextPaint();
         if (window.buildHoldAllocSheet) {
           const ent = rowsSel.map((x) => ({ id: x.id, name: nameOf(x) }));
           const sh = await window.buildHoldAllocSheet(ent, { chartLimit: 30, imgScale: 0.8 });
@@ -944,8 +1112,9 @@
       let seriesMap = null;
       if (needSeries) {
         ST.stage = 'series';
-        $$PCT = 55; tick(TQ('正在读取逐日净值 {n}/{t}…', { n: 0, t: rowsSel.length }));
-        seriesMap = await loadSeries(rowsSel, (n, t) => { $$PCT = 55 + (n / Math.max(1, t)) * 30; tick(TQ('正在读取逐日净值 {n}/{t}…', { n, t })); });
+        pct = 42; tick(TQ('正在读取逐日净值 {n}/{t}…', { n: 0, t: rowsSel.length }));
+        await nextPaint();
+        seriesMap = await loadSeries(rowsSel, (n, t) => { pct = 42 + (n / Math.max(1, t)) * 34; tick(TQ('正在读取逐日净值 {n}/{t}…', { n, t })); });
       }
       const from = rangeStart(ST.histRange);
       const to = rangeEnd();
@@ -954,7 +1123,8 @@
         ST.stage = 'hist';
         const out = [{ h: 30, cells: [{ v: TT('逐日净值（每行一个交易日）'), s: 1 }] },
           { h: 30, cells: [TT('基金名称'), TT('日期'), TT('单位资产净值'), TT('日涨跌')].map((v) => ({ v, s: 2 })) }];
-        rowsSel.forEach((x) => {
+        for (let xi = 0; xi < rowsSel.length; xi++) {
+          const x = rowsSel[xi];
           /* 名称含繁转简：必须在行循环外只算一次，否则每行一次转换会把主线程卡死 */
           const nm = nameOf(x);
           const ser = (seriesMap.get(String(x.id)) || []).filter((p) => (!from || p[0] >= from) && (!to || p[0] <= to));
@@ -969,7 +1139,8 @@
             ] });
             prev = v;
           });
-        });
+          if (xi % 12 === 11) { pct = 78 + (xi / Math.max(1, rowsSel.length)) * 6; tick(TQ('正在写入逐日净值 {n}/{t}…', { n: xi + 1, t: rowsSel.length })); await nextPaint(); }
+        }
         sheets.push({ name: TT('逐日净值'), rows: out, merges: ['A1:D1'], cols: [30, 12, 14, 10], freeze: { x: 0, y: 2, top: 'A3' } });
       }
 
@@ -987,29 +1158,34 @@
           const png = await svgPng(trendSVG(lines), 980, 400, lines.map((l) => ({ name: l.name, color: l.color })));
           if (png) {
             sheets.push({
-              name: TT('走势对比图'),
+              name: TT('净值走势图'),
               rows: [{ h: 30, cells: [{ v: TT('净值走势对比（起点 = 100）'), s: 1 }] }, { h: 16, cells: [{ v: '', s: 4 }] }],
-              cols: Array(16).fill(16),
-              images: [{ data: png, col: 0, row: 1, fitW: 900, fitH: 400 + legendH, name: TT('走势对比图') }],
+              merges: ['A1:H1'],
+              cols: Array(8).fill(16),
+              images: [{ data: png, col: 0, row: 1, fitW: 860, fitH: 400 + legendH, name: TT('净值走势图') }],
             });
           }
         } else {
           /* 每只一张：同一工作表纵向排列（用户要求「选择单独导出或合并对比」） */
+          /* 2026-11-22（用户要求）：表头与每只基金名都要合并单元格并居中 */
           const rowsT = [{ h: 30, cells: [{ v: TT('各基金净值走势（起点 = 100）'), s: 1 }] }];
+          const mergesT = ['A1:H1'];
           const images = [];
           let r = 1;
           for (let i = 0; i < lines.length; i++) {
+            pct = 84 + (i / Math.max(1, lines.length)) * 8;
             tick(TQ('正在绘制走势图 {n}/{t}…', { n: i + 1, t: lines.length }));
-            rowsT.push({ h: 22, cells: [{ v: lines[i].name, s: 3 }] }); r += 1;
+            rowsT.push({ h: 24, cells: [{ v: lines[i].name, s: 3 }] });
+            r += 1; mergesT.push('A' + rowsT.length + ':H' + rowsT.length);
             const png = await svgPng(trendSVG([lines[i]]), 900, 280, []);
             if (png) images.push({ data: png, col: 0, row: r, fitW: 860, fitH: 280, name: lines[i].name });
             for (let k = 0; k < 14; k++) { rowsT.push({ h: 16, cells: [{ v: '', s: 4 }] }); r += 1; }
           }
-          sheets.push({ name: TT('走势图'), rows: rowsT, cols: Array(14).fill(16), images: images });
+          sheets.push({ name: TT('净值走势图'), rows: rowsT, merges: mergesT, cols: Array(8).fill(16), images: images });
         }
       }
 
-      $$PCT = 92; ST.stage = 'pack'; tick(TT('正在打包 xlsx…'));
+      pct = 92; ST.stage = 'pack'; tick(TT('正在打包 xlsx…')); await nextPaint();
       const blob = window.MPFXLSX.build({ sheets: sheets });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -1019,7 +1195,7 @@
       mpfToast(TQ('已导出 {n} 只基金、{c} 个字段', { n: rowsSel.length, c: picked.length }));
       progDone(true);
       ST.stage = 'done';
-      close();
+      /* 2026-11-22（用户要求）：导出完成后留在导出中心，不再自动关闭 */
     } catch (e) {
       ST.stage = 'error:' + (e && e.message);
       console.error('[export-center]', e);

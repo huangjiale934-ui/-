@@ -2942,7 +2942,10 @@ window.renderCmpBar = renderCmpBar;
 
 window.clearCmp = function () {
   CMPX.clear();
-  /* 2026-11-22（用户反馈）：底部对比栏清空后，表格里的勾选态也要跟着取消 */
+  /* 2026-11-22（用户第 N 次反馈）：底部「清空」后，表格里的勾选也必须消失。
+     分析页的勾选态来自走势图的基金列表（不是 CMPX），所以两边都要清。 */
+  if (typeof window.__anClearChartFunds === 'function') window.__anClearChartFunds();
+  document.querySelectorAll('input[data-cmp]').forEach(function (c) { c.checked = false; });
   document.querySelectorAll('.fsel.on').forEach(function (b) { b.classList.remove('on'); b.textContent = ''; });
   renderCmpBar();
 };
@@ -3072,14 +3075,43 @@ window.openCmp = function () {
         return;
       }
       if (act === 'csv') {
-        /* 2026-10-21：改用走势图工作簿（净值+涨跌幅+区间统计+截图），不再导出裸 CSV */
-        if (window.__trendExportBook) { window.__trendExportBook(); return; }
-        const head = [TT('对比项')].concat(list.map((x) => x.fund));
-        const out = [head];
-        rows.forEach(([label, fn]) => {
-          out.push([label].concat(list.map((x) => String(fn(x)).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim())));
-        });
-        window.csvDownload(out, 'mpf-compare-' + ids2.length + '.csv');
+        /* 2026-11-22（用户要求）：对比页导出与「全量导出」同一套工作簿，
+           工作表顺序：数据说明 → 基金对比 → 基金数据 → 持仓与分布 → 逐日净值 → 净值走势图 */
+        const mkCmp = () => {
+          const colOf = (k) => {
+            let s2 = '', x2 = k;
+            while (x2 > 0) { const m2 = (x2 - 1) % 26; s2 = String.fromCharCode(65 + m2) + s2; x2 = Math.floor((x2 - 1) / 26); }
+            return s2;
+          };
+          const n = list.length + 1;
+          const cmpRows = [
+            { h: 32, cells: [{ v: TT('基金对比') + ' · ' + TQ('{n} 只基金', { n: list.length }), s: 1 }] },
+            { h: 34, cells: [{ v: TT('对比项'), s: 2 }].concat(list.map((x) => ({ v: String(x.fundBase || x.fund), s: 2 }))) },
+          ];
+          rows.forEach(([label, fn]) => {
+            cmpRows.push({ cells: [{ v: label, s: 3 }].concat(list.map((x) => {
+              const raw = String(fn(x)).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+              return { v: raw, s: 4 };
+            })) });
+          });
+          return { rows: cmpRows, merges: ['A1:' + colOf(n) + '1'],
+            cols: [[34]].concat(list.map(() => [22])), freeze: { x: 1, y: 2, top: 'B3' } };
+        };
+        if (window.mpfFundBook) {
+          window.mpfFundBook(list, { compareSheet: mkCmp(), mergeTrend: true }).then(function (ok) {
+            if (ok) mpfToast(TT('已导出对比（含基金对比 / 基金数据 / 持仓与分布 / 逐日净值 / 净值走势图）'));
+          }).catch(function () { if (window.__trendExportBook) window.__trendExportBook(); });
+        } else if (window.__trendExportBook) {
+          window.__trendExportBook();
+        } else {
+          const head = [TT('对比项')].concat(list.map((x) => x.fund));
+          const out = [head];
+          rows.forEach(([label, fn]) => {
+            out.push([label].concat(list.map((x) => String(fn(x)).replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim())));
+          });
+          window.csvDownload(out, 'mpf-compare-' + ids2.length + '.csv');
+        }
+        return;
       }
     };
     m.classList.add('show');

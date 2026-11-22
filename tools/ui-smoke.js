@@ -132,6 +132,19 @@ async function getWs() {
   })()`);
   check('④ 导出中心下拉不被误关', r4 && (r4.skip || (r4.open1 && r4.open2)), JSON.stringify(r4));
 
+  /* ⑤ 指数详情导出必须绑定指数（不是上一只基金的闭包） */
+  await send('Page.navigate', { url: URL0 });
+  await sleep(1500);
+  const r5 = await ev(`(async()=>{
+    if(!window.openIndexDetail) return {err:'no fn'};
+    window.openIndexDetail('HSI');
+    await new Promise(r=>setTimeout(r,2600));
+    const b=document.querySelector('#mExport');
+    const src=b&&b.onclick? String(b.onclick):'';
+    return {hasFn: src.indexOf('mpfIndexBook')>=0, title: (document.querySelector('#mTitle')||{}).textContent||''};
+  })()`);
+  check('⑤ 指数详情导出指向指数', r5 && r5.hasFn === true, JSON.stringify(r5));
+
   const bad = results.filter((r) => !r.pass);
   results.forEach((r) => console.log((r.pass ? '  ✔ ' : '  ✘ ') + r.name + (r.pass ? '' : '  ' + r.detail)));
   console.log('UI 冒烟：' + (results.length - bad.length) + '/' + results.length + (bad.length ? ' 失败' : ' 全部通过'));

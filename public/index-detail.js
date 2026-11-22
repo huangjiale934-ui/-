@@ -228,6 +228,27 @@
       if (ms) ms.textContent = meta.cat + (it.code ? ' · ' + it.code : '') + ' · ' + (meta.src || '');
       mb.innerHTML = body(key, it);
       m.classList.add('show');
+      /* 2026-11-22（用户反馈「恒生指数详情页导出出来是一只基金的表格」）：
+         指数详情复用基金详情的弹窗，而 #mExport 上还挂着上一只基金的导出闭包。
+         这里必须重新绑定成「导出该指数」，并清掉 dataset.fid，避免基金侧 stillOpen 误判。 */
+      if (mh) mh.dataset.fid = '';
+      var ex2 = m.querySelector('#mExport');
+      if (ex2) ex2.onclick = function () {
+        if (window.mpfIndexBook) {
+          window.mpfIndexBook([key]).then(function (ok) {
+            if (ok && window.mpfToast) window.mpfToast(TT('已导出该指数（数据说明 / 指数数据 / 逐日点位 / 净值走势图）'));
+          });
+        } else if (window.mpfToast) window.mpfToast(TT('导出组件未加载，请刷新页面'));
+      };
+      var sh2 = m.querySelector('#mShare');
+      if (sh2) sh2.onclick = function () {
+        var u = location.origin + location.pathname + '?idx=' + encodeURIComponent(key);
+        var done = function () { if (window.mpfToast) window.mpfToast(TT('已复制该指数的链接')); };
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u).then(done, done);
+          else { var ta = document.createElement('textarea'); ta.value = u; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); }
+        } catch (e) { done(); }
+      };
       /* 2026-11-22（用户要求）：走势图接主走势组件（十字线 + 悬停涨跌） */
       setTimeout(function () {
         var tb = document.querySelector('#idxTrend');

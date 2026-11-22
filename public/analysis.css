@@ -1351,7 +1351,7 @@
 .modal-bd .fd-head .fd-price { display: flex; flex-direction: column; justify-content: center; }
 
 /* 2026-11-22（用户要求）：导出进度浮层 */
-.ec-prog { position: fixed; inset: 0; z-index: 300; display: none; align-items: center; justify-content: center;
+.ec-prog { position: fixed; inset: 0; z-index: 2000; display: none; align-items: center; justify-content: center;
   background: rgba(20, 32, 50, 0.35); }
 .ec-prog.show { display: flex; }
 .ec-prog-box { width: 320px; background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: 0 18px 50px rgba(0,0,0,.22); text-align: center; }

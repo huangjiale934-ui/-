@@ -513,6 +513,13 @@
     document.querySelectorAll('.ndk').forEach((x) => x.classList.remove('on'));
     renderFundList();
   };
+  /* 2026-11-22（用户要求）：底部对比栏「清空」时，把走势图里的基金一并移出，
+     表格的勾选态随之取消（勾选态 = 该基金是否在图上）。 */
+  window.__anClearChartFunds = function () {
+    if (!TREND_MAIN || !TREND_MAIN.getItems || !TREND_MAIN.setItems) return;
+    const keep = TREND_MAIN.getItems().filter((it) => it.type !== 'fund');
+    TREND_MAIN.setItems(keep);
+  };
 
   function IN_CHART(id) {
     /* 勾选状态 = 该基金是否在走势图中 */

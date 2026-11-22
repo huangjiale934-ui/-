@@ -178,6 +178,8 @@
 '发行人官网最新「基金便览」截至 {d}，{y} 年第 {q} 季报告尚未公布；本站不推测、不前值填充。': 'The latest fund fact sheet is dated {d}; the {y} Q{q} report is not published yet. No estimates or carry-forward.',
 '导出这组对比（Excel）': 'Export this comparison (Excel)',
 '已导出该基金（数据说明 / 基金数据 / 持仓与分布 / 逐日净值 / 净值走势图）': 'Fund exported (data notes / fund data / holdings & allocation / daily NAV / NAV trend)',
+'{n} 只基金': '{n} funds',
+'已导出对比（含基金对比 / 基金数据 / 持仓与分布 / 逐日净值 / 净值走势图）': 'Comparison exported (fund comparison / fund data / holdings & allocation / daily NAV / NAV trend)',
 '数据统计口径说明': 'Data methodology notes',
 '发行人未发布': 'Issuer not published',
 '发行人官网最新净值只公布到 {d}（落后 {n} 个估值日）；本站不插值、不前值填充。': 'Latest NAV published by the issuer is {d} ({n} valuation days behind); no interpolation or carry-forward.',

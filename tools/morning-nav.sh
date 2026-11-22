@@ -159,4 +159,6 @@ if [ "${1:-}" = "--sync" ]; then
 else
   echo "（已跳过 GitHub 推送：两站独立更新；确需推送加 --sync）"
 fi
+# 2026-11-22（用户要求）：发布前 UI 冒烟闸门 —— 交互回归（悬停残留 / 下拉误关 / 图表尺寸）不过就不发布
+bash tools/prepublish.sh || { echo "!!! UI 冒烟未通过，已阻止发布"; exit 1; }
 echo "下一步：发布 WorkBuddy 站（由调用方执行 workbuddy_sites_deploy）"
