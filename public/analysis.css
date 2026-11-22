@@ -1302,3 +1302,20 @@
 .tr-tbl th.tr-nameth .ver-info { width: 15px; height: 15px; line-height: 13px; font-size: 11px;
   margin-left: 5px; vertical-align: -2px; }
 @media (max-width: 760px) { .tr-tbl th.tr-nameth .ver-info { width: 14px; height: 14px; line-height: 12px; } }
+
+/* 2026-11-22（用户要求）：指数详情页（版式对齐基金详情页） */
+.idx-sec { margin: 18px 0 0; }
+.idx-sec-h { font-size: 13px; font-weight: 700; color: #24425f; margin: 0 0 8px; }
+.idx-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 18px; }
+.idx-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  padding: 7px 10px; background: #f7fafd; border-radius: 6px; font-size: 12.5px; color: #4a5b6e; }
+.idx-row b { font-weight: 600; color: #1f3b57; }
+.idx-row b.up { color: var(--up); }
+.idx-row b.down { color: var(--down); }
+.idx-desc { font-size: 12.5px; line-height: 1.8; color: #4a5b6e; }
+.idx-spark { width: 100%; height: 200px; display: block; background: #fbfdff; border: 1px solid #e6eff8; border-radius: 8px; }
+.idx-spark-x { display: flex; justify-content: space-between; font-size: 11.5px; color: #7d8fa3; margin-top: 4px; }
+@media (max-width: 760px) { .idx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .idx-spark { height: 150px; } }
+
+/* 2026-11-22（用户要求）：持仓 / 分布标题行的「发行人未发布」徽标，紧跟标题文字 */
+.sect-title .fd-late.sect-late { margin-left: 8px; vertical-align: 1px; font-weight: 400; }

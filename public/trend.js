@@ -286,6 +286,8 @@ window.TREND = (function () {
       /* 2026-11-02（第二十五轮）：点「基金名称」= 打开基金详情；点左侧线条 = 改样式 */
       const nf = e.target.closest('[data-openfund]');
       if (nf) { e.stopPropagation(); openFundDetail(nf.getAttribute('data-openfund')); return; }
+      const ni = e.target.closest('[data-openidx]');
+      if (ni && window.openIndexDetail) { e.stopPropagation(); window.openIndexDetail(ni.getAttribute('data-openidx')); return; }
       const st = e.target.closest('[data-style]');
       if (st) { e.stopPropagation(); openStylePopover(st.getAttribute('data-style')); }
     });
@@ -1478,12 +1480,17 @@ window.TREND = (function () {
            基金名称改成「打开详情」，不再弹样式面板。 */
         const fId = L.it && L.it.type === 'fund' ? L.it.id : '';
         const linePrev = '<svg class="tr-lg-line" width="55" height="12" data-style="' + esc0(L.key) + '" ' +
-          'title="' + esc0(_t('点线条可改颜色 / 线宽 / 线型')) + '">' +
+          'data-tip="' + esc0(_t('点线条可改颜色 / 线宽 / 线型')) + '">' +
           '<line x1="2" y1="6" x2="53" y2="6" stroke="' + L.color + '" stroke-width="' + L.width + '"' +
           (L.dash ? ' stroke-dasharray="' + L.dash + '"' : '') + ' stroke-linecap="round"/></svg>';
+        /* 2026-11-22（用户反馈）：指数名称原来写「点击可改颜色…」但点了没反应。
+           改为：名称 = 查看详情（指数也能点，打开指数详情页）；改线型只在左侧线段上提示。 */
+        const idxKey = (L.it && L.it.type === 'index') ? String(L.it.key || '') : '';
         const nameAttr = fId
-          ? ' data-openfund="' + esc0(fId) + '" title="' + esc0(_t('查看基金详情')) + '"'
-          : ' title="' + esc0(nameTip) + '"';
+          ? ' data-openfund="' + esc0(fId) + '" data-tip="' + esc0(_t('查看基金详情')) + '"'
+          : (idxKey
+            ? ' data-openidx="' + esc0(idxKey) + '" data-tip="' + esc0(_t('查看指数详情')) + '"'
+            : ' data-tip="' + esc0(nameTip) + '"');
         /* 2026-11-05（第四十轮）：手机上这张表改成「卡片 + 可展开」——
            每张卡默认只留「区间收益 / 年化波动率 / 区间最大回撤」三个关键指标，
            高低点与回撤区间收进「全部指标」，彻底不需要横滑。
@@ -1505,9 +1512,7 @@ window.TREND = (function () {
       wrap.innerHTML =
         '<div class="tr-tbl-scroll"><table class="tr-tbl tr-center">' +
           '<thead><tr>' +
-            '<th scope="col" class="tr-nameth">' + esc0(_t('名称')) +
-              '<i class="ver-info" role="button" tabindex="0" aria-label="' + esc0(_t('图表说明')) +
-              '" data-tip="' + esc0(_t('点线条可改颜色 / 线宽 / 线型。单条对比时纵轴为实际数值（净值 / 指数点位），悬停显示当日净值与当日涨跌幅；再加入一条即切换为相对区间起点的累计涨跌幅对比。')) + '">ⓘ</i></th>' +
+            '<th scope="col">' + esc0(_t('名称')) + '</th>' +
             '<th scope="col" class="r">' + esc0(_t('区间最高')) + '</th>' +
             '<th scope="col" class="r">' + esc0(_t('区间最低')) + '</th>' +
             /* 2026-11-03（第二十九轮，用户要求）：去掉四个列头的「?」悬浮提示（含义已够直白） */

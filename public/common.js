@@ -2562,6 +2562,27 @@ function mountFD(x, alive) {
 window.mountFD = mountFD;
 
 /* 详情（小窗 / 放大页）持仓与组合分布：按 id 懒加载 */
+
+/* 2026-11-22（用户要求）：持仓/分布标题行的「发行人未发布」小徽标 ——
+   与净值那枚同一套样式，塞在 .sect-title 文字后面，不换行、不加高。 */
+function prevQuarterEnd() {
+  const d = new Date(Date.now() + 8 * 3600e3);
+  const y = d.getUTCFullYear(), m = d.getUTCMonth() + 1;
+  if (m <= 3) return (y - 1) + '-12-31';
+  if (m <= 6) return y + '-03-31';
+  if (m <= 9) return y + '-06-30';
+  return y + '-09-30';
+}
+function holdLateBadge(d) {
+  if (!d || !d.asOf) return '';
+  const qEnd = prevQuarterEnd();
+  if (d.asOf >= qEnd) return '';
+  const qNum = Math.floor(parseInt(qEnd.slice(5, 7), 10) / 3);
+  const tip = TQ('发行人官网最新「基金便览」截至 {d}，{y} 年第 {q} 季报告尚未公布；本站不推测、不前值填充。',
+    { d: d.asOf, y: qEnd.slice(0, 4), q: qNum });
+  return '<span class="fd-late sect-late" data-tip="' + esc(tip) + '">' + TT('发行人未发布') + '</span>';
+}
+
 function fillFDHolds(x, alive) {
   const hb = document.querySelector('#fdHolds');
   const ab = document.querySelector('#fdAlloc');
@@ -2600,6 +2621,14 @@ function fillFDHolds(x, alive) {
     const aHtml = window.allocBlockHTML ? window.allocBlockHTML(String(x.id)) : '';
     hb.innerHTML = hHtml || window.fdBone(TT('前十大持仓'));
     ab.innerHTML = aHtml || window.fdBone(TT('投资组合分布'));
+    /* 同一份便览同时决定持仓与分布，日期一致 → 两处都标 */
+    const badge = holdLateBadge(d);
+    if (badge) {
+      [hb, ab].forEach((box) => {
+        const t = box.querySelector('.sect-title');
+        if (t && !t.querySelector('.sect-late')) t.insertAdjacentHTML('beforeend', badge);
+      });
+    }
   };
   if (window.ensureHoldings) window.ensureHoldings(x.id).then(paint).catch(paint);
   else paint();

@@ -1211,7 +1211,7 @@ const server = http.createServer(async (req, res) => {
     const isJs = p === '/b.js';
     const page = u.searchParams.get('p') || 'analysis';
     const list = isJs
-      ? ['t2s.js', 'i18n.js', 'zhmap.js', 'common.js', 'trend.js', 'xlsx.js']
+      ? ['t2s.js', 'i18n.js', 'zhmap.js', 'common.js', 'trend.js', 'index-detail.js', 'xlsx.js']
       : (page === 'home' ? ['style.css', 'analysis.css', 'home.css'] : ['style.css', 'analysis.css']);
     try {
       const dir = path.join(__dirname, 'public');

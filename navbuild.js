@@ -123,17 +123,20 @@ const SOURCES = [
     trustee: '友邦信託', scheme: '友邦強積金優選計劃', p: 'aiaTable', ti: 1,
   },
   {
+    histSrc: '萬通信託官網', noRender: true,
     key: 'YF', label: '萬全強制性公積金計劃（萬通信託）', file: 'YFLife.html',
     url: 'https://www.yflife.com/tc/Hong-Kong/Corporate/MPF/Fund-Price-History/',
     trustee: '萬通', scheme: '萬全強制性公積金計劃', p: 'yfTable', ti: 1,
   },
   {
+    histSrc: '交通銀行', noRender: true,
     key: 'BOCOM', label: '交通銀行愉盈退休強積金計劃（交通銀行信託）', file: 'BOCOM.html',
     url: 'https://www.bocomtrust.com.hk/BankCommSite/shtml/trust/tw/2600764/2600785/2600787/2600908/2600910/list.shtml',
     trustee: '交通', scheme: '交通銀行愉盈退休強積金計劃', p: 'bocomTable', ti: 1,
     budget: 45000,
   },
   {
+    histSrc: '中國人壽信託官網', noRender: true,
     key: 'ChinaLife', label: '中國人壽強積金集成信託計劃（中國人壽信託）· 單位淨值', file: 'ChinaLife.html',
     url: 'https://trustee.chinalife.com.hk/mpf/dailyPrices?request_locale=zh_TW',
     trustee: '中國人壽', scheme: '中國人壽強積金集成信託計劃', p: 'hsbcTable', ti: 0,

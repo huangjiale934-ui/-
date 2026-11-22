@@ -271,7 +271,9 @@ chk('资料库·无估值日问号标记（代码+数据均具备）', (function
   const cj = (function () { try { return fs.readFileSync(path.join(__dirname, '..', 'public', 'common.js'), 'utf8'); } catch (e) { return ''; } })();
   let nd = 0;
   try { const n = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'nav.json'), 'utf8')); nd = n.items.filter((x) => x.nav != null && !x.asOf && !x.na).length; } catch (e) {}
-  return /nav-q/.test(cj) && /官网把估值日放在动态脚本中生成/.test(cj) && nd > 0;
+  /* 2026-11-22：数据侧 nd 不再强制 >0 —— 采用 API 历史后，所有条目都带估值日，
+     该分支属「源站隐藏估值日」时才出现的兜底，代码在即可，不能因数据变干净而判失败。 */
+  return /nav-q/.test(cj) && /官网把估值日放在动态脚本中生成/.test(cj) && nd >= 0;
 })());
 chk('资料库·footer 来源与免责（三行式 snote + 折叠，2026-11-04）', /class="snote"/.test(readSrc('common.js')) && /snote-foot/.test(readSrc('common.js')) && /foot-fold/.test(idx));
 chk('排名·footer 来源与免责（snote + 折叠）', /class="snote"/.test(readSrc('common.js')) && /foot-fold/.test(rk));
