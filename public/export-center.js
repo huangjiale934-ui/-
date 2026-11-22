@@ -25,6 +25,7 @@
     open: false,
     sel: new Set(),
     fields: new Set(),      /* 本站最新数据列下标 */
+    idxFields: new Set(),   /* 指数口径字段下标（IDX_FIELDS） */
     extra: new Set(),       /* 'hld' | 'hist' | 'trend' */
     histRange: '1y',        /* 逐日净值区间：1y/3y/5y/10y/all/custom */
     histFrom: '', histTo: '', dateMsg: '',
@@ -39,6 +40,37 @@
     busy: false,
     preset: null,           /* 打开时预置的 id 列表（来自当前筛选） */
   };
+
+  /* ===== 2026-11-22（用户要求）：导出「其他市场指数」 =====
+     受托人下拉最底部多一项；选中后左侧列出站内全部指数，右侧字段切换成指数口径。 */
+  const IDXK = '__IDX__';
+  const IDX_GROUPS = [
+    { k: 'ibase', n: '基本信息', idx: [0, 1, 2, 3, 4, 16, 17] },
+    { k: 'iperf', n: '点位与回报', idx: [5, 6, 7, 8, 9, 10, 11] },
+    { k: 'irisk', n: '风险与波动', idx: [12, 13, 14, 15] },
+    { k: 'idesc', n: '编制说明', idx: [18] },
+  ];
+  const IDX_FIELDS = [
+    { n: '指数名称', w: 24, get: (r) => r.it.name || r.key },
+    { n: '代码', w: 14, get: (r) => r.it.code || r.key },
+    { n: '类别', w: 16, get: (r) => (window.idxMetaOf && (window.idxMetaOf(r.key) || {}).cat) || '指数' },
+    { n: '最新点位', w: 12, num: true, get: (r) => (r.st ? r.st.lastV : null) },
+    { n: '最新日期', w: 12, get: (r) => (r.st ? r.st.asOf : '') },
+    { n: '近 1 月', w: 10, pct: true, get: (r) => (r.st ? r.st.r1m : null) },
+    { n: '近 3 月', w: 10, pct: true, get: (r) => (r.st ? r.st.r3m : null) },
+    { n: '近 6 月', w: 10, pct: true, get: (r) => (r.st ? r.st.r6m : null) },
+    { n: '年初至今', w: 10, pct: true, get: (r) => (r.st ? r.st.ytd : null) },
+    { n: '近 1 年', w: 10, pct: true, get: (r) => (r.st ? r.st.r1y : null) },
+    { n: '近 3 年', w: 10, pct: true, get: (r) => (r.st ? r.st.r3y : null) },
+    { n: '近 5 年', w: 10, pct: true, get: (r) => (r.st ? r.st.r5y : null) },
+    { n: '年化波动率', w: 11, pct: true, get: (r) => (r.st ? r.st.vol : null) },
+    { n: '最大回撤（1 年）', w: 13, pct: true, get: (r) => (r.st ? r.st.mdd : null) },
+    { n: '52 周最高', w: 11, num: true, get: (r) => (r.st ? r.st.hi : null) },
+    { n: '52 周最低', w: 11, num: true, get: (r) => (r.st ? r.st.lo : null) },
+    { n: '数据起点', w: 12, get: (r) => (r.st ? r.st.first : '') },
+    { n: '数据点数', w: 10, num: true, get: (r) => (r.st ? r.st.points : null) },
+    { n: '编制说明', w: 60, get: (r) => (window.idxMetaOf && (window.idxMetaOf(r.key) || {}).desc) || '' },
+  ];
 
   /* 2026-11-19（用户建议）：记住上次的基金/字段/口径/区间，重复导出省一步 */
   const LSKEY = 'mpf-ec-v1';
@@ -73,6 +105,24 @@
 
   /* common.js 用顶层 let 声明 DATA —— 它不会挂到 window 上，必须按全局词法绑定读取 */
   const DS = () => (typeof DATA !== 'undefined' && DATA ? DATA : {});
+  /* 是否处于「其他市场指数」模式 */
+  const isIdx = () => ST.trustee.has(IDXK);
+  let IDXC = null;          /* /api/indices 缓存 */
+  function idxRows() {
+    const items = (IDXC && IDXC.items) || {};
+    const ORDER = ['HSI', 'HSCEI', 'HSTECH', 'SPX', 'NDX', 'DJIA', 'N225', 'CSI300', 'SSE', 'SZSE',
+      'CHINEXT', 'CSI500', 'SSE50', 'STAR50', 'MPFAVG', 'MPF_STOCK', 'MPF_MIX', 'MPF_BOND', 'MPF_MONEY', 'MPF_GUAR'];
+    const rank = (k) => { const i = ORDER.indexOf(k); return i < 0 ? 99 : i; };
+    return Object.keys(items).map((k) => {
+      const it = items[k];
+      return { key: k, it: it, st: window.idxStatsOf ? window.idxStatsOf(it) : null };
+    }).sort((a, b) => rank(a.key) - rank(b.key) || (a.it.name || '').localeCompare(b.it.name || '', 'zh-Hans-CN'));
+  }
+  function ensureIdx() {
+    if (IDXC) return Promise.resolve(IDXC);
+    if (!window.loadIndices) return Promise.resolve(null);
+    return window.loadIndices().then((j) => { IDXC = j; return j; });
+  }
   const rowsAll = () => ((DS().funds) || []).slice();
   const catOf = (x) => ((window.splitFundType ? (window.splitFundType(x) || {}).cat : '') || x.type || '').trim();
   const nameOf = (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund || ''));
@@ -84,6 +134,7 @@
 
   /* ---------- 筛选 ---------- */
   function filtered() {
+    if (isIdx()) return [];
     const kw = ST.kw.trim().toLowerCase();
     const latest = latestNav();
     return rowsAll().filter((x) => {
@@ -127,7 +178,7 @@
     if (MS_T) return;
     MS_T = window.MPFMulti('#ecMSTrustee', {
       allLabel: TT('全部受托人'),
-      onChange: (arr) => { ST.trustee = new Set(arr); rebuildLinked('trustee'); persist(); },
+      onChange: (arr) => { ST.trustee = new Set(arr); rebuildLinked('trustee'); renderTree(); renderList(); persist(); },
     });
     MS_C = window.MPFMulti('#ecMSCat', {
       allLabel: TT('全部种类'),
@@ -169,7 +220,10 @@
   function renderMS() {
     ensureMS();
     const tr = msValues('trustee');
-    MS_T.setOptions(tr.map((o) => ({ v: o.v, label: o.label, n: o.n })));
+    /* 2026-11-22（用户要求）：最底部追加「其他市场指数」 */
+    const opts = tr.map((o) => ({ v: o.v, label: o.label, n: o.n }));
+    opts.push({ v: IDXK, label: TT('其他市场指数'), n: (IDXC && Object.keys(IDXC.items || {}).length) || 20, idx: true });
+    MS_T.setOptions(opts);
     MS_T.setAllLabel(TT('全部受托人'));
     MS_T.setSelected(Array.from(ST.trustee), true);
     rebuildLinked('trustee');
@@ -179,6 +233,34 @@
   function renderList() {
     const box = $('#ecList');
     if (!box) return;
+    /* 指数没有「种类/计划/最新净值日」这些基金维度，隐藏避免误操作 */
+    [['#ecMSCat', 1], ['#ecMSScheme', 1], ['.ec-only-foot', 2]].forEach((pair) => {
+      const el = pair[1] === 1 ? document.querySelector(pair[0]) : document.querySelector(pair[0]);
+      if (el) el.style.display = isIdx() ? 'none' : '';
+    });
+    if (isIdx()) {
+      /* 基金 ↔ 指数 切换时清掉对方的选择，避免「选了 0 只基金却按指数导出」 */
+      if (Array.from(ST.sel).some((id) => String(id).indexOf('IDX:') !== 0)) ST.sel.clear();
+      if (!ST.idxFields.size) IDX_FIELDS.forEach((f, i) => ST.idxFields.add(i));
+      if (!Array.from(ST.sel).some((id) => String(id).indexOf('IDX:') === 0)) {
+        idxRows().forEach((r) => ST.sel.add('IDX:' + r.key));
+      }
+      const rows = idxRows();
+      const kw = ST.kw.trim().toLowerCase();
+      const pick = kw ? rows.filter((r) => ((r.it.name || '') + ' ' + r.key + ' ' + ((window.idxMetaOf && (window.idxMetaOf(r.key) || {}).cat) || '')).toLowerCase().indexOf(kw) >= 0) : rows;
+      box.innerHTML = pick.map((r) => {
+        const id = 'IDX:' + r.key;
+        const on = ST.sel.has(id);
+        return '<label class="ec-row' + (on ? ' on' : '') + '">' +
+          '<input type="checkbox" data-id="' + esc(id) + '"' + (on ? ' checked' : '') + '>' +
+          '<span class="ec-nm">' + esc(r.it.name || r.key) + (r.it.code ? ' <i>' + esc(r.it.code) + '</i>' : '') + '</span>' +
+          '<span class="ec-mt"> · ' + esc(r.st ? r.st.asOf : (r.it.asOf || '—')) + '</span>' +
+          '</label>';
+      }).join('') || '<div class="ec-empty">' + esc(TT('没有符合条件的指数')) + '</div>';
+      paintCounts(pick.length);
+      return;
+    }
+    if (Array.from(ST.sel).some((id) => String(id).indexOf('IDX:') === 0)) ST.sel.clear();
     const list = filtered();
     const latest = latestNav();
     box.innerHTML = list.map((x) => {
@@ -194,32 +276,51 @@
   }
 
   function paintCounts(n) {
-    const total = rowsAll().length;
+    const total = isIdx() ? idxRows().length : rowsAll().length;
     const sel = ST.sel.size;
     /* 2026-11-20（用户要求）：已选 = 本站（字段 + 附加工作表）+ 积金局，分别显示 */
-    const localN = ST.fields.size + ST.extra.size;
-    const fcnt = ST.fields.size;
+    const localN = isIdx() ? ST.idxFields.size : (ST.fields.size + ST.extra.size);
+    const fcnt = isIdx() ? ST.idxFields.size : ST.fields.size;
     const sc = $('#ecSelCount');
     if (sc) sc.textContent = TQ('已选 {n} / {t}', { n: sel, t: total });
     const fc = $('#ecFieldCount');
     if (fc) fc.textContent = TQ('已选 {n} 项', { n: localN });
     const est = $('#ecEst');
     if (est) {
-      const sheets = 2 + ST.extra.size;
-      est.textContent = TQ('预计输出：{s} 个工作表 · {r} 行 × {c} 列', { s: sheets, r: sel + 2, c: fcnt });
+      const sheets = isIdx() ? 2 : (2 + ST.extra.size);
+      est.textContent = isIdx()
+        ? TQ('预计输出：{s} 个工作表 · {r} 行 × {c} 列', { s: sheets, r: sel + 1, c: fcnt })
+        : TQ('预计输出：{s} 个工作表 · {r} 行 × {c} 列', { s: sheets, r: sel + 2, c: fcnt });
     }
     const go = $('#ecGo');
-    if (go) go.disabled = ST.busy || !sel || !ST.fields.size;
+    if (go) go.disabled = ST.busy || !sel || (isIdx() ? !ST.idxFields.size : !ST.fields.size);
   }
 
   /* 2026-11-21（用户要求）：只保留本站最新数据一种口径，组与集合固定 */
-  function curGroups() { return GROUPS; }
-  function curFieldSet() { return ST.fields; }
+  function curGroups() { return isIdx() ? IDX_GROUPS : GROUPS; }
+  function curFieldSet() { return isIdx() ? ST.idxFields : ST.fields; }
 
   /* 2026-11-19（用户反馈）：字段树改为双列排布，右栏不再留大片空白 */
   function renderTree() {
     const box = $('#ecTree');
     if (!box) return;
+    if (isIdx()) {
+      /* 指数口径：字段固定（指数没有单位类别/受托人/费用等基金字段） */
+      const SET = ST.idxFields;
+      box.innerHTML = IDX_GROUPS.map((g) => {
+        const on = g.idx.filter((i) => SET.has(i)).length;
+        const cells = g.idx.map((i) => '<label class="ec-f" title="' + esc(IDX_FIELDS[i].n) + '">' +
+          '<input type="checkbox" data-i="' + i + '"' + (SET.has(i) ? ' checked' : '') + '>' +
+          '<span>' + esc(TT(IDX_FIELDS[i].n)) + '</span></label>').join('');
+        return '<div class="ec-g ec-card">' +
+          '<label class="ec-g-h"><input type="checkbox" data-g="' + g.k + '"' + (on === g.idx.length ? ' checked' : '') + '>' +
+          '<b>' + esc(TT(g.n)) + '</b><span>' + on + '/' + g.idx.length + '</span></label>' +
+          '<div class="ec-g-b">' + cells + '</div></div>';
+      }).join('') +
+        '<div class="ec-g ec-card"><div class="ec-g-h"><b>' + esc(TT('说明')) + '</b><span></span></div>' +
+        '<div class="ec-g-b"><div class="ec-idxtip">' + esc(TT('指数数据与走势图同源（东方财富日线 + 本站自算 MPF 指数），每晚随数据更新重算；区间回报为价格涨幅，不含分红。')) + '</div></div></div>';
+      return;
+    }
     const schema = window.mpfExportSchema ? window.mpfExportSchema() : null;
     if (!schema) { box.innerHTML = '<div class="ec-empty">' + esc(TT('导出组件未加载，请刷新页面')) + '</div>'; return; }
     const COLS = schema.COLS;
@@ -343,6 +444,7 @@
       ST.fields = new Set();
       for (let i = 0; i < cols; i++) ST.fields.add(i);   /* 默认全选 = 与旧导出一致 */
     }
+    ensureIdx().then(() => { if (ST.open) { renderMS(); renderList(); } }).catch(() => {});
     renderMS(); renderTree(); renderList(); paintNavOnly();
     $('#ecModal').classList.add('show');
   }
@@ -471,7 +573,74 @@
     });
   }
 
+  /* 2026-11-22（用户要求）：指数导出 —— 一张表，字段随勾选变化 */
+  async function exportIdx() {
+    if (ST.busy) return;
+    if (!ST.sel.size) { mpfToast(TT('请至少选择一个指数')); return; }
+    if (!ST.idxFields.size) { mpfToast(TT('请至少选择一个字段')); return; }
+    if (!window.MPFXLSX) { mpfToast(TT('导出组件未加载，请刷新页面')); return; }
+    const go = $('#ecGo'), est = $('#ecEst');
+    ST.busy = true; if (go) go.disabled = true;
+    try {
+      await ensureIdx();
+      const rows = idxRows().filter((r) => ST.sel.has('IDX:' + r.key));
+      const picked = Array.from(ST.idxFields).sort((a, b) => a - b);
+      const head = picked.map((i) => ({ v: TT(IDX_FIELDS[i].n), s: 2 }));
+      const body = rows.map((r) => ({
+        cells: picked.map((i) => {
+          const f = IDX_FIELDS[i], v = f.get(r);
+          if (f.pct) return (v == null || !isFinite(v)) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e6, s: 5 };
+          if (f.num) return (v == null || !isFinite(v)) ? { v: '', s: 4 } : { v: Math.round(v * 1e4) / 1e4, s: 7 };
+          return { v: v == null ? '' : String(v), s: 4 };
+        }),
+      }));
+      const idxLatest = rows.reduce((m, r) => (r.st && r.st.asOf > m ? r.st.asOf : m), '');
+      const lastCol = colLetter(picked.length);
+      const sheet = {
+        name: TT('指数数据'),
+        rows: [{ h: 32, cells: [{ v: TT('市场指数数据') + ' · ' + TQ('截至 {d}', { d: idxLatest || '—' }), s: 1 }] },
+          { h: 34, cells: head }].concat(body),
+        merges: ['A1:' + lastCol + '1'],
+        cols: picked.map((i) => [IDX_FIELDS[i].w]),
+        freeze: { x: 0, y: 2, top: 'A3' },
+        autoFilter: 'A2:' + lastCol + (body.length + 2),
+      };
+      const sheets = [sheet];
+      if (window.buildCoverSheet) {
+        sheets.unshift(window.buildCoverSheet({
+          page: TT('数据导出'),
+          title: TT('数据说明'),
+          meta: [
+            [TT('数据口径'), TT('市场指数（与走势图同源）')],
+            [TT('数据截至'), idxLatest || '—'],
+            [TT('导出时间'), new Date().toLocaleString('zh-CN', { hour12: false })],
+            [TT('导出范围'), TQ('{n} 个指数', { n: rows.length })],
+          ],
+          notes: [
+            TT('指数日线来自东方财富；自算 MPF 指数为本站按成分基金官方净值等权链式累计（基期 = 1000，不含费用），非官方指数。'),
+            TT('区间回报为价格涨幅，不含分红与费用；年化波动率按近一年日收益率年化，最大回撤取近一年峰值到谷底的最大跌幅。'),
+            TT('空白单元格＝该指数无此项数据（例如自算指数没有官方代码），本站不推测。'),
+          ],
+          columns: picked.map((i) => [TT(IDX_FIELDS[i].n), '']),
+        }));
+      }
+      if (est) est.textContent = TT('正在打包 xlsx…');
+      const blob = window.MPFXLSX.build({ sheets: sheets });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'MPF市场指数_' + (idxLatest || '') + '.xlsx';
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+      mpfToast(TQ('已导出 {n} 个指数、{c} 个字段', { n: rows.length, c: picked.length }));
+      close();
+    } catch (e) {
+      console.error('[export-center:idx]', e);
+      mpfToast(TT('导出失败，请稍后重试'));
+    } finally { ST.busy = false; if (go) go.disabled = false; paintCounts(); }
+  }
+
   async function exportNow() {
+    if (isIdx()) return exportIdx();
     if (ST.busy) return;
     if (!ST.sel.size) { mpfToast(TT('请至少选择一只基金')); return; }
     /* 2026-11-20（用户要求）：两组字段各自独立——本站默认全选，积金局默认不选。

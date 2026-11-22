@@ -164,7 +164,24 @@
       '</div></div>';
   }
 
+  /* 供「数据导出中心」复用：指数清单与现算指标 */
+  window.idxMetaOf = function (k) { return META[k] || null; };
+  window.idxStatsOf = function (it) { return stats(it); };
+  window.loadIndices = load;
+
   window.openIndexDetail = function (key) {
+    var d0 = document.querySelector('#anDetail');
+    if (!d0) return;
+    /* 先出骨架：本地/线上都秒回，用户不会以为没反应 */
+    if (!CACHE) {
+      d0.innerHTML = '<div class="an-dwrap"><button type="button" class="an-back" onclick="window.idxBack()">' +
+        (window.TT ? TT('← 返回对比') : '← 返回对比') + '</button>' +
+        '<div class="fd"><div class="fd-title">' + key + '</div>' +
+        '<div class="fd-empty">' + (window.TT ? TT('正在读取指数数据…') : '正在读取指数数据…') + '</div></div></div>';
+      d0.hidden = false;
+      var c0 = document.querySelector('#anCompare'); if (c0) c0.hidden = true;
+      document.body.classList.add('an-detail');
+    }
     load().then(function (j) {
       var it = (j.items || {})[key];
       if (!it) return;
@@ -215,6 +232,9 @@
       if (!open) close();
     }
   });
+
+  /* 空闲时预取指数数据：用户点名称时基本已在内存里 */
+  setTimeout(function () { load(); }, 2500);
 
   /* 直接带 ?idx=HSI 打开（分享链接） */
   document.addEventListener('DOMContentLoaded', function () {

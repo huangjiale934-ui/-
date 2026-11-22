@@ -1319,3 +1319,7 @@
 
 /* 2026-11-22（用户要求）：持仓 / 分布标题行的「发行人未发布」徽标，紧跟标题文字 */
 .sect-title .fd-late.sect-late { margin-left: 8px; vertical-align: 1px; font-weight: 400; }
+
+/* 2026-11-22：指数名称可点（打开指数详情），给出手型光标与虚线下划线提示 */
+.tr-tbl .nm[data-openidx] { cursor: pointer; }
+.tr-tbl .nm[data-openidx]:hover { text-decoration: underline dotted; text-underline-offset: 3px; }
