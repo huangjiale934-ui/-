@@ -1354,7 +1354,8 @@
   '每日': 'Daily',
   '{n} 条 · 季更': '{n} funds · quarterly',
   '点位': 'Index level',
-  '以上是指数与已选基金': 'Above: indices and selected funds',
+  '以上是指数': 'Above: indices',
+'以上是指数与已选基金': 'Above: indices and selected funds',
   '近 40 日': 'Last 40 days',
   '供款（定投）计算器': 'Contribution (regular investment) calculator',
   /* ===== 2026-11-04（第三十六轮）：口径说明 / 积金局月报 / 导出文案 ===== */

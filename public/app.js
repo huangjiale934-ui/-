@@ -184,11 +184,11 @@
         fundMeta: meta,
         onSelChange: function () {
           if (DBSYNC) return;
-          /* 从图里增减基金 → 反向同步表格勾选（保持两处一致） */
+          /* 从图里增减基金 → 反向写回 CMPX，再由 __applyCmp 统一刷新两处表格与分析页 */
           const ids = (DBTREND.getItems() || []).filter((x) => x.type === 'fund').map((x) => x.id);
           CMPX.save(ids);
-          renderCmpBar();
-          render();
+          if (window.__applyCmp) window.__applyCmp();
+          else { renderCmpBar(); render(); }
         },
       });
     } else if (DBTREND.setItems) {
@@ -204,6 +204,13 @@
     DBSYNC = true;
     try { DBTREND.setItems(dbTrendItems()); } finally { DBSYNC = false; }
   }
+  /* 2026-11-22（用户要求：对比只保留一套状态）：
+     CMPX 变成唯一数据源，任何一处改动（表格勾选 / 图例增删 / 底部清空）
+     都调用 window.__applyCmp() → 这里统一刷新「上方走势图 + 置顶表格」。 */
+  window.__dbApplyCmp = function () {
+    try { syncDbTrend(); } catch (e) {}
+    try { render(); } catch (e) {}
+  };
 
   function init() {
     mountHeader('db');
@@ -875,12 +882,11 @@
         $$('#fundTable [data-c="' + d.k + '"]').forEach((n) => n.classList.add('dim-hl'));
       });
     }
-    // 表格内勾选 → 加入/移出对比（与排名页共用 CMPX；页底对比栏随之出现）
+    // 表格内勾选 → 加入/移出对比（CMPX 单源；统一刷新走势图、置顶行、对比栏与分析页）
     $$('#tbody input[data-cmp]').forEach((c) => c.addEventListener('change', () => {
       if (c.checked) { if (!CMPX.add(c.dataset.cmp)) c.checked = false; } else CMPX.remove(c.dataset.cmp);
-      renderCmpBar();
-      syncDbTrend();   /* 2026-11-02：勾选即叠加到上方走势图 */
-      render();        /* 2026-11-02（第二十五轮）：勾选后立即把这个基金置顶到表格最前面 */
+      if (window.__applyCmp) window.__applyCmp();
+      else { renderCmpBar(); syncDbTrend(); render(); }
     }));
 
     /* 2026-10-23（核验报告）：筛选后明确写「已筛选」，避免把「全市场 451」误读成计数没刷新 */

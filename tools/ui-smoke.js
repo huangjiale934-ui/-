@@ -75,18 +75,27 @@ async function getWs() {
   const results = [];
   const check = (name, pass, detail) => { results.push({ name, pass, detail }); };
 
-  /* ① 清空 → hover 不应弹提示 */
+  /* ① 清空对比：CMPX / 表格勾选 / 图例 必须同时归零（单源），空图时不得残留悬浮 */
   const r1 = await ev(`(async()=>{
+    const cbs=[...document.querySelectorAll('#tbody input[data-cmp]')].slice(0,2);
+    cbs.forEach(c=>{ if(!c.checked) c.click(); });
+    await new Promise(r=>setTimeout(r,900));
+    const before={cmp:(window.CMPX?window.CMPX.ids().length:-1), checked:document.querySelectorAll('#tbody input[data-cmp]:checked').length};
+    if(window.clearCmp) window.clearCmp();
+    await new Promise(r=>setTimeout(r,1100));
     const box=document.querySelector('#dbTrendBox'); const svg=box.querySelector('.tr-svg');
-    const clr=box.querySelector('.tr-clear'); if(clr) clr.click();
-    await new Promise(r=>setTimeout(r,700));
     const b=svg.getBoundingClientRect();
     svg.dispatchEvent(new PointerEvent('pointermove',{clientX:b.left+b.width*0.5,clientY:b.top+b.height*0.5,bubbles:true}));
     await new Promise(r=>setTimeout(r,300));
     const t=box.querySelector('.tr-tip');
-    return {tip: t? (t.hidden?'hidden':'shown') : 'na', empty: !!box.querySelector('.tr-emptycard:not([hidden])')};
+    const empty=!!box.querySelector('.tr-emptycard:not([hidden])');
+    return {before:before, cmp:(window.CMPX?window.CMPX.ids().length:-1),
+      checked:document.querySelectorAll('#tbody input[data-cmp]:checked').length,
+      pinned:document.querySelectorAll('#tbody tr.qf-divider').length,
+      tip: t? (t.hidden?'hidden':'shown') : 'na', empty: empty};
   })()`);
-  check('① 清空后悬浮不残留', r1 && r1.tip === 'hidden', JSON.stringify(r1));
+  check('① 清空对比后两处状态同步', r1 && r1.cmp === 0 && r1.checked === 0 && r1.pinned === 0 &&
+    (r1.empty ? r1.tip === 'hidden' : true), JSON.stringify(r1));
 
   /* ② 开关详情弹窗后 hover 仍有效（重新加载，确保图上有线） */
   await send('Page.navigate', { url: URL0 });

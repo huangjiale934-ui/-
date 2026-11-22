@@ -831,7 +831,8 @@ chk('第四板块·页头不再单列「MPF基金可视化对比」（2026-11-01
 chk('第四页·侧栏 + 基金列表联动（已选置顶+分隔线+其余，2026-10-17 v2）', /id="anProv"/.test(an) && /id="anTbody2"/.test(an) && (function () {
   try {
     const j = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
-    return j.indexOf('selRows = (DATA.funds || []).filter') >= 0 && j.indexOf('以上是已选基金') >= 0 && j.indexOf('onSelChange: function () { renderFundList(); }') >= 0;
+    return j.indexOf('selRows = (DATA.funds || []).filter') >= 0 && j.indexOf('以上是已选基金') >= 0 &&
+      j.indexOf('onSelChange: function () {') >= 0 && j.indexOf('CMPX.save(ids)') >= 0 && j.indexOf('renderFundList()') >= 0;
   } catch (e) { return false; }
 })());
 chk('第四页·左侧发行人栏 12 项（2026-11-02：data-t 保留原文，修「银联信托 0 条」）', (an.match(/class="an-pitem/g) || []).length === 12 && /data-t="銀聯信託"><span>银联信托<\/span><b>\d+<\/b>/.test(an));
@@ -1140,7 +1141,9 @@ chk('深夜批·④基金列表跟随走势勾选（onSelChange + 已选过滤�
   try {
     const t = fs.readFileSync(path.join(__dirname, '..', 'public', 'trend.js'), 'utf8');
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8');
-    return t.indexOf('opts.onSelChange') >= 0 && a.indexOf("onSelChange: function () { renderFundList(); }") >= 0 &&
+    /* 2026-11-22：onSelChange 改为「写回 CMPX + 刷另一张图 + renderFundList」单源实现 */
+    return t.indexOf('opts.onSelChange') >= 0 && a.indexOf('onSelChange: function () {') >= 0 &&
+      a.indexOf('CMPX.save(ids)') >= 0 && a.indexOf('renderFundList()') >= 0 &&
       a.indexOf('selRows = (DATA.funds || []).filter') >= 0 && a.indexOf('以上是已选基金') >= 0 &&
       a.indexOf('o.onSelChange') < 0;   /* 曾误写 o（opts 之误）致 ReferenceError */
   } catch (e) { return false; }

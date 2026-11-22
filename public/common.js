@@ -2940,14 +2940,21 @@ function renderCmpBar() {
 }
 window.renderCmpBar = renderCmpBar;
 
+/* 2026-11-22（用户要求：对比只保留一套状态）：
+   CMPX 是唯一数据源。任何入口（资料库表格勾选 / 分析页勾选 / 图例增删 / 底部清空）
+   改完 CMPX 都只调用这一个函数，由它把「资料库上方走势图 + 置顶表格 + 分析页走势图 +
+   分析页表格 + 底部对比栏」一次性刷到同一状态，避免各处各刷一半。 */
+window.__applyCmp = function () {
+  if (typeof window.__dbApplyCmp === 'function') window.__dbApplyCmp();
+  if (typeof window.__anSetCmpFunds === 'function') window.__anSetCmpFunds(CMPX.ids());
+  renderCmpBar();
+};
+
 window.clearCmp = function () {
   CMPX.clear();
-  /* 2026-11-22（用户第 N 次反馈）：底部「清空」后，表格里的勾选也必须消失。
-     分析页的勾选态来自走势图的基金列表（不是 CMPX），所以两边都要清。 */
-  if (typeof window.__anClearChartFunds === 'function') window.__anClearChartFunds();
   document.querySelectorAll('input[data-cmp]').forEach(function (c) { c.checked = false; });
-  document.querySelectorAll('.fsel.on').forEach(function (b) { b.classList.remove('on'); b.textContent = ''; });
-  renderCmpBar();
+  if (window.__applyCmp) window.__applyCmp();
+  else renderCmpBar();
 };
 window.closeCmp = function () { const m = document.getElementById('cmpModal'); if (m) m.classList.remove('show'); };
 window.openCmp = function () {

@@ -111,7 +111,23 @@
       if (sp) { const arr = itemsFromSet(sp); if (arr.length) items0 = arr; }
     } catch (e) {}
     /* 2026-10-21：对比视图不再显示「查看具体基金分析」按钮（用户要求直接删掉） */
-    TREND_MAIN = TREND.mount(box, items0, { filter: filterOf(), fundMeta: fundMetaMap(), trusteeOrder: PROV_ORDER || undefined, hideGoto: true, onSelChange: function () { renderFundList(); } });
+    TREND_MAIN = TREND.mount(box, items0, { filter: filterOf(), fundMeta: fundMetaMap(), trusteeOrder: PROV_ORDER || undefined, hideGoto: true,
+      /* 2026-11-22（用户要求：单源）：在图里增减/清空基金 → 写回 CMPX，并刷新资料库那张图与表格 */
+      onSelChange: function () {
+        if (!AN_SYNCING) {
+          const its = TREND_MAIN.getItems() || [];
+          const ids = its.filter((x) => x.type === 'fund').map((x) => String(x.id));
+          CMPX.save(ids);
+          /* 图被清空后回到默认（只留恒生指数），与资料库那张图保持一致，不留空白卡片 */
+          if (!its.length) {
+            AN_SYNCING = true;
+            try { TREND_MAIN.setItems(baseChartItems()); } finally { AN_SYNCING = false; }
+          }
+          if (window.__dbApplyCmp) window.__dbApplyCmp();
+          renderCmpBar();
+        }
+        renderFundList();
+      } });
     /* 2026-10-21：工具栏加「详细对比」——用同一套渲染打开对比弹窗（走势图 + 对比表） */
     (function addCmpBtn() {
       const t2 = box.querySelector('.tr-tools2');
@@ -513,13 +529,18 @@
     document.querySelectorAll('.ndk').forEach((x) => x.classList.remove('on'));
     renderFundList();
   };
-  /* 2026-11-22（用户要求）：底部对比栏「清空」时，把走势图里的基金一并移出，
-     表格的勾选态随之取消（勾选态 = 该基金是否在图上）。 */
-  window.__anClearChartFunds = function () {
-    if (!TREND_MAIN || !TREND_MAIN.getItems || !TREND_MAIN.setItems) return;
+  /* 2026-11-22（用户要求：对比只保留一套状态）：
+     CMPX 是唯一数据源；分析页的走势图由图例反推 → 这里按 CMPX 重建设置。 */
+  let AN_SYNCING = false;
+  window.__anSetCmpFunds = function (ids) {
+    if (!TREND_MAIN || !TREND_MAIN.setItems) return;
     const keep = TREND_MAIN.getItems().filter((it) => it.type !== 'fund');
-    TREND_MAIN.setItems(keep);
+    const add = (ids || []).map((id) => ({ type: 'fund', id: String(id) }));
+    AN_SYNCING = true;
+    try { TREND_MAIN.setItems(keep.concat(add).slice(0, 8)); } finally { AN_SYNCING = false; }
   };
+  /* 兼容旧调用 */
+  window.__anClearChartFunds = function () { window.__anSetCmpFunds([]); };
 
   function IN_CHART(id) {
     /* 勾选状态 = 该基金是否在走势图中 */
@@ -529,12 +550,11 @@
     const b = e.target && e.target.closest ? e.target.closest('[data-qf]') : null;
     if (!b || !TREND_MAIN || !TREND_MAIN.setItems) return;
     const id = String(b.getAttribute('data-qf'));
-    const cur = TREND_MAIN.getItems();
-    const has = cur.some((x) => x.type === 'fund' && String(x.id) === id);
-    let next;
-    if (has) next = cur.filter((x) => !(x.type === 'fund' && String(x.id) === id));
-    else next = cur.concat([{ type: 'fund', id: id }]).slice(0, 8);
-    TREND_MAIN.setItems(next);   /* onSelChange → renderFundList（列表只显示已选，图表同步） */
+    /* 2026-11-22（用户要求）：勾选 = 加入对比（CMPX），再由 __applyCmp 统一刷新
+       两张走势图、两张表格与对比栏 —— 不再各自维护一份 items。 */
+    CMPX.toggle(id);
+    if (window.__applyCmp) window.__applyCmp();
+    else window.__anSetCmpFunds(CMPX.ids());
   });
 
   function renderFundList() {
@@ -608,7 +628,10 @@
     const span = cols.length;
     if (IDXROWS) rowsHtml.push(IDXROWS);   /* 勾选的指数也显示（2026-10-17） */
     if (selRows.length) rowsHtml.push(selRows.map(rowHtml2).join(''));
-    if ((selRows.length || IDXROWS) && restRows.length) rowsHtml.push('<tr class="qf-divider"><td colspan="' + span + '">' + (IDXROWS ? TT('以上是指数与已选基金') : TT('以上是已选基金')) + '</td></tr>');
+    if ((selRows.length || IDXROWS) && restRows.length) rowsHtml.push('<tr class="qf-divider"><td colspan="' + span + '">' +
+      (selRows.length
+        ? (IDXROWS ? TT('以上是指数与已选基金') : TT('以上是已选基金'))
+        : TT('以上是指数')) + '</td></tr>');
     if (restRows.length) rowsHtml.push(restRows.map(rowHtml2).join(''));
     tb.innerHTML = rowsHtml.length
       ? rowsHtml.join('')
