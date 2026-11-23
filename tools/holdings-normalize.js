@@ -43,7 +43,11 @@ Object.values(j.funds).forEach((x) => {
     const me = MONTH_END(x.asOf.slice(0, 7));
     if (x.asOf !== me) {
       const diff = Math.abs(new Date(x.asOf) - new Date(me)) / 864e5;
-      if (diff <= 1) { x.asOf = me; d++; }
+      /* 2026-11-23（核验发现）：月末落在周末时不得前移。
+         海通 2026-10 便覽原文「截至30/10/2026」（周五），月末 10-31 是周六、
+         当天没有净值 —— 原来会归一成 10-31，等于给持仓挂了一个不存在的估值日。 */
+      const wd = new Date(me + 'T00:00:00Z').getUTCDay();
+      if (diff <= 1 && wd !== 0 && wd !== 6) { x.asOf = me; d++; }
     }
   }
   /* 2026-11-05（第四十轮）：BCT 便览解析只写 allocLabel + alloc，没有 allocSum，

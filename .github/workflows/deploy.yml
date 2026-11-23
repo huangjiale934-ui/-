@@ -278,6 +278,9 @@ jobs:
           # 上面 205 行的 nav-round4 已过期；构建前再归一一次，避免 funds/hist 精度不一致。
           node tools/nav-round4.js
           node tools/health-check.js --local || echo "!! health-check 有告警（不影响发布）"
+          # 2026-11-23（用户要求：解决不了的必须告诉我）：把本班没自动解决的事汇总，
+          # critical 进下面的告警邮件，warn 随邮件附上；同时写 Actions 的 Step Summary。
+          node tools/run-issues.js --print || true
 
       # 2026-11-18（用户要求）：跑完立刻自检新鲜度，落后就发邮件（仅定时/手动数据班次）
       - name: 新鮮度自檢（落後發郵件）

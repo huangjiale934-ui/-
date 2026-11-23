@@ -60,7 +60,12 @@ async function getJson(url, tries = 2) {
     ]);
     const pack = (s, f) => ({
       count: s.count, navLatest: s.navLatest || '', dataAsOf: s.dataAsOf || '', updatedAt: s.updatedAt || 0,
-      funds: (f.funds || []).map((x) => ({ id: String(x.id), name: x.fund || x.name || '', nav: x.nav, asOf: x.navAsOf || '' })),
+      funds: (f.funds || []).map((x) => ({
+        id: String(x.id), name: x.fund || x.name || '', nav: x.nav, asOf: x.navAsOf || '',
+        /* 2026-11-23（核验 D-04）：原口径只比 nav/navAsOf，worstYear 与 cal 的差异永远看不见 */
+        wy: x.worstYear == null ? null : Number(x.worstYear),
+        cal: x.cal || null,
+      })),
     });
     const pa = pack(sa, fa), pb = pack(sb, fb);
     out.a = { count: pa.count, navLatest: pa.navLatest, dataAsOf: pa.dataAsOf, updatedAt: pa.updatedAt };
@@ -68,11 +73,20 @@ async function getJson(url, tries = 2) {
 
     const mb = new Map(pb.funds.map((x) => [x.id, x]));
     const ma = new Map(pa.funds.map((x) => [x.id, x]));
-    let lagB = 0, aheadB = 0, valueDiff = 0, onlyA = 0, onlyB = 0;
+    let lagB = 0, aheadB = 0, valueDiff = 0, onlyA = 0, onlyB = 0, calDiff = 0, wyDiff = 0;
     const days = (x, y) => Math.round((new Date(y) - new Date(x)) / 864e5);
     pa.funds.forEach((x) => {
       const y = mb.get(x.id);
       if (!y) { onlyA++; out.diffs.push({ id: x.id, name: x.name, kind: 'onlyA' }); return; }
+      /* 年度回报（积金局口径）：与净值日期无关，先比，避免被上面的日期分支 return 掉 */
+      if (JSON.stringify(x.cal) !== JSON.stringify(y.cal)) {
+        calDiff++;
+        out.diffs.push({ id: x.id, name: x.name, kind: 'calDiff', a: x.cal, b: y.cal });
+      }
+      if (x.wy != null && y.wy != null && Math.abs(x.wy - y.wy) > 0.005) {
+        wyDiff++;
+        out.diffs.push({ id: x.id, name: x.name, kind: 'worstYearDiff', a: x.wy, b: y.wy });
+      }
       if (x.asOf && y.asOf && x.asOf !== y.asOf) {
         if (y.asOf > x.asOf) { aheadB++; out.diffs.push({ id: x.id, name: x.name, kind: 'aheadB', a: x.asOf, b: y.asOf }); }
         else if (days(y.asOf, x.asOf) <= 3) lagB++;
@@ -86,12 +100,12 @@ async function getJson(url, tries = 2) {
     });
     pb.funds.forEach((y) => { if (!ma.get(y.id)) { onlyB++; out.diffs.push({ id: y.id, name: y.name, kind: 'onlyB' }); } });
 
-    out.summary = { fundsA: pa.funds.length, fundsB: pb.funds.length, lagB, aheadB, valueDiff, onlyA, onlyB,
+    out.summary = { fundsA: pa.funds.length, fundsB: pb.funds.length, lagB, aheadB, valueDiff, onlyA, onlyB, calDiff, wyDiff,
       same: Math.min(pa.funds.length, pb.funds.length) - lagB - aheadB - valueDiff };
-    const hard = valueDiff + onlyA + onlyB;
+    const hard = valueDiff + onlyA + onlyB + calDiff + wyDiff;
     out.verdict = hard ? 'attention' : (aheadB ? 'aheadB' : 'ok');
     out.note = hard
-      ? '存在同日不同值/结构性差异，需人工复核（不自动互相覆盖）'
+      ? '存在同日不同值／年度回报差异／结构性差异，需人工复核（不自动互相覆盖）'
       : (aheadB ? 'B 站有 ' + aheadB + ' 只比 A 站新，A 站下一班重抓即可' : '两站一致（允许 ≤3 日时点差）');
   } catch (e) {
     out.verdict = 'error';

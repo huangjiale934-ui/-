@@ -2573,35 +2573,9 @@ function mountFD(x, alive) {
       const meta = {};
       (DATA.funds || []).forEach((f) => { meta[String(f.id)] = { trustee: f.trustee || '其他', type: f.type || '' }; });
       TREND.mount(box, [{ type: 'fund', id: x.id }], { hideGoto: true, fundMeta: meta, title: TT('基金走势对比图') });
-      /* 2026-10-21：历史有缺口的基金（早期源站只有月度价）→ 图例旁加一个悬浮提示 */
-      (function () {
-        if (!window.__gapsP) window.__gapsP = fetch('/api/hist-gaps').then((r) => r.json()).catch(() => null);
-        window.__gapsP.then((g) => {
-          const info = g && g.funds && g.funds[String(x.id)];
-          if (!info || !document.body.contains(box)) return;
-          const old = box.querySelector('.gap-flag');
-          if (old) old.remove();
-          const el = document.createElement('span');
-          el.className = 'gap-flag';
-          /* 2026-11-13（第三方核验 P1-1）：断档原因要分清——早年月频 vs 源侧近期断档（如新地 10 月） */
-          /* 2026-11-16（用户反馈：工具栏本来就很挤，角标被压成「ⓘ 有区 / 间缺 / 日」三行）：
-             图内只留一个 ⓘ 图标（保留黄底），完整说明放 data-tip 与 aria-label。
-             详情见悬浮提示，视觉上不再占宽度。 */
-          let tip = (info.reason === 'monthly-early')
-            ? TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站当时只公布月度价格，非本站漏抓）', { a: info.first, b: info.last, n: info.n })
-            : TQ('该基金在 {a} 至 {b} 之间有 {n} 处缺日（源站未提供该段净值，非本站漏抓；走势图此处为断档）', { a: info.first, b: info.last, n: info.n });
-          /* 2026-11-16（用户要求）：若该段含非官方补值，明确标注来源，并说明官方数据恢复后会替换 */
-          if (info.prov && info.prov.count) {
-            tip += ' ' + TQ('其中 {k} 个点为非官方补值（来源：{s}），已标注，官方数据恢复后会自动替换。',
-              { k: info.prov.count, s: info.prov.src });
-          }
-          el.setAttribute('data-tip', tip);
-          el.setAttribute('aria-label', tip);
-          el.textContent = 'ⓘ';
-          const bar = box.querySelector('.tr-adds') || box.querySelector('.tr-tools');
-          if (bar) bar.appendChild(el);
-        });
-      })();
+      /* 2026-11-23（用户要求）：基金详情页的走势图**不再**标缺日角标。
+         像海通只缺 1 天，也挂一个黄底 ⓘ，反而干扰阅读；用户明确「其他地方的可以保留」，
+         所以只去掉详情小窗/放大页这一处，主走势图与资料库的断档提示保持原样。 */
     } else {
       box.innerHTML = '<div class="an-coming"><b>' + TT('净值走势对比（1周–5年）') + '</b>' +
         TQ('历史净值回填中：当前已接入 {n} 只基金，其余受托人陆续接入；本基金数据就绪后走势对比将自动开放。', { n: (p && p.count) || 0 }) + '</div>';

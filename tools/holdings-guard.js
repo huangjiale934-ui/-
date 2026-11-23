@@ -43,4 +43,13 @@ if (topFail.length) {
   console.log('  top10 违规', topFail.length, '只：', topFail.map((b) => b.id + '(' + b.errs + ')').join(' '));
   process.exit(1);
 }
-console.log('top10 校验：全部通过 ✓');
+/* 2026-11-23（核验 D-07）：原来无论条数多少都打印「全部通过」，8 只 top10 不足 10 条被这句话盖住。
+   官方只披露 7–9 条的属于正常，但要显式列出来，不能让人以为都齐了。 */
+const shortIds = Object.entries(j.funds || {})
+  .filter(([, v]) => (v.top10 || []).length > 0 && (v.top10 || []).length < 10)
+  .map(([k, v]) => k + '(' + v.top10.length + ')');
+if (shortIds.length) {
+  console.log('top10 校验：无违规 ✓；其中 ' + shortIds.length + ' 只官方只披露不足 10 条（非抓取缺陷）：' + shortIds.slice(0, 14).join(' '));
+} else {
+  console.log('top10 校验：全部通过 ✓');
+}

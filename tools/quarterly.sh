@@ -156,17 +156,30 @@ fi
 [ -f fetch-manulife-detail.py ] && run "宏利持仓/分布（官方API）"    "$PY" fetch-manulife-detail.py
 [ -f alloc_fill.py ]        && run "通用持仓/分布抓取(alloc_fill)"  "$PY" alloc_fill.py
 [ -f bct_ffs_auto.py ]      && run "BCT 便览自动发现"               "$PY" bct_ffs_auto.py
-[ -f bocpt_holdings.py ]    && run "中銀保誠持仓"                   "$PY" bocpt_holdings.py
+# 2026-11-23（用户要求：不许再拿「缺输入 PDF」当借口）：
+# 中銀保誠「我的強積金」基金便覽 —— 先按季度文件名探测并下载，再解析；下载失败才跳过。
+if "$NODE" tools/fetch-pdf.js --bocpt tmp/bocpt_fs.pdf >> "$LOG" 2>&1; then
+  echo "  ✔ 中銀保誠便覽下載" >> "$LOG"
+  run "中銀保誠持仓" "$PY" bocpt_holdings.py
+else
+  echo "  ✘ 中銀保誠便覽下載失敗（源站改版或未发布，下次再试）" >> "$LOG"
+fi
 # bocpt_alloc_ingest.py 同样是静态录入（ASOF 固定 2026-06-30），默认跳过，避免覆盖更新的季度
 if [ -f bocpt_alloc_ingest.py ] && [ "${MPF_QUARTERLY_STATIC:-0}" = "1" ]; then
   run "中銀保誠分布(静态录入)" "$PY" bocpt_alloc_ingest.py
 fi
-[ -f chinalife_holdings.py ]&& run "中國人壽持仓(需先下载FPR PDF)"   "$PY" chinalife_holdings.py
 [ -f bocom_holdings.py ]    && run "交通持仓"                       "$PY" bocom_holdings.py
-# 2026-10-25 修 P1-5：舊版 ht_holdings.py 輸出含污染（表演出行混入 top10、
-# alloc 標籤含 FUND PERFORMANCE），會覆蓋已入庫的乾淨海通數據 → 改用 v3+v2
-[ -f ht_holdings3.py ]      && run "海通持仓(逐頁v3)"               "$PY" ht_holdings3.py
-[ -f ht_holdings2.py ]      && run "海通分布(v2)"                   "$PY" ht_holdings2.py
+# 2026-11-23（用户要求）：海通改走官方「基金概覽」月度汇总 PDF（7 只共用一份，2026-10-30 版已可下），
+# 用 fetch-pdf.js --ht 自动发现链接，解析用 tools/ht-apply.py。
+# 旧的 ht_holdings3/2 已停用（ASSET 会在面板间串行、asOf 写死，属于已知污染源）。
+if "$NODE" tools/fetch-pdf.js --ht tmp/ht_pdf3/Haitong_Korea_Fund.pdf >> "$LOG" 2>&1; then
+  echo "  ✔ 海通便覽下載" >> "$LOG"
+  run "海通持仓/分布(ht-apply)" "$PY" tools/ht-apply.py --write
+  # 解析完立刻删掉，避免任何旧脚本拿这份 PDF 按旧 asOf 重写
+  rm -f tmp/ht_pdf3/Haitong_Korea_Fund.pdf
+else
+  echo "  ✘ 海通便覽下載失敗（官网列表页未给出 PDF，下次再试）" >> "$LOG"
+fi
 [ -f bct_holdings.py ]      && run "BCT 持仓"                       "$PY" bct_holdings.py
 # 友邦（月报）：URL 可按月拼（fetch-aia-fpr.py 的规律），但持仓解析页码需逐期核对，
 # 未自动化；永明 SLR：官网 JS 拼接，需 Chrome 人工下载后跑 sunlife_holdings.py --force。

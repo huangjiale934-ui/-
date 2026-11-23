@@ -10,7 +10,15 @@
   window.__ecInit = 1;
 
   const $ = (s) => document.querySelector(s);
-  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  /* 2026-11-23（用户反馈：点全选/反选，列表会闪一下繁体再变回来）：
+     这里原先只做 HTML 转义，不跟全站的繁→简口径 → 列表先用繁体原文绘制，
+     等 common.js 的 t2s MutationObserver 扫到才改，肉眼就是「闪一下」。
+     与 common.js 的 esc() 保持同一出口：简体模式下先 t2s 再输出。 */
+  const esc = (s) => {
+    let out = String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    if (window.__t2sActive && window.t2s) out = window.t2s(out);
+    return out;
+  };
 
   /* 字段分组按 COLS 下标切分（与 app.js 的列顺序一一对应） */
   const GROUPS = [

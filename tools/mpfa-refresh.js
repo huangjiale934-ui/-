@@ -35,8 +35,10 @@ const dry = process.argv.includes('--dry');
 function main() {
   return scrape().then((r) => {
     if (!r.funds || !r.funds.length) {
-      console.log('[mpfa] 抓取结果为空，保留现有 funds.json');
-      return 0;
+      /* 2026-11-23：抓空不能静默。B 站 11-23 全量班就是这里抓空 → 22 只 cal 保持旧 null，
+         日志里看不出任何异常。现在明确报错，deploy.yml 的 `|| echo` 会亮出来，run-issues 也会记。 */
+      console.error('[mpfa] ✘ 抓取结果为空，保留现有 funds.json（本次积金局字段未刷新）');
+      return -1;
     }
     const old = JSON.parse(fs.readFileSync(FUNDS, 'utf8'));
     const oldFunds = old.funds || [];
@@ -136,11 +138,11 @@ function main() {
 
     fs.writeFileSync(FUNDS, JSON.stringify(next));
     console.log('[mpfa] 已写入 data/funds.json');
-    return changed;
+    return 0;   /* 成功（变化数已在上面的日志里） */
   });
 }
 
-main().then(() => process.exit(0)).catch((e) => {
+main().then((rc) => process.exit(rc === -1 ? 1 : 0)).catch((e) => {
   console.error('[mpfa] 失败：' + e.message);
   process.exit(1);
 });

@@ -315,6 +315,17 @@ async function main() {
     }
   } catch (e) { /* 尚未产出监控文件时跳过 */ }
 
+  /* 2026-11-23（用户要求：解决不了的必须告诉我）：把 run-issues 的结论并进来。
+     critical（净值未匹配 / 抓取结构缺失 / 两站数值不一致）计入告警 → 触发邮件；
+     warn（季度缺 PDF、持仓合计异常等）只随邮件附上，不单独发信，避免天天刷屏。 */
+  try {
+    const ri = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'run-issues.json'), 'utf8'));
+    (ri.items || []).forEach((x) => {
+      if (x.level === 'critical') problems.push('未解决 · ' + x.text);
+    });
+    detail.issues = (ri.items || []).filter((x) => x.level !== 'ok');
+  } catch (e) { /* 尚未产出时跳过 */ }
+
   const doc = {
     checkedAt: new Date().toISOString(),
     checkedAtHKT: new Date(Date.now() + 8 * 3600e3).toISOString().replace('T', ' ').slice(0, 19),
@@ -362,6 +373,9 @@ async function main() {
         '',
         '异常项：',
         ...problems.map((p) => '  - ' + p),
+        ...((detail.issues || []).filter((x) => x.level === 'warn').length
+          ? ['', '待跟进（未阻断发布）：', ...(detail.issues || []).filter((x) => x.level === 'warn').map((x) => '  - ' + x.text)]
+          : []),
         '',
         '详情：https://mpf-data.app.workbuddy.host/',
       ].join('\n');
