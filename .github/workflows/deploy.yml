@@ -357,7 +357,9 @@ jobs:
       group: mpf-data
       cancel-in-progress: false
     needs: [update-data]
-    if: needs.update-data.result == 'success' && needs.update-data.outputs.mode == 'full'
+    # 正常只在全量班后跑；手动 workflow_dispatch 选 quarterly=force 时允许跟轻量班一起跑
+    # （用于单独验证季度链路，不必再等一次全量抓取）。
+    if: needs.update-data.result == 'success' && (needs.update-data.outputs.mode == 'full' || github.event.inputs.quarterly == 'force')
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
