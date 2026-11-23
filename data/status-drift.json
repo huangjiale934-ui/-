@@ -1,0 +1,21 @@
+{
+ "updatedAt": 1795400167231,
+ "days": [
+  {
+   "date": "2026-11-23",
+   "total": 451,
+   "verified": 450,
+   "na": 1,
+   "unmatched": 0,
+   "pending": 0,
+   "naIds": [
+    "365"
+   ],
+   "unmatchedIds": [],
+   "drift": false,
+   "changes": [],
+   "prevDate": "",
+   "prev": null
+  }
+ ]
+}

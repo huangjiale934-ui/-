@@ -1,5 +1,5 @@
 {
- "updatedAt": 1795382690348,
+ "updatedAt": 1795399758669,
  "day": "2026-11-23",
  "summary": {
   "total": 24,
@@ -202,7 +202,7 @@
    "detail": "",
    "count": 20,
    "asOf": "2026-11-19",
-   "rawBytes": 461628
+   "rawBytes": 461773
   },
   {
    "key": "YF",

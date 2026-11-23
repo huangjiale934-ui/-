@@ -1,37 +1,38 @@
 {
- "checkedAt": "2026-11-22T21:38:19.507Z",
- "checkedAtHKT": "2026-11-23 05:38:19",
+ "checkedAt": "2026-11-23T02:19:15.019Z",
+ "checkedAtHKT": "2026-11-23 10:19:15",
  "ok": true,
  "problems": [],
  "detail": {
   "A": {
    "navLatest": "2026-11-19",
    "count": 451,
-   "updatedAt": 1795357921109,
-   "build": "2026-11-22-an",
+   "updatedAt": 1795399377348,
+   "build": "2026-11-23-an",
    "status": {
     "phase": "done",
-    "step": "全部完成（已发布）",
-    "finishedAt": "22:44",
-    "day": "2026-11-22",
+    "step": "早晨净值更新完成",
+    "finishedAt": "10:03",
+    "day": "2026-11-23",
     "host": "workbuddy"
    }
   },
   "B": {
    "navLatest": "2026-11-19",
    "count": 451,
-   "updatedAt": 1795296957794,
-   "build": "2026-11-22-an",
+   "updatedAt": 1795383499573,
+   "build": "2026-11-23-an",
    "status": {
     "phase": "done",
     "step": "早晨净值更新完成",
-    "finishedAt": "05:35",
-    "day": "2026-11-22",
+    "finishedAt": "05:38",
+    "day": "2026-11-23",
     "host": "github"
    }
   },
   "referenceLatest": "2026-11-19",
   "today": "2026-11-23",
-  "WorkBuddy 站_planLag": 14
+  "WorkBuddy 站_planLag": 14,
+  "GitHub 站_planLag": 14
  }
 }
