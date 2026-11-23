@@ -362,9 +362,9 @@ jobs:
       group: mpf-data
       cancel-in-progress: false
     needs: [update-data]
-    # 正常只在全量班后跑；手动 workflow_dispatch 选 quarterly=force 时允许跟轻量班一起跑
-    # （用于单独验证季度链路，不必再等一次全量抓取）。
-    if: needs.update-data.result == 'success' && (needs.update-data.outputs.mode == 'full' || github.event.inputs.quarterly == 'force')
+    # 正常只在全量班后跑；手动 workflow_dispatch 选 quarterly=force、或提交信息带
+    # [quarterly-now]（无需 token 的应急入口）时，允许单独跑一次季度链路。
+    if: always() && (needs.update-data.outputs.mode == 'full' || github.event.inputs.quarterly == 'force' || contains(github.event.head_commit.message, '[quarterly-now]'))
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
@@ -412,8 +412,8 @@ jobs:
       - name: 到期判定（季末后按月递增频率，≥95% 即停）
         id: due
         run: |
-          if [ "${{ github.event.inputs.quarterly }}" = "force" ]; then
-            echo "手动指定 force，强制跑一次"
+          if [ "${{ github.event.inputs.quarterly }}" = "force" ] || git log -1 --pretty=%B | grep -q '\[quarterly-now\]'; then
+            echo "手动指定 force / 提交带 [quarterly-now]，强制跑一次"
             echo "due=1" >> "$GITHUB_OUTPUT"
           elif node tools/quarterly-due.js --why; then
             echo "due=1" >> "$GITHUB_OUTPUT"
