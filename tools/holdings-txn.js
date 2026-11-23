@@ -43,6 +43,10 @@ function degraded(before, now) {
   if (tb >= 3 && tn < Math.max(2, Math.floor(tb * 0.6))) why.push('top10 缩水 ' + tb + '→' + tn);
   const ab = (before.alloc || []).length, an = (now.alloc || []).length;
   if (ab >= 2 && an < 2) why.push('分布 ' + ab + '→' + an);
+  /* 2026-11-23（季度上云）：多个历史解析器把 ASOF 写死在脚本里（如 2026-06-30）。
+     云端每季重跑时，它们会把已更新的季度写回旧日期 —— asOf 倒退一律判退化。 */
+  const sb = String(before.asOf || ''), sn = String(now.asOf || '');
+  if (sb && sn && sn < sb) why.push('asOf 倒退 ' + sb + '→' + sn);
   return why;
 }
 
@@ -72,8 +76,12 @@ function main() {
   console.log('持仓事务校验：检测到退化 ' + bad.length + ' 只');
   console.log('  ' + bad.slice(0, 20).join('\n  ') + (bad.length > 20 ? '\n  … 其余 ' + (bad.length - 20) + ' 只' : ''));
   if (restore) {
-    fs.copyFileSync(SNAP, P);
-    console.log('已整档回滚到抓取前快照（tmp/holdings-txn.json）');
+    /* 2026-11-23：改为「逐只回滚」——原先整档覆盖，一只退化就把同批全部成果扔掉；
+       云端季度班跑一次要 20+ 分钟，整档回滚等于白跑。 */
+    const badIds = new Set(bad.map((s) => s.split(':')[0]));
+    badIds.forEach((id) => { nowAll.funds[id] = before[id]; });
+    fs.writeFileSync(P, JSON.stringify(nowAll));
+    console.log('已按基金逐条回滚 ' + badIds.size + ' 只（其余保留本次抓取结果）');
   } else {
     console.log('未写盘（加 --restore 可回滚）');
   }

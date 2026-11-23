@@ -1,7 +1,7 @@
 name: deploy
 
 # push 到 main 即構建並部署 GitHub Pages；
-# 每日北京 00:00（UTC 16:00）跑一次全量數據更新（抓取 → 校驗 → commit → 觸發部署）；
+# 每日北京 00:00（UTC 16:00）跑一次全量數據更新（抓取 → 校驗 → 季度持倉 → commit → 觸發部署）；
 # 工作日 09:00（UTC 01:00）跑一次僅淨值的輕量班。GitHub 定時觸發實測延遲 5.5–8 小時。
 # 2026-10-28：本機鏈路改為「不推 GitHub」，雲端成為 GitHub 側唯一寫手，
 #             兩站各自獨立更新；提交信息含 [run-data] 可手動觸發一次數據更新。
@@ -9,12 +9,25 @@ on:
   push:
     branches: [main]
   schedule:
-    # 2026-11-21（用户要求）：只保留两班 —— 00:00 全量（净值 + 持仓归一 + 指数重算）、09:00 轻量（工作日）。
-    # 注：季度持仓抓取（tools/quarterly.sh）目前仍只在本机跑（脚本内是本机 python/node 路径），未上云。
-    # GitHub 定时触发实测稳定延迟 7.3–7.8 小时，不再靠「多点小票」堆时点，改为接受延迟。
-    - cron: '0 16 * * *'        # 00:00 HKT 全量
-    - cron: '0 1 * * 1-5'       # 09:00 HKT 轻量（工作日）
-  workflow_dispatch: {}
+    # ⚠️ 下面两行 cron 必须分别带 `# full` / `# light` 标记：
+    # 「判定更新模式」那一步直接从本文件读标记，不再手写第二份 cron 字符串。
+    # 历史事故（2026-11-21）：schedule 已改成 0 16，判定里还比着旧的 40 14 →
+    # 11-21 起每一次全量班都被判成轻量，scraper/持仓/indexbuild/allstats 在云端从未执行。
+    # 现在只有「改 cron 且忘了改标记」才会出问题，而那种情况会直接让 job 失败（不会静默降级）。
+    - cron: '0 16 * * *'   # full   00:00 HKT 全量（净值 + 持仓 + 指数 + 季度）
+    - cron: '0 1 * * 1-5'  # light  09:00 HKT 仅净值（工作日）
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: '更新模式（full = 全量，light = 仅净值）'
+        type: choice
+        options: [full, light]
+        default: full
+      quarterly:
+        description: '季度持仓（auto = 按季度计划日判定，force = 强制跑一次，用于验证链路）'
+        type: choice
+        options: [auto, force]
+        default: auto
 
 permissions:
   contents: write
@@ -27,10 +40,13 @@ jobs:
       group: mpf-data
       cancel-in-progress: false
     # 排程 / 手动触发才抓数据；push 触发的构建跳过（数据已在 commit 里）。
-    # 例外：提交信息带 [run-data] 时也跑一次，用于手动验证云端抓取链路。
+    # 例外：提交信息带 [run-data] 时也跑一次（= 手动全量），用于验证云端抓取链路。
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[run-data]'))
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    outputs:
+      # 供 quarterly job 判断「本次是否为全量班」
+      mode: ${{ steps.mode.outputs.mode }}
     steps:
       - uses: actions/checkout@v4
 
@@ -61,19 +77,44 @@ jobs:
             (command -v chromium-browser || command -v chromium) && echo "ok"
           fi
 
-      - name: 判定更新模式（全量 / 仅净值）
+      - name: 判定更新模式（全量 / 轻量）
         id: mode
+        env:
+          EV_NAME: ${{ github.event_name }}
+          EV_SCHED: ${{ github.event.schedule }}
+          IN_MODE: ${{ github.event.inputs.mode }}
         run: |
-          # 2026-11-23 修（致命）：定时已改为 00:00 HKT（0 16 * * *），但这里仍比对旧的 40 14 * * *，
-          # 导致 11-21 起每一次「全量班」都被判成【仅净值】——scraper / 持仓归一 / indexbuild / allstats
-          # 在云端从未执行。判定必须与本文件 schedule 的第一条严格一致。
-          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.schedule }}" != "0 16 * * *" ]; then
-            echo "light=1" >> "$GITHUB_OUTPUT"
-            echo "本次为「仅净值」模式（北京时间工作日 09:00）"
-          else
-            echo "light=0" >> "$GITHUB_OUTPUT"
-            echo "本次为「全量」模式"
+          set -u
+          WF=".github/workflows/deploy.yml"
+          # 唯一事实来源：本文件 schedule 里带 `# full` / `# light` 标记的两行。
+          # 绝不在这里再写一遍 cron 字面量（11-21 事故就是这么来的）。
+          FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" "$WF" | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || true)
+          LIGHT_CRON=$(grep -oE "cron: *'[^']+' *# *light" "$WF" | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || true)
+          N_CRON=$(grep -cE "^[[:space:]]*-[[:space:]]*cron:" "$WF" || true)
+          if [ -z "$FULL_CRON" ] || [ -z "$LIGHT_CRON" ] || [ "$N_CRON" != "2" ]; then
+            echo "::error::schedule 必须正好两条 cron，且分别带 '# full' / '# light' 标记；当前 cron=${N_CRON:-0} 条，full='${FULL_CRON}' light='${LIGHT_CRON}'"
+            exit 1
           fi
+
+          case "$EV_NAME" in
+            workflow_dispatch) MODE="${IN_MODE:-full}" ;;
+            push)              MODE=full ;;   # 只有带 [run-data] 的提交才会进本 job = 手动全量
+            schedule)
+              if   [ "$EV_SCHED" = "$FULL_CRON" ];  then MODE=full
+              elif [ "$EV_SCHED" = "$LIGHT_CRON" ]; then MODE=light
+              else echo "::error::未知的 schedule '$EV_SCHED'（不是本文件里的任何一条 cron）"; exit 1; fi ;;
+            *)                 MODE=light ;;
+          esac
+
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          if [ "$MODE" = "full" ]; then echo "light=0" >> "$GITHUB_OUTPUT"; else echo "light=1" >> "$GITHUB_OUTPUT"; fi
+          echo "本次模式：$MODE ｜ 触发=$EV_NAME ｜ 命中 cron=${EV_SCHED:-无} ｜ full=$FULL_CRON light=$LIGHT_CRON"
+          {
+            echo "### 本次更新模式"
+            echo "| 模式 | 触发 | 命中 cron | 全量 cron |"
+            echo "| --- | --- | --- | --- |"
+            echo "| **$MODE** | $EV_NAME | ${EV_SCHED:-—} | $FULL_CRON |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 抓取發行人官網數據（失敗保留舊數據）
         if: steps.mode.outputs.light == '0'
@@ -109,7 +150,7 @@ jobs:
           python news_fetch.py || echo "!! 積金局新聞稿失敗"
           python tools/bct-recent.py || echo "!! BCT 失敗"
 
-      - name: 抓取淨值（交易日 09:40 轻量模式）
+      - name: 抓取淨值（交易日 09:00 轻量模式）
         if: steps.mode.outputs.light == '1'
         run: |
           node tools/mpfa-refresh.js || echo "!! 積金局快照刷新失敗（保留舊數據）"
@@ -288,7 +329,7 @@ jobs:
             echo "數據無變更"
             exit 0
           fi
-          git commit -m "daily data update $(date -u +%F)"
+          git commit -m "daily data update $(date -u +%F) [${{ steps.mode.outputs.mode }}]"
           ok=0
           for i in 1 2 3; do
             if git push origin HEAD:main; then ok=1; echo "推送成功（第 $i 次）"; break; fi
@@ -306,13 +347,123 @@ jobs:
             echo "!! 数据回写失败（不影响本次站点发布，本机 nightly 仍会推送）"
           fi
 
+  # 2026-11-23（用户要求：两站必须各自独立更新，B 站不能依赖本机 WorkBuddy）：
+  # 季度持仓在云端自己跑。到期判定沿用 tools/quarterly-due.js（季末后第 1 个月周日 /
+  # 第 2 个月周三+周日 / 第 3 个月周二+周四+周日；完成度 ≥95% 即停，下一季重新计）。
+  # tools/quarterly.sh 已改为动态解析解释器（$MPF_PYTHON / $MPF_NODE → PATH → 自动探测），
+  # 不再写死任何本机路径；原先被 .gitignore 漏掉的 4 个解析器也已入库。
+  quarterly:
+    concurrency:
+      group: mpf-data
+      cancel-in-progress: false
+    needs: [update-data]
+    if: needs.update-data.result == 'success' && needs.update-data.outputs.mode == 'full'
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 安裝抓取依賴
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'curl_cffi>=0.16,<0.17' 'PyMuPDF>=1.26,<3' 'pdfplumber>=0.11,<0.12' 'requests>=2.32,<3'
+
+      - name: 確認無頭瀏覽器可用（AMTD 走 Google Drive）
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then google-chrome --version
+          elif command -v chromium >/dev/null 2>&1; then chromium --version
+          else
+            sudo apt-get update -qq && sudo apt-get install -y -qq chromium-browser || sudo apt-get install -y -qq chromium
+            (command -v chromium-browser || command -v chromium) && echo "ok"
+          fi
+
+      - name: 必需檔案自檢（防止核心腳本被 .gitignore 漏掉）
+        run: |
+          miss=0
+          for f in tools/quarterly.sh tools/quarterly-due.js tools/source-due.js tools/holdings-txn.js \
+                   tools/holdings-normalize.js tools/holdings-guard.js \
+                   bea_holdings.py bea_alloc_ingest.py tools/replace-mpfhk-hsbc2.py \
+                   tools/parse-fidelity-ffs.py fetch-manulife-detail.py alloc_fill.py \
+                   bct_ffs_auto.py bct_ffs2.py bct_holdings.py sunlife_holdings.py \
+                   tools/fetch-chinalife-fpr.py chinalife_holdings.py \
+                   tools/amtd-fetch-chrome.js tools/parse-amtd-ffs.py; do
+            [ -f "$f" ] || { echo "!! 缺少必需文件：$f"; miss=1; }
+          done
+          [ "$miss" = "0" ] || exit 1
+          echo "季度链路脚本齐全"
+
+      - name: 到期判定（季末后按月递增频率，≥95% 即停）
+        id: due
+        run: |
+          if [ "${{ github.event.inputs.quarterly }}" = "force" ]; then
+            echo "手动指定 force，强制跑一次"
+            echo "due=1" >> "$GITHUB_OUTPUT"
+          elif node tools/quarterly-due.js --why; then
+            echo "due=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "due=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 刷新季度持倉（含逐只事务护栏）
+        if: steps.due.outputs.due == '1'
+        run: |
+          # 硬超时 60 分钟：最慢的是 AMTD（16 只逐只过 Chrome 下载 Google Drive）
+          timeout 3600 bash tools/quarterly.sh || echo "!! 季度链路有步骤失败（明细见 data/holdings-update.log）"
+          node -e "
+            const h=require('./data/holdings.json');
+            const ids=Object.keys(h.funds||{});
+            const a=ids.map(i=>h.funds[i]&&h.funds[i].asOf).filter(Boolean).sort();
+            console.log('holdings 条目 '+ids.length+'；asOf 中位 '+(a[Math.floor(a.length/2)]||'无')+'；最新 '+(a[a.length-1]||'无'));
+          "
+
+      - name: 提交季度數據
+        if: steps.due.outputs.due == '1'
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config pull.rebase true
+          git add data/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "季度數據無變更"
+            exit 0
+          fi
+          git commit -m "quarterly holdings update $(date -u +%F)"
+          ok=0
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then ok=1; echo "推送成功（第 $i 次）"; break; fi
+            echo "推送被拒（第 $i 次），rebase 后重试…"
+            git fetch origin main || true
+            if ! git rebase origin/main; then
+              git checkout --theirs -- data 2>/dev/null || true
+              git add data 2>/dev/null || true
+              GIT_EDITOR=true git rebase --continue || git rebase --abort || true
+            fi
+            sleep 5
+          done
+          if [ "$ok" != "1" ]; then
+            echo "!! 季度數據回寫失敗（不影響本次站點發布，明晚全量班會再補）"
+          fi
+
   build-deploy:
     concurrency:
       group: pages
       cancel-in-progress: false
     runs-on: ubuntu-latest
-    needs: [update-data]
-    if: always() && !failure() && !cancelled()
+    needs: [update-data, quarterly]
+    # 即使数据班/季度班失败也照常发布「已提交的 main」——发布上一次完整数据，
+    # 比整站停在旧版本更安全（10-28 就因为校验步骤返回 1 把 Pages 卡死过一次）。
+    if: always() && !cancelled()
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -352,7 +503,9 @@ jobs:
           miss=0
           for f in mpfindex.js indexbuild.js navperf.js allstats.js server.js scraper.js \
                    tools/build-static.js tools/mpfa-refresh.js tools/hist-index-sync.js \
-                   tools/merge-nav.js tools/fix-nulls.js public/index.html public/home.html; do
+                   tools/merge-nav.js tools/fix-nulls.js public/index.html public/home.html \
+                   tools/quarterly.sh tools/quarterly-due.js fetch-manulife-detail.py \
+                   alloc_fill.py bct_ffs2.py bct_holdings.py; do
             [ -f "$f" ] || { echo "!! 缺少必需文件：$f"; miss=1; }
           done
           [ "$miss" = "0" ] || exit 1
@@ -422,18 +575,34 @@ jobs:
   # 2026-11-17（用户要求）：数据任务失败/被跳过 → 直接发邮件，不再等人发现。
   # 依赖 Secrets：MPF_SMTP_USER / MPF_SMTP_PASS / MPF_MAIL_TO（已在仓库设置）。
   notify-failure:
-    needs: [update-data, build-deploy]
-    # 2026-11-21（用户要求）：邮件只在晚间 00:00 全量班（或 push 触发）失败时发；
-    # 早班 09:00 失败不打扰（数据可等晚上那班补齐）。
-    if: failure() && (github.event_name != 'schedule' || github.event.schedule == '0 16 * * *')
+    needs: [update-data, quarterly, build-deploy]
+    # 2026-11-23：job 级不再写死 cron 判断（那是第二份「事实来源」，11-21 就是这么坏的）。
+    # 先算「本次是不是全量/手动班」，再决定发不发信：早班（轻量）失败不打扰，
+    # 数据可等当晚全量班补齐。
+    if: failure()
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+      - name: 判定是否需要发信
+        id: cls
+        env:
+          EV_NAME: ${{ github.event_name }}
+          EV_SCHED: ${{ github.event.schedule }}
+        run: |
+          FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" .github/workflows/deploy.yml | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || true)
+          if [ "$EV_NAME" != "schedule" ] || [ "$EV_SCHED" = "$FULL_CRON" ]; then
+            echo "send=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "send=0" >> "$GITHUB_OUTPUT"
+            echo "轻量班失败，不发邮件（等今晚全量班补齐）"
+          fi
       - uses: actions/setup-node@v4
+        if: steps.cls.outputs.send == '1'
         with:
           node-version: '20'
       - name: 发送失败告警
+        if: steps.cls.outputs.send == '1'
         env:
           MPF_SMTP_USER: ${{ secrets.MPF_SMTP_USER }}
           MPF_SMTP_PASS: ${{ secrets.MPF_SMTP_PASS }}

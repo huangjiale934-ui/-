@@ -2,6 +2,8 @@
 # 季度持仓 / 资产分布刷新（2026-10-23）
 # 目标：每季（3/6/9/12 月末报告发布后）重抓十大持仓与资产分布。
 # 说明：各家披露节奏不同（月报/季报），这里跑"能自动跑的那部分"，其余靠人工核对。
+# 2026-11-23（用户要求）：本脚本**两站共用**——本机 daily.sh 第 8.6 步调用，
+#   GitHub Actions 的 quarterly job 也调用。因此不得写死任何本机路径。
 set -u
 cd "$(dirname "$0")/.."
 # 2026-10-23：互斥锁——每日任务与季度任务可能撞车（都写 data/），先到先跑，后来的直接跳过
@@ -12,10 +14,45 @@ if ! mkdir "$LOCK" 2>/dev/null; then
   exit 0
 fi
 trap 'rmdir "$LOCK" 2>/dev/null' EXIT
-PY="C:/Users/11718/.workbuddy/binaries/python/envs/default/Scripts/python.exe"
-NODE="C:/Users/11718/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
+
+# 解释器解析（2026-11-23）：不再写死任何本机绝对路径。
+# 顺序：环境变量 → PATH 上的 python3/python → 本机 WorkBuddy 自带运行时（通配探测）。
+# 判据不是「能执行」而是「依赖能导入」：PATH 上的 python 往往没有 curl_cffi/pdfplumber。
+pick_python() {
+  local c
+  for c in "${MPF_PYTHON:-}" \
+           "$(command -v python3 2>/dev/null || true)" \
+           "$(command -v python 2>/dev/null || true)" \
+           "$HOME"/.workbuddy*/binaries/python/envs/*/Scripts/python.exe \
+           "$HOME"/.workbuddy*/binaries/python/envs/*/bin/python; do
+    [ -n "$c" ] && [ -x "$c" ] || continue
+    if "$c" -c 'import pdfplumber, fitz' >/dev/null 2>&1; then printf '%s\n' "$c"; return 0; fi
+  done
+  return 1
+}
+PY="$(pick_python || true)"
+NODE="${MPF_NODE:-$(command -v node 2>/dev/null || true)}"
+if [ -z "${PY:-}" ]; then
+  echo "!! 找不到可用的 python（需 pdfplumber + pymupdf）。可用 MPF_PYTHON=/path/to/python 指定" >&2
+  exit 1
+fi
+if [ -z "${NODE:-}" ]; then
+  echo "!! 找不到 node。可用 MPF_NODE=/path/to/node 指定" >&2
+  exit 1
+fi
+# AMTD 的 Google Drive 下载要真浏览器（tools/amtd-fetch-chrome.js 读 CHROME_PATH）
+if [ -z "${CHROME_PATH:-}" ]; then
+  for c in "$(command -v google-chrome 2>/dev/null || true)" \
+           "$(command -v chromium 2>/dev/null || true)" \
+           "$(command -v chromium-browser 2>/dev/null || true)"; do
+    if [ -n "$c" ] && [ -x "$c" ]; then CHROME_PATH="$c"; break; fi
+  done
+  export CHROME_PATH
+fi
+
 LOG="data/holdings-update.log"
-echo "[$(date '+%F %H:%M')] 季度持仓刷新开始" >> "$LOG"
+LOG_FROM=$(wc -l < "$LOG" 2>/dev/null || echo 0)
+echo "[$(date '+%F %H:%M')] 季度持仓刷新开始（python=$PY node=$NODE chrome=${CHROME_PATH:-未找到}）" >> "$LOG"
 
 # 2026-10-26 新增：写盘事务——本链路有 8+ 个解析器直接覆盖 holdings 条目，
 # 一旦某个解析器退化（当日 BCT 空名称/分布塌缩），过去只能人工 diff 回滚。
@@ -42,11 +79,14 @@ fetch_pdf() {
 
 # 2026-10-24：换源后的季度链路（mpf.hk 转载已清零，全部走官方原件）
 # 東亞：官網 FFS 按季拼 URL（mpf-2026-2nd.pdf；1st/2nd/3rd/4th = Q1-Q4）
-Q_NTH=$(date +%-m | awk '{print int(($1-1)/3)+1}')
+# 2026-11-23：云端 runner 是 UTC，季度必须按 HKT 算 —— 每月 1 日 00:00 HKT 的班次在 UTC 还停在上月。
+HKT_M=$(TZ=Asia/Hong_Kong date +%-m)
+HKT_Y=$(TZ=Asia/Hong_Kong date +%Y)
+Q_NTH=$(( (HKT_M - 1) / 3 + 1 ))
 case "$Q_NTH" in 1) Q_EN=1st;; 2) Q_EN=2nd;; 3) Q_EN=3rd;; 4) Q_EN=4th;; esac
-Q_YEAR=$(date +%Y)
+Q_YEAR=$HKT_Y
 # 季度末报告在下一季发布：当前月 1-3 月抓去年 4th，其余抓本年 (Q-1)
-if [ "$(date +%-m)" -le 3 ]; then Q_YEAR=$((Q_YEAR-1)); Q_NTH=4; Q_EN=4th
+if [ "$HKT_M" -le 3 ]; then Q_YEAR=$((Q_YEAR-1)); Q_NTH=4; Q_EN=4th
 else Q_NTH=$((Q_NTH-1)); case "$Q_NTH" in 1) Q_EN=1st;; 2) Q_EN=2nd;; 3) Q_EN=3rd;; 4) Q_EN=4th;; esac; fi
 
 # 2026-11-20（用户反馈）：東亞 2026 年基金便覧官网只发布到第 1 季，Q2/Q3 尚未上线。
@@ -59,7 +99,9 @@ if [ "$BEA_CODE" = "200" ]; then
 else
   echo "  · 東亞FFS：源站尚未发布 ${Q_YEAR} 年第 ${Q_NTH} 季便覧（HTTP ${BEA_CODE}），跳过（非抓取故障）" >> "$LOG"
 fi
-[ -f bea_alloc_ingest.py ]  && run "東亞分布(读图)"           "$PY" bea_alloc_ingest.py
+# 2026-11-23：bea_alloc_ingest.py 是「按 2026-06 便覧读图」的一次性静态入库（数据写死 ASOF），
+# 只在本次真的下载到 PDF 时才跑；否则云端会拿旧快照覆盖更新的季度。
+if [ -f bea_alloc_ingest.py ] && [ -f tmp/bea_ffs.pdf ]; then run "東亞分布(读图)" "$PY" bea_alloc_ingest.py; fi
 
 # 滙豐：固定 URL（內容隨季更新）；恒生：固定 URL
 fetch_pdf "滙豐invrptce1" "https://www.hsbc.com.hk/content/dam/hsbc/hk/docs/mpf/invrptce1.pdf" tmp/hsbc_invrptce1.pdf \
@@ -81,7 +123,13 @@ fetch_pdf "富達MT00288" "https://www.mpfa.org.hk/assets/FF/MT00288.pdf" tmp/ff
 if "$NODE" tools/source-due.js 永明; then
   fetch_pdf "永明SLR" "https://www.sunlife.com.hk/content/dam/sunlife/regional/hong-kong/documents/pensions/SLR_MPF_Quarterly_Update.pdf" tmp/slr_mpf.pdf \
     && run "永明持仓" "$PY" sunlife_holdings.py tmp/slr_mpf.pdf
-  [ -f sunlife_alloc_ingest.py ] && run "永明分布" "$PY" sunlife_alloc_ingest.py
+  # sunlife_alloc_ingest.py 是按 2026-06 季报读图录入的静态数据（ASOF 写死），
+  # 云端每季重跑只会把分布写回旧季度 → 只在明确指定时才跑（重新录入后手动开启）。
+  if [ -f sunlife_alloc_ingest.py ] && [ "${MPF_QUARTERLY_STATIC:-0}" = "1" ]; then
+    run "永明分布(静态录入)" "$PY" sunlife_alloc_ingest.py
+  else
+    echo "  · 永明分布：静态录入脚本（ASOF 固定），默认跳过" >> "$LOG"
+  fi
 else
   echo "  · 永明：本季持仓已齐，跳过下载/解析" >> "$LOG"
 fi
@@ -94,8 +142,13 @@ else
   echo "  · 中國人壽：本季持仓已齐，跳过下载/解析" >> "$LOG"
 fi
 if "$NODE" tools/source-due.js AMTD; then
-  run "AMTD下载(Chrome)" node tools/amtd-fetch-chrome.js
-  run "AMTD持仓" "$PY" tools/parse-amtd-ffs.py --write
+  run "AMTD下载(Chrome)" "$NODE" tools/amtd-fetch-chrome.js
+  # 没下到 PDF 就不要解析（否则 parse 会在空目录上报错，污染日志）
+  if [ -n "$(ls -A tmp/amtd 2>/dev/null | grep -v '^_dl$' || true)" ]; then
+    run "AMTD持仓" "$PY" tools/parse-amtd-ffs.py --write
+  else
+    echo "  · AMTD：未下载到 PDF，跳过解析" >> "$LOG"
+  fi
 else
   echo "  · AMTD：本季持仓已齐，跳过下载/解析" >> "$LOG"
 fi
@@ -104,7 +157,10 @@ fi
 [ -f alloc_fill.py ]        && run "通用持仓/分布抓取(alloc_fill)"  "$PY" alloc_fill.py
 [ -f bct_ffs_auto.py ]      && run "BCT 便览自动发现"               "$PY" bct_ffs_auto.py
 [ -f bocpt_holdings.py ]    && run "中銀保誠持仓"                   "$PY" bocpt_holdings.py
-[ -f bocpt_alloc_ingest.py ]&& run "中銀保誠分布"                   "$PY" bocpt_alloc_ingest.py
+# bocpt_alloc_ingest.py 同样是静态录入（ASOF 固定 2026-06-30），默认跳过，避免覆盖更新的季度
+if [ -f bocpt_alloc_ingest.py ] && [ "${MPF_QUARTERLY_STATIC:-0}" = "1" ]; then
+  run "中銀保誠分布(静态录入)" "$PY" bocpt_alloc_ingest.py
+fi
 [ -f chinalife_holdings.py ]&& run "中國人壽持仓(需先下载FPR PDF)"   "$PY" chinalife_holdings.py
 [ -f bocom_holdings.py ]    && run "交通持仓"                       "$PY" bocom_holdings.py
 # 2026-10-25 修 P1-5：舊版 ht_holdings.py 輸出含污染（表演出行混入 top10、
@@ -119,8 +175,13 @@ fi
 if "$NODE" tools/holdings-txn.js check --restore >> "$LOG" 2>&1; then
   echo "  ✔ 持仓事务校验：零退化" >> "$LOG"
 else
-  echo "  ⚠ 持仓事务校验：检测到退化，已回滚到抓取前快照" >> "$LOG"
+  echo "  ⚠ 持仓事务校验：检测到退化，已按基金逐条回滚到抓取前快照" >> "$LOG"
 fi
 "$NODE" tools/holdings-normalize.js >> "$LOG" 2>&1
 "$NODE" tools/holdings-guard.js --fix >> "$LOG" 2>&1
-echo "[$(date '+%F %H:%M')] 季度持仓刷新结束" >> "$LOG"
+
+# 2026-11-23：云端日志里要一眼看到「跑成了几步、坏了几步」，不能只留一个结束时间。
+RUN_OK=$(tail -n +$((LOG_FROM + 1)) "$LOG" | grep -c '✔' || true)
+RUN_NG=$(tail -n +$((LOG_FROM + 1)) "$LOG" | grep -c '✘' || true)
+echo "[$(date '+%F %H:%M')] 季度持仓刷新结束：成功 ${RUN_OK} 步，失败 ${RUN_NG} 步" >> "$LOG"
+tail -n +$((LOG_FROM + 1)) "$LOG" | grep -E '✔|✘|·' | tail -60

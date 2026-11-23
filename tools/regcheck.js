@@ -2374,18 +2374,32 @@ chk('调度·②抓取降并发 + 失败重试 30 秒', (function () {
     return /renderAll\(1\)/.test(n) && /等待 30 秒重试/.test(n) && /attempt <= 2/.test(n);
   } catch (err) { return false; }
 })());
-chk('调度·③季度判定（月份递增频率 + 90% 完成即停）', (function () {
+chk('调度·③季度判定（月份递增频率 + 95% 完成即停 + HKT）', (function () {
   try {
     const q = fs.readFileSync(path.join(__dirname, 'quarterly-due.js'), 'utf8');
-    return /1: \[0\], 2: \[3, 0\], 3: \[2, 4, 0\]/.test(q) && /pct >= 0\.9/.test(q) &&
-      /prevQuarterEnd/.test(q);
+    return /1: \[0\], 2: \[3, 0\], 3: \[2, 4, 0\]/.test(q) && /pct >= 0\.95/.test(q) &&
+      /* 2026-11-23：云端 runner 是 UTC，必须按 HKT 取「今天/星期」 */
+      /Date\.now\(\) \+ 8 \* 3600e3/.test(q) && /getUTCDay\(\)/.test(q);
   } catch (err) { return false; }
 })());
-chk('调度·④GitHub 两班时间（00:00 / 09:00）+ 邮件只在晚间', (function () {
+chk('调度·④GitHub 两班（00:00 全量 / 09:00 轻量）+ 判定只认 cron 标记', (function () {
   try {
     const w = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
-    return /cron: '0 16 \* \* \*'/.test(w) && /cron: '0 1 \* \* 1-5'/.test(w) &&
-      /github\.event\.schedule == '0 16 \* \* \*'/.test(w) && /pages1/.test(w);
+    /* 2026-11-23：判定不再手写第二份 cron 字符串（11-21 事故根因），
+       改为从本文件读 `# full` / `# light` 标记；缺失即 job 失败，不静默降级。 */
+    return /cron: '0 16 \* \* \*'\s*# full/.test(w) && /cron: '0 1 \* \* 1-5'\s*# light/.test(w) &&
+      /# \*full/.test(w) && /# \*light/.test(w) &&
+      !/github\.event\.schedule == '\d/.test(w) &&
+      /pages1/.test(w);
+  } catch (err) { return false; }
+})());
+chk('调度·⑤季度持仓在云端独立跑（不再依赖本机路径）', (function () {
+  try {
+    const y = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
+    const q = fs.readFileSync(path.join(__dirname, 'quarterly.sh'), 'utf8');
+    return /^  quarterly:/m.test(y) && /bash tools\/quarterly\.sh/.test(y) &&
+      /needs: \[update-data, quarterly\]/.test(y) &&
+      q.indexOf('C:/Users/') < 0 && /pick_python/.test(q) && /MPF_PYTHON/.test(q);
   } catch (err) { return false; }
 })());
 chk('每日摘要·④不再依赖 push.js，独立脚本可写', (function () {

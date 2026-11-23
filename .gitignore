@@ -29,8 +29,11 @@ audit-gaps.py
 bct_backfill.py
 bct_daily.py
 bct_ffs.py
-bct_ffs2.py
-bct_holdings.py
+# 2026-11-23（用户要求：季度持仓由 GitHub Actions 独立更新）：
+# bct_ffs2.py / bct_holdings.py / fetch-manulife-detail.py / alloc_fill.py
+# 是 tools/quarterly.sh 在云端必跑的核心解析器，原先被本文件忽略 →
+# Actions 里必然 FileNotFoundError（与 11-12 的 mpfindex.js 同类事故）。
+# 已移出忽略列表，缺失由 deploy.yml 的「必需檔案自檢」直接拦下。
 bocom_all.py
 bocom_esg.py
 build.js
@@ -38,7 +41,6 @@ engbuild.js
 etnet_alloc.py
 etnet_hist.py
 fetch-aia-yahoo.py
-fetch-manulife-detail.py
 holdquote.py
 holdquote2.py
 hsbc_holdings.py
@@ -49,7 +51,6 @@ report-coverage.js
 # 2026-11-12：mpfindex.js 从忽略列表移除——它是云端构建必跑的核心脚本，
 # 被忽略会导致 Actions 里 `node mpfindex.js` 永远 MODULE_NOT_FOUND，
 # 自算指数只能沿用本机推上来的旧快照（两站 ticker 差 0.02–0.17%）。
-alloc_fill.py
 docs/
 data/update-status.json
 output/
@@ -61,3 +62,6 @@ data/spot-check-report.json
 data/wb-share.txt
 data/mail.json
 data/freshness.json
+
+# 回归快照（生成物，不入库）
+tools/reg/

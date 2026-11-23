@@ -16,22 +16,19 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const WHY = process.argv.indexOf('--why') >= 0;
-const now = new Date();
-const y = now.getFullYear();
-const m = now.getMonth() + 1;      // 1-12
-const dow = now.getDay();          // 0=周日
+/* 2026-11-23（云端化）：原先用运行机器的本地时区取「今天」。GitHub runner 是 UTC，
+   00:00 HKT 的全量班在 UTC 仍是前一天 16:00（周一 00:00 HKT = 周日 16:00 UTC），
+   星期会整体偏移一天 → 计划日算错。这里统一按 HKT 计算，且不再用 Date 对象推季末。 */
+const now = new Date(Date.now() + 8 * 3600e3);
+const y = now.getUTCFullYear();
+const m = now.getUTCMonth() + 1;      // 1-12（HKT）
+const dow = now.getUTCDay();          // 0=周日（HKT）
 
-/* 上一季度末（含当天） */
-function prevQuarterEnd() {
-  if (m <= 3) return new Date(y - 1, 11, 31);
-  if (m <= 6) return new Date(y, 2, 31);
-  if (m <= 9) return new Date(y, 5, 30);
-  return new Date(y, 8, 30);
-}
-const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-const qEnd = prevQuarterEnd();
-const qEndIso = iso(qEnd);
-const qEndMonth = qEnd.getMonth() + 1;     // 3/6/9/12
+/* 上一季度末（含当天）：3/6/9/12 月末，日期固定，无需构造 Date */
+const qEndMonth = m <= 3 ? 12 : m <= 6 ? 3 : m <= 9 ? 6 : 9;
+const qEndYear = m <= 3 ? y - 1 : y;
+const qEndDay = qEndMonth === 6 || qEndMonth === 9 ? '30' : '31';
+const qEndIso = qEndYear + '-' + String(qEndMonth).padStart(2, '0') + '-' + qEndDay;
 let monthIdx = m - qEndMonth;              // 1/2/3
 if (monthIdx <= 0) monthIdx += 12;         // 跨年（12 月季度末 → 次年 1 月 = 1）
 
@@ -52,7 +49,8 @@ try {
 } catch (e) { log('holdings.json 不可读，按「未完成」处理'); }
 
 const pct = total ? done / total : 0;
-log('季末 ' + qEndIso + '（第 ' + monthIdx + ' 个月）· 计划星期 ' + JSON.stringify(PLAN) +
+log('HKT 今日 ' + y + '-' + String(m).padStart(2, '0') + '-' + String(now.getUTCDate()).padStart(2, '0') +
+  ' · 季末 ' + qEndIso + '（第 ' + monthIdx + ' 个月）· 计划星期 ' + JSON.stringify(PLAN) +
   ' · 今日星期 ' + dow + ' · 完成 ' + done + '/' + total + '（' + Math.round(pct * 100) + '%）');
 
 /* 已基本更新完（≥95%）→ 不再跑，下一季度重新计数 */

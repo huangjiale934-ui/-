@@ -23,7 +23,21 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const OUTDIR = path.join(ROOT, 'tmp', 'amtd');
 const PROFILE = path.join(ROOT, 'tmp', 'chrome-dl-prof');
-const CHROME = process.env.CHROME_PATH || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+/* 2026-11-23（云端化）：不再默认写死 Windows 路径。CHROME_PATH 优先；
+   否则按 Linux/macOS/Windows 的常见位置探测（GitHub runner 装的是 chromium）。 */
+function findChrome() {
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  const cands = [
+    '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium', '/usr/bin/chromium-browser', '/snap/bin/chromium',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ];
+  for (const p of cands) { try { if (fs.existsSync(p)) return p; } catch (e) {} }
+  return 'google-chrome';
+}
+const CHROME = findChrome();
 const PORT = Number(process.env.CDP_PORT || 9224);
 const PAGE = 'https://www.ooogroup.xyz/locales/hk/mpf-3';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
