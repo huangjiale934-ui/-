@@ -5,6 +5,8 @@ name: deploy
 # 工作日 09:00（UTC 01:00）跑一次僅淨值的輕量班。GitHub 定時觸發實測延遲 5.5–8 小時。
 # 2026-10-28：本機鏈路改為「不推 GitHub」，雲端成為 GitHub 側唯一寫手，
 #             兩站各自獨立更新；提交信息含 [run-data] 可手動觸發一次數據更新。
+#             注意：正文里出现该标记也算（11-23 一次提交说明引用它，误触发了一次全量班），
+#             写 commit message 时不要把它当普通词汇引用。
 on:
   push:
     branches: [main]
@@ -88,8 +90,8 @@ jobs:
           WF=".github/workflows/deploy.yml"
           # 唯一事实来源：本文件 schedule 里带 `# full` / `# light` 标记的两行。
           # 绝不在这里再写一遍 cron 字面量（11-21 事故就是这么来的）。
-          FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" "$WF" | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || true)
-          LIGHT_CRON=$(grep -oE "cron: *'[^']+' *# *light" "$WF" | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || true)
+          FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" "$WF" | head -1 | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
+          LIGHT_CRON=$(grep -oE "cron: *'[^']+' *# *light" "$WF" | head -1 | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
           N_CRON=$(grep -cE "^[[:space:]]*-[[:space:]]*cron:" "$WF" || true)
           if [ -z "$FULL_CRON" ] || [ -z "$LIGHT_CRON" ] || [ "$N_CRON" != "2" ]; then
             echo "::error::schedule 必须正好两条 cron，且分别带 '# full' / '# light' 标记；当前 cron=${N_CRON:-0} 条，full='${FULL_CRON}' light='${LIGHT_CRON}'"
@@ -592,7 +594,7 @@ jobs:
           EV_NAME: ${{ github.event_name }}
           EV_SCHED: ${{ github.event.schedule }}
         run: |
-          FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" .github/workflows/deploy.yml | head -1 | sed -E "s/.*'([^']+)'.*/\1/" || true)
+          FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" .github/workflows/deploy.yml | head -1 | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
           if [ "$EV_NAME" != "schedule" ] || [ "$EV_SCHED" = "$FULL_CRON" ]; then
             echo "send=1" >> "$GITHUB_OUTPUT"
           else
