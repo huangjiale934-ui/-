@@ -149,6 +149,7 @@ window.TYPE_I18N = {
 '債券基金': { s: '债券基金', e: 'Bond Fund' },
 '混合資產基金': { s: '混合资产基金', e: 'Mixed Assets Fund' },
 '股票基金': { s: '股票基金', e: 'Equity Fund' },
+'貨幣市場基金': { s: '货币市场基金', e: 'Money Market Fund' },
 '貨幣市場基金 — 不包括強積金保守基金': { s: '货币市场基金 — 不包括强积金保守基金', e: 'Money Market Fund (other than MPF Conservative Fund)' },
 '貨幣市場基金 — 強積金保守基金': { s: '货币市场基金 — 强积金保守基金', e: 'MPF Conservative Fund' },
 '21% 至 40% 股票': { s: '21% 至 40% 股票', e: '21% to 40% Equity' },

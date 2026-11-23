@@ -75,6 +75,33 @@ async function bocpt(out) {
   return 2;
 }
 
+/* 交通銀行：便覽列表 → previewPdf.html?fileId=NNN → viewer.html?file=<真实路径> → 下载。
+   2026-11-23 用真实浏览器抓包确认：列表最新一条就是「YYYY年第N季」，PDF 名形如
+   MPF_FFS(2026Q2)_Final.pdf，路径含上传批次目录，无法按规律拼，只能这样跳两级。 */
+async function bocom(out) {
+  const LIST = 'https://www.bocomtrust.com.hk/BankCommSite/shtml/trust/cn/2600817/2600824/2600825/2601011/list.shtml?channelId=2600825';
+  const H = { 'user-agent': UA };
+  const h1 = Buffer.from(await (await fetch(LIST, { headers: H })).arrayBuffer()).toString('utf8');
+  /* 列表第一条 = 最新一季（2026-11 时为 2026Q2；Q3 发布后会变成 Q3） */
+  const m1 = h1.match(/href="([^"]*previewPdf\.html\?fileId=(\d+)[^"]*)"/i);
+  if (!m1) { console.error('便覽列表页没有 previewPdf 链接（源站可能改版）'); return 2; }
+  const fileId = m1[2];
+  const r = await fetch('https://www.bocomtrust.com.hk/SITE/getContentPath.do', {
+    method: 'POST',
+    headers: Object.assign({}, H, {
+      'content-type': 'application/x-www-form-urlencoded',
+      referer: new URL(m1[1], LIST).href,
+    }),
+    body: 'fileId=' + fileId,
+  });
+  const j = JSON.parse(await r.text());
+  const p = j && j.RSP_BODY && j.RSP_BODY.filePath;
+  if (!p) { console.error('getContentPath 未返回 filePath：' + JSON.stringify(j).slice(0, 160)); return 2; }
+  const abs = 'https://www.bocomtrust.com.hk/BankCommSite/upload/' + decodeURIComponent(p);
+  console.log('  列表最新 fileId=' + fileId + ' → ' + decodeURIComponent(j.RSP_BODY.fileName || ''));
+  return save(abs, out);
+}
+
 (async () => {
   const args = process.argv.slice(2);
   if (!args.length) { console.error('用法见文件头'); process.exit(2); }
@@ -82,6 +109,7 @@ async function bocpt(out) {
     let rc;
     if (args[0] === '--ht') rc = await ht(args[1] || 'tmp/ht_pdf3/Haitong_Korea_Fund.pdf');
     else if (args[0] === '--bocpt') rc = await bocpt(args[1] || 'tmp/bocpt_fs.pdf');
+    else if (args[0] === '--bocom') rc = await bocom(args[1] || 'tmp/bocom_ffs.pdf');
     else if (args.length >= 2) rc = await save(args[0], args[1]);
     else { console.error('缺少输出路径'); rc = 2; }
     process.exit(rc);

@@ -168,7 +168,14 @@ fi
 if [ -f bocpt_alloc_ingest.py ] && [ "${MPF_QUARTERLY_STATIC:-0}" = "1" ]; then
   run "中銀保誠分布(静态录入)" "$PY" bocpt_alloc_ingest.py
 fi
-[ -f bocom_holdings.py ]    && run "交通持仓"                       "$PY" bocom_holdings.py
+# 2026-11-23（用户要求）：交通银行便览同样改为自动下载——列表最新一条即最新季度，
+# 走 getContentPath.do 拿真实文件路径（路径含上传批次目录，无法按规律拼）。
+if "$NODE" tools/fetch-pdf.js --bocom tmp/bocom_ffs.pdf >> "$LOG" 2>&1; then
+  echo "  ✔ 交通便覽下載" >> "$LOG"
+  run "交通持仓" "$PY" bocom_holdings.py tmp/bocom_ffs.pdf
+else
+  echo "  ✘ 交通便覽下載失敗（源站改版或列表为空，下次再试）" >> "$LOG"
+fi
 # 2026-11-23（用户要求）：海通改走官方「基金概覽」月度汇总 PDF（7 只共用一份，2026-10-30 版已可下），
 # 用 fetch-pdf.js --ht 自动发现链接，解析用 tools/ht-apply.py。
 # 旧的 ht_holdings3/2 已停用（ASSET 会在面板间串行、asOf 写死，属于已知污染源）。

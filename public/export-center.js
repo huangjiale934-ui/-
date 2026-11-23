@@ -1322,6 +1322,22 @@
     document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && ST.open) close(); });
   }
 
+  /* 2026-11-23（用户反馈：切到繁/英后，导出中心整块仍是原语言）：
+     弹层是 build() 一次性拼的静态 HTML，不跟 mpf:lang 走。这里整块重建，
+     但保留已选基金 / 已选字段 / 区间等状态（ST 不变，只重画）。 */
+  document.addEventListener('mpf:lang', function () {
+    if (!ST.open) return;
+    const old = $('#ecModal');
+    if (old) old.remove();
+    build();
+    renderMS(); renderTree(); renderList(); paintNavOnly();
+    const m = $('#ecModal');
+    if (m) { m.classList.add('show'); paintCounts(ST.sel.size); }
+  });
+
+  /* 英文名表是异步加载的：到货后重画一次列表，否则英文模式下仍显示中文名 */
+  document.addEventListener('mpf:names', function () { if (ST.open) renderList(); });
+
   window.openExportCenter = open;
   window.__ecState = ST;
   window.__ecExport = exportNow;   /* 供无头回归直接调用（等价于点「导出 xlsx」） */

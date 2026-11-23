@@ -1653,6 +1653,30 @@
   '走势对比图': 'NAV comparison',
   '走势图': 'NAV charts',
 
+/* 2026-11-23：官方来源标签（友链）英文化 */
+'BCT官網（bcthk.com）': "BCT official site (bcthk.com)",
+'宏利官網（www.manulife.com.hk）': "Manulife official site",
+'東亞銀行官網（GetMPFData 全量日度單位價格）': "BEA official site (daily unit prices)",
+'中銀保誠官網（基金價格查詢）': "BOC-Prudential official site (fund price enquiry)",
+'永明官網（彩虹強積金計劃）': "Sun Life official site (Rainbow MPF)",
+'富達退休集成信託官網 NavChartData API（逐日單位資產淨值）': "Fidelity official site (NavChartData API, daily NAV)",
+'友邦官網價格搜尋（aia-pt API，逐日）': "AIA official site (aia-pt API, daily)",
+'恒生官網（rbwm-api）': "Hang Seng official site (rbwm-api)",
+'滙豐官網（rbwm-api）': "HSBC official site (rbwm-api)",
+'etnet 環富通（逐日累積回報，按當前淨值錨定）': "etnet (daily cumulative return, anchored to current NAV)",
+'交通銀行信託官網（愉盈退休強積金計劃）': "BOCOM Trustee official site (Joyful Retirement MPF)",
+'海通國際官網 PerformanceChart API（逐日單位價格）': "Haitong official site (PerformanceChart API, daily)",
+'萬通信託官網基金價格歷史 API（逐日單位價格）': "YF Life official site (fund price history API, daily)",
+'中國人壽信託官網（OnePartner API）': "China Life official site (OnePartner API)",
+'經濟通（HKET）強積金每日價格（新地計劃官方指定渠道）': "HKET daily MPF prices (designated channel for SHKP scheme)",
+
+/* 2026-11-23：导出中心字段分组标题 */
+'净值与回报': "NAV & returns",
+'风险与自算指标': "Risk & calculated metrics",
+'规模与费用': "Size & fees",
+
+'前十大持仓 + 投资组合分布': 'Top 10 holdings + portfolio allocation',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -1233,9 +1233,9 @@ function renderFriends() {
   document.querySelectorAll('.friend-links').forEach((box) => {
     box.innerHTML =
       '<div class="fr-title">' + TT('友情链接 · 官方数据来源') + '</div>' +
-      '<ul class="fr-list">' + FRIEND_LINKS.map((x) => li([x[0], x[1], TT(x[2])])).join('') + '</ul>' +
+      '<ul class="fr-list">' + FRIEND_LINKS.map((x) => li([TT(x[0]), x[1], TT(x[2])])).join('') + '</ul>' +
       '<div class="fr-sub">' + TT('各计划受托人／保荐人官网基金价格页（单位资产净值核对来源）') + '</div>' +
-      '<ul class="fr-list fr-sm">' + src.map(li).join('') + '</ul>';
+      '<ul class="fr-list fr-sm">' + src.map((x) => li([TT(x[0]), x[1], x[2]])).join('') + '</ul>';
   });
   /* 映射表未到货时先拉一次，到货后重绘完成自愈（只拉一次，避免循环） */
   if (!window.__SRC_PAGES) {
@@ -1374,7 +1374,7 @@ window.fundMatch = fundMatch;
    英文模式下表格/详情/榜单统一用英文名；受托人用官方英文品牌名。 */
 const TRUSTEE_EN = {
   HSBC: 'HSBC', 中國人壽: 'China Life', 中銀保誠: 'BOC-Prudential', 交通: 'BOCOM', 友邦信託: 'AIA',
-  宏利: 'Manulife', 東亞: 'BEA', 永明: 'Sun Life', 渣打信托: 'Standard Chartered', 萬通: 'YF Life', 銀聯信託: 'BCT',
+  宏利: 'Manulife', 東亞: 'BEA', 永明: 'Sun Life', '渣打信托': 'Standard Chartered', '渣打信託': 'Standard Chartered', 萬通: 'YF Life', 銀聯信託: 'BCT',
 };
 function isEn() { return (document.documentElement.lang || '').indexOf('en') === 0; }
 /* /api/market 的榜单只给中文名、没有 id：用当前基金表反查 id 后再取英文名 */

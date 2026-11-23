@@ -171,7 +171,7 @@ const SOURCES = [
   {
     key: 'SHKP', label: '新地強積金僱主營辦計劃（新鴻基地產）', file: 'SHKP.json',
     url: 'https://www.shkp.com/Html/MPF/Fund%20Price%20and%20FFS%20for%20SHKPESS.pdf',
-    trustee: '渣打信托', scheme: '新地強積金僱主營辦計劃', p: 'rawJson',
+    trustee: '渣打信託', scheme: '新地強積金僱主營辦計劃', p: 'rawJson',
     // 月度价格 PDF：Chrome dump-dom 拿不到表格内容，改由 tmp/shkp_nav.py 抽取为 SHKP.json
     noRender: true,
   },
