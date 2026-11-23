@@ -327,6 +327,9 @@ soft_step "10/10 清理临时文件" bash tools/clean-scratch.sh
 # 2026-11-17：plan-lag 原来在 5.6 步跑（早于 funds 更新），清单里的 asOf 会滞后一天。
 # 在派生数据全部重算后再跑一次，保证 status 里的计划内落后清单是当前值。
 soft_step "9.9/9 同计划落后（末次）" node tools/plan-lag.js
+# 2026-11-23（用户要求）：状态漂移检查 —— na / unmatched 的基金集合与上一班不同就单独提醒，
+# 避免被「T+1 落后」这类每日都有的 warn 淹没。soft_step：有漂移只告警不阻断发布。
+soft_step "9.92/9 状态漂移（na/unmatched）" node tools/status-drift.js
 # 2026-11-19（8.0 交接验收发现）：9.5 的补抓会把 2 位净值写回 funds（AMTD 经 etnet 锚定，
 # 如 22.42），而 8.45 的 nav-round4 早已跑过 → predeploy 报「净值与历史末点不一致：16 条」
 # 并中止发布（11-18 22:35 就是这样挂在 10/10）。发布前再归一一次，幂等。

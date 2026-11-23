@@ -181,6 +181,7 @@
 '{n} 只基金': '{n} funds',
 '已导出对比（含基金对比 / 基金数据 / 持仓与分布 / 逐日净值 / 净值走势图）': 'Comparison exported (fund comparison / fund data / holdings & allocation / daily NAV / NAV trend)',
 '该基金暂无日度净值历史，无法加入对比': 'No daily NAV history for this fund, so it cannot be compared',
+'该基金为发行人官网明确不提供单位资产净值的基金（利息基金／保证基金／非单位化基金），故显示「不适用」；本站不以估算值代替。': 'The issuer does not publish a unit NAV for this fund (interest / guaranteed / non-unitised fund), so it is shown as N/A; we do not substitute estimates.',
 '数据统计口径说明': 'Data methodology notes',
 '发行人未发布': 'Issuer not published',
 '发行人官网最新净值只公布到 {d}（落后 {n} 个估值日）；本站不插值、不前值填充。': 'Latest NAV published by the issuer is {d} ({n} valuation days behind); no interpolation or carry-forward.',

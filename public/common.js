@@ -1152,7 +1152,8 @@ function navCell(x, noDate) {
       (noDate ? '' : '<div class="nav-d">' + (x.navAsOf ? esc(x.navAsOf.slice(5).replace('-', '/')) : '—') + '</div>');
   }
   if (x.navStatus === 'na') {
-    const t1 = TT('该基金为官方注明不提供单位资产净值的保证基金／非单位化基金');
+    /* 2026-11-23（用户要求）：明确写出「利息基金／保证基金／非单位化基金」，并说明不以估算值代替 */
+    const t1 = TT('该基金为发行人官网明确不提供单位资产净值的基金（利息基金／保证基金／非单位化基金），故显示「不适用」；本站不以估算值代替。');
     return '<span class="nav-na" data-tip="' + esc(t1) + '" aria-label="' + esc(t1) + '">' + TT('不适用') + '</span>';
   }
   const t2 = TT('未能从受托人／保荐人官网公开页面取得最新净值，为避免出错暂不填值');

@@ -340,6 +340,16 @@ function attachNav(funds) {
       f.navSource = '';
       f.navSourceUrl = '';
       f.navStatus = 'unmatched';
+      /* 2026-11-23（用户反馈）：利息基金是官方不提供单位资产净值的品种（按日计息），
+         官网基金列表偶发整只不返回，之前会从 na 漂移成「待核实」。
+         这类基金固定标 na，避免源站列表抖动影响状态与统计。 */
+      if (/利息基金$/.test(String(f.fund || ''))) {
+        f.navStatus = 'na';
+        /* 用同一受托人的官方来源名，保证 merge-nav 的按来源统计不会多出一组 */
+        f.navSource = '宏利官网（www.manulife.com.hk）';
+        f.navSourceUrl = 'https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2';
+        stat.na = (stat.na || 0) + 1;
+      }
     }
   }
   stat.na = stat.na || 0;
