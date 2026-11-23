@@ -1,14 +1,16 @@
 name: deploy
 
 # push 到 main 即構建並部署 GitHub Pages；
-# 每日北京 22:40（UTC 14:40）跑一次數據更新（抓取 → 校驗 → commit → 觸發部署）。
+# 每日北京 00:00（UTC 16:00）跑一次全量數據更新（抓取 → 校驗 → commit → 觸發部署）；
+# 工作日 09:00（UTC 01:00）跑一次僅淨值的輕量班。GitHub 定時觸發實測延遲 5.5–8 小時。
 # 2026-10-28：本機鏈路改為「不推 GitHub」，雲端成為 GitHub 側唯一寫手，
 #             兩站各自獨立更新；提交信息含 [run-data] 可手動觸發一次數據更新。
 on:
   push:
     branches: [main]
   schedule:
-    # 2026-11-21（用户要求）：只保留两班 —— 00:00 全量（含季度判定）、09:00 轻量（工作日）。
+    # 2026-11-21（用户要求）：只保留两班 —— 00:00 全量（净值 + 持仓归一 + 指数重算）、09:00 轻量（工作日）。
+    # 注：季度持仓抓取（tools/quarterly.sh）目前仍只在本机跑（脚本内是本机 python/node 路径），未上云。
     # GitHub 定时触发实测稳定延迟 7.3–7.8 小时，不再靠「多点小票」堆时点，改为接受延迟。
     - cron: '0 16 * * *'        # 00:00 HKT 全量
     - cron: '0 1 * * 1-5'       # 09:00 HKT 轻量（工作日）
@@ -62,10 +64,12 @@ jobs:
       - name: 判定更新模式（全量 / 仅净值）
         id: mode
         run: |
-          # 2026-11-17：除了 22:40（14:40 UTC）的全量班，其余定时/推送一律走「仅净值」
-          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.schedule }}" != "40 14 * * *" ]; then
+          # 2026-11-23 修（致命）：定时已改为 00:00 HKT（0 16 * * *），但这里仍比对旧的 40 14 * * *，
+          # 导致 11-21 起每一次「全量班」都被判成【仅净值】——scraper / 持仓归一 / indexbuild / allstats
+          # 在云端从未执行。判定必须与本文件 schedule 的第一条严格一致。
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.schedule }}" != "0 16 * * *" ]; then
             echo "light=1" >> "$GITHUB_OUTPUT"
-            echo "本次为「仅净值」模式（北京时间交易日 09:35）"
+            echo "本次为「仅净值」模式（北京时间工作日 09:00）"
           else
             echo "light=0" >> "$GITHUB_OUTPUT"
             echo "本次为「全量」模式"
@@ -146,6 +150,10 @@ jobs:
         if: steps.mode.outputs.light == '0'
         run: node scraper.js || echo "!! 積金局抓取失敗（保留舊 dataAsOf）"
 
+      # 2026-11-23（用户要求）：狀態漂移（na / unmatched 集合與上一班比較），只記錄不阻斷
+      - name: 狀態漂移（na / unmatched）
+        run: node tools/status-drift.js || true
+
       # 2026-11-11（用户要求自动化）：月度統計表在新聞稿裡是**圖片**，用 OCR 解析。
       # 官方 6 日前後發佈，所以只在每月 1–12 日跑；OCR 校驗不通過就保留舊資料。
       - name: 積金局月度統計（OCR，1–12 日）
@@ -179,7 +187,7 @@ jobs:
           # 只覆盖積金局口径字段（保护 nav/navAsOf），官网日期倒退时自动跳过。
           if [ "${{ steps.mode.outputs.light }}" = "0" ]; then node tools/mpfa-refresh.js || echo "!! 積金局快照刷新失敗（保留舊數據）"; fi
           node navperf.js
-          # 2026-11-11（用户反馈两站数据不一致）：原来只有 22:40 全量跑 indexbuild，
+          # 2026-11-11（用户反馈两站数据不一致）：原来只有全量班跑 indexbuild，
           # 白天 09:45 的轻量任务不更新市场指数 → GitHub 站的恒指/标普在白天比
           # WorkBuddy 站晚一天（11-09 vs 11-10）。指数只取一次行情接口，成本很低。
           node indexbuild.js || echo "!! 市場指數失敗（保留舊數據）"

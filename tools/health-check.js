@@ -100,6 +100,23 @@ const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
     const noNav = fl.filter((f) => f.nav == null && f.navStatus !== 'na').length;
     if (noNav) add('warn', noNav + ' 只无净值（非 na）');
   }
+  /* 2026-11-23（用户要求）：同一只基金连续两天出现在状态漂移里 → 直接升为 warn，
+     不再只依赖夜间提示词的判断。 */
+  try {
+    const sd = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'status-drift.json'), 'utf8'));
+    const days = (sd.days || []).slice(-2);
+    if (days.length === 2) {
+      const gap = Math.round((new Date(days[1].date) - new Date(days[0].date)) / 864e5);
+      if (gap === 1) {
+        const prev = new Set((days[0].changes || []).map((c) => String(c.id)));
+        const rep = (days[1].changes || []).filter((c) => prev.has(String(c.id)));
+        if (rep.length) {
+          add('warn', '状态连续 2 天漂移：' + rep.slice(0, 5).map((c) => c.name || c.id).join('、') +
+            (rep.length > 5 ? ' 等 ' + rep.length + ' 只' : ''));
+        }
+      }
+    }
+  } catch (e) { /* 无漂移记录时跳过 */ }
 
   /* 三處一致：全量 451 隻比對 funds.nav ↔ hist 末點 ↔ navperf.asOf
      2026-10-24 改全量（抽樣 40 曾漏報 30 隻錯位）；hist 改本地讀檔（451 次 <2s，不走線上 API） */

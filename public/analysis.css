@@ -60,11 +60,9 @@
   line-height: 1.8;
 }
 .an-pitem.on b { color: #fff; background: rgba(255, 255, 255, 0.18); border-color: transparent; }
-/* 2026-11-23（用户反馈）：选中态不要深蓝底 —— 改成浅蓝底 + 左侧品牌色细条，
-   与侧栏其他项（hover 浅蓝）同一视觉体系。 */
+/* 2026-11-23（用户反馈）：选中态只改底色，浅蓝底 + 品牌蓝字；不要左侧色条 */
 .an-pitem.on {
   background: #e6f2fe; color: var(--brand); font-weight: 600;
-  box-shadow: inset 3px 0 0 var(--brand);
 }
 .an-pitem.on b {
   color: var(--brand); background: #fff; border-color: rgba(8, 102, 187, 0.28);
@@ -73,7 +71,6 @@
    避免用户以为没生效、还要手动点一下。 */
 .an-prov:not(:has(.an-pitem.on)) .an-pitem:first-child {
   background: #e6f2fe; color: var(--brand); font-weight: 600;
-  box-shadow: inset 3px 0 0 var(--brand);
 }
 .an-prov:not(:has(.an-pitem.on)) .an-pitem:first-child b {
   color: var(--brand); background: #fff; border-color: rgba(8, 102, 187, 0.28);

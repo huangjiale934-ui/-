@@ -10,6 +10,22 @@ const pathmod = require('path');
 const { URL } = require('url');
 
 const NAV_FILE = pathmod.join(__dirname, 'data', 'nav.json');
+/* 2026-11-23（用户要求）：非单位化/利息基金登记表，登记后源站列表未返回时固定标 na。
+   新增同类基金只改 data/non-unit.json，不改代码。 */
+const NON_UNIT_FILE = pathmod.join(__dirname, 'data', 'non-unit.json');
+let NON_UNIT = [];
+try {
+  const j = JSON.parse(fs.readFileSync(NON_UNIT_FILE, 'utf8'));
+  NON_UNIT = Array.isArray(j.funds) ? j.funds : [];
+} catch (e) { NON_UNIT = []; }
+function nonUnitOf(f) {
+  const id = String(f.id || '');
+  for (const r of NON_UNIT) {
+    if (r.id && String(r.id) === id) return r;
+    if (r.namePattern) { try { if (new RegExp(r.namePattern).test(String(f.fund || ''))) return r; } catch (e) {} }
+  }
+  return null;
+}
 
 // 注意：积金局官网现已强制 HTTPS（http 会返回 302 跳到 https），必须使用 https
 const SOURCE_URL = 'https://mfp.mpfa.org.hk/tch/mpp_list.jsp';
@@ -340,14 +356,14 @@ function attachNav(funds) {
       f.navSource = '';
       f.navSourceUrl = '';
       f.navStatus = 'unmatched';
-      /* 2026-11-23（用户反馈）：利息基金是官方不提供单位资产净值的品种（按日计息），
-         官网基金列表偶发整只不返回，之前会从 na 漂移成「待核实」。
-         这类基金固定标 na，避免源站列表抖动影响状态与统计。 */
-      if (/利息基金$/.test(String(f.fund || ''))) {
+      /* 2026-11-23（用户要求）：登记在 data/non-unit.json 的基金固定标 na，
+         避免源站列表抖动导致 na↔unmatched 反复。 */
+      const nu = nonUnitOf(f);
+      if (nu) {
         f.navStatus = 'na';
-        /* 用同一受托人的官方来源名，保证 merge-nav 的按来源统计不会多出一组 */
-        f.navSource = '宏利官网（www.manulife.com.hk）';
-        f.navSourceUrl = 'https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2';
+        f.navSource = nu.source || f.navSource || '';
+        f.navSourceUrl = nu.sourceUrl || f.navSourceUrl || '';
+        if (nu.reason) f.navStatusNote = nu.reason;
         stat.na = (stat.na || 0) + 1;
       }
     }
