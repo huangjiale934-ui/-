@@ -134,23 +134,23 @@ jobs:
           node navbuild.js || echo "!! navbuild 解析失敗"
           # 2026-11-22：節點級抓取監控（源站改版單獨告警，不阻斷）
           node tools/scrape-health.js || true
-          python fetch-manulife-hist.py || echo "!! 宏利失敗"
-          python nav-etnet.py || echo "!! etnet 失敗"
-          python fetch-bea-hist.py || echo "!! 東亞失敗"
-          python fetch-fidelity-hist.py || echo "!! 富達失敗"
-          python ht_daily.py || echo "!! 海通失敗"
-          python fetch-bocom-hist.py || echo "!! 交通失敗"
-          python fetch-sunlife-hist.py || echo "!! 永明失敗"
-          python fetch-chinalife-hist.py || echo "!! 中國人壽失敗"
-          python fetch-hsbc-family.py --from "$(date -d '10 days ago' +%F)" || echo "!! 滙豐/恒生失敗"
-          python fetch-bocpt-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 中銀保誠失敗"
-          python aia_ingest2.py || echo "!! 友邦失敗"
-          python fetch-shkp-hist.py || echo "!! 新地失敗"
+          timeout 900 python fetch-manulife-hist.py || echo "!! 宏利失敗"
+          timeout 900 python nav-etnet.py || echo "!! etnet 失敗"
+          timeout 900 python fetch-bea-hist.py || echo "!! 東亞失敗"
+          timeout 900 python fetch-fidelity-hist.py || echo "!! 富達失敗"
+          timeout 900 python ht_daily.py || echo "!! 海通失敗"
+          timeout 900 python fetch-bocom-hist.py || echo "!! 交通失敗"
+          timeout 900 python fetch-sunlife-hist.py --from "$(date -d '45 days ago' +%F)" || echo "!! 永明失敗"
+          timeout 900 python fetch-chinalife-hist.py || echo "!! 中國人壽失敗"
+          timeout 900 python fetch-hsbc-family.py --from "$(date -d '10 days ago' +%F)" || echo "!! 滙豐/恒生失敗"
+          timeout 900 python fetch-bocpt-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 中銀保誠失敗"
+          timeout 900 python aia_ingest2.py || echo "!! 友邦失敗"
+          timeout 900 python fetch-shkp-hist.py || echo "!! 新地失敗"
           # 2026-11-12：官網 PDF 路徑帶 %20 被 WAF 返 999（非撤檔），改用發行人指定的 HKET 每日價格
-          python tools/shkp-hket.py || echo "!! 新地 HKET 兜底失敗"
-          python yflife_daily.py || echo "!! 萬通失敗"
-          python news_fetch.py || echo "!! 積金局新聞稿失敗"
-          python tools/bct-recent.py || echo "!! BCT 失敗"
+          timeout 900 python tools/shkp-hket.py || echo "!! 新地 HKET 兜底失敗"
+          timeout 900 python yflife_daily.py || echo "!! 萬通失敗"
+          timeout 900 python news_fetch.py || echo "!! 積金局新聞稿失敗"
+          timeout 900 python tools/bct-recent.py || echo "!! BCT 失敗"
 
       - name: 抓取淨值（交易日 09:00 轻量模式）
         if: steps.mode.outputs.light == '1'
@@ -165,21 +165,21 @@ jobs:
           node navbuild.js || echo "!! navbuild 解析失敗"
           # 2026-11-22：節點級抓取監控（源站改版單獨告警，不阻斷）
           node tools/scrape-health.js || true
-          python fetch-manulife-hist.py || echo "!! 宏利失敗"
-          python fetch-bea-hist.py || echo "!! 東亞失敗"
-          python fetch-fidelity-hist.py || echo "!! 富達失敗"
-          python fetch-sunlife-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 永明失敗"
-          python fetch-hsbc-family.py --from "$(date -d '10 days ago' +%F)" || echo "!! 滙豐/恒生失敗"
-          python fetch-bocpt-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 中銀保誠失敗"
-          python fetch-bocom-hist.py || echo "!! 交通失敗"
-          python fetch-chinalife-hist.py || echo "!! 中國人壽失敗"
-          python aia_ingest2.py || echo "!! 友邦失敗"
-          python fetch-shkp-hist.py || echo "!! 新地失敗"
+          timeout 900 python fetch-manulife-hist.py || echo "!! 宏利失敗"
+          timeout 900 python fetch-bea-hist.py || echo "!! 東亞失敗"
+          timeout 900 python fetch-fidelity-hist.py || echo "!! 富達失敗"
+          timeout 900 python fetch-sunlife-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 永明失敗"
+          timeout 900 python fetch-hsbc-family.py --from "$(date -d '10 days ago' +%F)" || echo "!! 滙豐/恒生失敗"
+          timeout 900 python fetch-bocpt-hist.py --from "$(date -d '10 days ago' +%F)" || echo "!! 中銀保誠失敗"
+          timeout 900 python fetch-bocom-hist.py || echo "!! 交通失敗"
+          timeout 900 python fetch-chinalife-hist.py || echo "!! 中國人壽失敗"
+          timeout 900 python aia_ingest2.py || echo "!! 友邦失敗"
+          timeout 900 python fetch-shkp-hist.py || echo "!! 新地失敗"
           # 2026-11-12：官網 PDF 路徑帶 %20 被 WAF 返 999（非撤檔），改用發行人指定的 HKET 每日價格
-          python tools/shkp-hket.py || echo "!! 新地 HKET 兜底失敗"
-          python yflife_daily.py || echo "!! 萬通失敗"
-          python ht_daily.py || echo "!! 海通失敗"
-          python tools/bct-recent.py || echo "!! BCT 失敗"
+          timeout 900 python tools/shkp-hket.py || echo "!! 新地 HKET 兜底失敗"
+          timeout 900 python yflife_daily.py || echo "!! 萬通失敗"
+          timeout 900 python ht_daily.py || echo "!! 海通失敗"
+          timeout 900 python tools/bct-recent.py || echo "!! BCT 失敗"
 
       # 2026-11-16（用户反馈 1525/1528 停在 11-10）：列表页对个别基金滞後，
       # 逐只查 fundhistory（3 次重试，取最新节点），只在官方更晚时追加。
@@ -204,7 +204,7 @@ jobs:
         run: |
           if [ "$(date -u +%d)" -le 12 ]; then
             python -m pip install -q 'rapidocr-onnxruntime>=1.2,<1.4' 2>/dev/null || echo "!! OCR 依賴安裝失敗"
-            python tools/mpfa-monthly-sync.py || echo "!! 月度統計未更新（保留舊數據）"
+          timeout 900 python tools/mpfa-monthly-sync.py || echo "!! 月度統計未更新（保留舊數據）"
           else
             echo "非月初窗口，跳過月度統計"
           fi
