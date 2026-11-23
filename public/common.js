@@ -1337,7 +1337,10 @@ function uniq(arr) {
 let __NAMES_EN = null, __NAMES_EN_P = null;
 function ensureNamesEn() {
   if (!__NAMES_EN_P) {
-    __NAMES_EN_P = fetch('/api/names-en', { cache: 'default' })
+    /* 2026-11-23：A 站接口要分享码，不带会 403 → 英文基金名永远出不来 */
+    let __sc = '';
+    try { __sc = new URLSearchParams(location.search).get('sharecode') || ''; } catch (e) { __sc = ''; }
+    __NAMES_EN_P = fetch('/api/names-en' + (__sc ? '?sharecode=' + encodeURIComponent(__sc) : ''), { cache: 'default' })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => { __NAMES_EN = (j && j.funds) || null; window.__mpfNamesEn = __NAMES_EN; return __NAMES_EN; })
       .catch(() => null);

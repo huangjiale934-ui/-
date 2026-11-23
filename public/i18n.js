@@ -88,7 +88,11 @@ if (code === 'zh-Hans') { cb(); return; }
 var flag = code === 'zh-Hant' ? '__hantLoaded' : '__enLoaded';
 if (window[flag]) { cb(); return; }
 var sc = document.createElement('script');
-sc.src = (code === 'zh-Hant' ? 'i18n-hant.js' : 'i18n-en.js') + '?v=20261102g';
+/* 2026-11-23（线上 A 站实测）：站点按分享码分发，静态资源不带 ?sharecode= 会 403，
+   英/繁词典因此加载失败、点 EN 毫无反应（B 站公开所以看不出来）。这里带上当前分享码。 */
+var __sc = '';
+try { __sc = new URLSearchParams(location.search).get('sharecode') || ''; } catch (e) { __sc = ''; }
+sc.src = (code === 'zh-Hant' ? 'i18n-hant.js' : 'i18n-en.js') + '?v=20261102g' + (__sc ? '&sharecode=' + encodeURIComponent(__sc) : '');
 sc.onload = function () { window[flag] = 1; cb(); };
 sc.onerror = function () { cb(); };
 document.head.appendChild(sc);
