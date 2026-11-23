@@ -1,0 +1,13 @@
+{
+ "updatedAt": "2026-11-23",
+ "note": "发行人官网明确不提供单位资产净值的基金（利息基金／保证基金／非单位化基金）。抓取时若源站列表未返回该基金，按本表固定标为 na（不适用），避免 na 与 unmatched 随源站列表抖动反复。新增同类基金只需在此登记，不必改代码。",
+ "funds": [
+  {
+   "id": "365",
+   "namePattern": "利息基金$",
+   "reason": "利息基金按日计息，发行人不提供单位资产净值",
+   "source": "宏利官网（www.manulife.com.hk）",
+   "sourceUrl": "https://www.manulife.com.hk/zh-hk/individual/fund-price/mpf.html/v2"
+  }
+ ]
+}
