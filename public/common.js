@@ -383,7 +383,10 @@ function initUpdateBanner() {
      用 /api/status.json 区分：动态站该端点回传 mode='live'，静态站是构建产物（无 mode）。
      探针失败按动态站处理，不误报。 */
   let isStatic = false;
-  fetch('/api/status.json', { cache: 'no-store' })
+  /* 2026-11-23（B 站 404）：这里原来用绝对路径 /api/status.json —— GitHub Pages 是
+     项目站点（/-/ 子路径），绝对路径会跑到域名根 → 404，静态站提示条因此判错。
+     改成相对路径，两站都正确解析。 */
+  fetch('api/status.json', { cache: 'no-store' })
     .then((r) => (r.ok ? r.json() : null))
     .then((j) => { isStatic = !(j && j.mode === 'live'); check(); })
     .catch(() => {});

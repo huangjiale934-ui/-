@@ -269,7 +269,7 @@ async function main() {
     if (!s) return;
     const day = (s.updateStatus || {}).day || '';
     /* 2026-11-18：原来只要「当天还没跑」就报错，于是每天中午前必报一次假警。
-       本机 22:30、云端 22:40 才是主班次，13:00 之前不应判定「今天没跑」。 */
+       本机 22:00、云端 00:00（实测延迟 5.5–8h）才是主班次，13:00 之前不应判定「今天没跑」。 */
     const hourHKT = hktNow().getUTCHours ? hktNow().getUTCHours() : 0;
     if (day !== today && hourHKT >= 13) {
       problems.push(label + ' 当天（' + today + '）13:00 后仍没有完成的数据任务（updateStatus.day=' + (day || '空') + '）');
