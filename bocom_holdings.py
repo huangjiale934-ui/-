@@ -11,6 +11,7 @@
 import json
 import os
 import re
+import datetime as _dt
 import sys
 import time
 
@@ -83,6 +84,23 @@ def main():
     FN = json.load(open(os.path.join(DATA, "funds.json"), encoding="utf-8"))["funds"]
     bc = [x for x in FN if "交通" in (x.get("trustee") or "") or "交通" in (x.get("scheme") or "")]
     pdf = pdfplumber.open(path)
+    # 2026-11-23（用户要求）：asOf 不再写死脚本常量——从便览首页取「不晚于今天的最新 dd/mm/yyyy」。
+    # 换季后（如 2026Q3）只要官方 PDF 里出现 30/09/2026，就会自动写成该日期。
+    asof = ASOF
+    try:
+        _t0 = pdf.pages[0].extract_text() or ""
+        _c = []
+        for _m in re.finditer(r"(\d{1,2})/(\d{1,2})/(20\d{2})", _t0):
+            try:
+                _d = _dt.date(int(_m.group(3)), int(_m.group(2)), int(_m.group(1)))
+                if _d <= _dt.date.today():
+                    _c.append(_d)
+            except ValueError:
+                pass
+        if _c:
+            asof = max(_c).isoformat()
+    except Exception:
+        pass
     ok = 0
     for pg in pdf.pages:
         t = pg.extract_text() or ""
@@ -100,8 +118,8 @@ def main():
             print("✘ 未匹配:", name, "core=", core)
             continue
         hld["funds"][str(x["id"])] = {
-            "asOf": ASOF,
-            "src": "交通銀行信託基金便覽 PDF（FFS 2026Q2）",
+            "asOf": asof,
+            "src": "交通銀行信託基金便覽 PDF（FFS %s）" % asof[:4] + "Q" + str((int(asof[5:7]) - 1) // 3 + 1),
             "top10": top10,
             "alloc": alloc,
             "allocLabel": "資產分佈" if alloc else None,

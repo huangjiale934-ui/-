@@ -1399,6 +1399,11 @@ function fundDisplayName(x) {
     const e = window.__mpfNamesEn[String(nameIdOf(x))];
     if (e && e.fund) return e.fund;
   }
+  /* 2026-11-23（用户要求一次性修好英文基金名）：任何一次英文渲染发现名表还没到货，
+     就主动补拉一次；到货后发 mpf:names，各表自行重绘。这样不再依赖 mpf:lang 的时序。 */
+  if (isEn() && !window.__mpfNamesEn && typeof window.ensureNamesEnReady === 'function') {
+    try { window.ensureNamesEnReady(); } catch (e) { /* 忽略 */ }
+  }
   return x.fundBase || x.fund || '';
 }
 function schemeDisplay(x) {
@@ -1423,6 +1428,14 @@ function fundFullName(x) {
   return x.fund || x.fundBase || '';
 }
 window.fundDisplayName = fundDisplayName;
+/* 2026-11-23：英文名表「按需补拉」入口（fundDisplayName 命中缺失时调用） */
+window.ensureNamesEnReady = function () {
+  if (!isEn() || window.__mpfNamesEn) return;
+  ensureNamesEn().then(() => {
+    if (window.__onRefresh) window.__onRefresh();
+    document.dispatchEvent(new Event('mpf:names'));
+  }).catch(() => {});
+};
 window.fundFullName = fundFullName;
 window.schemeDisplay = schemeDisplay;
 window.trusteeDisplay = trusteeDisplay;

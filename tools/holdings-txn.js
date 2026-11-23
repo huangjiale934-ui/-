@@ -47,6 +47,11 @@ function degraded(before, now) {
      云端每季重跑时，它们会把已更新的季度写回旧日期 —— asOf 倒退一律判退化。 */
   const sb = String(before.asOf || ''), sn = String(now.asOf || '');
   if (sb && sn && sn < sb) why.push('asOf 倒退 ' + sb + '→' + sn);
+  /* 2026-11-23（用户要求）：分布标签不得是持仓名称——云端曾把个股名写进资产类别 */
+  const norm = (v) => String(v || '').toLowerCase().replace(/[^0-9a-z一-鿿]/g, '');
+  const tset = new Set((now.top10 || []).map((y) => norm(y.name)).filter(Boolean));
+  const ov = (now.alloc || []).filter((b) => tset.has(norm(b.label)));
+  if (ov.length) why.push('分布混入持仓名(' + ov.length + ')');
   return why;
 }
 

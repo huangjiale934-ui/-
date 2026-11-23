@@ -1677,6 +1677,8 @@
 
 '前十大持仓 + 投资组合分布': 'Top 10 holdings + portfolio allocation',
 
+'中文原文': 'Chinese original',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

@@ -768,7 +768,11 @@
         '<li class="news-item">' +
           '<span class="news-date">' + esc(x.date) + '</span>' +
           '<a class="news-title" href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer">' +
-            '<span class="nt-text">' + esc(x.title) + '</span><i class="news-out">↗</i></a>' +
+            '<span class="nt-text">' + esc(x.title) + '</span>' +
+            (window.isEnLang && window.isEnLang()
+              ? '<span style="margin-left:6px;font-size:11px;color:#8a94a6;border:1px solid #d8dee9;border-radius:4px;padding:0 4px;white-space:nowrap">' + esc(TT('中文原文')) + '</span>'
+              : '') +
+            '<i class="news-out">↗</i></a>' +
         '</li>').join('');
     }).catch(() => {
       box.innerHTML = '<li class="news-item news-empty">' + TT('资讯加载失败，可前往积金局官网查看') + '</li>';
