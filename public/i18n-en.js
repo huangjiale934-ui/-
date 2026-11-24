@@ -1700,6 +1700,10 @@
 '回撤修复天数': "Drawdown recovery (days)",
 '连续正收益年数': "Consecutive positive years",
 
+/* 2026-11-24：非单位化基金说明 */
+"该基金不设单位资产净值（利息基金／非单位化基金），受托人明确不提供净值，因此官方没有历史序列可画——这不是本站未获取。费用、风险级别、规模等资料不受影响。": "This fund has no unit NAV by design (interest fund / non-unitised fund). The trustee does not publish a NAV, so no historical series exists — this is not a scraping gap. Fees, risk level and fund size are unaffected.",
+"该基金无单位净值，仅参与费用/风险等指标对比": "No unit NAV — compared on fees, risk and other metrics only",
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

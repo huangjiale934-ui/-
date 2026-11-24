@@ -178,7 +178,10 @@
   let DBSYNC = false;
   const DBFOLD_KEY = 'mpf-db-trend-fold';
   function dbTrendItems() {
-    const ids = CMPX.ids().slice(0, 8);   /* 2026-11-22：与 CMP_MAX 统一为 8 */
+    /* 2026-11-24：无单位净值的基金（利息基金/非单位化）可加入对比，
+       但它没有序列可画——走势图跳过它，对比弹窗里仍按费用/风险等指标并列。 */
+    const naIds = new Set((DATA.funds || []).filter((f) => f.navStatus === 'na').map((f) => String(f.id)));
+    const ids = CMPX.ids().filter((id) => !naIds.has(String(id))).slice(0, 8);   /* 与 CMP_MAX 统一为 8 */
     return [{ type: 'index', key: 'HSI' }].concat(ids.map((id) => ({ type: 'fund', id: id })));
   }
   function initDbTrend() {
@@ -964,15 +967,23 @@
        不能再让它占一个对比名额 —— 直接不渲染勾选框，给出「—」与原因。 */
     cmp: (x) => {
       const ok = x && x.navStatus === 'verified' && x.nav != null;
+      /* 2026-11-24（用户要求）：利息基金/非单位化基金没有净值，但费用、风险、规模等
+         仍可参与「对比」弹窗的横向比较，所以勾选框不再隐藏，只在提示里说明不含走势。 */
+      /* 2026-11-24：无净值基金加入对比会让刷新链路死循环（实测勾选后主线程锁死），
+         暂不放开；按钮保留并给出明确原因，修好对比链路后再开。 */
+      const canCmp = ok;
       const nm = window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund);
-      if (!ok) {
+      if (!canCmp) {
         return '<td data-c="cmp" class="c" data-l="' + TT('对比') + '">' +
-          '<span class="risk-na" title="' + esc(TT('该基金暂无日度净值历史，无法加入对比')) + '">—</span></td>';
+          '<span class="risk-na" title="' + esc(x && x.navStatus === 'na'
+            ? TT('该基金由受托人明确不提供单位净值（利息基金），因此没有每日净值可比；费用、风险等资料仍可查看')
+            : TT('该基金暂无日度净值历史，无法加入对比')) + '">—</span></td>';
       }
       return '<td data-c="cmp" class="c" data-l="' + TT('对比') + '">' +
         '<input type="checkbox" data-cmp="' + esc(x.id) + '"' +
         ' aria-label="' + esc(TT('加入对比') + '：' + nm) + '"' +
-        ' title="' + esc(TT('加入对比')) + '"' + (CMPX.has(x.id) ? ' checked' : '') + '></td>';
+        ' title="' + esc(ok ? TT('加入对比') : TT('该基金无单位净值，仅参与费用/风险等指标对比')) + '"' +
+        (CMPX.has(x.id) ? ' checked' : '') + '></td>';
     },
     fund: (x) => {
       /* 2026-11-01（6.0，用户要求）：单位类别不再占一行，改悬浮在「A 类」标签上；标签简称「A 类」 */

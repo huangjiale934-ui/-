@@ -12,7 +12,15 @@
 */
 (function () {
   if (window.MPFMulti) return;
-  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  /* 2026-11-24（用户反馈：点开筛选时选项会闪一下繁体再变简体）：
+     这里原来只做 HTML 转义，不跟全站繁→简口径，列表先用繁体原文绘制，
+     等 common.js 的 t2s 观察器扫到才改。与 common.js 的 esc() 保持同一出口。 */
+  const t2sText = (s) => {
+    let out = String(s == null ? '' : s);
+    if (window.__t2sActive && window.t2s) out = window.t2s(out);
+    return out;
+  };
+  const esc = (s) => t2sText(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const lbl = (s) => (typeof TT === 'function' ? TT(s) : s);
 
   function create(host, opt) {
@@ -34,7 +42,7 @@
 
     const labelOf = (v) => {
       const it = options.find((x) => x.v === v);
-      return it ? it.label : v;
+      return t2sText(it ? it.label : v);
     };
     function syncText() {
       if (!sel.size) txt.textContent = o.allLabel;
