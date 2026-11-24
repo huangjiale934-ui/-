@@ -3289,11 +3289,12 @@ html[lang="en"] .f-row-merged > .f-item > label {
 
 /* 2026-11-24（用户要求）：六个筛选框固定 65px（等宽），右侧「共筛选出/每页显示/列设置/导出」
    恢复原始样式（align-items:flex-end + height:auto + position:relative，列设置弹层靠它定位）。 */
+/* 六个筛选等宽：按剩余空间均分（flex:1 1 0），右侧工具条 flex:0 0 auto 不受影响 */
 .f-row-merged > .f-item {
-  flex: 0 0 65px !important;
-  min-width: 65px !important;
-  max-width: 65px !important;
-  width: 65px !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: auto !important;
 }
 .f-row-merged > .f-item .mpfsel,
 .f-row-merged > .f-item .mpfsel-btn,
