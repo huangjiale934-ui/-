@@ -1,7 +1,8 @@
 name: deploy
 
 # push 到 main 即構建並部署 GitHub Pages；
-# 每日北京 00:00（UTC 16:00）跑一次全量數據更新（抓取 → 校驗 → 季度持倉 → commit → 觸發部署）；
+# 每日香港 01:40（UTC 17:40）跑一次全量資料更新（抓取 → 校驗 → 季度持倉 → commit → 觸發部署）；
+# 香港 04:30（UTC 20:30）再跑一次全量重試，避免官網晚發布或 GitHub 排隊造成漏更；
 # 工作日 09:00（UTC 01:00）跑一次僅淨值的輕量班。GitHub 定時觸發實測延遲 5.5–8 小時。
 # 2026-10-28：本機鏈路改為「不推 GitHub」，雲端成為 GitHub 側唯一寫手，
 #             兩站各自獨立更新；提交信息含 [run-data] 可手動觸發一次數據更新。
@@ -11,12 +12,13 @@ on:
   push:
     branches: [main]
   schedule:
-    # ⚠️ 下面两行 cron 必须分别带 `# full` / `# light` 标记：
+    # 全量班可配置两条 cron（发布后首跑 + 重试），并必须带一条 `# light` 标记：
     # 「判定更新模式」那一步直接从本文件读标记，不再手写第二份 cron 字符串。
     # 历史事故（2026-11-21）：schedule 已改成 0 16，判定里还比着旧的 40 14 →
     # 11-21 起每一次全量班都被判成轻量，scraper/持仓/indexbuild/allstats 在云端从未执行。
     # 现在只有「改 cron 且忘了改标记」才会出问题，而那种情况会直接让 job 失败（不会静默降级）。
-    - cron: '0 16 * * *'   # full   00:00 HKT 全量（净值 + 持仓 + 指数 + 季度）
+    - cron: '40 17 * * *'  # full   01:40 HKT 全量（净值 + 持仓 + 指数 + 季度）
+    - cron: '30 20 * * *'  # full   04:30 HKT 全量重試（晚發布／排隊兜底）
     - cron: '0 1 * * 1-5'  # light  09:00 HKT 仅净值（工作日）
   workflow_dispatch:
     inputs:
@@ -88,13 +90,15 @@ jobs:
         run: |
           set -u
           WF=".github/workflows/deploy.yml"
-          # 唯一事实来源：本文件 schedule 里带 `# full` / `# light` 标记的两行。
+          # 唯一事实来源：本文件 schedule 里带 `# full` 的首跑／重试行及 `# light` 行。
           # 绝不在这里再写一遍 cron 字面量（11-21 事故就是这么来的）。
-          FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" "$WF" | head -1 | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
+          FULL_CRONS=$(grep -oE "cron: *'[^']+' *# *full" "$WF" | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
           LIGHT_CRON=$(grep -oE "cron: *'[^']+' *# *light" "$WF" | head -1 | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
+          N_FULL=$(printf '%s\n' "$FULL_CRONS" | sed '/^$/d' | wc -l)
+          N_LIGHT=$(grep -cE "cron: *'[^']+' *# *light" "$WF" || true)
           N_CRON=$(grep -cE "^[[:space:]]*-[[:space:]]*cron:" "$WF" || true)
-          if [ -z "$FULL_CRON" ] || [ -z "$LIGHT_CRON" ] || [ "$N_CRON" != "2" ]; then
-            echo "::error::schedule 必须正好两条 cron，且分别带 '# full' / '# light' 标记；当前 cron=${N_CRON:-0} 条，full='${FULL_CRON}' light='${LIGHT_CRON}'"
+          if [ "$N_FULL" -lt 1 ] || [ "$N_LIGHT" != "1" ]; then
+            echo "::error::schedule 必须至少一条 '# full' cron 和恰好一条 '# light' cron；当前 cron=${N_CRON:-0} 条，full=${N_FULL} light=${N_LIGHT}"
             exit 1
           fi
 
@@ -102,9 +106,12 @@ jobs:
             workflow_dispatch) MODE="${IN_MODE:-full}" ;;
             push)              MODE=full ;;   # 只有带 [run-data] 的提交才会进本 job = 手动全量
             schedule)
-              if   [ "$EV_SCHED" = "$FULL_CRON" ];  then MODE=full
-              elif [ "$EV_SCHED" = "$LIGHT_CRON" ]; then MODE=light
-              else echo "::error::未知的 schedule '$EV_SCHED'（不是本文件里的任何一条 cron）"; exit 1; fi ;;
+              MODE=
+              while IFS= read -r FULL_CRON; do
+                [ -n "$FULL_CRON" ] && [ "$EV_SCHED" = "$FULL_CRON" ] && MODE=full
+              done <<< "$FULL_CRONS"
+              if [ -z "$MODE" ] && [ "$EV_SCHED" = "$LIGHT_CRON" ]; then MODE=light; fi
+              if [ -z "$MODE" ]; then echo "::error::未知的 schedule '$EV_SCHED'（不是本文件里的任何一条 cron）"; exit 1; fi ;;
             *)                 MODE=light ;;
           esac
 
