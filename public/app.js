@@ -380,20 +380,20 @@
     if (MF_TY) return;
     if (typeof window.MPFMulti !== 'function') return;   /* 脚本尚未就绪时不抛错 */
     MF_TY = window.MPFMulti('#fType', {
-      allLabel: TT('全部种类'),
+      allLabel: TT('全部'),
       onChange: (arr) => { F.type = arr; F.sub = []; S.page = 1; fillSub(); render(); syncUrlFilters(); },
     });
     MF_S = window.MPFMulti('#fSub', {
-      allLabel: TT('全部细类'),
+      allLabel: TT('全部'),
       onChange: (arr) => { F.sub = arr; S.page = 1; render(); syncUrlFilters(); },
     });
     /* 2026-11-24（用户要求）：受托人与种类之间增加「基金计划」筛选 */
     MF_SC = window.MPFMulti('#fScheme', {
-      allLabel: TT('全部计划'),
+      allLabel: TT('全部'),
       onChange: (arr) => { F.scheme = arr; S.page = 1; render(); syncUrlFilters(); },
     });
     MF_T = window.MPFMulti('#fTrustee', {
-      allLabel: TT('全部受托人'),
+      allLabel: TT('全部'),
       onChange: (arr) => {
         F.trustee = arr; S.page = 1; render(); syncUrlFilters();
         if (typeof window.__anSetTrustee === 'function') { try { window.__anSetTrustee(arr[0] || ''); } catch (e) {} }
@@ -419,9 +419,9 @@
       return ta - tb || String(a).localeCompare(String(b), 'zh-Hant');
     });
     MF_SC.setOptions(schemes.map((v) => ({ v, label: schemeLabel(v) })));
-    MF_SC.setAllLabel(TT('全部计划'));
-    MF_TY.setAllLabel(TT('全部种类'));
-    MF_T.setAllLabel(TT('全部受托人'));
+    MF_SC.setAllLabel(TT('全部'));
+    MF_TY.setAllLabel(TT('全部'));
+    MF_T.setAllLabel(TT('全部'));
     fillSub();
   }
 
@@ -438,7 +438,7 @@
     const f = DATA.funds.filter((x) => !F.type.length || F.type.indexOf(x.type) >= 0);
     const vals = uniq(f.map((x) => x.subtype));
     MF_S.setOptions(vals.map((v) => ({ v, label: typeLabel(v) })));
-    MF_S.setAllLabel(TT('全部细类'));
+    MF_S.setAllLabel(TT('全部'));
     const valid = new Set(vals);
     F.sub = F.sub.filter((v) => valid.has(v));
     MF_S.setSelected(F.sub, true);
