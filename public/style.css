@@ -1965,11 +1965,13 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
    ========================================================================== */
 .card.filters .f-row-main.f-row-merged { flex-wrap: nowrap; gap: 10px; align-items: flex-end; }
 .f-row-merged > .f-item { min-width: 0 !important; }
-.f-row-merged > .dim-item { flex: 0 0 118px !important; min-width: 118px !important; }
-.f-row-merged > .f-search { flex: 1 1 176px !important; min-width: 118px !important; }
+/* 2026-11-24（用户要求）：新增「基金计划」筛选，所有筛选框缩 5%，搜索框缩一半 */
+.f-row-merged > .dim-item { flex: 0 0 100px !important; min-width: 100px !important; }
+.f-row-merged > .f-search { flex: 0 0 84px !important; min-width: 84px !important; }
 .f-row-merged > .f-type,
-.f-row-merged > .f-sub { flex: 0 1 112px !important; min-width: 86px !important; }
-.f-row-merged > .f-trustee { flex: 0 1 122px !important; min-width: 92px !important; }
+.f-row-merged > .f-sub,
+.f-row-merged > .f-scheme { flex: 0 1 92px !important; min-width: 78px !important; }
+.f-row-merged > .f-trustee { flex: 0 1 104px !important; min-width: 84px !important; }
 .f-row-merged .tb-tail { display: flex; align-items: center; gap: 8px; flex: 0 0 auto;
   margin-left: auto; height: 36px; position: relative; }
 .f-row-merged .tb-per-label { font-size: 12.5px; color: var(--text-2); white-space: nowrap; margin: 0; }
@@ -1984,7 +1986,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .f-row-merged .tb-search { height: 36px; }
 .f-row-merged .dim-item .mpfsel-btn { height: 36px; }
 
-@media (max-width: 980px) {
+@media (max-width: 1180px) {
   .card.filters .f-row-main.f-row-merged { flex-wrap: wrap; }
   .f-row-merged > .dim-item { flex: 0 0 auto !important; min-width: 108px !important; }
   .f-row-merged > .f-search { flex: 1 1 200px !important; }
@@ -3293,3 +3295,25 @@ body { overflow-x: clip; }
    不新增行、不改现有间距；只对落后 ≥2 个估值日的基金显示。 */
 .fd-late { display: inline-block; margin-left: 6px; font-size: 10.5px; line-height: 15px;
   padding: 0 6px; border-radius: 9px; background: #fff4e5; color: #a35a00; border: 1px solid #f0d5ae; }
+
+/* ==========================================================================
+   2026-11-24（用户反馈：英文模式拥挤、超出页面）
+   英文标签普遍比中文长 30–60%，在 1024–1280 的窗口里会挤爆固定的筛选宽度
+   与走势卡的 7 列指标表。这里只针对英文做「密度压缩」，不改中文/繁体版式。
+   ========================================================================== */
+html[lang="en"] .f-row-merged > .dim-item { flex-basis: 106px !important; }
+html[lang="en"] .f-row-merged > .f-search { flex-basis: 92px !important; }
+html[lang="en"] .f-row-merged > .f-trustee { flex-basis: 112px !important; }
+html[lang="en"] .f-row-merged > .f-scheme { flex-basis: 104px !important; }
+html[lang="en"] .f-row-merged > .f-type,
+html[lang="en"] .f-row-merged > .f-sub { flex-basis: 96px !important; }
+html[lang="en"] .mpfsel-btn { font-size: 12px; padding-left: 8px; padding-right: 22px; }
+html[lang="en"] .f-item label { font-size: 11.5px; }
+html[lang="en"] .tr-tbl th,
+html[lang="en"] .tr-tbl td { font-size: 12px; padding-left: 6px; padding-right: 6px; white-space: nowrap; }
+html[lang="en"] .tr-tbl th.r,
+html[lang="en"] .tr-tbl td.r { text-align: right; }
+@media (max-width: 1240px) {
+  /* 英文更早换行，避免末端的「导出/Export」被挤出可视区 */
+  html[lang="en"] .card.filters .f-row-main.f-row-merged { flex-wrap: wrap; }
+}

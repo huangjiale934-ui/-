@@ -355,8 +355,8 @@
 '自定义每页条数': 'Custom rows per page',
 '名称': 'Name',
 '最新点位': 'Latest level',
-'区间收益': 'Range return',
-'区间最大回撤': 'Max drawdown',
+'区间收益': 'Return',
+'区间最大回撤': 'Max DD',
 '最大回撤起始日期': 'Drawdown start',
 '最大回撤结束日期': 'Drawdown end',
 '查看具体基金分析': 'View detailed fund analysis',
@@ -1289,8 +1289,8 @@
   '添加基金': 'Add fund',
   '期初': 'Start',
   '期末': 'End',
-  '区间最高': 'Period high',
-  '区间最低': 'Period low',
+  '区间最高': 'High',
+  '区间最低': 'Low',
   '年化波动率': 'Annualised volatility',
   '区间第一个交易日的净值 / 指数点位': 'NAV / index level on the first trading day of the range',
   '区间最后一个交易日的净值 / 指数点位': 'NAV / index level on the last trading day of the range',
@@ -1312,7 +1312,7 @@
   '导出 CSV': 'Export CSV',
   '把下面这张统计表导出为 CSV（Excel 可直接打开）': 'Export the table below as CSV (opens in Excel)',
   '基金走势区间统计': 'Fund range stats',
-  '最大回撤区间': 'Max drawdown period',
+  '最大回撤区间': 'DD period',
   /* ===== 2026-11-04（第三十六轮）：语言切换补齐 ===== */
   '数据取自 {n} 家受托人官网（每交易日更新），指标由本平台自行计算；个别基金公布较慢，可能滞后 1–2 天。':
     'Source: official websites of {n} trustees (updated every trading day). Metrics are calculated by this platform; a few funds publish slower and may lag 1–2 days.',
@@ -1678,6 +1678,20 @@
 '前十大持仓 + 投资组合分布': 'Top 10 holdings + portfolio allocation',
 
 '中文原文': 'Chinese original',
+
+/* 2026-11-24：排名维度写全后的标签 */
+'近1周回报': "1-week return",
+'近1个月回报': "1-month return",
+'年初至今回报': "Year-to-date return",
+'近3年年化回报': "3-year annualised return",
+'近5年年化回报': "5-year annualised return",
+'年化波动率（近3年）': "Annualised volatility (3Y)",
+'正收益月份（近1年）': "Positive months (1Y)",
+'超额收益（相对恒指）': "Excess return vs HSI",
+
+/* 2026-11-24：基金计划筛选 */
+'基金计划': "Fund scheme",
+'搜索': "Search",
 
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }

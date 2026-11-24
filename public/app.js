@@ -9,7 +9,7 @@
      D0 会跟着当前列漂移，第三下点击等于什么也没复位。 */
   const DEF_SORT = { key: 'size', dir: 'desc' };
   /* 2026-11-19（8.0）：种类/细类/受托人改为多选（数组），支持同时筛多个 */
-  const F = { kw: '', type: [], sub: [], trustee: [], risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' };
+  const F = { kw: '', type: [], sub: [], trustee: [], scheme: [], risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' };
   let ROWS = [];
   let YEARS = [];
 
@@ -26,12 +26,13 @@
   /* 2026-10-31（用户要求）：排名维度标签行改为工具栏下拉（默认「无」）。
      选中维度 = 该维度默认方向排序（波动/波幅类为升序）；选「无」= 回名次顺序；
      表头点击仍可再改方向（互斥逻辑在 common.makeSorter 内同步复位下拉）。 */
+  /* 2026-11-24（用户要求）：维度名称写完整，避免「近1年」这类歧义 */
   const DIMS = [
-    ['selfY1', '近1年', 'desc'], ['selfD1', '日涨跌', 'desc'], ['selfW1', '近1周', 'desc'],
-    ['selfM1', '近1月', 'desc'], ['selfYtd', '年初至今', 'desc'], ['selfY3a', '近3年年化', 'desc'],
-    ['selfY5a', '近5年年化', 'desc'], ['selfMdd', '近1年回撤', 'desc'], ['selfMdd5', '近5年回撤', 'desc'],
-    ['sharpe1', '夏普比率', 'desc'], ['vol1', '年化波动率', 'asc'], ['vol3', '3年波幅', 'asc'],
-    ['posM12', '正收益月份', 'desc'], ['excess1', '超额收益（恒指）', 'desc'],
+    ['selfY1', '近1年回报', 'desc'], ['selfD1', '日涨跌幅', 'desc'], ['selfW1', '近1周回报', 'desc'],
+    ['selfM1', '近1个月回报', 'desc'], ['selfYtd', '年初至今回报', 'desc'], ['selfY3a', '近3年年化回报', 'desc'],
+    ['selfY5a', '近5年年化回报', 'desc'], ['selfMdd', '近1年最大回撤', 'desc'], ['selfMdd5', '近5年最大回撤', 'desc'],
+    ['sharpe1', '夏普比率（近1年）', 'desc'], ['vol1', '年化波动率（近1年）', 'asc'], ['vol3', '年化波动率（近3年）', 'asc'],
+    ['posM12', '正收益月份（近1年）', 'desc'], ['excess1', '超额收益（相对恒指）', 'desc'],
   ];
 
   /* ===== 排名维度（2026-11-02 第十八轮，用户要求）：支持多维度叠加排序 =====
@@ -46,7 +47,9 @@
   function syncDimUI() {
     const a = window.__DIMSEL;
     const txt = document.getElementById('dimTxt');
-    if (txt) txt.textContent = dimLabel(a[0].k);
+    /* 按钮显示真正生效的排序维度（规模只是常驻的并列打破，不作为主标签） */
+    const eff = a.find((x) => x.k !== 'size') || a[0];
+    if (txt) txt.textContent = dimLabel(eff.k);
     const cnt = document.getElementById('dimCnt');
     if (cnt) { cnt.hidden = a.length < 2; cnt.textContent = '+' + (a.length - 1); }
     const grid = document.getElementById('dimGrid');
@@ -62,7 +65,7 @@
     const a = window.__DIMSEL;
     /* 2026-11-14：用户改用「排名维度」下拉时，清掉表头的「已取消」标记 */
     S.cancelled = false;
-    const first = a[0] || { k: 'size', d: 'desc' };
+    const first = a.find((x) => x.k !== 'size') || a[0] || { k: 'size', d: 'desc' };
     S.key = first.k; S.dir = first.d;
     /* 联动放出：非默认列临时显示（不写 colSet，刷新后回到用户自己的列设置） */
     DIM_EXTRA = a.map((x) => x.k).filter((k) => COL_DEFS.some((c) => c.k === k) && COL_DEFAULT.indexOf(k) < 0);
@@ -105,13 +108,17 @@
       const k = b.dataset.k;
       const a = window.__DIMSEL;
       const i = a.findIndex((x) => x.k === k);
-      if (i >= 0) a.splice(i, 1);
-      else {
-        /* 首次点非默认维度时替换默认的「基金规模」，让用户点的维度成为第一优先级 */
-        if (a.length === 1 && a[0].k === 'size' && k !== 'size') a.length = 0;
+      if (i >= 0) {
+        /* 2026-11-24（用户要求）：只有点「基金规模」本身才取消它；且不允许一个都不留 */
+        if (a.length === 1) return;
+        a.splice(i, 1);
+      } else if (k === 'size') {
+        a.unshift({ k: 'size', d: 'desc' });
+      } else {
+        /* 非规模维度：规模始终保留在第 1 位，新维度排在后面（编号 2、3…） */
+        if (!a.some((x) => x.k === 'size')) a.unshift({ k: 'size', d: 'desc' });
         a.push({ k: k, d: dimDefDir(k) });
       }
-      if (!a.length) a.push({ k: 'size', d: 'desc' });
       applyDims();
     });
     const clr = document.getElementById('dimClear');
@@ -150,9 +157,12 @@
     return String(x).localeCompare(String(y), 'zh-Hans-CN') * sgn;
   }
   function sortByDims(rows, dims) {
+    /* 2026-11-24（用户要求）：基金规模常驻（编号 1），但排序让「后点的维度」先生效，
+       规模只作最后的并列打破——否则点了近1年仍按规模排，等于没点。 */
+    const order = dims.filter((d) => d.k !== 'size').concat(dims.filter((d) => d.k === 'size'));
     return rows.slice().sort((a, b) => {
-      for (let i = 0; i < dims.length; i++) {
-        const r = cmpDim(a[dims[i].k], b[dims[i].k], dims[i].d);
+      for (let i = 0; i < order.length; i++) {
+        const r = cmpDim(a[order[i].k], b[order[i].k], order[i].d);
         if (r) return r;
       }
       return 0;
@@ -365,7 +375,7 @@
   }
 
   /* 2026-11-19：三个筛选统一换成共用多选组件（与导出中心同一套） */
-  let MF_TY = null, MF_S = null, MF_T = null;
+  let MF_TY = null, MF_S = null, MF_T = null, MF_SC = null;
   function ensureMF() {
     if (MF_TY) return;
     if (typeof window.MPFMulti !== 'function') return;   /* 脚本尚未就绪时不抛错 */
@@ -376,6 +386,11 @@
     MF_S = window.MPFMulti('#fSub', {
       allLabel: TT('全部细类'),
       onChange: (arr) => { F.sub = arr; S.page = 1; render(); syncUrlFilters(); },
+    });
+    /* 2026-11-24（用户要求）：受托人与种类之间增加「基金计划」筛选 */
+    MF_SC = window.MPFMulti('#fScheme', {
+      allLabel: TT('全部计划'),
+      onChange: (arr) => { F.scheme = arr; S.page = 1; render(); syncUrlFilters(); },
     });
     MF_T = window.MPFMulti('#fTrustee', {
       allLabel: TT('全部受托人'),
@@ -395,9 +410,27 @@
       v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
       n: f.filter((y) => y.trustee === v).length,
     })));
+    /* 计划的排序跟随左侧受托人排序（宏利 → 銀聯信託 → 友邦 …），同受托人内按计划名 */
+    const trank = {};
+    tlist.forEach((v, i) => { trank[v] = i; });
+    const schemes = uniq(f.map((x) => x.scheme)).filter(Boolean).sort((a, b) => {
+      const ta = trank[(f.find((y) => y.scheme === a) || {}).trustee] ?? 99;
+      const tb = trank[(f.find((y) => y.scheme === b) || {}).trustee] ?? 99;
+      return ta - tb || String(a).localeCompare(String(b), 'zh-Hant');
+    });
+    MF_SC.setOptions(schemes.map((v) => ({ v, label: schemeLabel(v) })));
+    MF_SC.setAllLabel(TT('全部计划'));
     MF_TY.setAllLabel(TT('全部种类'));
     MF_T.setAllLabel(TT('全部受托人'));
     fillSub();
+  }
+
+  /* 计划名：英文模式取 names-en 里同计划的英文名，中文模式保留原名（简中再走 t2s） */
+  function schemeLabel(name) {
+    if (document.documentElement.lang !== 'en' || !window.__mpfNamesEn) return name;
+    const f = (DATA.funds || []).find((y) => y.scheme === name);
+    if (f) { const e = window.__mpfNamesEn[String(f.id)]; if (e && e.scheme) return e.scheme; }
+    return name;
   }
 
   function fillSub() {
@@ -803,6 +836,7 @@
       if (F.type.length && F.type.indexOf(x.type) < 0) return false;
       if (F.sub.length && F.sub.indexOf(x.subtype) < 0) return false;
       if (F.trustee.length && F.trustee.indexOf(x.trustee) < 0) return false;
+      if (F.scheme.length && F.scheme.indexOf(x.scheme) < 0) return false;
       if (F.retMin !== '' && !(x[F.retDim] != null && x[F.retDim] >= parseFloat(F.retMin))) return false;
       if (F.retMax !== '' && !(x[F.retDim] != null && x[F.retDim] <= parseFloat(F.retMax))) return false;
       /* 2026-10-19：与参考版式一致——「最大回撤区间」按近5年最差年度（worstYear）筛 */

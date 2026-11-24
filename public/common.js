@@ -1430,8 +1430,13 @@ function fundFullName(x) {
 window.fundDisplayName = fundDisplayName;
 /* 2026-11-23：英文名表「按需补拉」入口（fundDisplayName 命中缺失时调用） */
 window.ensureNamesEnReady = function () {
-  if (!isEn() || window.__mpfNamesEn) return;
-  ensureNamesEn().then(() => {
+  /* 2026-11-24（用户反馈切英文卡死/页面无响应）：原来每个单元格都会触发一次，
+     名表失败（返回 null）时 .then 立刻执行 → __onRefresh → 重绘 → 又触发……
+     形成微任务死循环把主线程锁死。这里加「只试一次 + 只有真到货才重绘」。 */
+  if (!isEn() || window.__mpfNamesEn || window.__namesEnTried) return;
+  window.__namesEnTried = 1;
+  ensureNamesEn().then((j) => {
+    if (!j) return;                       /* 没拿到数据：静默放弃，不再重绘 */
     if (window.__onRefresh) window.__onRefresh();
     document.dispatchEvent(new Event('mpf:names'));
   }).catch(() => {});
@@ -1441,7 +1446,7 @@ window.schemeDisplay = schemeDisplay;
 window.trusteeDisplay = trusteeDisplay;
 window.isEnLang = isEn;
 /* 英文模式才加载英文名表（约 50KB），切到英文时补加载并重绘 */
-function maybeNamesEn() { if (!isEn()) return; ensureNamesEn().then(() => { const f = () => { if (window.__onRefresh) window.__onRefresh(); document.dispatchEvent(new Event('mpf:names')); }; f(); setTimeout(f, 900); }); }
+function maybeNamesEn() { if (!isEn()) return; window.__namesEnTried = 1; ensureNamesEn().then(() => { const f = () => { if (window.__onRefresh) window.__onRefresh(); document.dispatchEvent(new Event('mpf:names')); }; f(); setTimeout(f, 900); }); }
 document.addEventListener('mpf:lang', maybeNamesEn);
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeNamesEn);
 else maybeNamesEn();
