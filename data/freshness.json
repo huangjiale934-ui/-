@@ -1,37 +1,39 @@
 {
- "checkedAt": "2026-11-23T08:49:49.912Z",
- "checkedAtHKT": "2026-11-23 16:49:49",
- "ok": true,
- "problems": [],
+ "checkedAt": "2026-11-24T02:55:16.724Z",
+ "checkedAtHKT": "2026-11-24 10:55:16",
+ "ok": false,
+ "problems": [
+  "未解决 · 连续 2 天状态异常（na 未恢复）：365"
+ ],
  "detail": {
   "A": {
-   "navLatest": "2026-11-19",
+   "navLatest": "2026-11-20",
    "count": 451,
-   "updatedAt": 1795399377348,
+   "updatedAt": 1795485843994,
    "build": "2026-11-23-an",
    "status": {
     "phase": "done",
     "step": "早晨净值更新完成",
-    "finishedAt": "10:03",
-    "day": "2026-11-23",
+    "finishedAt": "10:04",
+    "day": "2026-11-24",
     "host": "workbuddy"
    }
   },
   "B": {
-   "navLatest": "2026-11-19",
+   "navLatest": "2026-11-20",
    "count": 451,
-   "updatedAt": 1795406516766,
+   "updatedAt": 1795423789993,
    "build": "2026-11-23-an",
    "status": {
     "phase": "done",
-    "step": "全量更新完成",
-    "finishedAt": "12:01",
+    "step": "早晨净值更新完成",
+    "finishedAt": "16:49",
     "day": "2026-11-23",
     "host": "github"
    }
   },
-  "referenceLatest": "2026-11-19",
-  "today": "2026-11-23",
+  "referenceLatest": "2026-11-20",
+  "today": "2026-11-24",
   "WorkBuddy 站_planLag": 12,
   "GitHub 站_planLag": 12,
   "issues": [
@@ -42,6 +44,10 @@
    {
     "level": "warn",
     "text": "季度链路未完成：交通持仓"
+   },
+   {
+    "level": "critical",
+    "text": "连续 2 天状态异常（na 未恢复）：365"
    },
    {
     "level": "warn",

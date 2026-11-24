@@ -1,8 +1,13 @@
 {
- "updatedAt": 1795405992330,
+ "updatedAt": 1795488304873,
  "source": "積金局「新聞稿」",
  "sourceUrl": "https://www.mpfa.org.hk/tc/info-centre/press-releases",
  "items": [
+  {
+   "date": "23/11/2026",
+   "title": "積金局發表2026年9月號《強制性公積金計劃統計摘要》季刊",
+   "url": "https://www.mpfa.org.hk/info-centre/press-releases/20261123"
+  },
   {
    "date": "27/10/2026",
    "title": "積金局提醒職業退休計劃管理人及僱主須嚴格履行法定審計責任",
@@ -87,11 +92,6 @@
    "date": "28/06/2026",
    "title": "積金局主席網誌 - 註冊「積金易」 管理強積金",
    "url": "https://www.mpfa.org.hk/info-centre/press-releases/20260628"
-  },
-  {
-   "date": "16/06/2026",
-   "title": "積金局推出「積金投資教育AI助手」聊天機械人",
-   "url": "https://www.mpfa.org.hk/info-centre/press-releases/20260616"
   }
  ]
 }

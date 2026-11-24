@@ -1,6 +1,6 @@
 {
- "updatedAt": 1795423197528,
- "day": "2026-11-23",
+ "updatedAt": 1795488101072,
+ "day": "2026-11-24",
  "summary": {
   "total": 24,
   "ok": 24,
@@ -33,7 +33,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 20,
-   "asOf": "2026-11-19",
+   "asOf": "2026-11-20",
    "rawBytes": 0
   },
   {
@@ -45,7 +45,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 20,
-   "asOf": "2026-11-19",
+   "asOf": "2026-11-20",
    "rawBytes": 0
   },
   {
@@ -117,7 +117,7 @@
    "node": "",
    "detail": "",
    "count": 26,
-   "asOf": "2026-11-19",
+   "asOf": "2026-11-20",
    "rawBytes": 45407
   },
   {
@@ -129,8 +129,8 @@
    "node": "",
    "detail": "",
    "count": 26,
-   "asOf": "2026-11-19",
-   "rawBytes": 36565
+   "asOf": "2026-11-20",
+   "rawBytes": 36569
   },
   {
    "key": "BCT-S800",
@@ -141,8 +141,8 @@
    "node": "",
    "detail": "",
    "count": 28,
-   "asOf": "2026-11-19",
-   "rawBytes": 37662
+   "asOf": "2026-11-20",
+   "rawBytes": 37660
   },
   {
    "key": "BCT-Smart",
@@ -153,8 +153,8 @@
    "node": "",
    "detail": "",
    "count": 14,
-   "asOf": "2026-11-19",
-   "rawBytes": 18941
+   "asOf": "2026-11-20",
+   "rawBytes": 18940
   },
   {
    "key": "BCT-Simple",
@@ -165,7 +165,7 @@
    "node": "",
    "detail": "",
    "count": 10,
-   "asOf": "2026-11-19",
+   "asOf": "2026-11-20",
    "rawBytes": 13637
   },
   {
@@ -177,7 +177,7 @@
    "node": "",
    "detail": "",
    "count": 12,
-   "asOf": "2026-11-19",
+   "asOf": "2026-11-20",
    "rawBytes": 20138
   },
   {
@@ -201,8 +201,8 @@
    "node": "",
    "detail": "",
    "count": 20,
-   "asOf": "2026-11-19",
-   "rawBytes": 461826
+   "asOf": "2026-11-20",
+   "rawBytes": 461760
   },
   {
    "key": "YF",
@@ -249,7 +249,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 23,
-   "asOf": "2026-11-19",
+   "asOf": "2026-11-20",
    "rawBytes": 0
   },
   {
@@ -317,6 +317,19 @@
   },
   {
    "day": "2026-11-23",
+   "summary": {
+    "total": 24,
+    "ok": 24,
+    "structMiss": 0,
+    "empty": 0,
+    "missing": 0,
+    "failed": 0,
+    "notRendered": 0,
+    "degraded": 0
+   }
+  },
+  {
+   "day": "2026-11-24",
    "summary": {
     "total": 24,
     "ok": 24,
