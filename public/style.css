@@ -1467,7 +1467,6 @@ table.data th:hover { background: var(--brand-soft); }
 .card.filters + .card { border-top: 0; border-top-left-radius: 0; border-top-right-radius: 0; }
 /* 2026-11-01（6.0）：筛选行左侧标题与搜索标签 */
 .f-lead { flex: 0 0 auto; align-self: flex-start; font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 18px; height: 18px; margin: 0 4px 0 -4px; white-space: nowrap; }
-.f-item.f-search { flex: 0 0 190px; }
 .f-item.f-search .tb-search { flex: 1 1 auto; width: 100%; min-width: 0; }
 #perPage, #rkRTop { min-width: 92px; }
 .f-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
@@ -1955,7 +1954,6 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 /* 2026-11-01（6.0）：窄屏时「基金筛选」独占一行、搜索框整行，避免标题被挤在搜索框左侧 */
 @media (max-width: 640px) {
   .f-lead { flex: 1 1 100%; margin: 0 0 2px; }
-  .f-item.f-search { flex: 1 1 100%; }
 }
 
 
@@ -1965,24 +1963,9 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
    ========================================================================== */
 .card.filters .f-row-main.f-row-merged { flex-wrap: nowrap; gap: 10px; align-items: flex-end; }
 .f-row-merged > .f-item { min-width: 0 !important; }
-/* 2026-11-24（用户要求）：新增「基金计划」筛选；所有筛选框统一为「排名维度」同宽（112px），
-   搜索框也在其内，不再单独做半宽（半宽后右侧留白被用户指出）。 */
-.f-row-merged > .f-item {
-  flex: 0 0 112px !important;
-  min-width: 112px !important;
-  max-width: 112px !important;
-  width: 112px !important;
-}
-.f-row-merged > .f-item .mpfsel,
-.f-row-merged > .f-item .mpfsel-btn,
-.f-row-merged > .f-item .tb-search { width: 100% !important; }
-.f-row-merged > .f-item .tb-search { box-sizing: border-box; }
-.f-row-merged > .f-item label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
 /* 2026-11-02（第十七轮）：合并行内所有控件统一 36px 高、搜索框不再吃掉全部空白 */
 .f-row-merged .mpfsel-btn { height: 36px; }
 .f-row-merged .tb-tail .btn { height: 36px; padding: 0 12px; }
-.f-row-merged > .f-search { flex: 0 1 240px !important; max-width: 264px; }
 
 /* 2026-11-02（第十七轮）：字号再放大后，收紧单元格左右内边距，给「成分基金」留出一行显示的空间 */
 #fundTable thead th { padding-left: 6px; padding-right: 6px; }
@@ -1990,10 +1973,6 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 #fundTable thead th[data-c="fund"] { min-width: 184px; }
 /* 1092 左右宽度：优先保证下拉文案完整，搜索框让位 */
 @media (max-width: 1200px) {
-  .f-row-merged > .dim-item { flex: 0 0 112px !important; min-width: 112px !important; }
-  .f-row-merged > .f-search { flex: 1 1 140px !important; min-width: 100px !important; max-width: none; }
-  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 94px !important; min-width: 94px !important; }
-  .f-row-merged > .f-trustee { flex: 0 0 104px !important; min-width: 104px !important; }
   .f-row-merged .tb-tail { gap: 7px; }
   .f-row-merged .tb-count { font-size: 12px; }
 }
@@ -2004,12 +1983,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
    ② 自绘下拉：宽度按最长选项自适应，文字不再截断；高度不设 260px 上限，
       常规筛选项一次全部展开（仅当超过视口高度时才在内部滚动）
    ========================================================================== */
-@media (min-width: 1201px) {
-  .f-row-merged > .dim-item { flex: 0 0 132px !important; min-width: 132px !important; }
-  .f-row-merged > .f-search { flex: 1 1 280px !important; max-width: 340px; }
-  .f-row-merged > .f-type, .f-row-merged > .f-sub { flex: 0 0 150px !important; min-width: 150px !important; }
-  .f-row-merged > .f-trustee { flex: 0 0 168px !important; min-width: 168px !important; }
-}
+
 .mpfsel-pop { width: max-content; min-width: 100%; max-width: min(360px, 92vw);
   max-height: calc(100vh - 140px); overflow: auto; }
 .mpfsel-pop.align-r { left: auto; right: 0; }
@@ -3304,3 +3278,39 @@ html[lang="en"] .f-row-merged > .f-item > label {
   line-height: 1.15; min-height: 28px; display: flex; align-items: flex-end;
 }
 
+
+
+/* ==========================================================================
+   2026-11-24（用户要求）：排名维度 / 基金搜索 / 受托人 / 基金计划 / 基金种类 / 基金细类
+   六个筛选框宽度完全一致（同一个变量），右侧「共筛选出 / 每页 / 列设置 / 导出」保持原样。
+   旧的多套断点宽度互相覆盖是这一轮错乱的根因，已在上方删除。
+   ========================================================================== */
+
+
+/* 2026-11-24（用户要求）：六个筛选框固定 65px（等宽），右侧「共筛选出/每页显示/列设置/导出」
+   恢复原始样式（align-items:flex-end + height:auto + position:relative，列设置弹层靠它定位）。 */
+.f-row-merged > .f-item {
+  flex: 0 0 65px !important;
+  min-width: 65px !important;
+  max-width: 65px !important;
+  width: 65px !important;
+}
+.f-row-merged > .f-item .mpfsel,
+.f-row-merged > .f-item .mpfsel-btn,
+.f-row-merged > .f-item .tb-search { width: 100% !important; box-sizing: border-box; }
+.f-row-merged > .f-item > label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 搜索框：外层是框，内层 input 不能再画一个框（用户截图里的「框中框」） */
+.f-row-merged .tb-search input[type="text"] {
+  border: 0 !important; background: transparent !important; box-shadow: none !important;
+  padding: 0 !important; height: 100% !important;
+}
+.f-row-merged .tb-tail {
+  display: flex !important; align-items: flex-end !important; flex-wrap: nowrap !important;
+  height: auto !important; gap: 9px !important; position: relative !important;
+  flex: 0 0 auto !important; margin-left: auto !important;
+}
+.f-row-merged .tb-tail > * { flex: 0 0 auto; }
+.f-row-merged .tb-tail .tb-count { display: flex; align-items: center; height: 36px; margin-left: 12px; white-space: nowrap; }
+@media (max-width: 1240px) {
+  .card.filters .f-row-main.f-row-merged { flex-wrap: wrap !important; }
+}
