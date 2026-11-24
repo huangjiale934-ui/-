@@ -400,7 +400,7 @@
     MF_T = window.MPFMulti('#fTrustee', {
       allLabel: TT('全部'),
       onChange: (arr) => {
-        F.trustee = arr; S.page = 1; render(); syncUrlFilters();
+        F.trustee = arr; S.page = 1; fillScheme(); render(); syncUrlFilters();
         if (typeof window.__anSetTrustee === 'function') { try { window.__anSetTrustee(arr[0] || ''); } catch (e) {} }
       },
     });
@@ -415,19 +415,33 @@
       v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
       n: f.filter((y) => y.trustee === v).length,
     })));
-    /* 计划的排序跟随左侧受托人排序（宏利 → 銀聯信託 → 友邦 …），同受托人内按计划名 */
+    MF_TY.setAllLabel(TT('全部'));
+    MF_T.setAllLabel(TT('全部'));
+    fillScheme();
+    fillSub();
+  }
+
+  /* 2026-11-24（用户反馈：选了「宏利」再选「宏利退休精選」出 0 条）：宏利退休精選
+     的法定受托人是銀聯信託（宏利只是保荐人/发行人），所以计划列表必须跟着受托人联动，
+     不允许出现「受托人 × 计划」互斥的组合。 */
+  function fillScheme() {
+    ensureMF();
+    const f = DATA.funds || [];
+    const pool = F.trustee.length ? f.filter((x) => F.trustee.indexOf(x.trustee) >= 0) : f;
     const trank = {};
-    tlist.forEach((v, i) => { trank[v] = i; });
-    const schemes = uniq(f.map((x) => x.scheme)).filter(Boolean).sort((a, b) => {
+    (window.mpfSortTrustees ? window.mpfSortTrustees(uniq(f.map((x) => x.trustee))) : uniq(f.map((x) => x.trustee)))
+      .forEach((v, i) => { trank[v] = i; });
+    const schemes = uniq(pool.map((x) => x.scheme)).filter(Boolean).sort((a, b) => {
       const ta = trank[(f.find((y) => y.scheme === a) || {}).trustee] ?? 99;
       const tb = trank[(f.find((y) => y.scheme === b) || {}).trustee] ?? 99;
       return ta - tb || String(a).localeCompare(String(b), 'zh-Hant');
     });
     MF_SC.setOptions(schemes.map((v) => ({ v, label: schemeLabel(v) })));
     MF_SC.setAllLabel(TT('全部'));
-    MF_TY.setAllLabel(TT('全部'));
-    MF_T.setAllLabel(TT('全部'));
-    fillSub();
+    /* 已选计划若不在新池子里（换了受托人）→ 自动清掉，避免 0 条 */
+    const valid = new Set(schemes);
+    const kept = F.scheme.filter((v) => valid.has(v));
+    if (kept.length !== F.scheme.length) { F.scheme = kept; MF_SC.setSelected(F.scheme, true); }
   }
 
   /* 计划名：英文模式取 names-en 里同计划的英文名，中文模式保留原名（简中再走 t2s） */
@@ -980,7 +994,7 @@
               ? TT('该基金由受托人明确不提供单位净值（利息基金），因此没有每日净值可比；费用、风险等资料仍可查看')
               : TT('该基金暂无日度净值历史，无法加入对比');
             /* 2026-11-24（用户要求）：用站内自绘浮层（data-tip）而不是浏览器原生 title */
-            return '<span class="risk-na nav-q" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">—</span></td>';
+            return '<span class="nav-na" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">—</span></td>';
           })();
       }
       return '<td data-c="cmp" class="c" data-l="' + TT('对比') + '">' +
