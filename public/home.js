@@ -779,6 +779,11 @@
     });
   }
 
+  /* 2026-11-24（用户要求）：切语言后重绘资讯列表，英文模式才会出现「中文原文」标注 */
+  document.addEventListener('mpf:lang', function () {
+    if (document.getElementById('newsList')) loadNews();
+  });
+
   /* ---------------- 首屏市场情绪卡（2026-11-03 第三十三轮，用户选定 B02 圆环） ----------------
      数据源 /api/breadth：nav-perf 的 w1（近一周）算上涨占比；圆环弧长 = 占比。
      配色只用站内蓝（#0866bb），不引入红绿。 */
