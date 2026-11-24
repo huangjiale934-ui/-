@@ -276,6 +276,16 @@ function decorateSelfPerf(funds, perf) {
     x.selfMdd5 = p.mdd5 != null ? p.mdd5 : null;
     x.selfMdd = p.mdd1 != null ? p.mdd1 : p.mdd;
     x.vol1 = p.vol1; x.vol3 = p.vol3; x.sharpe1 = p.sharpe1; x.posM12 = p.posM12;
+    /* 2026-11-24（用户要求）：排名维度新增——3/5 年累计、成立以来年化、回撤修复天数 */
+    x.selfY3 = p.y3; x.selfY5 = p.y5; x.selfYLaunch = p.yLaunch;
+    x.selfRec1 = (p.rec1 == null ? null : p.rec1);
+    /* 连续正收益年数：从最近一个完整年度往前数，遇到非正/缺失即停（数据只到 5 年） */
+    (function () {
+      const yrs = Object.keys(x.cal || {}).filter((y) => x.cal[y] != null).sort().reverse();
+      let n = 0;
+      for (const y of yrs) { if (x.cal[y] > 0) n++; else break; }
+      x.posYears = n;
+    })();
     /* 2026-11-17（外部核验 A6/P0）：超额收益由服务端按「该基金自己的估值日」算好并落盘，
        前端不再用全站锚点相减（那会让 asOf 较早的基金系统性高估 1.2–1.5pp）。 */
     x.excess1 = (p.excess1 != null) ? p.excess1

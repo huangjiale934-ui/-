@@ -987,7 +987,7 @@
 '风险级别由积金局按基金价格波动幅度评定，1 级最低、7 级最高。色块自绿（低风险）逐级过渡至深红（高风险），仅为风险示意，与涨跌无关。': 'Risk ratings are assigned by the MPFA based on price volatility — level 1 lowest, level 7 highest. Colours step from green (low) to dark red (high) purely as a risk indicator, unrelated to gains or losses.',
 '另有 {n} 条基金积金局未提供风险级别，未计入上图。': '{n} funds have no risk rating published by the MPFA and are excluded from the chart.',
 '供款计算器': "Contribution calculator",
-'供款（定投）计算器': "Contribution (DCA) calculator",
+'供款（定投）计算器': 'Contribution calculator',
 '每月供款（港元）': "Monthly contribution (HKD)",
 '开始月份': "Start month",
 '+ 添加基金（最多 3 只）': "+ Add fund (up to 3)",
@@ -1359,7 +1359,7 @@
   '以上是指数': 'Above: indices',
 '以上是指数与已选基金': 'Above: indices and selected funds',
   '近 40 日': 'Last 40 days',
-  '供款（定投）计算器': 'Contribution (regular investment) calculator',
+  '供款（定投）计算器': 'Contribution calculator',
   /* ===== 2026-11-04（第三十六轮）：口径说明 / 积金局月报 / 导出文案 ===== */
   '收录': 'Coverage',
   '核对': 'Verification',
@@ -1692,6 +1692,13 @@
 /* 2026-11-24：基金计划筛选 */
 '基金计划': "Fund scheme",
 '搜索': "Search",
+
+/* 2026-11-24：新增排名维度 */
+'近3年累计回报': "3-year cumulative return",
+'近5年累计回报': "5-year cumulative return",
+'成立以来年化回报': "Annualised since launch",
+'回撤修复天数': "Drawdown recovery (days)",
+'连续正收益年数': "Consecutive positive years",
 
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }

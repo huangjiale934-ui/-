@@ -1965,34 +1965,19 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
    ========================================================================== */
 .card.filters .f-row-main.f-row-merged { flex-wrap: nowrap; gap: 10px; align-items: flex-end; }
 .f-row-merged > .f-item { min-width: 0 !important; }
-/* 2026-11-24（用户要求）：新增「基金计划」筛选，所有筛选框缩 5%，搜索框缩一半 */
-.f-row-merged > .dim-item { flex: 0 0 100px !important; min-width: 100px !important; }
-.f-row-merged > .f-search { flex: 0 0 84px !important; min-width: 84px !important; }
-.f-row-merged > .f-type,
-.f-row-merged > .f-sub { flex: 0 1 92px !important; min-width: 92px !important; }
-.f-row-merged > .f-scheme { flex: 0 1 96px !important; min-width: 96px !important; }
-.f-row-merged > .f-trustee { flex: 0 1 106px !important; min-width: 106px !important; }
-.f-row-merged .tb-tail { display: flex; align-items: center; gap: 8px; flex: 0 0 auto;
-  margin-left: auto; height: 36px; position: relative; }
-.f-row-merged .tb-per-label { font-size: 12.5px; color: var(--text-2); white-space: nowrap; margin: 0; }
-.f-row-merged .tb-count { font-size: 12.5px; }
-.f-row-merged .tb-count b { font-size: 13px; }
-.tb-tail .mpfsel { width: 88px; flex: 0 0 auto; }
-.tb-tail .mpfsel-btn { height: 36px; }
-
-/* 搜索框：外层就是框，内部 input 不能再自带边框（用户截图里的「框中框」） */
-.f-item .tb-search input[type="text"] { border: 0 !important; background: transparent !important;
-  box-shadow: none !important; height: 100%; padding: 0; border-radius: 0; }
-.f-row-merged .tb-search { height: 36px; }
-.f-row-merged .dim-item .mpfsel-btn { height: 36px; }
-
-@media (max-width: 1180px) {
-  .card.filters .f-row-main.f-row-merged { flex-wrap: wrap; }
-  .f-row-merged > .dim-item { flex: 0 0 auto !important; min-width: 108px !important; }
-  .f-row-merged > .f-search { flex: 1 1 200px !important; }
-  .f-row-merged > .f-type, .f-row-merged > .f-sub, .f-row-merged > .f-trustee { flex: 1 1 42% !important; }
-  .f-row-merged .tb-tail { flex: 1 1 100%; margin-left: 0; height: auto; flex-wrap: wrap; }
+/* 2026-11-24（用户要求）：新增「基金计划」筛选；所有筛选框统一为「排名维度」同宽（112px），
+   搜索框也在其内，不再单独做半宽（半宽后右侧留白被用户指出）。 */
+.f-row-merged > .f-item {
+  flex: 0 0 112px !important;
+  min-width: 112px !important;
+  max-width: 112px !important;
+  width: 112px !important;
 }
+.f-row-merged > .f-item .mpfsel,
+.f-row-merged > .f-item .mpfsel-btn,
+.f-row-merged > .f-item .tb-search { width: 100% !important; }
+.f-row-merged > .f-item .tb-search { box-sizing: border-box; }
+.f-row-merged > .f-item label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* 2026-11-02（第十七轮）：合并行内所有控件统一 36px 高、搜索框不再吃掉全部空白 */
 .f-row-merged .mpfsel-btn { height: 36px; }
@@ -2064,6 +2049,7 @@ th.sort-on .arrow { color: var(--brand); font-weight: 700; }
 .dim-cnt { flex: none; margin-right: 2px; padding: 0 5px; border-radius: 8px; background: var(--brand, #0866bb);
   color: #fff; font-size: 10.5px; line-height: 16px; font-weight: 700; }
 .dim-pop { position: absolute; left: 0; top: calc(100% + 5px); z-index: 86; width: 344px; max-width: 92vw;
+  max-height: min(70vh, 520px); overflow: auto;
   background: #fff; border: 1px solid #dbe8f4; border-radius: 10px; padding: 10px;
   box-shadow: 0 12px 30px rgba(16, 40, 70, 0.16); }
 .dim-pop.align-r { left: auto; right: 0; }
@@ -3301,12 +3287,6 @@ body { overflow-x: clip; }
    英文标签普遍比中文长 30–60%，在 1024–1280 的窗口里会挤爆固定的筛选宽度
    与走势卡的 7 列指标表。这里只针对英文做「密度压缩」，不改中文/繁体版式。
    ========================================================================== */
-html[lang="en"] .f-row-merged > .dim-item { flex-basis: 106px !important; }
-html[lang="en"] .f-row-merged > .f-search { flex-basis: 92px !important; }
-html[lang="en"] .f-row-merged > .f-trustee { flex-basis: 112px !important; }
-html[lang="en"] .f-row-merged > .f-scheme { flex-basis: 104px !important; }
-html[lang="en"] .f-row-merged > .f-type,
-html[lang="en"] .f-row-merged > .f-sub { flex-basis: 96px !important; }
 html[lang="en"] .mpfsel-btn { font-size: 12px; padding-left: 8px; padding-right: 22px; }
 html[lang="en"] .f-item label { font-size: 11.5px; }
 html[lang="en"] .tr-tbl th,
@@ -3317,3 +3297,10 @@ html[lang="en"] .tr-tbl td.r { text-align: right; }
   /* 英文更早换行，避免末端的「导出/Export」被挤出可视区 */
   html[lang="en"] .card.filters .f-row-main.f-row-merged { flex-wrap: wrap; }
 }
+
+/* 2026-11-24（用户反馈：英文标签重叠/被截断）：英文允许标签折行，工具条独占一行 */
+html[lang="en"] .f-row-merged > .f-item > label {
+  white-space: normal !important; overflow: visible !important; text-overflow: clip !important;
+  line-height: 1.15; min-height: 28px; display: flex; align-items: flex-end;
+}
+

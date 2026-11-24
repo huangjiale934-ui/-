@@ -95,6 +95,26 @@ function monthlyStats(s) {
 }
 
 /** 运行峰值法最大回撤 */
+
+/* 2026-11-24：回撤修复天数——从最大回撤谷底起，净值重新回到回撤前高点的天数；
+   未修复返回 null。只用于「排名维度」新增指标。 */
+function mddRecoveryDays(slice) {
+  if (!slice || slice.length < 20) return null;
+  let peak = -Infinity, peakIdx = 0, mdd = 0, tIdx = 0, pIdx = 0;
+  for (let i = 0; i < slice.length; i++) {
+    const v = slice[i][1];
+    if (v > peak) { peak = v; peakIdx = i; }
+    const dd = (v - peak) / peak;
+    if (dd < mdd) { mdd = dd; tIdx = i; pIdx = peakIdx; }
+  }
+  if (mdd >= 0) return 0;
+  const peakVal = slice[pIdx][1];
+  for (let i = tIdx + 1; i < slice.length; i++) {
+    if (slice[i][1] >= peakVal) return Math.round((new Date(slice[i][0]) - new Date(slice[tIdx][0])) / 864e5);
+  }
+  return null;
+}
+
 function maxDrawdown(series) {
   let peak = series[0][1], peakDate = series[0][0];
   let mdd = 0, from = series[0][0], to = series[0][0];
@@ -180,6 +200,7 @@ function computeOne(obj) {
     })(),
     ...md,
     mdd1: md1.mdd, mdd1From: md1.mddFrom, mdd1To: md1.mddTo,
+    rec1: y1StartIdx > 0 ? mddRecoveryDays(s.slice(y1StartIdx)) : mddRecoveryDays(s),
     mdd5: md5.mdd, mdd5From: md5.mddFrom, mdd5To: md5.mddTo,
   };
 }

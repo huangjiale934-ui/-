@@ -33,6 +33,11 @@
     ['selfY5a', '近5年年化回报', 'desc'], ['selfMdd', '近1年最大回撤', 'desc'], ['selfMdd5', '近5年最大回撤', 'desc'],
     ['sharpe1', '夏普比率（近1年）', 'desc'], ['vol1', '年化波动率（近1年）', 'asc'], ['vol3', '年化波动率（近3年）', 'asc'],
     ['posM12', '正收益月份（近1年）', 'desc'], ['excess1', '超额收益（相对恒指）', 'desc'],
+    /* 2026-11-24（用户要求）：新增六个维度 */
+    ['selfY3', '近3年累计回报', 'desc'], ['selfY5', '近5年累计回报', 'desc'],
+    ['selfYLaunch', '成立以来年化回报', 'desc'], ['fer', '基金开支比率', 'asc'],
+    ['risk', '风险级别', 'asc'], ['selfRec1', '回撤修复天数', 'asc'],
+    ['posYears', '连续正收益年数', 'desc'],
   ];
 
   /* ===== 排名维度（2026-11-02 第十八轮，用户要求）：支持多维度叠加排序 =====
@@ -48,7 +53,7 @@
     const a = window.__DIMSEL;
     const txt = document.getElementById('dimTxt');
     /* 按钮显示真正生效的排序维度（规模只是常驻的并列打破，不作为主标签） */
-    const eff = a.find((x) => x.k !== 'size') || a[0];
+    const eff = a[0];
     if (txt) txt.textContent = dimLabel(eff.k);
     const cnt = document.getElementById('dimCnt');
     if (cnt) { cnt.hidden = a.length < 2; cnt.textContent = '+' + (a.length - 1); }
@@ -65,7 +70,7 @@
     const a = window.__DIMSEL;
     /* 2026-11-14：用户改用「排名维度」下拉时，清掉表头的「已取消」标记 */
     S.cancelled = false;
-    const first = a.find((x) => x.k !== 'size') || a[0] || { k: 'size', d: 'desc' };
+    const first = a[0] || { k: 'size', d: 'desc' };
     S.key = first.k; S.dir = first.d;
     /* 联动放出：非默认列临时显示（不写 colSet，刷新后回到用户自己的列设置） */
     DIM_EXTRA = a.map((x) => x.k).filter((k) => COL_DEFS.some((c) => c.k === k) && COL_DEFAULT.indexOf(k) < 0);
@@ -112,11 +117,9 @@
         /* 2026-11-24（用户要求）：只有点「基金规模」本身才取消它；且不允许一个都不留 */
         if (a.length === 1) return;
         a.splice(i, 1);
-      } else if (k === 'size') {
-        a.unshift({ k: 'size', d: 'desc' });
       } else {
-        /* 非规模维度：规模始终保留在第 1 位，新维度排在后面（编号 2、3…） */
-        if (!a.some((x) => x.k === 'size')) a.unshift({ k: 'size', d: 'desc' });
+        /* 2026-11-24（用户要求）：一律「后来者排后」——先取消规模、再点其他维度、再点规模时，
+           规模应排在最后（编号 2/3…），不再强行插到第一位。 */
         a.push({ k: k, d: dimDefDir(k) });
       }
       applyDims();
@@ -157,9 +160,8 @@
     return String(x).localeCompare(String(y), 'zh-Hans-CN') * sgn;
   }
   function sortByDims(rows, dims) {
-    /* 2026-11-24（用户要求）：基金规模常驻（编号 1），但排序让「后点的维度」先生效，
-       规模只作最后的并列打破——否则点了近1年仍按规模排，等于没点。 */
-    const order = dims.filter((d) => d.k !== 'size').concat(dims.filter((d) => d.k === 'size'));
+    /* 2026-11-24：严格按用户点击顺序排序（先点优先），不再把规模特殊排到最后 */
+    const order = dims;
     return rows.slice().sort((a, b) => {
       for (let i = 0; i < order.length; i++) {
         const r = cmpDim(a[order[i].k], b[order[i].k], order[i].d);
