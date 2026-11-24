@@ -21,6 +21,10 @@
     return out;
   };
   const esc = (s) => t2sText(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  /* 2026-11-24（事故复盘）：选项的 value 是「身份值」，绝不能做繁转简——
+     否则勾选后存进选中集合的是简体计划名，与数据里的繁体名永远匹配不上，直接筛出 0 条。
+     与 common.js 的 escA 同一规则：只做 HTML 转义。 */
+  const escAttr = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const lbl = (s) => (typeof TT === 'function' ? TT(s) : s);
 
   function create(host, opt) {
@@ -54,7 +58,7 @@
       pop.innerHTML = '<button type="button" class="mf-all' + (sel.size ? '' : ' on') + '" data-all="1">' + esc(o.allLabel) + '</button>' +
         options.map((it) =>
           '<label class="mf-opt' + (sel.has(it.v) ? ' on' : '') + '">' +
-          '<input type="checkbox" value="' + esc(it.v) + '"' + (sel.has(it.v) ? ' checked' : '') + '>' +
+          '<input type="checkbox" value="' + escAttr(it.v) + '"' + (sel.has(it.v) ? ' checked' : '') + '>' +
           '<span>' + esc(it.label) + '</span>' +
           (it.n != null ? '<b>' + it.n + '</b>' : '') + '</label>').join('') ||
         '<div class="mf-empty">' + esc(lbl('暂无可选项')) + '</div>';

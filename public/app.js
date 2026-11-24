@@ -975,9 +975,13 @@
       const nm = window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund);
       if (!canCmp) {
         return '<td data-c="cmp" class="c" data-l="' + TT('对比') + '">' +
-          '<span class="risk-na" title="' + esc(x && x.navStatus === 'na'
-            ? TT('该基金由受托人明确不提供单位净值（利息基金），因此没有每日净值可比；费用、风险等资料仍可查看')
-            : TT('该基金暂无日度净值历史，无法加入对比')) + '">—</span></td>';
+          (function () {
+            const tip = (x && x.navStatus === 'na')
+              ? TT('该基金由受托人明确不提供单位净值（利息基金），因此没有每日净值可比；费用、风险等资料仍可查看')
+              : TT('该基金暂无日度净值历史，无法加入对比');
+            /* 2026-11-24（用户要求）：用站内自绘浮层（data-tip）而不是浏览器原生 title */
+            return '<span class="risk-na nav-q" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">—</span></td>';
+          })();
       }
       return '<td data-c="cmp" class="c" data-l="' + TT('对比') + '">' +
         '<input type="checkbox" data-cmp="' + esc(x.id) + '"' +
