@@ -1,6 +1,6 @@
 {
- "checkedAt": "2026-11-24T02:55:16.724Z",
- "checkedAtHKT": "2026-11-24 10:55:16",
+ "checkedAt": "2026-11-24T10:53:24.380Z",
+ "checkedAtHKT": "2026-11-24 18:53:24",
  "ok": false,
  "problems": [
   "未解决 · 连续 2 天状态异常（na 未恢复）：365"
@@ -10,7 +10,7 @@
    "navLatest": "2026-11-20",
    "count": 451,
    "updatedAt": 1795485843994,
-   "build": "2026-11-23-an",
+   "build": "2026-11-24-an",
    "status": {
     "phase": "done",
     "step": "早晨净值更新完成",
@@ -22,13 +22,13 @@
   "B": {
    "navLatest": "2026-11-20",
    "count": 451,
-   "updatedAt": 1795423789993,
-   "build": "2026-11-23-an",
+   "updatedAt": 1795488919680,
+   "build": "2026-11-24-an",
    "status": {
     "phase": "done",
-    "step": "早晨净值更新完成",
-    "finishedAt": "16:49",
-    "day": "2026-11-23",
+    "step": "全量更新完成",
+    "finishedAt": "10:55",
+    "day": "2026-11-24",
     "host": "github"
    }
   },
