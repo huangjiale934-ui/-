@@ -1,6 +1,6 @@
 {
- "updatedAt": 1795517014324,
- "day": "2026-11-24",
+ "updatedAt": 1795563898601,
+ "day": "2026-11-25",
  "summary": {
   "total": 24,
   "ok": 24,
@@ -33,7 +33,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 20,
-   "asOf": "2026-11-20",
+   "asOf": "2026-11-23",
    "rawBytes": 0
   },
   {
@@ -45,7 +45,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 20,
-   "asOf": "2026-11-20",
+   "asOf": "2026-11-23",
    "rawBytes": 0
   },
   {
@@ -105,7 +105,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 17,
-   "asOf": "2026-11-20",
+   "asOf": "2026-11-23",
    "rawBytes": 0
   },
   {
@@ -117,8 +117,8 @@
    "node": "",
    "detail": "",
    "count": 26,
-   "asOf": "2026-11-20",
-   "rawBytes": 45407
+   "asOf": "2026-11-23",
+   "rawBytes": 45388
   },
   {
    "key": "BCT-Strategic",
@@ -129,8 +129,8 @@
    "node": "",
    "detail": "",
    "count": 26,
-   "asOf": "2026-11-20",
-   "rawBytes": 36569
+   "asOf": "2026-11-23",
+   "rawBytes": 36553
   },
   {
    "key": "BCT-S800",
@@ -141,8 +141,8 @@
    "node": "",
    "detail": "",
    "count": 28,
-   "asOf": "2026-11-20",
-   "rawBytes": 37660
+   "asOf": "2026-11-23",
+   "rawBytes": 37644
   },
   {
    "key": "BCT-Smart",
@@ -153,8 +153,8 @@
    "node": "",
    "detail": "",
    "count": 14,
-   "asOf": "2026-11-20",
-   "rawBytes": 18940
+   "asOf": "2026-11-23",
+   "rawBytes": 18932
   },
   {
    "key": "BCT-Simple",
@@ -165,8 +165,8 @@
    "node": "",
    "detail": "",
    "count": 10,
-   "asOf": "2026-11-20",
-   "rawBytes": 13637
+   "asOf": "2026-11-23",
+   "rawBytes": 13630
   },
   {
    "key": "BCT-Industry",
@@ -177,8 +177,8 @@
    "node": "",
    "detail": "",
    "count": 12,
-   "asOf": "2026-11-20",
-   "rawBytes": 20138
+   "asOf": "2026-11-23",
+   "rawBytes": 20130
   },
   {
    "key": "SunLife",
@@ -201,8 +201,8 @@
    "node": "",
    "detail": "",
    "count": 20,
-   "asOf": "2026-11-20",
-   "rawBytes": 461722
+   "asOf": "2026-11-23",
+   "rawBytes": 461690
   },
   {
    "key": "YF",
@@ -249,7 +249,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 23,
-   "asOf": "2026-11-20",
+   "asOf": "2026-11-23",
    "rawBytes": 0
   },
   {
@@ -285,7 +285,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 14,
-   "asOf": "2026-11-20",
+   "asOf": "2026-11-23",
    "rawBytes": 0
   },
   {
@@ -330,6 +330,19 @@
   },
   {
    "day": "2026-11-24",
+   "summary": {
+    "total": 24,
+    "ok": 24,
+    "structMiss": 0,
+    "empty": 0,
+    "missing": 0,
+    "failed": 0,
+    "notRendered": 0,
+    "degraded": 0
+   }
+  },
+  {
+   "day": "2026-11-25",
    "summary": {
     "total": 24,
     "ok": 24,
