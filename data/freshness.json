@@ -1,6 +1,6 @@
 {
- "checkedAt": "2026-11-24T23:58:55.050Z",
- "checkedAtHKT": "2026-11-25 07:58:55",
+ "checkedAt": "2026-11-25T09:49:06.405Z",
+ "checkedAtHKT": "2026-11-25 17:49:06",
  "ok": false,
  "problems": [
   "未解决 · 连续 2 天状态异常（na 未恢复）：365"
@@ -9,32 +9,33 @@
   "A": {
    "navLatest": "2026-11-23",
    "count": 451,
-   "updatedAt": 1795530685592,
+   "updatedAt": 1795571812251,
    "build": "2026-11-24-an",
    "status": {
     "phase": "done",
-    "step": "全部完成",
-    "day": "2026-11-24",
-    "finishedAt": "22:32",
+    "step": "早晨净值更新完成",
+    "finishedAt": "09:57",
+    "day": "2026-11-25",
     "host": "workbuddy"
    }
   },
   "B": {
    "navLatest": "2026-11-23",
    "count": 451,
-   "updatedAt": 1795517604453,
-   "build": "2026-11-24-an",
+   "updatedAt": 1795564735121,
+   "build": "2026-11-25-an",
    "status": {
     "phase": "done",
-    "step": "早晨净值更新完成",
-    "finishedAt": "18:53",
-    "day": "2026-11-24",
+    "step": "全量更新完成",
+    "finishedAt": "07:58",
+    "day": "2026-11-25",
     "host": "github"
    }
   },
   "referenceLatest": "2026-11-23",
   "today": "2026-11-25",
   "WorkBuddy 站_planLag": 15,
+  "GitHub 站_planLag": 39,
   "issues": [
    {
     "level": "warn",
@@ -42,7 +43,7 @@
    },
    {
     "level": "warn",
-    "text": "季度链路未完成：交通持仓"
+    "text": "季度链路未完成：海通便覽下載失敗（官网列表页未给出 PDF，下次再试）"
    },
    {
     "level": "critical",
@@ -50,11 +51,11 @@
    },
    {
     "level": "warn",
-    "text": "持仓配置合计 >100%：218:100.6 799:101.4 1543:102.4"
+    "text": "持仓配置合计 >100%：218:100.6"
    },
    {
     "level": "warn",
-    "text": "前十大不足 10 条：216:8 223:9 227:9 460:7 1000:9 1001:7 1039:8 1543:9"
+    "text": "前十大不足 10 条：209:7 210:9 216:8 223:9 227:9 460:7 1000:9 1001:7 1039:8 1543:9"
    },
    {
     "level": "warn",
