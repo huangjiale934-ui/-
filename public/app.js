@@ -88,6 +88,18 @@
     render();
   }
 
+  /* 2026-11-26（体检发现）：排名维度 UI 下线后 bindSelfTabs 会因找不到 #dimBtn 提前 return，
+     原来定义在它内部的三个桥接就永远不存在 —— 表头排序只改箭头、不改顺序。
+     这里前移到模块作用域，与 UI 是否存在无关。 */
+  window.__dimApply = (k, dir) => { window.__DIMSEL = [{ k: k, d: dir || dimDefDir(k) }]; applyDims(); };
+  window.__dimCancel = () => { window.__DIMSEL = [{ k: 'size', d: 'desc' }]; applyDims(); };
+  window.__dimFromHeader = (k, dir) => {
+    window.__DIMSEL = [{ k: k, d: dir }];
+    S.key = k; S.dir = dir;
+    window.__dimActive = dimsActive();
+    syncDimUI();
+  };
+
   function bindSelfTabs() {
     const btn = document.getElementById('dimBtn');
     const pop = document.getElementById('dimPop');
@@ -136,16 +148,6 @@
       closePop();
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePop(); });
-    /* 兼容旧调用（表头排序 / 移动端） */
-    window.__dimApply = (k, dir) => { window.__DIMSEL = [{ k: k, d: dir || dimDefDir(k) }]; applyDims(); };
-    window.__dimCancel = () => { window.__DIMSEL = [{ k: 'size', d: 'desc' }]; applyDims(); };
-    /* 表头点击排序：维度复位为「单列」，并同步按钮文案（由 common.makeSorter 调用） */
-    window.__dimFromHeader = (k, dir) => {
-      window.__DIMSEL = [{ k: k, d: dir }];
-      S.key = k; S.dir = dir;
-      window.__dimActive = dimsActive();
-      syncDimUI();
-    };
   }
 
   /* 多维度比较：依次按优先级比较，空值恒排最后 */

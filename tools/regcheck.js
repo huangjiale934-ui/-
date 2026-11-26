@@ -1657,6 +1657,14 @@ chk('十八轮·⑧多维度排序内核保留（UI 已于 2026-11-26 下线，�
   /sortByDims\(filtered\(\), window\.__DIMSEL\)/.test(readSrc('app.js')));
 
 /* ===== 2026-11-02 第二十轮（5 条反馈）===== */
+chk('资料库·表头排序桥接在模块作用域（2026-11-26：维度 UI 下线后排序仍生效）', (function () {
+  try {
+    const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
+    const i = a.indexOf('window.__dimFromHeader');
+    const j = a.indexOf('function bindSelfTabs');
+    return i > 0 && j > 0 && i < j;
+  } catch (e) { return false; }
+})());
 chk('二十轮·①每页显示标签移到框上方（与其它筛选框一致）+ 计数右移',
   /class="f-item tb-per"/.test(rawIdxHtml) && /class="f-item tb-per"/.test(idx) &&
   /\.f-row-merged \.tb-tail \.tb-count \{[^}]*margin-left/.test(readSrc('style.css')));
