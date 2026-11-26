@@ -47,24 +47,6 @@
        风险级别筛选按用户要求删除；「基金筛选」标题删除。 -->
   <div class="card filters">
     <div class="f-row f-row-main f-row-merged">
-      <div class="f-item dim-item">
-        <label for="dimBtn" data-i18n="排名维度">排名维度</label>
-        <div class="dim-multi" id="dimMulti">
-          <button type="button" class="mpfsel-btn dim-btn" id="dimBtn" aria-haspopup="listbox" aria-expanded="false">
-            <span class="mpfsel-txt" id="dimTxt">基金规模</span>
-            <span class="dim-cnt" id="dimCnt" hidden>+1</span>
-            <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="#0866bb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="dim-pop" id="dimPop" hidden role="listbox" aria-multiselectable="true">
-            <div class="dim-hd" data-i18n="可叠加多个维度，先点的优先">可叠加多个维度，先点的优先</div>
-            <div class="dim-grid" id="dimGrid"></div>
-            <div class="dim-ft">
-              <span class="dim-tip" data-i18n="按优先级依次排序">按优先级依次排序</span>
-              <button type="button" id="dimClear" data-i18n="清空">清空</button>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="f-item f-search">
         <label data-i18n="基金搜索">基金搜索</label>
         <div class="tb-search">
@@ -85,10 +67,6 @@
       <div class="f-item f-type">
         <label data-i18n-parts>基金种类</label>
         <span class="mf" id="fType" data-all="全部种类" aria-label="基金种类筛选"></span>
-      </div>
-      <div class="f-item f-sub">
-        <label data-i18n-parts>基金细类</label>
-        <span class="mf" id="fSub" data-all="全部细类" aria-label="基金细类筛选"></span>
       </div>
       <div class="tb-tail">
         <div class="tb-count"><span data-i18n="共筛选出">共筛选出</span> <b id="cnt">0</b> <span data-i18n="条">条</span> <span class="muted" id="cntTip" hidden></span></div>
@@ -117,7 +95,7 @@
     <div class="table-scroll" id="tscroll">
       <table class="data" id="fundTable">
         <thead><tr id="thead">
-          <th scope="col" data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>
+          <th scope="col" data-c="rank" data-i18n-parts class="c" style="width:56px">序号</th>
           <th scope="col" data-c="cmp" data-i18n-parts class="c" style="width:52px">对比</th>
           <th scope="col" data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">基金名称 <span class="arrow">↕</span></th>
           <th scope="col" data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>
@@ -172,33 +150,29 @@
   <div class="card filters rk-filters">
     <div style="display:none"><h2 id="rkBoardTitle">排行榜</h2><div class="desc" id="rkBoardDesc"></div></div>
     <div class="f-row f-row-main f-row-merged">
-      <div class="f-item dim-item">
-        <label for="rkDimSel" data-i18n="排名维度">排名维度</label>
-        <select id="rkDimSel" aria-label="排名维度" data-i18n-aria="排名维度"></select>
-      </div>
       <div class="f-item f-search">
         <label data-i18n="基金搜索">基金搜索</label>
         <div class="tb-search">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
             <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
           </svg>
-          <input type="text" id="rkKw" data-i18n-ph="基金名称／计划名称" placeholder="基金名称／计划名称" aria-label="关键词搜索" data-i18n-aria="关键词搜索">
+          <input type="text" id="rkKw" placeholder="搜索" aria-label="关键词搜索" data-i18n-aria="关键词搜索" data-i18n-ph="搜索">
         </div>
       </div>
       <div class="f-item f-trustee">
         <label data-i18n-parts>受托人</label>
         <span class="mf" id="rkRTrustee" data-all="全部受托人" aria-label="受托人筛选"></span>
       </div>
+      <div class="f-item f-scheme">
+        <label data-i18n-parts>基金计划</label>
+        <span class="mf" id="rkRScheme" data-all="全部计划" aria-label="基金计划筛选"></span>
+      </div>
       <div class="f-item f-type">
         <label data-i18n-parts>基金种类</label>
         <span class="mf" id="rkRType" data-all="全部种类" aria-label="基金种类筛选"></span>
       </div>
-      <div class="f-item f-sub">
-        <label data-i18n-parts>基金细类</label>
-        <span class="mf" id="rkRSub" data-all="全部细类" aria-label="基金细类筛选"></span>
-      </div>
       <div class="tb-tail">
-        <div class="tb-count"><span data-i18n="当前榜单共">当前榜单共</span> <b id="rkRcnt">0</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip"></span></div>
+        <div class="tb-count"><span data-i18n="共筛选出">共筛选出</span> <b id="rkRcnt">0</b> <span id="rkRcntUnit">条</span> <span class="muted" id="rkRtip"></span></div>
         <div class="f-item tb-per">
           <label class="muted tb-per-label" for="rkRTop" data-i18n-parts>每页显示</label>
           <select id="rkRTop" aria-label="显示名次范围" data-i18n-aria="显示名次范围">
@@ -230,7 +204,7 @@
     <div class="table-scroll" id="rkTscroll">
       <table class="data" id="rkTable">
         <thead><tr id="rkThead">
-          <th scope="col" data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>
+          <th scope="col" data-c="rank" data-i18n-parts class="c" style="width:56px">序号</th>
           <th scope="col" data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">基金名称 <span class="arrow">↕</span></th>
           <th scope="col" data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>
           <th scope="col" data-c="typeFull" data-i18n-parts data-k="typeFull" data-defdir="asc" class="sortable">基金种类 <span class="arrow">↕</span></th>

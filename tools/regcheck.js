@@ -147,18 +147,13 @@ chk('资料库·总条数显示 451', /451/.test(idx));
 /* ---------------- 排名 ---------------- */
 const rkHead = (/<thead>[\s\S]*?<\/thead>/.exec(rk) || [''])[0];
 chk('排名·无「近5年最差年度」表头', rkHead.indexOf('最差') < 0);
-chk('排名·维度下拉 17+1 项（2026-10-31：标签行改下拉）', (function () {
-  const m = /<select[^>]*id="rkDimSel"[^>]*>[\s\S]*?<\/select>/.exec(rk);
-  return m && (m[0].match(/<option/g) || []).length === 18;
-})(), '实际 ' + (function () { const m = /<select[^>]*id="rkDimSel"[^>]*>[\s\S]*?<\/select>/.exec(rk); return m ? (m[0].match(/<option/g) || []).length : 0; })());
-chk('排名·维度下拉（2026-10-31：标签行删除，工具栏下拉，默认无）', (function () {
+chk('排名·排名维度筛选已按领导要求下线（2026-11-26）', rk.indexOf('id="rkDimSel"') < 0 && rk.indexOf('data-i18n="排名维度"') < 0);
+chk('排名·榜单切换（深链）仍可用且不依赖已下线的下拉', (function () {
   try {
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const r = fs.readFileSync(path.join(__dirname, '..', 'public', 'rank.js'), 'utf8');
-    const st = fs.readFileSync(path.join(__dirname, '..', 'public', 'style.css'), 'utf8');
-    return h.indexOf('rkTabsToggle') < 0 && h.indexOf('id="rkTabs"') < 0 && /id="rkDimSel"/.test(h) &&
-      r.indexOf('buildTabs') >= 0 && r.indexOf('paintTabs') >= 0 &&
-      st.indexOf('.dim-pick') >= 0;
+    return h.indexOf('rkTabsToggle') < 0 && h.indexOf('id="rkTabs"') < 0 && h.indexOf('id="rkDimSel"') < 0 &&
+      r.indexOf('buildTabs') >= 0 && /getElementById\('rkDimSel'\)/.test(r);
   } catch (e) { return false; }
 })());
 chk('排名·榜单表体默认渲染 10 行', (function () {
@@ -255,11 +250,11 @@ chk('首页·风险柱用蓝色 7 级色板', (function () {
     return !!m && m[1].split(',').length === 7 && /#a5cbee/.test(m[1]) && /#4f90d2/.test(m[1]);
   } catch (e) { return false; }
 }));
-chk('排名·维度下拉在工具栏（2026-10-31）', /id="rkDimSel"/.test(rk) && rk.indexOf('rkTabsNote') < 0);
-chk('排名·标签容器已删（仅下拉，2026-10-31）', (function () {
+chk('排名·工具栏不再有排名维度（2026-11-26）', !/id="rkDimSel"/.test(rk) && rk.indexOf('rkTabsNote') < 0);
+chk('排名·标签容器与维度下拉均已删（2026-11-26）', (function () {
   try {
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
-    return h.indexOf('rkTabsToggle') < 0 && h.indexOf('id="rkTabs"') < 0 && h.indexOf('id="rkDimSel"') >= 0;
+    return h.indexOf('rkTabsToggle') < 0 && h.indexOf('id="rkTabs"') < 0 && h.indexOf('id="rkDimSel"') < 0;
   } catch (e) { return false; }
 })());
 chk('排名·对比栏带数量徽标', /class="cmp-lab"/.test(rk) && /id="cmpN"/.test(rk));
@@ -278,8 +273,10 @@ chk('资料库·无估值日问号标记（代码+数据均具备）', (function
 chk('资料库·footer 来源与免责（三行式 snote + 折叠，2026-11-04）', /class="snote"/.test(readSrc('common.js')) && /snote-foot/.test(readSrc('common.js')) && /foot-fold/.test(idx));
 chk('排名·footer 来源与免责（snote + 折叠）', /class="snote"/.test(readSrc('common.js')) && /foot-fold/.test(rk));
 chk('首页·页面标题已加标记', /<title data-i18n="香港强积金市场数据平台/.test(rawH));
-chk('资料库·筛选与工具栏合并一行（2026-11-02：排名维度→搜索→下拉→共筛选出→每页显示→导出，无「筛选条件：无」）',
-  /class="f-row f-row-main f-row-merged"/.test(idx) && /id="dimBtn"/.test(idx) && /id="dimPop"/.test(idx) && /class="tb-tail"/.test(idx) &&
+chk('资料库·筛选与工具栏合并一行（2026-11-26：搜索→受托人→计划→种类→共筛选出→每页显示→导出；排名维度与细类已下线）',
+  /class="f-row f-row-main f-row-merged"/.test(idx) && /id="kw"/.test(idx) && /id="fTrustee"/.test(idx) &&
+  /id="fScheme"/.test(idx) && /id="fType"/.test(idx) && !/id="fSub"/.test(idx) &&
+  !/id="dimBtn"/.test(idx) && !/id="dimPop"/.test(idx) && /class="tb-tail"/.test(idx) &&
   /共筛选出/.test(idx) && idx.indexOf('筛选条件：无') < 0 && idx.indexOf('点击表头排序') < 0 &&
   idx.indexOf('id="fRisk"') < 0 && idx.indexOf('class="f-lead"') < 0);
 chk('排名·表头提示已删（2026-10-31）', rk.indexOf('点击表头可排序') < 0);
@@ -776,7 +773,7 @@ chk('导出·溯源头（csvSourceNote）与榜单 xlsx 化（2026-10-30：主�
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
     /* 2026-11-04：资料库导出升级为 xlsx（数据说明 + 基金数据两表），榜单导出仍是 xlsx */
     return /function csvSourceNote/.test(c) && /buildCoverSheet = function/.test(c) && /buildHoldAllocSheet/.test(c) &&
-      /MPFXLSX\.build/.test(r) && /window\.MPFXLSX\.build/.test(a) && /buildCoverSheet/.test(a) && /TT\('名次'\)/.test(a);
+      /MPFXLSX\.build/.test(r) && /window\.MPFXLSX\.build/.test(a) && /buildCoverSheet/.test(a) && /TT\('序号'\)/.test(a);
   } catch (e) { return false; }
 })());
 chk('导出·文件名改为数据截至日（含 TT(\'数据截至\')）', (function () {
@@ -1339,7 +1336,7 @@ chk('对比数量·统一 8 只（CMP_MAX=8 / 图表 9 条含指数）', (functi
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
     /* 2026-11-22（用户要求）：勾选上限、资料库图、分析图三处统一为 8 只基金 */
     return /const CMP_MAX = 8;/.test(c) && /const MAX_ITEMS = 9;/.test(t) &&
-      /CMPX\.ids\(\)\.slice\(0, 8\)/.test(a) && /\.slice\(0, 9\)/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8'));
+      /CMPX\.ids\(\)[\s\S]{0,90}?\.slice\(0, 8\)/.test(a) && /\.slice\(0, 9\)/.test(fs.readFileSync(path.join(__dirname, '..', 'public', 'analysis.js'), 'utf8'));
   } catch (e) { return false; }
 })());
 chk('涨跌幅说明·含换算公式与示例（2026-10-19 改口径）', (function () {
@@ -1655,9 +1652,9 @@ chk('十八轮·⑥横轴月份标月底 + 年份落 1 月 1 日',
 chk('十八轮·⑦行情栏（2026-11-02 第二十七轮：已并入顶部栏，关闭按钮下线）',
   /id="mktTicker"/.test(rawIdxHtml) && /id="mktTicker"/.test(home) &&
   /\.hdr \.mkt-ticker \{/.test(readSrc('style.css')) && rawIdxHtml.indexOf('id="tkClose"') < 0);
-chk('十八轮·⑧排名维度支持多维度叠加排序',
+chk('十八轮·⑧多维度排序内核保留（UI 已于 2026-11-26 下线，导出仍按 __DIMSEL 记录）',
   /window\.__DIMSEL/.test(readSrc('app.js')) && /function sortByDims/.test(readSrc('app.js')) &&
-  /sortByDims\(filtered\(\), window\.__DIMSEL\)/.test(readSrc('app.js')) && /class="dim-opt/.test(readSrc('app.js')) && /\.dim-grid \{ display: grid/.test(readSrc('style.css')));
+  /sortByDims\(filtered\(\), window\.__DIMSEL\)/.test(readSrc('app.js')));
 
 /* ===== 2026-11-02 第二十轮（5 条反馈）===== */
 chk('二十轮·①每页显示标签移到框上方（与其它筛选框一致）+ 计数右移',
@@ -1685,11 +1682,11 @@ chk('二十一轮·①侧边栏贴左固定 + 对比发行人列表收为二级�
   rawIdxHtml.indexOf('class="an-side"') < 0 && /dsub\.hidden = isRank/.test(rawIdxHtml));
 chk('二十一轮·②榜单排名维度写出实际口径（近 1 年回报）',
   /esc\(TT\('近 1 年回报'\)\)/.test(readSrc('rank.js')) && rawIdxHtml.length > 0);
-chk('二十一轮·③搜索框与受托人同宽、占位只写基金名称／计划名称',
-  rawIdxHtml.indexOf('data-i18n-ph="基金名称／计划名称"') >= 0 &&
+chk('二十一轮·③四个筛选框等宽（2026-11-26：统一 100px，占位为「搜索」）',
+  rawIdxHtml.indexOf('data-i18n-ph="搜索"') >= 0 &&
   rawIdxHtml.indexOf('基金名称／计划名称／受托人') < 0 &&
-  /\.f-row-merged > \.f-search \{ flex: 0 0 96px/.test(readSrc('style.css')) &&
-  /\.f-row-merged > \.f-trustee \{ flex: 0 0 96px/.test(readSrc('style.css')));
+  /\.f-row-merged > \.f-item \{[^}]*flex: 0 1 100px/.test(readSrc('style.css')) &&
+  /\.f-row-merged > \.f-item > label \{ white-space: nowrap/.test(readSrc('style.css')));
 chk('二十一轮·④基金表说明条移入 #dbSec、与表格同宽且蓝色调',
   (function () {
     const a = rawIdxHtml.indexOf('id="dbScopeNote"');
@@ -2201,7 +2198,7 @@ chk('多选筛选·①资料库三个筛选已换成共用多选组件', (functi
     const h = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
     const a = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
     return /<span class="mf" id="fTrustee"/.test(h) && /<span class="mf" id="fType"/.test(h) &&
-      /<span class="mf" id="fSub"/.test(h) && /window\.MPFMulti/.test(a) &&
+      /<span class="mf" id="fScheme"/.test(h) && !/<span class="mf" id="fSub"/.test(h) && /window\.MPFMulti/.test(a) &&
       /F\.trustee\.indexOf\(x\.trustee\)/.test(a) && /multifilter\.js/.test(h);
   } catch (err) { return false; }
 })());

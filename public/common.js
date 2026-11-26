@@ -159,7 +159,7 @@ window.fetchJSON = fetchJSON;
    任何筛选器、下拉、多选、侧栏都必须用这个顺序，不得按出现次数或字母排。 */
 window.MPF_TRUSTEE_ORDER = {
   '宏利': 0, '銀聯信託': 1, '友邦信託': 2, 'HSBC': 3, '東亞': 4,
-  '中銀保誠': 5, '永明': 6, '交通': 7, '萬通': 8, '中國人壽': 9, '渣打信托': 10,
+  '中銀保誠': 5, '永明': 6, '交通': 7, '萬通': 8, '中國人壽': 9, '渣打信託': 10, '渣打信托': 10,
 };
 window.mpfTrusteeRank = function (t) {
   const m = window.MPF_TRUSTEE_ORDER;

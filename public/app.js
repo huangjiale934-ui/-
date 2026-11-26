@@ -372,7 +372,7 @@
         MF_TY.setSelected(F.type, true);
         MF_T.setSelected(F.trustee, true);
         fillSub();
-        MF_S.setSelected(F.sub, true);
+        if (MF_S) MF_S.setSelected(F.sub, true);
       }
       S.page = 1;
       return true;
@@ -388,10 +388,14 @@
       allLabel: TT('全部'),
       onChange: (arr) => { F.type = arr; F.sub = []; S.page = 1; fillSub(); render(); syncUrlFilters(); },
     });
-    MF_S = window.MPFMulti('#fSub', {
-      allLabel: TT('全部'),
-      onChange: (arr) => { F.sub = arr; S.page = 1; render(); syncUrlFilters(); },
-    });
+    /* 2026-11-26（领导要求）：「基金细类」筛选已从页面移除，组件不再创建；
+       其余调用统一空值保护，避免找不到容器时报错。 */
+    if (document.querySelector('#fSub')) {
+      MF_S = window.MPFMulti('#fSub', {
+        allLabel: TT('全部'),
+        onChange: (arr) => { F.sub = arr; S.page = 1; render(); syncUrlFilters(); },
+      });
+    }
     /* 2026-11-24（用户要求）：受托人与种类之间增加「基金计划」筛选 */
     MF_SC = window.MPFMulti('#fScheme', {
       allLabel: TT('全部'),
@@ -456,10 +460,11 @@
     ensureMF();
     const f = DATA.funds.filter((x) => !F.type.length || F.type.indexOf(x.type) >= 0);
     const vals = uniq(f.map((x) => x.subtype));
-    MF_S.setOptions(vals.map((v) => ({ v, label: typeLabel(v) })));
-    MF_S.setAllLabel(TT('全部'));
     const valid = new Set(vals);
     F.sub = F.sub.filter((v) => valid.has(v));
+    if (!MF_S) return;   /* 细类筛选已下线 */
+    MF_S.setOptions(vals.map((v) => ({ v, label: typeLabel(v) })));
+    MF_S.setAllLabel(TT('全部'));
     MF_S.setSelected(F.sub, true);
   }
 
@@ -575,7 +580,7 @@
 
     /* [表头, 取值, 类型, 列宽, 列说明] */
     const COLS = [
-      [TT('名次'), (x, i) => i + 1, 'rank', 6, TT('按当前排名维度排出的名次（1 = 排在最前）')],
+      [TT('序号'), (x, i) => i + 1, 'rank', 6, TT('按当前排序排出的序号（1 = 排在最前）')],
       [TT('基金名称'), (x) => (window.fundDisplayName ? window.fundDisplayName(x) : (x.fundBase || x.fund)), 'txtL', 34, TT('成分基金名称；单位类别在下一列单列')],
       [TT('单位类别'), (x) => x.unit || '', 'txt', 12, TT('同一基金的不同单位类别（A / T / B 等），净值与回报各自独立')],
       /* 2026-11-17（用户要求）：积金局是两级分类，拆成两列，不再用「/」挤在一格里 */
@@ -665,7 +670,7 @@
             [TT('本站同步时间'), new Date(DATA.updatedAt || Date.now()).toLocaleString('zh-CN', { hour12: false })],
             [TT('导出时间'), new Date().toLocaleString('zh-CN', { hour12: false })],
             [TT('收录范围'), TQ('{n} 条成分基金（按单位类别逐条，全市场 {u} 家受托人）', { n: ROWS.length, u: DATA.trusteeCount || '—' })],
-            [TT('排名维度'), (window.__DIMSEL || []).map((d) => dimLabel(d.k) + '（' + dirTxt(d.d) + '）').join(' + ') || '—'],
+            [TT('排序'), (window.__DIMSEL || []).map((d) => dimLabel(d.k) + '（' + dirTxt(d.d) + '）').join(' + ') || '—'],
             [TT('筛选条件'), filterBits.length ? filterBits.join('、') : TT('无（全市场）')],
           ],
           notes: [
@@ -706,7 +711,8 @@
   /** 重置全部筛选（含估值日标签，2026-10-14） */
   function resetAll() {
     Object.assign(F, { kw: '', type: [], sub: [], trustee: [], risk: '', retDim: 'ann1', retMin: '', retMax: '', ddMin: '', ddMax: '', feeMax: '', navDate: '' });
-    if (MF_TY) { MF_TY.setSelected([], true); MF_S.setSelected([], true); MF_T.setSelected([], true); }
+    if (MF_TY) { MF_TY.setSelected([], true); MF_T.setSelected([], true); }
+    if (MF_S) MF_S.setSelected([], true);
     ['#kw', '#fRetMin', '#fRetMax', '#fDdMin', '#fDdMax', '#fFeeMax'].forEach((s) => { const el = $(s); if (el) el.value = ''; });
     /* 2026-10-31（用户要求）：涨跌幅/回撤/费率第二行筛选已下线 */
     document.querySelectorAll('.ndk').forEach((el) => el.classList.remove('on'));
@@ -717,7 +723,7 @@
   /* ---------- 列设置（2026-10-14）：勾选显示列 + 精简模式 ---------- */
   /* 2026-10-19：列序对齐「基金最新数据」表格（名次 + 自算指标） */
   const COL_DEFS = [
-    { i: 1, k: 'rank', n: '名次', lock: true },
+    { i: 1, k: 'rank', n: '序号', lock: true },
     { i: 3, k: 'fund', n: '基金名称' },
     /* 2026-11-20（用户要求）：导出中心有、表格列设置缺的三列补上（默认不勾） */
     { i: 3.1, k: 'unit', n: '单位类别' },
@@ -973,7 +979,7 @@
   }
 
   const CELL_FNS = {
-    rank: (x, rk) => '<td data-c="rank" class="c" data-l="' + TT('名次') + '">' +
+    rank: (x, rk) => '<td data-c="rank" class="c" data-l="' + TT('序号') + '">' +
       (rk != null && rk <= 3 ? '<span class="medal g' + rk + '">' + rk + '</span>' : '<span class="rank-cell">' + (rk || '') + '</span>') + '</td>',
     /* 2026-11-14（第三轮独立核验 D-06）：行内对比勾选框原先没有任何可读名称，
        屏幕阅读器只会念「复选框」。补 aria-label（含基金名）与 title。 */
@@ -1055,7 +1061,7 @@
   };
   /* 表头模板（与 CELL_FNS 同 key；搬自原静态 thead） */
   const TH_HTML = {
-    rank: '<th scope="col" data-c="rank" data-i18n-parts class="c" style="width:56px">名次</th>',
+    rank: '<th scope="col" data-c="rank" data-i18n-parts class="c" style="width:56px">序号</th>',
     cmp: '<th scope="col" data-c="cmp" data-i18n-parts class="c" style="width:52px">对比</th>',
     fund: '<th scope="col" data-c="fund" data-i18n-parts data-k="fund" data-defdir="asc" class="sortable fz">基金名称 <span class="arrow">↕</span></th>',
     trustee: '<th scope="col" data-c="trustee" data-i18n-parts data-k="trustee" data-defdir="asc" class="sortable">受托人 <span class="arrow">↕</span></th>',
