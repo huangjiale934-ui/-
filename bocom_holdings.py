@@ -119,7 +119,8 @@ def main():
             continue
         hld["funds"][str(x["id"])] = {
             "asOf": asof,
-            "src": "交通銀行信託基金便覽 PDF（FFS %s）" % asof[:4] + "Q" + str((int(asof[5:7]) - 1) // 3 + 1),
+            # 2026-11-26 修正：季度要写在括号内，原来拼成「FFS 2026）Q2」
+            "src": "交通銀行信託基金便覽 PDF（FFS %sQ%d）" % (asof[:4], (int(asof[5:7]) - 1) // 3 + 1),
             "top10": top10,
             "alloc": alloc,
             "allocLabel": "資產分佈" if alloc else None,

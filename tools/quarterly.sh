@@ -162,7 +162,19 @@ if "$NODE" tools/fetch-pdf.js --bocpt tmp/bocpt_fs.pdf >> "$LOG" 2>&1; then
   echo "  ✔ 中銀保誠便覽下載" >> "$LOG"
   run "中銀保誠持仓" "$PY" bocpt_holdings.py
 else
-  echo "  ✘ 中銀保誠便覽下載失敗（源站改版或未发布，下次再试）" >> "$LOG"
+  # 2026-11-26（领导批准）：受托人站下载失败 → 回退到积金局托管的同一份便覽
+  # （/assets/FF/MTxxxxx.pdf）。积金局那份可能更旧，holdings-txn 的 asOf 倒退判定会逐只拦下。
+  _bc_ok=0
+  for _S in "中銀保誠簡易強積金計劃" "我的強積金計劃"; do
+    if "$NODE" tools/mpfa-ffs.js --get "$_S" tmp/bocpt_fs.pdf >> "$LOG" 2>&1; then
+      run "中銀保誠持仓（MPFA 回退：$_S）" "$PY" bocpt_holdings.py && _bc_ok=1
+    fi
+  done
+  if [ "$_bc_ok" = "1" ]; then
+    echo "  ✔ 中銀保誠便覽下載（MPFA 回退源）" >> "$LOG"
+  else
+    echo "  ✘ 中銀保誠便覽下載失敗（受托人站 + 積金局回退源均不可用）" >> "$LOG"
+  fi
 fi
 # bocpt_alloc_ingest.py 同样是静态录入（ASOF 固定 2026-06-30），默认跳过，避免覆盖更新的季度
 if [ -f bocpt_alloc_ingest.py ] && [ "${MPF_QUARTERLY_STATIC:-0}" = "1" ]; then
@@ -174,7 +186,13 @@ if "$NODE" tools/fetch-pdf.js --bocom tmp/bocom_ffs.pdf >> "$LOG" 2>&1; then
   echo "  ✔ 交通便覽下載" >> "$LOG"
   run "交通持仓" "$PY" bocom_holdings.py tmp/bocom_ffs.pdf
 else
-  echo "  ✘ 交通便覽下載失敗（源站改版或列表为空，下次再试）" >> "$LOG"
+  # 2026-11-26（领导批准）：交通官网列表改版/为空时，回退到积金局托管的便覽（MT00393）
+  if "$NODE" tools/mpfa-ffs.js --get "交通銀行愉盈退休強積金計劃" tmp/bocom_ffs.pdf >> "$LOG" 2>&1; then
+    echo "  ✔ 交通便覽下載（MPFA 回退源）" >> "$LOG"
+    run "交通持仓（MPFA 回退）" "$PY" bocom_holdings.py tmp/bocom_ffs.pdf
+  else
+    echo "  ✘ 交通便覽下載失敗（受托人站 + 積金局回退源均不可用）" >> "$LOG"
+  fi
 fi
 # 2026-11-23（用户要求）：海通改走官方「基金概覽」月度汇总 PDF（7 只共用一份，2026-10-30 版已可下），
 # 用 fetch-pdf.js --ht 自动发现链接，解析用 tools/ht-apply.py。

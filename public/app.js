@@ -419,8 +419,8 @@
       v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
       n: f.filter((y) => y.trustee === v).length,
     })));
-    MF_TY.setAllLabel(TT('全部'));
-    MF_T.setAllLabel(TT('全部'));
+    MF_TY.setAllLabel(TT('全部种类'));
+    MF_T.setAllLabel(TT('全部受托人'));
     fillScheme();
     fillSub();
   }
@@ -441,7 +441,7 @@
       return ta - tb || String(a).localeCompare(String(b), 'zh-Hant');
     });
     MF_SC.setOptions(schemes.map((v) => ({ v, label: schemeLabel(v) })));
-    MF_SC.setAllLabel(TT('全部'));
+    MF_SC.setAllLabel(TT('全部计划'));
     /* 已选计划若不在新池子里（换了受托人）→ 自动清掉，避免 0 条 */
     const valid = new Set(schemes);
     const kept = F.scheme.filter((v) => valid.has(v));

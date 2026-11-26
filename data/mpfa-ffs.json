@@ -1,0 +1,102 @@
+{
+ "updatedAt": "2026-11-26T06:12:07.228Z",
+ "source": "https://mfp.mpfa.org.hk/tch/mpp_list.jsp",
+ "schemes": {
+  "友邦強積金優選計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00172.pdf",
+   "code": "MT00172"
+  },
+  "AMTD強積金計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00539.pdf",
+   "code": "MT00539"
+  },
+  "交通銀行愉盈退休強積金計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00393.pdf",
+   "code": "MT00393"
+  },
+  "BCT（強積金）行業計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/IS00017.pdf",
+   "code": "IS00017"
+  },
+  "BCT積金之選": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00016.pdf",
+   "code": "MT00016"
+  },
+  "BCT強積金—易富之選": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00504.pdf",
+   "code": "MT00504"
+  },
+  "BCT強積金—明智之選": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00180.pdf",
+   "code": "MT00180"
+  },
+  "BCT強積金計劃800系列": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00059.pdf",
+   "code": "MT00059"
+  },
+  "BCT強積金策略計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00075.pdf",
+   "code": "MT00075"
+  },
+  "東亞（強積金）行業計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/IS00025.pdf",
+   "code": "IS00025"
+  },
+  "東亞（強積金）集成信託計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00202.pdf",
+   "code": "MT00202"
+  },
+  "東亞（強積金）享惠計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00571.pdf",
+   "code": "MT00571"
+  },
+  "中銀保誠簡易強積金計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00091.pdf",
+   "code": "MT00091"
+  },
+  "中國人壽強積金集成信託計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00083.pdf",
+   "code": "MT00083"
+  },
+  "富達退休集成信託": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00288.pdf",
+   "code": "MT00288"
+  },
+  "海通MPF退休金": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00121.pdf",
+   "code": "MT00121"
+  },
+  "恒生強積金智選計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00253.pdf",
+   "code": "MT00253"
+  },
+  "滙豐強積金智選計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00245.pdf",
+   "code": "MT00245"
+  },
+  "宏利環球精選（強積金）計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00482.pdf",
+   "code": "MT00482"
+  },
+  "宏利退休精選（強積金）計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00490.pdf",
+   "code": "MT00490"
+  },
+  "萬全強制性公積金計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00350.pdf",
+   "code": "MT00350"
+  },
+  "我的強積金計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00547.pdf",
+   "code": "MT00547"
+  },
+  "新地強積金僱主營辦計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/ES00020.pdf",
+   "code": "ES00020"
+  },
+  "永明彩虹強積金計劃": {
+   "url": "https://www.mpfa.org.hk/assets/FF/MT00067.pdf",
+   "code": "MT00067"
+  }
+ }
+}

@@ -3292,11 +3292,13 @@ html[lang="en"] .f-row-merged > .f-item > label {
 /* 六个筛选等宽：按剩余空间均分（flex:1 1 0），右侧工具条 flex:0 0 auto 不受影响 */
 /* 2026-11-26（领导要求）：「排名维度」「基金细类」下线后，剩余 4 个筛选框（基金搜索 /
    受托人 / 基金计划 / 基金种类）保持原宽度、整体左移，不再拉伸铺满整行。 */
+/* 2026-11-26（领导要求）：删掉两个筛选后右側留白过多——四个框改为按剩余空间均分
+   （上限 200px，避免超宽屏被拉成长条），右侧工具条仍 flex:0 0 auto。 */
 .f-row-merged > .f-item {
-  flex: 0 1 100px !important;
-  min-width: 0 !important;
-  max-width: 100px !important;
-  width: 100px !important;
+  flex: 1 1 120px !important;
+  min-width: 96px !important;
+  max-width: 200px !important;
+  width: auto !important;
 }
 .f-row-merged > .f-item .mpfsel,
 .f-row-merged > .f-item .mpfsel-btn,
@@ -3314,7 +3316,7 @@ html[lang="en"] .f-row-merged > .f-item > label {
 }
 .f-row-merged .tb-tail > * { flex: 0 0 auto; }
 .f-row-merged .tb-tail .tb-count { display: flex; align-items: center; height: 36px; margin-left: 12px; white-space: nowrap; }
-/* 2026-11-26：四个筛选框在 900px 以上都不需要换行（原来为容纳 6 个筛选加的 1240 断点已删除） */
-@media (max-width: 1100px) {
+/* 2026-11-26：四个筛选框 + 右侧工具条在 1000px 以上同一行（更窄才换行） */
+@media (max-width: 1000px) {
   .card.filters .f-row-main.f-row-merged { flex-wrap: wrap !important; }
 }

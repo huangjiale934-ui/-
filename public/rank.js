@@ -341,7 +341,7 @@
       return ta - tb || String(a).localeCompare(String(b), 'zh-Hant');
     });
     MF_RSC.setOptions(schemes.map((v) => ({ v, label: v })));
-    MF_RSC.setAllLabel(TT('全部'));
+    MF_RSC.setAllLabel(TT('全部计划'));
     const valid = new Set(schemes);
     const kept = S.scheme.filter((v) => valid.has(v));
     if (kept.length !== S.scheme.length) { S.scheme = kept; MF_RSC.setSelected(kept, true); }
@@ -356,8 +356,8 @@
       v, label: (window.trusteeDisplay ? window.trusteeDisplay(v) : v),
       n: f.filter((y) => y.trustee === v).length,
     })));
-    MF_RTY.setAllLabel(TT('全部'));
-    MF_RTR.setAllLabel(TT('全部'));
+    MF_RTY.setAllLabel(TT('全部种类'));
+    MF_RTR.setAllLabel(TT('全部受托人'));
     fillScheme();
     buildSubRisk();
   }
@@ -369,7 +369,7 @@
     const vals = [...new Set(pool.map((x) => x.subtype).filter(Boolean))].sort();
     if (MF_RS) {
       MF_RS.setOptions(vals.map((v) => ({ v, label: typeLabel(v) })));
-      MF_RS.setAllLabel(TT('全部'));
+      MF_RS.setAllLabel(TT('全部细类'));
     }
     const valid = new Set(vals);
     S.sub = S.sub.filter((v) => valid.has(v));
@@ -646,12 +646,23 @@
 
   /* ═══ 2026-10-26 重做：列顺序数组单源（修复表头/表体错位）═══
      thead 与 tbody 由同一个可见列顺序数组生成；维度联动=改数组而非移动 DOM。 */
+  /* 2026-11-26（用户要求）：同一成分基金有多个单位类别时，鼠标悬浮名称即可看到
+     各类别的最新净值，不必再进详情页逐只切换。 */
+  function unitsTip(x) {
+    if (!x || !x.units || x.units.length < 2) return '';
+    return x.units.map((u) => (u.unit ? String(u.unit) : '—') + '：' +
+      (u.nav == null ? TT('无净值') : nf(u.nav, 4)) + '（' + (u.navAsOf || '—') + '）').join(' · ');
+  }
+
   const CELL_FUND = {
     rank: (x, medal, rk) => '<td data-c="rank" class="c" data-l="' + TT('序号') + '">' + medal + '</td>',
-    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name">' + esc(fundFullName(x)) + '</div></td>',   /* 2026-10-31 四版：名称下的对比横线一并删除（用户不需要） */
+    fund: (x) => '<td data-c="fund" class="f-main fz" data-l="' + TT('基金名称') + '"><div class="fund-name"' +
+      (unitsTip(x) ? ' data-tip="' + esc(unitsTip(x)) + '"' : '') + '>' + esc(fundFullName(x)) + '</div></td>',   /* 2026-10-31 四版：名称下的对比横线一并删除（用户不需要） */
     scheme: (x) => '<td data-c="scheme" data-l="' + TT('计划名称') + '" class="fz"><div>' + esc(x.scheme || '—') + '</div>' +
       (x.groupSize > 1 ? '<div class="cell-sub">' + TQ('{n} 个单位类别', { n: x.groupSize }) + '</div>' : '') + '</td>',
-    unit: (x) => '<td data-c="unit" data-l="' + TT('单位类别') + '" class="c">' + esc(x.unit || '—') + '</td>',
+    unit: (x) => '<td data-c="unit" data-l="' + TT('单位类别') + '" class="c"' +
+      (unitsTip(x) ? ' data-tip="' + esc(unitsTip(x)) + '"' : '') + '>' +
+      esc(x.unitN > 1 ? x.unitList.join(' / ') : (x.unit || '—')) + '</td>',
     nav: (x) => '<td data-c="nav" data-l="' + TT('单位资产净值') + '" class="r num">' + (x.nav == null ? '—' : esc(String(x.nav))) + '</td>',
     trustee: (x) => '<td data-c="trustee" data-l="' + TT('受托人') + '"><span class="tag">' + esc(trusteeDisplay(x.trustee)) + '</span></td>',
     /* 2026-11-02：细类不再占第二行（会让整行高出一大截）——收进悬浮说明，行高与资料库一致 */

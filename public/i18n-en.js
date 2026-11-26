@@ -1757,6 +1757,10 @@
 '已导出（数据说明 + 基金列表 + 持仓分布，共三个工作表）': 'Exported (data notes + fund list + holdings, three worksheets)',
 '该基金由受托人明确不提供单位净值（利息基金），因此没有每日净值可比；费用、风险等资料仍可查看': 'This fund has no unit NAV (interest fund), so there is no daily NAV to compare; fee and risk data are still available',
 
+/* 2026-11-26：计划筛选默认文案 */
+
+'无净值': 'no NAV',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);
