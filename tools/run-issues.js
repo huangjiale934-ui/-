@@ -35,6 +35,10 @@ const add = (level, text, extra) => items.push(Object.assign({ level, text }, ex
     .map((l) => l.replace(/^.*✘\s*/, '').replace(/（http[^）]*）/g, '').trim())
     .filter(Boolean);
   fails.forEach((t) => add('warn', '季度链路未完成：' + t));
+  /* 2026-11-26（用户要求）：便覽改用积金局回退源 = 某家受托人站已不可用，必须让我知道 */
+  tail.split('\n').filter((l) => l.indexOf('MPFA 回退源') >= 0).forEach((l) => {
+    add('warn', '季度便覽改用积金局回退源：' + l.replace(/^.*?✔\s*/, '').trim());
+  });
   const m = tail.match(/季度持仓刷新结束：成功 (\d+) 步，失败 (\d+) 步/);
   if (m && Number(m[2]) === 0) items.push({ level: 'ok', text: '季度链路 ' + m[1] + ' 步全部成功' });
 })();

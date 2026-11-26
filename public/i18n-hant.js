@@ -1618,6 +1618,8 @@
 
 '无净值': '無淨值',
 
+'名称/受托人/计划': '名稱／受託人／計劃',
+
 };
   for (var k in H) { if (Object.prototype.hasOwnProperty.call(H, k)) w.HANT[k] = H[k]; }
 })(window);

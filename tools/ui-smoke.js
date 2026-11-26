@@ -154,6 +154,21 @@ async function getWs() {
   })()`);
   check('⑤ 指数详情导出指向指数', r5 && r5.hasFn === true, JSON.stringify(r5));
 
+  /* ⑥ 表头排序（2026-11-26 体检发现过：维度 UI 下线后只变箭头不排序） */
+  await send('Page.navigate', { url: URL0 });
+  await sleep(2200);
+  const r6 = await ev(`(async()=>{
+    const first=()=>{const t=document.querySelector('#tbody tr:nth-child(1)');return t?t.innerText.replace(/\\s+/g,' ').slice(0,24):'';};
+    const th=()=>[...document.querySelectorAll('#thead th')].find(t=>t.dataset.k==='selfY1');
+    const base=first();
+    if(!th()) return {err:'no th'};
+    th().click(); await new Promise(r=>setTimeout(r,700)); const desc=first();
+    th().click(); await new Promise(r=>setTimeout(r,700)); const asc=first();
+    th().click(); await new Promise(r=>setTimeout(r,700)); const off=first();
+    return {base:base,desc:desc,asc:asc,off:off};
+  })()`);
+  check('⑥ 表头排序三态生效（降序/升序/取消）', r6 && r6.desc && r6.desc !== r6.base && r6.asc !== r6.desc && r6.off === r6.base, JSON.stringify(r6));
+
   const bad = results.filter((r) => !r.pass);
   results.forEach((r) => console.log((r.pass ? '  ✔ ' : '  ✘ ') + r.name + (r.pass ? '' : '  ' + r.detail)));
   console.log('UI 冒烟：' + (results.length - bad.length) + '/' + results.length + (bad.length ? ' 失败' : ' 全部通过'));

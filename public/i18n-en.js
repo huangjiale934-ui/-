@@ -1761,6 +1761,8 @@
 
 '无净值': 'no NAV',
 
+'名称/受托人/计划': 'Name / Trustee / Scheme',
+
 };
   for (var k in E) { if (Object.prototype.hasOwnProperty.call(E, k)) w.EN[k] = E[k]; }
 })(window);

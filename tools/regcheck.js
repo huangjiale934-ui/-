@@ -1691,7 +1691,7 @@ chk('二十一轮·①侧边栏贴左固定 + 对比发行人列表收为二级�
 chk('二十一轮·②榜单排名维度写出实际口径（近 1 年回报）',
   /esc\(TT\('近 1 年回报'\)\)/.test(readSrc('rank.js')) && rawIdxHtml.length > 0);
 chk('二十一轮·③四个筛选框按剩余空间均分（2026-11-26：flex 1 1 120px，上限 200px）',
-  rawIdxHtml.indexOf('data-i18n-ph="搜索"') >= 0 &&
+  rawIdxHtml.indexOf('data-i18n-ph="名称/受托人/计划"') >= 0 &&
   rawIdxHtml.indexOf('基金名称／计划名称／受托人') < 0 &&
   /\.f-row-merged > \.f-item \{[^}]*flex: 1 1 120px/.test(readSrc('style.css')) &&
   /\.f-row-merged > \.f-item \{[^}]*max-width: 200px/.test(readSrc('style.css')));

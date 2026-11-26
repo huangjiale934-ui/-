@@ -488,8 +488,13 @@
       return true;
     });
     if (S.kw) {
-      const k = S.kw.toLowerCase();
-      const hit = (x) => [x.fund, x.fundBase, x.scheme, x.trustee].some((v) => v && String(v).toLowerCase().indexOf(k) >= 0);
+      /* 2026-11-26（用户反馈：搜「韩国」0 条）：数据是繁体、输入是简体，必须走全站统一的
+         fundMatch（内部 toSimp 双向归一 + 英文名表）。此前这里只做 indexOf。 */
+      const kwNorm = window.toSimp ? window.toSimp(S.kw) : S.kw;
+      const k = String(kwNorm).toLowerCase();
+      const hit = window.fundMatch
+        ? (x) => window.fundMatch(x, kwNorm)
+        : (x) => [x.fund, x.fundBase, x.scheme, x.trustee].some((v) => v && String(v).toLowerCase().indexOf(k) >= 0);
       arr = arr.filter(hit);
     }
     return arr;

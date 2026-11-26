@@ -140,7 +140,8 @@
 
   /* ---------- 筛选 ---------- */
   function filtered() {
-    const kw = ST.kw.trim().toLowerCase();
+    /* 2026-11-26：简繁归一后再比，避免简体输入搜不到繁体基金名 */
+    const kw = (window.toSimp ? window.toSimp(ST.kw.trim()) : ST.kw.trim()).toLowerCase();
     const latest = latestNav();
     /* 只选了「其他市场指数」时没有真实受托人 → 基金列表为空（不再返回全部 451 只） */
     const real = Array.from(ST.trustee).filter((v) => v !== IDXK);
@@ -151,7 +152,8 @@
       if (ST.scheme.size && !ST.scheme.has(x.scheme)) return false;
       if (ST.navOnly && x.navAsOf !== latest) return false;
       if (kw) {
-        const hay = (nameOf(x) + ' ' + (x.scheme || '') + ' ' + (x.trustee || '')).toLowerCase();
+        const hayRaw = nameOf(x) + ' ' + (x.scheme || '') + ' ' + (x.trustee || '');
+        const hay = (window.toSimp ? window.toSimp(hayRaw) : hayRaw).toLowerCase();
         if (hay.indexOf(kw) < 0) return false;
       }
       return true;

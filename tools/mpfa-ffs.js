@@ -19,7 +19,8 @@ const path = require('path');
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36';
 const LIST = 'https://mfp.mpfa.org.hk/tch/mpp_list.jsp';
 const OUT = path.join(__dirname, '..', 'data', 'mpfa-ffs.json');
-const MAX_AGE = 7 * 864e5;
+/* 2026-11-26（用户要求）：便覽按季度发布，映射每月刷新一次即可 */
+const MAX_AGE = 30 * 864e5;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

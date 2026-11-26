@@ -3300,6 +3300,12 @@ html[lang="en"] .f-row-merged > .f-item > label {
   max-width: 200px !important;
   width: auto !important;
 }
+/* 搜索框要放「名称/受托人/计划」，比其它三个多分一点空间（仍随窗口伸缩） */
+.f-row-merged > .f-search {
+  flex: 1.4 1 150px !important;
+  min-width: 140px !important;
+  max-width: 210px !important;
+}
 .f-row-merged > .f-item .mpfsel,
 .f-row-merged > .f-item .mpfsel-btn,
 .f-row-merged > .f-item .tb-search { width: 100% !important; box-sizing: border-box; }
