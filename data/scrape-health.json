@@ -1,5 +1,5 @@
 {
- "updatedAt": 1795663549876,
+ "updatedAt": 1795684515041,
  "day": "2026-11-26",
  "summary": {
   "total": 24,
@@ -22,7 +22,7 @@
    "detail": "",
    "count": 16,
    "asOf": "2026-11-24",
-   "rawBytes": 17624
+   "rawBytes": 17294
   },
   {
    "key": "HSBC",
@@ -93,7 +93,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 17,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -105,7 +105,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 17,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -202,7 +202,7 @@
    "detail": "",
    "count": 20,
    "asOf": "2026-11-24",
-   "rawBytes": 474666
+   "rawBytes": 462465
   },
   {
    "key": "YF",
@@ -225,7 +225,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 14,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -285,7 +285,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 14,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
