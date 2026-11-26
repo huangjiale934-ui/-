@@ -376,5 +376,113 @@
       }
     ],
     "review": []
+  },
+  {
+    "generatedAt": "2026-11-22T22:39:28",
+    "groups": [
+      {
+        "name": "AMTD",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": null,
+        "action": "样张下载失败（网络或代理）",
+        "updated": false
+      },
+      {
+        "name": "滙豐",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      },
+      {
+        "name": "恒生",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      }
+    ],
+    "review": []
+  },
+  {
+    "generatedAt": "2026-11-23T23:27:59",
+    "groups": [
+      {
+        "name": "AMTD",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": null,
+        "action": "样张下载失败（网络或代理）",
+        "updated": false
+      },
+      {
+        "name": "滙豐",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      },
+      {
+        "name": "恒生",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      }
+    ],
+    "review": []
+  },
+  {
+    "generatedAt": "2026-11-24T22:31:48",
+    "groups": [
+      {
+        "name": "AMTD",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": null,
+        "action": "样张下载失败（网络或代理）",
+        "updated": false
+      },
+      {
+        "name": "滙豐",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      },
+      {
+        "name": "恒生",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      }
+    ],
+    "review": []
+  },
+  {
+    "generatedAt": "2026-11-26T11:35:17",
+    "groups": [
+      {
+        "name": "AMTD",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": null,
+        "action": "样张下载失败（网络或代理）",
+        "updated": false
+      },
+      {
+        "name": "滙豐",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      },
+      {
+        "name": "恒生",
+        "currentAsOf": "2026-06-30",
+        "latestPeriod": "2026-06-30",
+        "action": "官方尚未发布新季",
+        "updated": false
+      }
+    ],
+    "review": []
   }
 ]

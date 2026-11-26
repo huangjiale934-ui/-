@@ -1,8 +1,8 @@
 name: deploy
 
 # push 到 main 即構建並部署 GitHub Pages；
-# 按北京時間每日 23:00（UTC 15:00）跑一次全量資料更新（抓取 → 校驗 → 季度持倉 → commit → 觸發部署）；
-# 工作日 09:00（UTC 01:00）跑一次僅淨值的輕量班。
+# 每日北京 00:00（UTC 16:00）跑一次全量數據更新（抓取 → 校驗 → 季度持倉 → commit → 觸發部署）；
+# 工作日 09:00（UTC 01:00）跑一次僅淨值的輕量班。GitHub 定時觸發實測延遲 5.5–8 小時。
 # 2026-10-28：本機鏈路改為「不推 GitHub」，雲端成為 GitHub 側唯一寫手，
 #             兩站各自獨立更新；提交信息含 [run-data] 可手動觸發一次數據更新。
 #             注意：正文里出现该标记也算（11-23 一次提交说明引用它，误触发了一次全量班），
@@ -11,13 +11,13 @@ on:
   push:
     branches: [main]
   schedule:
-    # 全量班和轻量班必须分别带 `# full` / `# light` 标记：
+    # ⚠️ 下面两行 cron 必须分别带 `# full` / `# light` 标记：
     # 「判定更新模式」那一步直接从本文件读标记，不再手写第二份 cron 字符串。
     # 历史事故（2026-11-21）：schedule 已改成 0 16，判定里还比着旧的 40 14 →
     # 11-21 起每一次全量班都被判成轻量，scraper/持仓/indexbuild/allstats 在云端从未执行。
     # 现在只有「改 cron 且忘了改标记」才会出问题，而那种情况会直接让 job 失败（不会静默降级）。
-    - cron: '0 15 * * *'   # full   23:00 北京時間 全量（净值 + 持仓 + 指数 + 季度）
-    - cron: '0 1 * * 1-5'   # light  09:00 北京時間 仅净值（工作日）
+    - cron: '0 16 * * *'   # full   00:00 HKT 全量（净值 + 持仓 + 指数 + 季度）
+    - cron: '0 1 * * 1-5'  # light  09:00 HKT 仅净值（工作日）
   workflow_dispatch:
     inputs:
       mode:
@@ -88,15 +88,13 @@ jobs:
         run: |
           set -u
           WF=".github/workflows/deploy.yml"
-          # 唯一事实来源：本文件 schedule 里带 `# full` 和 `# light` 的行。
+          # 唯一事实来源：本文件 schedule 里带 `# full` / `# light` 标记的两行。
           # 绝不在这里再写一遍 cron 字面量（11-21 事故就是这么来的）。
           FULL_CRON=$(grep -oE "cron: *'[^']+' *# *full" "$WF" | head -1 | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
-          LIGHT_CRONS=$(grep -oE "cron: *'[^']+' *# *light" "$WF" | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
-          N_FULL=$(grep -cE "cron: *'[^']+' *# *full" "$WF" || true)
-          N_LIGHT=$(printf '%s\n' "$LIGHT_CRONS" | sed '/^$/d' | wc -l)
+          LIGHT_CRON=$(grep -oE "cron: *'[^']+' *# *light" "$WF" | head -1 | sed -E "s/^.*cron: *'([^']+)'.*/\1/" || true)
           N_CRON=$(grep -cE "^[[:space:]]*-[[:space:]]*cron:" "$WF" || true)
-          if [ "$N_FULL" != "1" ] || [ "$N_LIGHT" -lt 1 ]; then
-            echo "::error::schedule 必须恰好一条 '# full' 和至少一条 '# light' cron；当前 cron=${N_CRON:-0} 条，full=${N_FULL} light=${N_LIGHT}"
+          if [ -z "$FULL_CRON" ] || [ -z "$LIGHT_CRON" ] || [ "$N_CRON" != "2" ]; then
+            echo "::error::schedule 必须正好两条 cron，且分别带 '# full' / '# light' 标记；当前 cron=${N_CRON:-0} 条，full='${FULL_CRON}' light='${LIGHT_CRON}'"
             exit 1
           fi
 
@@ -104,22 +102,15 @@ jobs:
             workflow_dispatch) MODE="${IN_MODE:-full}" ;;
             push)              MODE=full ;;   # 只有带 [run-data] 的提交才会进本 job = 手动全量
             schedule)
-              if [ "$EV_SCHED" = "$FULL_CRON" ]; then
-                MODE=full
-              else
-                MODE=
-                while IFS= read -r LIGHT_CRON; do
-                  [ -n "$LIGHT_CRON" ] && [ "$EV_SCHED" = "$LIGHT_CRON" ] && MODE=light
-                done <<< "$LIGHT_CRONS"
-              fi
-              if [ -z "$MODE" ]; then echo "::error::未知的 schedule '$EV_SCHED'（不是本文件里的任何一条 cron）"; exit 1; fi ;;
+              if   [ "$EV_SCHED" = "$FULL_CRON" ];  then MODE=full
+              elif [ "$EV_SCHED" = "$LIGHT_CRON" ]; then MODE=light
+              else echo "::error::未知的 schedule '$EV_SCHED'（不是本文件里的任何一条 cron）"; exit 1; fi ;;
             *)                 MODE=light ;;
           esac
 
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
           if [ "$MODE" = "full" ]; then echo "light=0" >> "$GITHUB_OUTPUT"; else echo "light=1" >> "$GITHUB_OUTPUT"; fi
-          LIGHT_CRON_LIST=$(printf '%s' "$LIGHT_CRONS" | paste -sd ',' -)
-          echo "本次模式：$MODE ｜ 触发=$EV_NAME ｜ 命中 cron=${EV_SCHED:-无} ｜ full=$FULL_CRON light=$LIGHT_CRON_LIST"
+          echo "本次模式：$MODE ｜ 触发=$EV_NAME ｜ 命中 cron=${EV_SCHED:-无} ｜ full=$FULL_CRON light=$LIGHT_CRON"
           {
             echo "### 本次更新模式"
             echo "| 模式 | 触发 | 命中 cron | 全量 cron |"
@@ -128,7 +119,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 抓取發行人官網數據（失敗保留舊數據）
-        if: steps.mode.outputs.mode != 'skip' && steps.mode.outputs.light == '0'
+        if: steps.mode.outputs.light == '0'
         run: |
           # 2026-10-28：hist 快照——发行人脚本多为「整段覆盖写」，用 --from 只抓近端区间时
           # 会把 2015 年以来的历史冲成 5 个点（云端 10-28 就把 74 只基金冲成了 5 点）。
@@ -162,7 +153,7 @@ jobs:
           timeout 900 python tools/bct-recent.py || echo "!! BCT 失敗"
 
       - name: 抓取淨值（交易日 09:00 轻量模式）
-        if: steps.mode.outputs.mode != 'skip' && steps.mode.outputs.light == '1'
+        if: steps.mode.outputs.light == '1'
         run: |
           node tools/mpfa-refresh.js || echo "!! 積金局快照刷新失敗（保留舊數據）"
           # 2026-10-28：抓取前备份 hist（本次多为「近端区间覆盖写」，合并时按日期取并集）
@@ -193,26 +184,23 @@ jobs:
       # 2026-11-16（用户反馈 1525/1528 停在 11-10）：列表页对个别基金滞後，
       # 逐只查 fundhistory（3 次重试，取最新节点），只在官方更晚时追加。
       - name: 宏利最新點補齊（逐只 fundhistory）
-        if: steps.mode.outputs.mode != 'skip'
         run: python tools/manulife-latest.py || echo "!! 宏利補點失敗（不影響已抓到數據）"
       # 2026-11-16：同计划内落后监控（按 scheme 取当天最大值，逐只比较）
       - name: 同計劃內落後監控
-        if: steps.mode.outputs.mode != 'skip'
         run: node tools/plan-lag.js || echo "!! 落後監控失敗（不影響數據）"
 
       - name: 積金局基金資訊表（scraper；失敗保留舊 dataAsOf）
-        if: steps.mode.outputs.mode != 'skip' && steps.mode.outputs.light == '0'
+        if: steps.mode.outputs.light == '0'
         run: node scraper.js || echo "!! 積金局抓取失敗（保留舊 dataAsOf）"
 
       # 2026-11-23（用户要求）：狀態漂移（na / unmatched 集合與上一班比較），只記錄不阻斷
       - name: 狀態漂移（na / unmatched）
-        if: steps.mode.outputs.mode != 'skip'
         run: node tools/status-drift.js || true
 
       # 2026-11-11（用户要求自动化）：月度統計表在新聞稿裡是**圖片**，用 OCR 解析。
       # 官方 6 日前後發佈，所以只在每月 1–12 日跑；OCR 校驗不通過就保留舊資料。
       - name: 積金局月度統計（OCR，1–12 日）
-        if: steps.mode.outputs.mode != 'skip' && steps.mode.outputs.light == '0'
+        if: steps.mode.outputs.light == '0'
         run: |
           if [ "$(date -u +%d)" -le 12 ]; then
             python -m pip install -q 'rapidocr-onnxruntime>=1.2,<1.4' 2>/dev/null || echo "!! OCR 依賴安裝失敗"
@@ -222,21 +210,17 @@ jobs:
           fi
 
       - name: 近 5 個交易日淨值複核（官網重比對，偏差自動修正）
-        if: steps.mode.outputs.mode != 'skip'
         # 2026-11-04：源站偶發錯價（BCT 10-30 曾報高 4.2%）——每日對最近 5 個交易日逐只重抓，
         # 偏差 >0.2% 自動改正並寫 data/nav-recheck.log；後面的 navperf 會重算受影響的指標。
         run: python tools/nav-recheck.py --apply || echo "!! 淨值複核失敗（不影響已抓到的最新值）"
 
       - name: 雅虎補空（官網未發布時先用雅虎同源淨值）
-        if: steps.mode.outputs.mode != 'skip'
         run: node tools/yahoo-fill.js || echo "!! 雅虎補空失敗（不影響已抓到的最新值）"
 
       - name: 歷史淨值統一 4 位（2026-11-17）
-        if: steps.mode.outputs.mode != 'skip'
         run: node tools/hist-round4.js
 
       - name: 重算指標與校驗
-        if: steps.mode.outputs.mode != 'skip'
         run: |
           # 2026-10-28：先做 hist 并集合并（快照 ∪ 本次新值），再算指标——
           # 顺序不能反，否则算出来的 ytd/mdd 是建立在被截断的 5 个点上。
@@ -300,7 +284,7 @@ jobs:
 
       # 2026-11-18（用户要求）：跑完立刻自检新鲜度，落后就发邮件（仅定时/手动数据班次）
       - name: 新鮮度自檢（落後發郵件）
-        if: steps.mode.outputs.mode != 'skip' && (github.event_name == 'schedule' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[run-data]')))
+        if: github.event_name == 'schedule' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[run-data]'))
         continue-on-error: true
         env:
           MPF_SMTP_USER: ${{ secrets.MPF_SMTP_USER }}
@@ -309,7 +293,6 @@ jobs:
         run: node tools/freshness-watch.js --mail || true
 
       - name: 官網快照自檢（雲端必須真的抓到頁面）
-        if: steps.mode.outputs.mode != 'skip'
         continue-on-error: true
         run: |
           node -e "
@@ -329,7 +312,6 @@ jobs:
       # 2026-11-16：轻量任务当天无数据变化时不会提交，B 站横幅停在上一班（04:41）。
       # 每次数据任务结束都打时间戳：funds.updatedAt + update-status.json。
       - name: 打時間戳（數據更新時間 / 更新狀態）
-        if: steps.mode.outputs.mode != 'skip'
         run: |
           if [ "${{ steps.mode.outputs.light }}" = "1" ]; then
             node tools/stamp-run.js "早晨净值更新完成" github
@@ -338,7 +320,6 @@ jobs:
           fi
 
       - name: 提交數據變更
-        if: steps.mode.outputs.mode != 'skip'
         # 2026-10-28：本机每日 23:20 也会推一次数据，云端与本机同时提交同一批文件时 rebase 会冲突，
         # 曾导致整个 run 在「提交」这一步失败（10:41 的定时任务就是这样挂的，站点没发布）。
         # 现在：冲突时以「本次运行抓到的数据」为准继续 rebase；仍失败只告警，不阻断后续构建发布。

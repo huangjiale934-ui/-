@@ -1,0 +1,31 @@
+{
+ "at": 1795664586126,
+ "atHKT": "2026-11-26 11:43",
+ "a": {
+  "count": 451,
+  "navLatest": "2026-11-24",
+  "dataAsOf": "2026-10-31",
+  "updatedAt": 1795664099709
+ },
+ "b": {
+  "count": 451,
+  "navLatest": "2026-11-24",
+  "dataAsOf": "2026-10-31",
+  "updatedAt": 1795650069100
+ },
+ "summary": {
+  "fundsA": 451,
+  "fundsB": 451,
+  "lagB": 16,
+  "aheadB": 0,
+  "valueDiff": 0,
+  "onlyA": 0,
+  "onlyB": 0,
+  "calDiff": 0,
+  "wyDiff": 0,
+  "same": 435
+ },
+ "diffs": [],
+ "verdict": "ok",
+ "note": "两站一致（允许 ≤3 日时点差）"
+}

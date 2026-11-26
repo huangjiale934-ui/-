@@ -77,5 +77,77 @@
    "銀聯信託": 55
   },
   "updated": 374
+ },
+ {
+  "date": "2026-11-22",
+  "syncAt": "2026-11-22T14:40:55.905Z",
+  "count": 451,
+  "dataAsOf": "2026-10-31",
+  "navVerified": 450,
+  "navNa": 1,
+  "avgAnn1": 3.75,
+  "navLatest": "2026-11-19",
+  "lagged": 53,
+  "lagByTrustee": {
+   "友邦信託": 2,
+   "銀聯信託": 51
+  },
+  "updated": 0
+ },
+ {
+  "date": "2026-11-23",
+  "syncAt": "2026-11-23T15:28:45.009Z",
+  "count": 451,
+  "dataAsOf": "2026-10-31",
+  "navVerified": 450,
+  "navNa": 1,
+  "avgAnn1": 3.75,
+  "navLatest": "2026-11-20",
+  "lagged": 268,
+  "lagByTrustee": {
+   "友邦信託": 21,
+   "銀聯信託": 171,
+   "中國人壽": 10,
+   "HSBC": 14,
+   "宏利": 28,
+   "萬通": 14,
+   "渣打信托": 10
+  },
+  "updated": 182
+ },
+ {
+  "date": "2026-11-24",
+  "syncAt": "2026-11-24T14:33:09.225Z",
+  "count": 451,
+  "dataAsOf": "2026-10-31",
+  "navVerified": 450,
+  "navNa": 1,
+  "avgAnn1": 3.75,
+  "navLatest": "2026-11-23",
+  "lagged": 254,
+  "lagByTrustee": {
+   "友邦信託": 21,
+   "銀聯信託": 171,
+   "中國人壽": 10,
+   "宏利": 28,
+   "萬通": 14,
+   "渣打信托": 10
+  },
+  "updated": 196
+ },
+ {
+  "date": "2026-11-26",
+  "syncAt": "2026-11-26T03:36:00.748Z",
+  "count": 451,
+  "dataAsOf": "2026-10-31",
+  "navVerified": 450,
+  "navNa": 1,
+  "avgAnn1": 3.75,
+  "navLatest": "2026-11-24",
+  "lagged": 39,
+  "lagByTrustee": {
+   "銀聯信託": 39
+  },
+  "updated": 411
  }
 ]

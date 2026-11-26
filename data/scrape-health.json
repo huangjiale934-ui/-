@@ -1,5 +1,5 @@
 {
- "updatedAt": 1795649274975,
+ "updatedAt": 1795663549876,
  "day": "2026-11-26",
  "summary": {
   "total": 24,
@@ -21,8 +21,8 @@
    "node": "",
    "detail": "",
    "count": 16,
-   "asOf": "2026-11-23",
-   "rawBytes": 17268
+   "asOf": "2026-11-24",
+   "rawBytes": 17624
   },
   {
    "key": "HSBC",
@@ -57,7 +57,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 17,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -69,7 +69,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 11,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -81,7 +81,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 12,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -189,7 +189,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 31,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -202,7 +202,7 @@
    "detail": "",
    "count": 20,
    "asOf": "2026-11-24",
-   "rawBytes": 462455
+   "rawBytes": 474666
   },
   {
    "key": "YF",
@@ -213,7 +213,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 14,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -237,7 +237,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 10,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -261,7 +261,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 28,
-   "asOf": "2026-11-23",
+   "asOf": "2026-11-24",
    "rawBytes": 0
   },
   {
@@ -273,7 +273,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 39,
-   "asOf": "2026-11-20",
+   "asOf": "2026-11-23",
    "rawBytes": 0
   },
   {
@@ -285,7 +285,7 @@
    "node": "API 历史序列",
    "detail": "",
    "count": 14,
-   "asOf": "2026-11-24",
+   "asOf": "2026-11-23",
    "rawBytes": 0
   },
   {
@@ -306,11 +306,11 @@
    "day": "2026-11-22",
    "summary": {
     "total": 24,
-    "ok": 22,
+    "ok": 24,
     "structMiss": 0,
     "empty": 0,
     "missing": 0,
-    "failed": 2,
+    "failed": 0,
     "notRendered": 0,
     "degraded": 0
    }
@@ -319,11 +319,11 @@
    "day": "2026-11-23",
    "summary": {
     "total": 24,
-    "ok": 24,
+    "ok": 23,
     "structMiss": 0,
     "empty": 0,
     "missing": 0,
-    "failed": 0,
+    "failed": 1,
     "notRendered": 0,
     "degraded": 0
    }
@@ -332,11 +332,11 @@
    "day": "2026-11-24",
    "summary": {
     "total": 24,
-    "ok": 24,
+    "ok": 23,
     "structMiss": 0,
     "empty": 0,
     "missing": 0,
-    "failed": 0,
+    "failed": 1,
     "notRendered": 0,
     "degraded": 0
    }
@@ -345,11 +345,11 @@
    "day": "2026-11-25",
    "summary": {
     "total": 24,
-    "ok": 24,
+    "ok": 23,
     "structMiss": 0,
     "empty": 0,
     "missing": 0,
-    "failed": 0,
+    "failed": 1,
     "notRendered": 0,
     "degraded": 0
    }

@@ -1,68 +1,91 @@
 {
- "checkedAt": "2026-11-25T23:41:09.031Z",
- "checkedAtHKT": "2026-11-26 07:41:09",
- "ok": false,
- "problems": [
-  "WorkBuddy 站 净值落后参考源：本站 2026-11-23 < BCT 2026-11-24",
-  "两站净值日不一致（本站落后参考源）：2026-11-23 vs 2026-11-24",
-  "未解决 · 连续 2 天状态异常（na 未恢复）：365"
- ],
- "detail": {
-  "A": {
-   "navLatest": "2026-11-23",
-   "count": 451,
-   "updatedAt": 1795571812251,
-   "build": "2026-11-24-an",
-   "status": {
-    "phase": "done",
-    "step": "早晨净值更新完成",
-    "finishedAt": "09:57",
-    "day": "2026-11-25",
-    "host": "workbuddy"
-   }
+ "at": "2026-11-26T05:03:20.753Z",
+ "latest": "2026-11-24",
+ "marketLatest": "2026-11-25",
+ "fundLag": 1,
+ "marketAge": 1,
+ "globalAge": 2,
+ "maxLag": 4,
+ "hardLag": 10,
+ "warnCount": 0,
+ "hard": false,
+ "items": [
+  {
+   "trustee": "HSBC",
+   "count": 77,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
   },
-  "B": {
-   "navLatest": "2026-11-24",
-   "count": 451,
-   "updatedAt": 1795600146490,
-   "build": "2026-11-25-an",
-   "status": {
-    "phase": "done",
-    "step": "早晨净值更新完成",
-    "finishedAt": "17:49",
-    "day": "2026-11-25",
-    "host": "github"
-   }
+  {
+   "trustee": "中國人壽",
+   "count": 10,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
   },
-  "referenceLatest": "2026-11-24",
-  "today": "2026-11-26",
-  "WorkBuddy 站_planLag": 15,
-  "GitHub 站_planLag": 1,
-  "issues": [
-   {
-    "level": "warn",
-    "text": "季度链路未完成：p24 目及基金：未匹配清单"
-   },
-   {
-    "level": "warn",
-    "text": "季度链路未完成：海通便覽下載失敗（官网列表页未给出 PDF，下次再试）"
-   },
-   {
-    "level": "critical",
-    "text": "连续 2 天状态异常（na 未恢复）：365"
-   },
-   {
-    "level": "warn",
-    "text": "持仓配置合计 >100%：218:100.6"
-   },
-   {
-    "level": "warn",
-    "text": "前十大不足 10 条：209:7 210:9 216:8 223:9 227:9 460:7 1000:9 1001:7 1039:8 1543:9"
-   },
-   {
-    "level": "warn",
-    "text": "部分来源净值滞后 4 天（见 data/freshness.json）"
-   }
-  ]
- }
+  {
+   "trustee": "中銀保誠",
+   "count": 34,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "交通",
+   "count": 14,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "友邦信託",
+   "count": 21,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "宏利",
+   "count": 28,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "東亞",
+   "count": 40,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "永明",
+   "count": 31,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "渣打信托",
+   "count": 10,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "萬通",
+   "count": 14,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  },
+  {
+   "trustee": "銀聯信託",
+   "count": 171,
+   "latest": "2026-11-24",
+   "lagDays": 1,
+   "exempt": null
+  }
+ ]
 }
