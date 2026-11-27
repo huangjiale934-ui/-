@@ -1,8 +1,10 @@
 {
- "checkedAt": "2026-11-26T09:25:08.662Z",
- "checkedAtHKT": "2026-11-26 17:25:08",
+ "checkedAt": "2026-11-27T00:40:45.673Z",
+ "checkedAtHKT": "2026-11-27 08:40:45",
  "ok": false,
  "problems": [
+  "WorkBuddy 站 净值落后参考源：本站 2026-11-24 < BCT 2026-11-25",
+  "两站净值日不一致（本站落后参考源）：2026-11-24 vs 2026-11-25",
   "未解决 · 连续 2 天状态异常（na 未恢复）：365"
  ],
  "detail": {
@@ -20,20 +22,20 @@
    }
   },
   "B": {
-   "navLatest": "2026-11-24",
+   "navLatest": "2026-11-25",
    "count": 451,
-   "updatedAt": 1795664099709,
+   "updatedAt": 1795685108746,
    "build": "2026-11-26-an",
    "status": {
     "phase": "done",
-    "step": "全部完成",
-    "finishedAt": "2026-11-26 11:38",
+    "step": "早晨净值更新完成",
+    "finishedAt": "17:25",
     "day": "2026-11-26",
-    "host": "workbuddy"
+    "host": "github"
    }
   },
-  "referenceLatest": "2026-11-24",
-  "today": "2026-11-26",
+  "referenceLatest": "2026-11-25",
+  "today": "2026-11-27",
   "issues": [
    {
     "level": "warn",
