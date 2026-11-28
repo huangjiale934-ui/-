@@ -1,39 +1,40 @@
 {
- "checkedAt": "2026-11-27T09:41:41.931Z",
- "checkedAtHKT": "2026-11-27 17:41:41",
+ "checkedAt": "2026-11-28T00:16:02.620Z",
+ "checkedAtHKT": "2026-11-28 08:16:02",
  "ok": false,
  "problems": [
   "未解决 · 连续 2 天状态异常（na 未恢复）：365"
  ],
  "detail": {
   "A": {
-   "navLatest": "2026-11-25",
+   "navLatest": "2026-11-26",
    "count": 451,
-   "updatedAt": 1795744294866,
+   "updatedAt": 1795790036952,
    "build": "2026-11-26-an",
    "status": {
     "phase": "done",
     "step": "全部完成",
     "day": "2026-11-27",
-    "host": "workbuddy",
-    "finishedAt": "2026-11-27 10:10"
+    "finishedAt": "2026-11-",
+    "host": "workbuddy"
    }
   },
   "B": {
-   "navLatest": "2026-11-25",
+   "navLatest": "2026-11-26",
    "count": 451,
-   "updatedAt": 1795740045759,
+   "updatedAt": 1795772502017,
    "build": "2026-11-27-an",
    "status": {
     "phase": "done",
-    "step": "全量更新完成",
-    "finishedAt": "08:40",
+    "step": "早晨净值更新完成",
+    "finishedAt": "17:41",
     "day": "2026-11-27",
     "host": "github"
    }
   },
-  "referenceLatest": "2026-11-25",
-  "today": "2026-11-27",
+  "referenceLatest": "2026-11-26",
+  "today": "2026-11-28",
+  "WorkBuddy 站_planLag": 3,
   "issues": [
    {
     "level": "warn",

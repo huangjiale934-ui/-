@@ -1,5 +1,5 @@
 {
- "updatedAt": 1795772302561,
+ "updatedAt": 1795824543171,
  "days": [
   {
    "date": "2026-11-23",
@@ -71,6 +71,26 @@
    "drift": false,
    "changes": [],
    "prevDate": "2026-11-26",
+   "prev": {
+    "na": 1,
+    "unmatched": 0,
+    "verified": 450
+   }
+  },
+  {
+   "date": "2026-11-28",
+   "total": 451,
+   "verified": 450,
+   "na": 1,
+   "unmatched": 0,
+   "pending": 0,
+   "naIds": [
+    "365"
+   ],
+   "unmatchedIds": [],
+   "drift": false,
+   "changes": [],
+   "prevDate": "2026-11-27",
    "prev": {
     "na": 1,
     "unmatched": 0,
